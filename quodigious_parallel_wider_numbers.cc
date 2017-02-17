@@ -23,19 +23,23 @@ inline bool isQuodigious10(u64 value, u64 length) noexcept {
 	return (value % sum == 0) && (value % prod == 0);
 }
 
-inline bool isQuodigious100(u64 value, u64 length) noexcept {
+inline bool isQuodigious1000(u64 value, u64 length) noexcept {
+	static constexpr auto count = 1000u;
+	static constexpr auto digits = 3;
 	static bool init = true;
-	static bool predicates[100] = { 0 };
-	static u64 sums[100] = { 0 };
-	static u64 products[100] = { 0 };
+	static bool predicates[count] = { 0 };
+	static u64 sums[count] = { 0 };
+	static u64 products[count] = { 0 };
 	if (init) {
 		init = false;
-		for (int x = 0; x < 10; ++x) {
-			for (int y = 0; y < 10; ++y) {
-				auto index = (x * 10) + y;
-				sums[index] = x + y;
-				products[index] = x * y;
-				predicates[index] = ((x >= 2) && (y >= 2));
+		for (int z = 0; z < 10; ++z) {
+			for (int x = 0; x < 10; ++x) {
+				for (int y = 0; y < 10; ++y) {
+					auto index = (z * 100) + (x * 10) + y;
+					sums[index] = x + y + z;
+					products[index] = x * y * z;
+					predicates[index] = ((x >= 2) && (y >= 2)) && (z >= 2);
+				}
 			}
 		}
 	}
@@ -43,30 +47,31 @@ inline bool isQuodigious100(u64 value, u64 length) noexcept {
 	u64 current = value;
 	u64 sum = 0;
 	u64 product = 1;
-	if (length % 2 == 1) {
-		u64 back = value % 10;
-		if (back < 2) {
+	auto remainder = length % digits;
+	len -= remainder;
+	for (u64 i = 0; i < remainder; ++i) {
+		auto tmp = current % 10;
+		if (tmp < 2) {
 			return false;
-		} 
-		sum += back;
-		product *= back;
-		current = value / 10;
-		len = length - 1;
-	} 
-	for (u64 i =0 ; i < len; i += 2) {
-		u64 result = current % 100u;
+		}
+		sum += tmp;
+		product *= tmp;
+		current /= 10;
+	}
+	for (u64 i =0 ; i < len; i += digits) {
+		u64 result = current % count;
 		if (!predicates[result]) {
 			return false;
 		} else {
 			product *= products[result];
 			sum += sums[result];
-			current /= 100;
+			current /= count;
 		}
 	}
 	return ((value % sum) == 0) && ((value % product) == 0);
 }
 int performQuodigiousCheck(u64 length, u64 start, u64 end, vec64& results) noexcept {
-	auto fn = length > 8 ? isQuodigious100 : isQuodigious10;
+	auto fn = length > 8 ? isQuodigious1000 : isQuodigious10;
 	for (auto value = start; value < end; ++value) {
 		if (fn(value, length)) {
 			results.emplace_back(value);
