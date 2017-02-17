@@ -39,38 +39,28 @@ inline bool isQuodigious100(u64 value, u64 length) noexcept {
 			}
 		}
 	}
+	u64 len = length;
+	u64 current = value;
 	u64 sum = 0;
 	u64 product = 1;
-	auto body = [&sum, &product](auto value, auto length) {
-		u64 len = length;
-		u64 current = value;
-		// now it is even
-		for (u64 i = 0u; i < len; i+=2) {
-			u64 result = current % 100u;
-			if (!predicates[result]) {
-				return false;
-			} else {
-				product *= products[result];
-				sum += sums[result];
-				current /= 100;
-			}
-		}
-		return true;
-	};
 	if (length % 2 == 1) {
 		u64 back = value % 10;
 		if (back < 2) {
 			return false;
-		} else {
-			sum += back;
-			product *= back;
-			if (!body(value / 10, length - 1)) {
-				return false;
-			}
-		}
-	} else {
-		if (!body(value, length)) {
+		} 
+		sum += back;
+		product *= back;
+		current = value / 10;
+		len = length - 1;
+	} 
+	for (u64 i =0 ; i < len; i += 2) {
+		u64 result = current % 100u;
+		if (!predicates[result]) {
 			return false;
+		} else {
+			product *= products[result];
+			sum += sums[result];
+			current /= 100;
 		}
 	}
 	return ((value % sum) == 0) && ((value % product) == 0);
