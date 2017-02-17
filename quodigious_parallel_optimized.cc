@@ -12,7 +12,7 @@ inline bool isQuodigious(u64 value, u64 length) noexcept {
 	u64 sum = 0;
 	u64 prod = 1;
 	for (u64 i = 0u; i < length; ++i) {
-		u64 result = static_cast<current % 10u;
+		u64 result = current % 10u;
 		switch (result) {
 			case 0:
 			case 1:
@@ -47,8 +47,7 @@ inline bool isQuodigious(u64 value, u64 length) noexcept {
 		sum += result;
 		current /= 10u;
 	}
-}
-return (value % sum == 0) && (value % prod == 0);
+	return (value % sum == 0) && (value % prod == 0);
 }
 int performQuodigiousCheck(u64 length, u64 start, u64 end, vec64& results) {
 	for (auto value = start; value < end; ++value) {
