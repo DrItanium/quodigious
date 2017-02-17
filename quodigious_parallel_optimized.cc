@@ -21,25 +21,25 @@ inline bool isQuodigious(u64 value, u64 length) noexcept {
 				prod <<= 1;
 				break;
 			case 3:
-				prod = prod + prod + prod;
+				prod = (prod << 1) + prod;
 				break;
 			case 4:
 				prod <<= 2;
 				break;
 			case 5:
-				prod = prod + prod + prod + prod + prod;
+				prod = (prod << 2) + prod;
 				break;
 			case 6:
-				prod = prod + prod + prod + prod + prod + prod;
+				prod = (prod << 2) + (prod << 1);
 				break;
 			case 7:
-				prod = prod + prod + prod + prod + prod + prod + prod;
+				prod = (prod << 2) + (prod << 1) + prod;
 				break;
 			case 8:
 				prod <<= 3;
 				break;
 			case 9:
-				prod = prod + prod + prod + prod + prod + prod + prod + prod + prod;
+				prod = (prod << 3) + prod;
 				break;
 			default:
 				throw 0;
