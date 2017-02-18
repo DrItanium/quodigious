@@ -161,7 +161,8 @@ inline void body() noexcept {
 	auto fut4 = std::async(std::launch::async, [start = st + (base * 4), end = 7 * base]() { return performQuodigiousCheck<length>( start, end, l4); });
 	auto fut5 = std::async(std::launch::async, [start = st + (base * 5), end = 8 * base]() { return performQuodigiousCheck<length>( start, end, l5); });
 	auto fut6 = std::async(std::launch::async, [start = st + (base * 6), end = 9 * base]() { return performQuodigiousCheck<length>( start, end, l6); });
-	auto fut7 = std::async(std::launch::async, [start = st + (base * 7), end = 10 * base]() { return performQuodigiousCheck<length>( start, end, l7); });
+	// use the primary thread to compute the last portion of this range!
+	performQuodigiousCheck<length>(st + (base * 7), 10 * base, l7);
 	fut0.get();
 	fut1.get();
 	fut2.get();
@@ -169,7 +170,6 @@ inline void body() noexcept {
 	fut4.get();
 	fut5.get();
 	fut6.get();
-	fut7.get();
 	printout(l0);
 	printout(l1);
 	printout(l2);
