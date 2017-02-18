@@ -7,22 +7,25 @@
 using u64 = uint64_t;
 using vec64 = std::vector<u64>;
 
+inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
+	return (value % sum == 0) && (value % prod == 0);
+}
 template<u64 length>
 inline bool isQuodigious10(u64 value) noexcept {
+	static constexpr auto divisor = 10u;
 	u64 current = value;
 	u64 sum = 0;
 	u64 prod = 1;
 	for (u64 i = 0u; i < length; ++i) {
-		u64 result = current % 10u;
+		auto result = current % divisor;
 		if (result < 2) {
 			return false;
-		} else {
-			sum += result;
-			prod *= result;
-			current /= 10u;
-		}
+		} 
+		sum += result;
+		prod *= result;
+		current /= divisor;
 	}
-	return (value % sum == 0) && (value % prod == 0);
+	return performQCheck(value, sum, prod);
 }
 
 
@@ -44,10 +47,12 @@ inline bool isQuodigious(u64 value) noexcept {
 			for (int z = 0; z < 10; ++z) {
 				auto zInd = z * 100 + wInd;
 				auto zPred = wPred && z >= 2;
+				auto zMul = z * w;
+				auto zSum = z + w;
 				for (int x = 0; x < 10; ++x) {
-					auto outerMul = z * x;
+					auto outerMul = zMul * x;
 					auto combinedInd = zInd + (x * 10);
-					auto outerSum = z + x;
+					auto outerSum = zSum + x;
 					auto outerPredicate = ((x >= 2) && zPred);
 					sums[combinedInd + 0] = outerSum;
 					products[combinedInd + 0] = 0;
@@ -146,22 +151,347 @@ inline bool isQuodigious(u64 value) noexcept {
 			current /= count;
 		}
 	}
-	return ((value % sum) == 0) && ((value % product) == 0);
+	return performQCheck(value, sum, product);
+}
+
+template<>
+inline bool isQuodigious<10>(u64 value) noexcept {
+	static constexpr auto count = 1000u;
+	static bool init = true;
+	static bool predicates[count] = { 0 };
+	static u64 sums[count] = { 0 };
+	static u64 products[count] = { 0 };
+	if (init) {
+		init = false;
+		for (int z = 0; z < 10; ++z) {
+			auto zPred = z >= 2;
+			auto zSum = z;
+			auto zMul = z;
+			auto zInd = z * 100;
+			for (int x = 0; x < 10; ++x) {
+				auto outerMul = x * zMul;
+				auto combinedInd = (x * 10) + zInd;
+				auto outerSum = x + zSum;
+				auto outerPredicate = ((x >= 2) && zPred);
+				sums[combinedInd + 0] = outerSum;
+				products[combinedInd + 0] = 0;
+				predicates[combinedInd + 0] = false;
+				sums[combinedInd + 1] = outerSum + 1;
+				products[combinedInd + 1] = outerMul ;
+				predicates[combinedInd + 1] = false;
+				sums[combinedInd + 2] = outerSum + 2;
+				products[combinedInd + 2] = outerMul * 2;
+				predicates[combinedInd + 2] = outerPredicate;
+				sums[combinedInd + 3] = outerSum + 3;
+				products[combinedInd + 3] = outerMul * 3;
+				predicates[combinedInd + 3] = outerPredicate; 
+				sums[combinedInd + 4] = outerSum + 4;
+				products[combinedInd + 4] = outerMul * 4;
+				predicates[combinedInd + 4] = outerPredicate; 
+				sums[combinedInd + 5] = outerSum + 5;
+				products[combinedInd + 5] = outerMul * 5;
+				predicates[combinedInd + 5] = outerPredicate;
+				sums[combinedInd + 6] = outerSum + 6;
+				products[combinedInd + 6] = outerMul * 6;
+				predicates[combinedInd + 6] = outerPredicate;
+				sums[combinedInd + 7] = outerSum + 7;
+				products[combinedInd + 7] = outerMul * 7;
+				predicates[combinedInd + 7] = outerPredicate;
+				sums[combinedInd + 8] = outerSum + 8;
+				products[combinedInd + 8] = outerMul * 8;
+				predicates[combinedInd + 8] = outerPredicate;
+				sums[combinedInd + 9] = outerSum + 9;
+				products[combinedInd + 9] = outerMul * 9;
+				predicates[combinedInd + 9] = outerPredicate;
+			}
+		}
+	}
+	u64 current = value;
+	//3
+	auto result = current % count;
+	if (!predicates[result]) {
+		return false;
+	} 
+	u64 product = products[result];
+	u64 sum = sums[result];
+	current /= count;
+
+	//6
+	result = current % count;
+	if (!predicates[result]) {
+		return false;
+	} 
+	product *= products[result];
+	sum += sums[result];
+	current /= count;
+
+	// 9
+	result = current % count;
+	if (!predicates[result]) {
+		return false;
+	} 
+	product *= products[result];
+	sum += sums[result];
+	current /= count;
+
+	// 10
+	result = current % 10;
+	if (result < 2) {
+		return false;
+	} 
+	product *= result;
+	sum += result;
+
+	return performQCheck(value, sum, product);
 }
 
 template<> inline bool isQuodigious<1>(u64 value) noexcept { return value >= 2; }
-template<> inline bool isQuodigious<2>(u64 value) noexcept { return isQuodigious10<2>(value); }
-template<> inline bool isQuodigious<3>(u64 value) noexcept { return isQuodigious10<3>(value); }
-template<> inline bool isQuodigious<4>(u64 value) noexcept { return isQuodigious10<4>(value); }
-template<> inline bool isQuodigious<5>(u64 value) noexcept { return isQuodigious10<5>(value); }
-template<> inline bool isQuodigious<6>(u64 value) noexcept { return isQuodigious10<6>(value); }
-template<> inline bool isQuodigious<7>(u64 value) noexcept { return isQuodigious10<7>(value); }
+template<> 
+inline bool isQuodigious<2>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
+template<> 
+inline bool isQuodigious<3>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
+template<> 
+inline bool isQuodigious<4>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
+template<> 
+inline bool isQuodigious<5>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
+template<> 
+inline bool isQuodigious<6>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
+template<> 
+inline bool isQuodigious<7>(u64 value) noexcept { 
+	static constexpr auto divisor = 10u;
+	auto result = value % divisor;
+	if (result < 2) {
+		return false;
+	}
+	u64 sum = result;
+	u64 prod = result;
+	u64 current = value / divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	current /= divisor;
+
+	result = current % divisor;
+	if (result < 2) {
+		return false;
+	}
+	sum += result;
+	prod *= result;
+	return performQCheck(value, sum, prod);
+}
+
 template<> inline bool isQuodigious<8>(u64 value) noexcept { return isQuodigious10<8>(value); }
+template<> inline bool isQuodigious<9>(u64 value) noexcept { return isQuodigious10<9>(value); }
 
 template<u64 length>
 inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (((value % 10) >= 2) && isQuodigious<length>(value)) {
+		if (isQuodigious<length>(value)) {
 			results.emplace_back(value);
 		}
 	}
