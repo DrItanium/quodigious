@@ -33,13 +33,43 @@ inline bool isQuodigious1000(u64 value, u64 length) noexcept {
 	if (init) {
 		init = false;
 		for (int z = 0; z < 10; ++z) {
+			auto zInd = z * 100;
+			auto zPred = z >= 2;
 			for (int x = 0; x < 10; ++x) {
-				for (int y = 0; y < 10; ++y) {
-					auto index = (z * 100) + (x * 10) + y;
-					sums[index] = x + y + z;
-					products[index] = x * y * z;
-					predicates[index] = ((x >= 2) && (y >= 2)) && (z >= 2);
-				}
+				auto outerMul = z * x;
+				auto combinedInd = zInd + (x * 10);
+				auto outerSum = z + x;
+				auto outerPredicate = ((x >= 2) && zPred);
+				sums[combinedInd + 0] = outerSum;
+				products[combinedInd + 0] = 0;
+				predicates[combinedInd + 0] = false;
+				sums[combinedInd + 1] = outerSum + 1;
+				products[combinedInd + 1] = outerMul ;
+				predicates[combinedInd + 1] = false;
+				sums[combinedInd + 2] = outerSum + 2;
+				products[combinedInd + 2] = outerMul * 2;
+				predicates[combinedInd + 2] = outerPredicate;
+				sums[combinedInd + 3] = outerSum + 3;
+				products[combinedInd + 3] = outerMul * 3;
+				predicates[combinedInd + 3] = outerPredicate; 
+				sums[combinedInd + 4] = outerSum + 4;
+				products[combinedInd + 4] = outerMul * 4;
+				predicates[combinedInd + 4] = outerPredicate; 
+				sums[combinedInd + 5] = outerSum + 5;
+				products[combinedInd + 5] = outerMul * 5;
+				predicates[combinedInd + 5] = outerPredicate;
+				sums[combinedInd + 6] = outerSum + 6;
+				products[combinedInd + 6] = outerMul * 6;
+				predicates[combinedInd + 6] = outerPredicate;
+				sums[combinedInd + 7] = outerSum + 7;
+				products[combinedInd + 7] = outerMul * 7;
+				predicates[combinedInd + 7] = outerPredicate;
+				sums[combinedInd + 8] = outerSum + 8;
+				products[combinedInd + 8] = outerMul * 8;
+				predicates[combinedInd + 8] = outerPredicate;
+				sums[combinedInd + 9] = outerSum + 9;
+				products[combinedInd + 9] = outerMul * 9;
+				predicates[combinedInd + 9] = outerPredicate;
 			}
 		}
 	}
@@ -49,7 +79,25 @@ inline bool isQuodigious1000(u64 value, u64 length) noexcept {
 	u64 product = 1;
 	auto remainder = length % digits;
 	len -= remainder;
-	for (u64 i = 0; i < remainder; ++i) {
+	// maximum of two right now
+	if (remainder == 2) {
+		auto tmp = current % 10;
+		if (tmp < 2) {
+			return false;
+		}
+		sum += tmp;
+		product *= tmp;
+		current /= 10;
+
+		tmp = current % 10;
+		if (tmp < 2) {
+			return false;
+		}
+		sum += tmp;
+		product *= tmp;
+		current /= 10;
+
+	} else if (remainder == 1) {
 		auto tmp = current % 10;
 		if (tmp < 2) {
 			return false;
