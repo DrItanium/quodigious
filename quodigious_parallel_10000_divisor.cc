@@ -234,24 +234,6 @@ inline void initialize() noexcept {
 inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
 	return (value % sum == 0) && (value % prod == 0);
 }
-template<u64 length>
-inline bool isQuodigious10(u64 value) noexcept {
-	static constexpr auto divisor = 10u;
-	u64 current = value;
-	u64 sum = 0;
-	u64 prod = 1;
-	for (u64 i = 0u; i < length; ++i) {
-		auto result = current % divisor;
-		if (result < 2) {
-			return false;
-		} 
-		sum += result;
-		prod *= result;
-		current /= divisor;
-	}
-	return performQCheck(value, sum, prod);
-}
-
 
 template<u64 length>
 inline bool isQuodigious(u64 value) noexcept {
@@ -382,13 +364,7 @@ inline bool isQuodigious<15>(u64 value) noexcept {
 
 	//15
 	result = current % count;
-	if (!predicates100000[result]) {
-		return false;
-	} 
-	product *= products100000[result];
-	sum += sums100000[result];
-
-	return performQCheck(value, sum, product);
+	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
 }
 
 template<> inline bool isQuodigious<1>(u64 value) noexcept { return value >= 2; }
@@ -414,8 +390,7 @@ template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicates10
 
 template<> 
 inline bool isQuodigious<7>(u64 value) noexcept { 
-//	return isQuodigious10<7>(value); 
-// 6 + 1
+	// 6 + 1
 	auto result = value % 1000000u;
 	if (!predicates1000000[result]) {
 		return false;
