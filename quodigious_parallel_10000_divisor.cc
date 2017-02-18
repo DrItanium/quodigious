@@ -542,6 +542,7 @@ inline void body() noexcept {
 	printout(l7);
 	std::cout << std::endl;
 }
+
 template<>
 inline void body<1>() noexcept {
 	std::cout << 2 << std::endl;
@@ -560,11 +561,9 @@ inline void body<2>() noexcept {
 	for (auto value = 22; value < 100; ++value) {
 		auto result = value % divisor;
 		if (result >= 2) {
-			u64 prod = result;
-			u64 sum = result;
-			u64 current = value / divisor;
-			result = current % divisor;
-			if ((result >= 2) && performQCheck(value, sum + result, prod * result)) {
+			u64 temp = result;
+			result = (value / divisor) % divisor;
+			if ((result >= 2) && performQCheck(value, temp + result, temp * result)) {
 				std::cout << value << std::endl;
 			}
 		}
@@ -574,7 +573,7 @@ inline void body<2>() noexcept {
 
 template<>
 inline void body<3>() noexcept {
-	for (auto value = 222; value < 1000; ++value) {
+	for (auto value = 222u; value < 1000u; ++value) {
 		if (predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value])) {
 			std::cout << value << std::endl;
 		}
@@ -584,7 +583,7 @@ inline void body<3>() noexcept {
 
 template<>
 inline void body<4>() noexcept {
-	for (auto value = 2222; value < 10000; ++value) {
+	for (auto value = 2222u; value < 10000u; ++value) {
 		if (predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value])) {
 			std::cout << value << std::endl;
 		}
@@ -594,7 +593,7 @@ inline void body<4>() noexcept {
 
 template<>
 inline void body<5>() noexcept {
-	for (auto value = 22222; value < 100000; ++value) {
+	for (auto value = 22222u; value < 100000u; ++value) {
 		if (predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value])) {
 			std::cout << value << std::endl;
 		}
@@ -604,7 +603,7 @@ inline void body<5>() noexcept {
 
 template<>
 inline void body<6>() noexcept {
-	for (auto value = 222222; value < 1000000; ++value) {
+	for (auto value = 222222u; value < 1000000u; ++value) {
 		if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
 			std::cout << value << std::endl;
 		}
