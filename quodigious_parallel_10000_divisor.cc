@@ -337,7 +337,7 @@ inline bool isQuodigious<11>(u64 value) noexcept {
 	auto sum = sums1000000[result];
 	auto current = value / 1000000u;
 
-	result = value % 100000u;
+	result = current % 100000u;
 	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
 }
 
