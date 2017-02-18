@@ -332,31 +332,7 @@ inline bool isQuodigious(u64 value) noexcept {
 	return performQCheck(value, sum, product);
 }
 
-/**
- * If we have only one digit then all numbers greater than 1 and less than 10
- * are quodigious!
- */
-template<> inline bool isQuodigious<1>(u64 value) noexcept { return value >= 2; }
-template<> 
-inline bool isQuodigious<2>(u64 value) noexcept { 
-	static constexpr auto divisor = 10u;
-	auto result = value % divisor;
-	if (result < 2) {
-		return false;
-	}
-	u64 prod = result;
-	u64 sum = result;
-	u64 current = value / divisor;
 
-	result = current % divisor;
-	return (result >= 2) && performQCheck(value, sum + result, prod * result);
-}
-
-template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value]); }
-template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value]); }
-template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value]); }
-template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value]); }
-template<> inline bool isQuodigious<7>(u64 value) noexcept { return predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value]); }
 
 
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
@@ -516,7 +492,7 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 template<>
 inline int performQuodigiousCheck<1>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<1>(value)) {
+		if (value >= 2) {
 			results.emplace_back(value);
 		}
 	}
@@ -525,9 +501,18 @@ inline int performQuodigiousCheck<1>(u64 start, u64 end, vec64& results) noexcep
 
 template<>
 inline int performQuodigiousCheck<2>(u64 start, u64 end, vec64& results) noexcept {
+	static constexpr auto divisor = 10u;
+
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<2>(value)) {
-			results.emplace_back(value);
+		auto result = value % divisor;
+		if (result >= 2) {
+			u64 prod = result;
+			u64 sum = result;
+			u64 current = value / divisor;
+			result = current % divisor;
+			if ((result >= 2) && performQCheck(value, sum + result, prod * result)) {
+				results.emplace_back(value);
+			}
 		}
 	}
 	return 0;
@@ -536,17 +521,16 @@ inline int performQuodigiousCheck<2>(u64 start, u64 end, vec64& results) noexcep
 template<>
 inline int performQuodigiousCheck<3>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<3>(value)) {
+		if (predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value])) {
 			results.emplace_back(value);
 		}
 	}
 	return 0;
 }
-
 template<>
 inline int performQuodigiousCheck<4>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<4>(value)) {
+		if (predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value])) {
 			results.emplace_back(value);
 		}
 	}
@@ -556,22 +540,31 @@ inline int performQuodigiousCheck<4>(u64 start, u64 end, vec64& results) noexcep
 template<>
 inline int performQuodigiousCheck<5>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<5>(value)) {
+		if (predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value])) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+template<>
+inline int performQuodigiousCheck<6>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+template<>
+inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
 			results.emplace_back(value);
 		}
 	}
 	return 0;
 }
 
-template<>
-inline int performQuodigiousCheck<6>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<6>(value)) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
 
 void printout(vec64& l) noexcept {
 	for (auto v : l) {
