@@ -8,36 +8,111 @@ using u64 = uint64_t;
 using vec64 = std::vector<u64>;
 
 
-u64 sums1000000[1000000] = { 0 };
-u64 products1000000[1000000] = { 0 };
-bool predicates1000000[1000000] = { false };
-u64 sums100000[100000] = { 0 };
-u64 products100000[100000] = { 0 };
-bool predicates100000[100000] = { false };
-u64 sums10000[10000] = { 0 };
-u64 products10000[10000] = { 0 };
-bool predicates10000[10000] = { false };
-u64 sums1000[1000] = { 0 };
-u64 products1000[1000] = { 0 };
-bool predicates1000[1000] = { false };
+constexpr auto Len7 = 10000000u;
+u64 sumsLen7[Len7] = { 0 };
+u64 productsLen7[Len7] = { 0 };
+bool predicatesLen7[Len7] = { false };
+constexpr auto Len6 = 1000000u;
+u64 sumsLen6[Len6] = { 0 };
+u64 productsLen6[Len6] = { 0 };
+bool predicatesLen6[Len6] = { false };
+constexpr auto Len5 = 100000u;
+u64 sumsLen5[Len5] = { 0 };
+u64 productsLen5[Len5] = { 0 };
+bool predicatesLen5[Len5] = { false };
+constexpr auto Len4 = 10000u;
+u64 sumsLen4[Len4] = { 0 };
+u64 productsLen4[Len4] = { 0 };
+bool predicatesLen4[Len4] = { false };
+constexpr auto Len3 = 1000u;
+u64 sumsLen3[Len3] = { 0 };
+u64 productsLen3[Len3] = { 0 };
+bool predicatesLen3[Len3] = { false };
 
 inline void initialize() noexcept {
-	// 1000000
+	// Len7
+	for (int k = 0; k < 10; ++k) {
+		auto kPred = k >= 2;
+		auto kSum = k;
+		auto kMul = k;
+		auto kInd = (k * Len6);
+		for (int h = 0; h < 10; ++h) {
+			auto hPred = (h >= 2) && kPred ;
+			auto hSum = h + kSum;
+			auto hMul = h * kMul;
+			auto hInd = (h * Len5) + kInd;
+			for (int w = 0; w < 10; ++w) {
+				auto wPred = (w >= 2) && hPred;
+				auto wSum = w + hSum;
+				auto wMul = w * hMul;
+				auto wInd = (w * Len4) + hInd;
+				for (int y = 0; y < 10; ++y) {
+					auto yPred = (y >= 2) && wPred;
+					auto ySum = y + wSum;
+					auto yMul = y * wMul;
+					auto yInd = (y * Len3) + wInd;
+					for (int z = 0; z < 10; ++z) {
+						auto zPred = z >= 2 && yPred;
+						auto zSum = z + ySum;
+						auto zMul = z * yMul;
+						auto zInd = (z * 100) + yInd ;
+						for (int x = 0; x < 10; ++x) {
+							auto outerMul = x * zMul;
+							auto combinedInd = (x * 10) + zInd;
+							auto outerSum = x + zSum;
+							auto outerPredicate = ((x >= 2) && zPred);
+							sumsLen7[combinedInd + 0] = outerSum;
+							productsLen7[combinedInd + 0] = 0;
+							predicatesLen7[combinedInd + 0] = false;
+							sumsLen7[combinedInd + 1] = outerSum + 1;
+							productsLen7[combinedInd + 1] = outerMul ;
+							predicatesLen7[combinedInd + 1] = false;
+							sumsLen7[combinedInd + 2] = outerSum + 2;
+							productsLen7[combinedInd + 2] = outerMul * 2;
+							predicatesLen7[combinedInd + 2] = outerPredicate;
+							sumsLen7[combinedInd + 3] = outerSum + 3;
+							productsLen7[combinedInd + 3] = outerMul * 3;
+							predicatesLen7[combinedInd + 3] = outerPredicate; 
+							sumsLen7[combinedInd + 4] = outerSum + 4;
+							productsLen7[combinedInd + 4] = outerMul * 4;
+							predicatesLen7[combinedInd + 4] = outerPredicate; 
+							sumsLen7[combinedInd + 5] = outerSum + 5;
+							productsLen7[combinedInd + 5] = outerMul * 5;
+							predicatesLen7[combinedInd + 5] = outerPredicate;
+							sumsLen7[combinedInd + 6] = outerSum + 6;
+							productsLen7[combinedInd + 6] = outerMul * 6;
+							predicatesLen7[combinedInd + 6] = outerPredicate;
+							sumsLen7[combinedInd + 7] = outerSum + 7;
+							productsLen7[combinedInd + 7] = outerMul * 7;
+							predicatesLen7[combinedInd + 7] = outerPredicate;
+							sumsLen7[combinedInd + 8] = outerSum + 8;
+							productsLen7[combinedInd + 8] = outerMul * 8;
+							predicatesLen7[combinedInd + 8] = outerPredicate;
+							sumsLen7[combinedInd + 9] = outerSum + 9;
+							productsLen7[combinedInd + 9] = outerMul * 9;
+							predicatesLen7[combinedInd + 9] = outerPredicate;
+						}
+					}
+				}
+			}
+		}
+	}
+	// Len6
 	for (int h = 0; h < 10; ++h) {
 		auto hPred = h >= 2;
 		auto hSum = h;
 		auto hMul = h;
-		auto hInd = (h * 100000);
+		auto hInd = (h * Len5);
 		for (int w = 0; w < 10; ++w) {
 			auto wPred = (w >= 2) && hPred;
 			auto wSum = w + hSum;
 			auto wMul = w * hMul;
-			auto wInd = (w * 10000) + hInd;
+			auto wInd = (w * Len4) + hInd;
 			for (int y = 0; y < 10; ++y) {
 				auto yPred = (y >= 2) && wPred;
 				auto ySum = y + wSum;
 				auto yMul = y * wMul;
-				auto yInd = (y * 1000) + wInd;
+				auto yInd = (y * Len3) + wInd;
 				for (int z = 0; z < 10; ++z) {
 					auto zPred = z >= 2 && yPred;
 					auto zSum = z + ySum;
@@ -48,52 +123,52 @@ inline void initialize() noexcept {
 						auto combinedInd = (x * 10) + zInd;
 						auto outerSum = x + zSum;
 						auto outerPredicate = ((x >= 2) && zPred);
-						sums1000000[combinedInd + 0] = outerSum;
-						products1000000[combinedInd + 0] = 0;
-						predicates1000000[combinedInd + 0] = false;
-						sums1000000[combinedInd + 1] = outerSum + 1;
-						products1000000[combinedInd + 1] = outerMul ;
-						predicates1000000[combinedInd + 1] = false;
-						sums1000000[combinedInd + 2] = outerSum + 2;
-						products1000000[combinedInd + 2] = outerMul * 2;
-						predicates1000000[combinedInd + 2] = outerPredicate;
-						sums1000000[combinedInd + 3] = outerSum + 3;
-						products1000000[combinedInd + 3] = outerMul * 3;
-						predicates1000000[combinedInd + 3] = outerPredicate; 
-						sums1000000[combinedInd + 4] = outerSum + 4;
-						products1000000[combinedInd + 4] = outerMul * 4;
-						predicates1000000[combinedInd + 4] = outerPredicate; 
-						sums1000000[combinedInd + 5] = outerSum + 5;
-						products1000000[combinedInd + 5] = outerMul * 5;
-						predicates1000000[combinedInd + 5] = outerPredicate;
-						sums1000000[combinedInd + 6] = outerSum + 6;
-						products1000000[combinedInd + 6] = outerMul * 6;
-						predicates1000000[combinedInd + 6] = outerPredicate;
-						sums1000000[combinedInd + 7] = outerSum + 7;
-						products1000000[combinedInd + 7] = outerMul * 7;
-						predicates1000000[combinedInd + 7] = outerPredicate;
-						sums1000000[combinedInd + 8] = outerSum + 8;
-						products1000000[combinedInd + 8] = outerMul * 8;
-						predicates1000000[combinedInd + 8] = outerPredicate;
-						sums1000000[combinedInd + 9] = outerSum + 9;
-						products1000000[combinedInd + 9] = outerMul * 9;
-						predicates1000000[combinedInd + 9] = outerPredicate;
+						sumsLen6[combinedInd + 0] = outerSum;
+						productsLen6[combinedInd + 0] = 0;
+						predicatesLen6[combinedInd + 0] = false;
+						sumsLen6[combinedInd + 1] = outerSum + 1;
+						productsLen6[combinedInd + 1] = outerMul ;
+						predicatesLen6[combinedInd + 1] = false;
+						sumsLen6[combinedInd + 2] = outerSum + 2;
+						productsLen6[combinedInd + 2] = outerMul * 2;
+						predicatesLen6[combinedInd + 2] = outerPredicate;
+						sumsLen6[combinedInd + 3] = outerSum + 3;
+						productsLen6[combinedInd + 3] = outerMul * 3;
+						predicatesLen6[combinedInd + 3] = outerPredicate; 
+						sumsLen6[combinedInd + 4] = outerSum + 4;
+						productsLen6[combinedInd + 4] = outerMul * 4;
+						predicatesLen6[combinedInd + 4] = outerPredicate; 
+						sumsLen6[combinedInd + 5] = outerSum + 5;
+						productsLen6[combinedInd + 5] = outerMul * 5;
+						predicatesLen6[combinedInd + 5] = outerPredicate;
+						sumsLen6[combinedInd + 6] = outerSum + 6;
+						productsLen6[combinedInd + 6] = outerMul * 6;
+						predicatesLen6[combinedInd + 6] = outerPredicate;
+						sumsLen6[combinedInd + 7] = outerSum + 7;
+						productsLen6[combinedInd + 7] = outerMul * 7;
+						predicatesLen6[combinedInd + 7] = outerPredicate;
+						sumsLen6[combinedInd + 8] = outerSum + 8;
+						productsLen6[combinedInd + 8] = outerMul * 8;
+						predicatesLen6[combinedInd + 8] = outerPredicate;
+						sumsLen6[combinedInd + 9] = outerSum + 9;
+						productsLen6[combinedInd + 9] = outerMul * 9;
+						predicatesLen6[combinedInd + 9] = outerPredicate;
 					}
 				}
 			}
 		}
 	}
-	// 100000
+	// Len5
 	for (int w = 0; w < 10; ++w) {
 		auto wPred = w >= 2;
 		auto wSum = w;
 		auto wMul = w;
-		auto wInd = (w * 10000);
+		auto wInd = (w * Len4);
 		for (int y = 0; y < 10; ++y) {
 			auto yPred = (y >= 2) && wPred;
 			auto ySum = y + wSum;
 			auto yMul = y * wMul;
-			auto yInd = (y * 1000) + wInd;
+			auto yInd = (y * Len3) + wInd;
 			for (int z = 0; z < 10; ++z) {
 				auto zPred = z >= 2 && yPred;
 				auto zSum = z + ySum;
@@ -104,46 +179,46 @@ inline void initialize() noexcept {
 					auto combinedInd = (x * 10) + zInd;
 					auto outerSum = x + zSum;
 					auto outerPredicate = ((x >= 2) && zPred);
-					sums100000[combinedInd + 0] = outerSum;
-					products100000[combinedInd + 0] = 0;
-					predicates100000[combinedInd + 0] = false;
-					sums100000[combinedInd + 1] = outerSum + 1;
-					products100000[combinedInd + 1] = outerMul ;
-					predicates100000[combinedInd + 1] = false;
-					sums100000[combinedInd + 2] = outerSum + 2;
-					products100000[combinedInd + 2] = outerMul * 2;
-					predicates100000[combinedInd + 2] = outerPredicate;
-					sums100000[combinedInd + 3] = outerSum + 3;
-					products100000[combinedInd + 3] = outerMul * 3;
-					predicates100000[combinedInd + 3] = outerPredicate; 
-					sums100000[combinedInd + 4] = outerSum + 4;
-					products100000[combinedInd + 4] = outerMul * 4;
-					predicates100000[combinedInd + 4] = outerPredicate; 
-					sums100000[combinedInd + 5] = outerSum + 5;
-					products100000[combinedInd + 5] = outerMul * 5;
-					predicates100000[combinedInd + 5] = outerPredicate;
-					sums100000[combinedInd + 6] = outerSum + 6;
-					products100000[combinedInd + 6] = outerMul * 6;
-					predicates100000[combinedInd + 6] = outerPredicate;
-					sums100000[combinedInd + 7] = outerSum + 7;
-					products100000[combinedInd + 7] = outerMul * 7;
-					predicates100000[combinedInd + 7] = outerPredicate;
-					sums100000[combinedInd + 8] = outerSum + 8;
-					products100000[combinedInd + 8] = outerMul * 8;
-					predicates100000[combinedInd + 8] = outerPredicate;
-					sums100000[combinedInd + 9] = outerSum + 9;
-					products100000[combinedInd + 9] = outerMul * 9;
-					predicates100000[combinedInd + 9] = outerPredicate;
+					sumsLen5[combinedInd + 0] = outerSum;
+					productsLen5[combinedInd + 0] = 0;
+					predicatesLen5[combinedInd + 0] = false;
+					sumsLen5[combinedInd + 1] = outerSum + 1;
+					productsLen5[combinedInd + 1] = outerMul ;
+					predicatesLen5[combinedInd + 1] = false;
+					sumsLen5[combinedInd + 2] = outerSum + 2;
+					productsLen5[combinedInd + 2] = outerMul * 2;
+					predicatesLen5[combinedInd + 2] = outerPredicate;
+					sumsLen5[combinedInd + 3] = outerSum + 3;
+					productsLen5[combinedInd + 3] = outerMul * 3;
+					predicatesLen5[combinedInd + 3] = outerPredicate; 
+					sumsLen5[combinedInd + 4] = outerSum + 4;
+					productsLen5[combinedInd + 4] = outerMul * 4;
+					predicatesLen5[combinedInd + 4] = outerPredicate; 
+					sumsLen5[combinedInd + 5] = outerSum + 5;
+					productsLen5[combinedInd + 5] = outerMul * 5;
+					predicatesLen5[combinedInd + 5] = outerPredicate;
+					sumsLen5[combinedInd + 6] = outerSum + 6;
+					productsLen5[combinedInd + 6] = outerMul * 6;
+					predicatesLen5[combinedInd + 6] = outerPredicate;
+					sumsLen5[combinedInd + 7] = outerSum + 7;
+					productsLen5[combinedInd + 7] = outerMul * 7;
+					predicatesLen5[combinedInd + 7] = outerPredicate;
+					sumsLen5[combinedInd + 8] = outerSum + 8;
+					productsLen5[combinedInd + 8] = outerMul * 8;
+					predicatesLen5[combinedInd + 8] = outerPredicate;
+					sumsLen5[combinedInd + 9] = outerSum + 9;
+					productsLen5[combinedInd + 9] = outerMul * 9;
+					predicatesLen5[combinedInd + 9] = outerPredicate;
 				}
 			}
 		}
 	}
-	// 10000
+	// Len4
 	for (int y = 0; y < 10; ++y) {
 		auto yPred = (y >= 2) ;
 		auto ySum = y ;
 		auto yMul = y ;
-		auto yInd = (y * 1000) ;
+		auto yInd = (y * Len3) ;
 		for (int z = 0; z < 10; ++z) {
 			auto zPred = z >= 2 && yPred;
 			auto zSum = z + ySum;
@@ -154,40 +229,40 @@ inline void initialize() noexcept {
 				auto combinedInd = (x * 10) + zInd;
 				auto outerSum = x + zSum;
 				auto outerPredicate = ((x >= 2) && zPred);
-				sums10000[combinedInd + 0] = outerSum;
-				products10000[combinedInd + 0] = 0;
-				predicates10000[combinedInd + 0] = false;
-				sums10000[combinedInd + 1] = outerSum + 1;
-				products10000[combinedInd + 1] = outerMul ;
-				predicates10000[combinedInd + 1] = false;
-				sums10000[combinedInd + 2] = outerSum + 2;
-				products10000[combinedInd + 2] = outerMul * 2;
-				predicates10000[combinedInd + 2] = outerPredicate;
-				sums10000[combinedInd + 3] = outerSum + 3;
-				products10000[combinedInd + 3] = outerMul * 3;
-				predicates10000[combinedInd + 3] = outerPredicate; 
-				sums10000[combinedInd + 4] = outerSum + 4;
-				products10000[combinedInd + 4] = outerMul * 4;
-				predicates10000[combinedInd + 4] = outerPredicate; 
-				sums10000[combinedInd + 5] = outerSum + 5;
-				products10000[combinedInd + 5] = outerMul * 5;
-				predicates10000[combinedInd + 5] = outerPredicate;
-				sums10000[combinedInd + 6] = outerSum + 6;
-				products10000[combinedInd + 6] = outerMul * 6;
-				predicates10000[combinedInd + 6] = outerPredicate;
-				sums10000[combinedInd + 7] = outerSum + 7;
-				products10000[combinedInd + 7] = outerMul * 7;
-				predicates10000[combinedInd + 7] = outerPredicate;
-				sums10000[combinedInd + 8] = outerSum + 8;
-				products10000[combinedInd + 8] = outerMul * 8;
-				predicates10000[combinedInd + 8] = outerPredicate;
-				sums10000[combinedInd + 9] = outerSum + 9;
-				products10000[combinedInd + 9] = outerMul * 9;
-				predicates10000[combinedInd + 9] = outerPredicate;
+				sumsLen4[combinedInd + 0] = outerSum;
+				productsLen4[combinedInd + 0] = 0;
+				predicatesLen4[combinedInd + 0] = false;
+				sumsLen4[combinedInd + 1] = outerSum + 1;
+				productsLen4[combinedInd + 1] = outerMul ;
+				predicatesLen4[combinedInd + 1] = false;
+				sumsLen4[combinedInd + 2] = outerSum + 2;
+				productsLen4[combinedInd + 2] = outerMul * 2;
+				predicatesLen4[combinedInd + 2] = outerPredicate;
+				sumsLen4[combinedInd + 3] = outerSum + 3;
+				productsLen4[combinedInd + 3] = outerMul * 3;
+				predicatesLen4[combinedInd + 3] = outerPredicate; 
+				sumsLen4[combinedInd + 4] = outerSum + 4;
+				productsLen4[combinedInd + 4] = outerMul * 4;
+				predicatesLen4[combinedInd + 4] = outerPredicate; 
+				sumsLen4[combinedInd + 5] = outerSum + 5;
+				productsLen4[combinedInd + 5] = outerMul * 5;
+				predicatesLen4[combinedInd + 5] = outerPredicate;
+				sumsLen4[combinedInd + 6] = outerSum + 6;
+				productsLen4[combinedInd + 6] = outerMul * 6;
+				predicatesLen4[combinedInd + 6] = outerPredicate;
+				sumsLen4[combinedInd + 7] = outerSum + 7;
+				productsLen4[combinedInd + 7] = outerMul * 7;
+				predicatesLen4[combinedInd + 7] = outerPredicate;
+				sumsLen4[combinedInd + 8] = outerSum + 8;
+				productsLen4[combinedInd + 8] = outerMul * 8;
+				predicatesLen4[combinedInd + 8] = outerPredicate;
+				sumsLen4[combinedInd + 9] = outerSum + 9;
+				productsLen4[combinedInd + 9] = outerMul * 9;
+				predicatesLen4[combinedInd + 9] = outerPredicate;
 			}
 		}
 	}
-	// 1000
+	// Len3
 	for (int z = 0; z < 10; ++z) {
 		auto zPred = z >= 2;
 		auto zSum = z;
@@ -198,36 +273,36 @@ inline void initialize() noexcept {
 			auto combinedInd = (x * 10) + zInd;
 			auto outerSum = x + zSum;
 			auto outerPredicate = ((x >= 2) && zPred);
-			sums1000[combinedInd + 0] = outerSum;
-			products1000[combinedInd + 0] = 0;
-			predicates1000[combinedInd + 0] = false;
-			sums1000[combinedInd + 1] = outerSum + 1;
-			products1000[combinedInd + 1] = outerMul ;
-			predicates1000[combinedInd + 1] = false;
-			sums1000[combinedInd + 2] = outerSum + 2;
-			products1000[combinedInd + 2] = outerMul * 2;
-			predicates1000[combinedInd + 2] = outerPredicate;
-			sums1000[combinedInd + 3] = outerSum + 3;
-			products1000[combinedInd + 3] = outerMul * 3;
-			predicates1000[combinedInd + 3] = outerPredicate; 
-			sums1000[combinedInd + 4] = outerSum + 4;
-			products1000[combinedInd + 4] = outerMul * 4;
-			predicates1000[combinedInd + 4] = outerPredicate; 
-			sums1000[combinedInd + 5] = outerSum + 5;
-			products1000[combinedInd + 5] = outerMul * 5;
-			predicates1000[combinedInd + 5] = outerPredicate;
-			sums1000[combinedInd + 6] = outerSum + 6;
-			products1000[combinedInd + 6] = outerMul * 6;
-			predicates1000[combinedInd + 6] = outerPredicate;
-			sums1000[combinedInd + 7] = outerSum + 7;
-			products1000[combinedInd + 7] = outerMul * 7;
-			predicates1000[combinedInd + 7] = outerPredicate;
-			sums1000[combinedInd + 8] = outerSum + 8;
-			products1000[combinedInd + 8] = outerMul * 8;
-			predicates1000[combinedInd + 8] = outerPredicate;
-			sums1000[combinedInd + 9] = outerSum + 9;
-			products1000[combinedInd + 9] = outerMul * 9;
-			predicates1000[combinedInd + 9] = outerPredicate;
+			sumsLen3[combinedInd + 0] = outerSum;
+			productsLen3[combinedInd + 0] = 0;
+			predicatesLen3[combinedInd + 0] = false;
+			sumsLen3[combinedInd + 1] = outerSum + 1;
+			productsLen3[combinedInd + 1] = outerMul ;
+			predicatesLen3[combinedInd + 1] = false;
+			sumsLen3[combinedInd + 2] = outerSum + 2;
+			productsLen3[combinedInd + 2] = outerMul * 2;
+			predicatesLen3[combinedInd + 2] = outerPredicate;
+			sumsLen3[combinedInd + 3] = outerSum + 3;
+			productsLen3[combinedInd + 3] = outerMul * 3;
+			predicatesLen3[combinedInd + 3] = outerPredicate; 
+			sumsLen3[combinedInd + 4] = outerSum + 4;
+			productsLen3[combinedInd + 4] = outerMul * 4;
+			predicatesLen3[combinedInd + 4] = outerPredicate; 
+			sumsLen3[combinedInd + 5] = outerSum + 5;
+			productsLen3[combinedInd + 5] = outerMul * 5;
+			predicatesLen3[combinedInd + 5] = outerPredicate;
+			sumsLen3[combinedInd + 6] = outerSum + 6;
+			productsLen3[combinedInd + 6] = outerMul * 6;
+			predicatesLen3[combinedInd + 6] = outerPredicate;
+			sumsLen3[combinedInd + 7] = outerSum + 7;
+			productsLen3[combinedInd + 7] = outerMul * 7;
+			predicatesLen3[combinedInd + 7] = outerPredicate;
+			sumsLen3[combinedInd + 8] = outerSum + 8;
+			productsLen3[combinedInd + 8] = outerMul * 8;
+			predicatesLen3[combinedInd + 8] = outerPredicate;
+			sumsLen3[combinedInd + 9] = outerSum + 9;
+			productsLen3[combinedInd + 9] = outerMul * 9;
+			predicatesLen3[combinedInd + 9] = outerPredicate;
 		}
 	}
 }
@@ -237,7 +312,7 @@ inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
 
 template<u64 length>
 inline bool isQuodigious(u64 value) noexcept {
-	static constexpr auto count = 10000u;
+	static constexpr auto count = Len4;
 	static constexpr auto digits = 4;
 	static constexpr auto remainder = length % digits;
 	static constexpr auto len = length - remainder;
@@ -245,13 +320,13 @@ inline bool isQuodigious(u64 value) noexcept {
 	u64 sum = 0;
 	u64 product = 1;
 	if (remainder == 3) {
-		auto result = current % 1000u;
-		if (!predicates1000[result]) {
+		auto result = current % Len3;
+		if (!predicatesLen3[result]) {
 			return false;
 		}
-		sum = sums1000[result];
-		product = products1000[result]; 
-		current /= 1000u;
+		sum = sumsLen3[result];
+		product = productsLen3[result]; 
+		current /= Len3;
 	} else if (remainder == 2) {
 		auto tmp = current % 10;
 		if (tmp < 2) {
@@ -280,11 +355,11 @@ inline bool isQuodigious(u64 value) noexcept {
 	}
 	for (u64 i = 0 ; i < len; i += digits) {
 		u64 result = current % count;
-		if (!predicates10000[result]) {
+		if (!predicatesLen4[result]) {
 			return false;
 		} else {
-			product *= products10000[result];
-			sum += sums10000[result];
+			product *= productsLen4[result];
+			sum += sumsLen4[result];
 			current /= count;
 		}
 	}
@@ -293,78 +368,96 @@ inline bool isQuodigious(u64 value) noexcept {
 
 template<>
 inline bool isQuodigious<10>(u64 value) noexcept {
-	static constexpr auto count = 100000u;
+	static constexpr auto count = Len5;
 	//5
 	auto result = value % count;
-	if (!predicates100000[result]) {
+	if (!predicatesLen5[result]) {
 		return false;
 	} 
-	auto product = products100000[result];
-	auto sum = sums100000[result];
+	auto product = productsLen5[result];
+	auto sum = sumsLen5[result];
 	auto current = value / count;
 
 	//10
 	result = current % count;
-	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
+	return predicatesLen5[result] && performQCheck(value, sum + sumsLen5[result], product * productsLen5[result]);
 }
 
-template<>
-inline bool isQuodigious<12>(u64 value) noexcept {
-	static constexpr auto count = 1000000u;
-	//6
-	auto result = value % count;
-	if (!predicates1000000[result]) {
-		return false;
-	} 
-	auto product = products1000000[result];
-	auto sum = sums1000000[result];
-	auto current = value / count;
-
-	//12
-	result = current % count;
-	return predicates1000000[result] && performQCheck(value, sum + sums1000000[result], product * products1000000[result]);
-}
 
 template<>
 inline bool isQuodigious<11>(u64 value) noexcept {
 	// 6 + 5
-	auto result = value % 1000000u;
-	if (!predicates1000000[result]) {
+	auto result = value % Len6;
+	if (!predicatesLen6[result]) {
 		return false;
 	}
-	auto product = products1000000[result];
-	auto sum = sums1000000[result];
-	auto current = value / 1000000u;
+	auto product = productsLen6[result];
+	auto sum = sumsLen6[result];
+	auto current = value / Len6;
 
-	result = current % 100000u;
-	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
+	result = current % Len5;
+	return predicatesLen5[result] && performQCheck(value, sum + sumsLen5[result], product * productsLen5[result]);
+}
+
+template<>
+inline bool isQuodigious<12>(u64 value) noexcept {
+	static constexpr auto count = Len6;
+	//6
+	auto result = value % count;
+	if (!predicatesLen6[result]) {
+		return false;
+	} 
+	auto product = productsLen6[result];
+	auto sum = sumsLen6[result];
+	auto current = value / count;
+
+	//12
+	result = current % count;
+	return predicatesLen6[result] && performQCheck(value, sum + sumsLen6[result], product * productsLen6[result]);
+}
+
+template<>
+inline bool isQuodigious<13>(u64 value) noexcept {
+	// 6 + 7
+	//6
+	auto result = value % Len6;
+	if (!predicatesLen6[result]) {
+		return false;
+	} 
+	auto product = productsLen6[result];
+	auto sum = sumsLen6[result];
+	auto current = value / Len6;
+
+	// 13
+	result = current % Len7;
+	return predicatesLen7[result] && performQCheck(value, sum + sumsLen7[result], product * productsLen7[result]);
 }
 
 template<>
 inline bool isQuodigious<15>(u64 value) noexcept {
-	static constexpr auto count = 100000u;
+	static constexpr auto count = Len5;
 	u64 current = value;
 	//5
 	auto result = current % count;
-	if (!predicates100000[result]) {
+	if (!predicatesLen5[result]) {
 		return false;
 	} 
-	u64 product = products100000[result];
-	u64 sum = sums100000[result];
+	u64 product = productsLen5[result];
+	u64 sum = sumsLen5[result];
 	current /= count;
 
 	//10
 	result = current % count;
-	if (!predicates100000[result]) {
+	if (!predicatesLen5[result]) {
 		return false;
 	} 
-	product *= products100000[result];
-	sum += sums100000[result];
+	product *= productsLen5[result];
+	sum += sumsLen5[result];
 	current /= count;
 
 	//15
 	result = current % count;
-	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
+	return predicatesLen5[result] && performQCheck(value, sum + sumsLen5[result], product * productsLen5[result]);
 }
 
 template<> inline bool isQuodigious<1>(u64 value) noexcept { return value >= 2; }
@@ -383,49 +476,37 @@ inline bool isQuodigious<2>(u64 value) noexcept {
 	return (result >= 2) &&performQCheck(value, sum + result, prod * result);
 }
 
-template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicates1000[value]    && performQCheck(value, sums1000[value],    products1000[value]); }
-template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicates10000[value]   && performQCheck(value, sums10000[value],   products10000[value]); }
-template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicates100000[value]  && performQCheck(value, sums100000[value],  products100000[value]); }
-template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicates1000000[value] && performQCheck(value, sums1000000[value], products1000000[value]); }
+template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicatesLen3[value]    && performQCheck(value, sumsLen3[value],    productsLen3[value]); }
+template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicatesLen4[value]   && performQCheck(value, sumsLen4[value],   productsLen4[value]); }
+template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicatesLen5[value]  && performQCheck(value, sumsLen5[value],  productsLen5[value]); }
+template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicatesLen6[value] && performQCheck(value, sumsLen6[value], productsLen6[value]); }
+template<> inline bool isQuodigious<7>(u64 value) noexcept { return predicatesLen7[value] && performQCheck(value, sumsLen7[value], productsLen7[value]); }
 
-template<> 
-inline bool isQuodigious<7>(u64 value) noexcept { 
-	// 6 + 1
-	auto result = value % 1000000u;
-	if (!predicates1000000[result]) {
-		return false;
-	}
-	auto sum = sums1000000[result];
-	auto product = products1000000[result];
-	auto current = value / 1000000u;
-	result = current % 10u;
-	return result >= 2 && performQCheck(value, sum + result, product * result);
-}
 
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
-	static constexpr auto divisor = 10000u;
+	static constexpr auto divisor = Len4;
 	auto result = value % divisor;
-	if (!predicates10000[result]) {
+	if (!predicatesLen4[result]) {
 		return false;
 	}
-	u64 sum = sums10000[result];
-	u64 product = products10000[result];
+	u64 sum = sumsLen4[result];
+	u64 product = productsLen4[result];
 	u64 current = value / divisor;
 
 	result = current % divisor;
-	return predicates10000[result] && performQCheck(value, sum + sums10000[result], product * products10000[result]);
+	return predicatesLen4[result] && performQCheck(value, sum + sumsLen4[result], product * productsLen4[result]);
 }
 template<> inline bool isQuodigious<9>(u64 value) noexcept { 
 	// 6 + 3
-	auto result = value % 1000000u;
-	if (!predicates1000000[result]) {
+	auto result = value % Len6;
+	if (!predicatesLen6[result]) {
 		return false;
 	}
-	auto sum = sums1000000[result];
-	auto product = products1000000[result];
-	auto current = value / 1000000u;
-	result = current % 1000u;
-	return predicates1000[result] && performQCheck(value, sum + sums1000[result], product * products1000[result]);
+	auto sum = sumsLen6[result];
+	auto product = productsLen6[result];
+	auto current = value / Len6;
+	result = current % Len3;
+	return predicatesLen3[result] && performQCheck(value, sum + sumsLen3[result], product * productsLen3[result]);
 }
 
 template<u64 length>
