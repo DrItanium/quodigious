@@ -404,7 +404,19 @@ template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicates10
 template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicates1000000[value] && performQCheck(value, sums1000000[value], products1000000[value]); }
 
 template<> 
-inline bool isQuodigious<7>(u64 value) noexcept { return isQuodigious10<7>(value); }
+inline bool isQuodigious<7>(u64 value) noexcept { 
+//	return isQuodigious10<7>(value); 
+// 6 + 1
+	auto result = value % 1000000u;
+	if (!predicates1000000[result]) {
+		return false;
+	}
+	auto sum = sums1000000[result];
+	auto product = products1000000[result];
+	auto current = value / 1000000u;
+	result = current % 10u;
+	return result >= 2 && performQCheck(value, sum + result, product * result);
+}
 
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
 	static constexpr auto divisor = 10000u;
@@ -419,7 +431,18 @@ template<> inline bool isQuodigious<8>(u64 value) noexcept {
 	result = current % divisor;
 	return predicates10000[result] && performQCheck(value, sum + sums10000[result], product * products10000[result]);
 }
-template<> inline bool isQuodigious<9>(u64 value) noexcept { return isQuodigious10<9>(value); }
+template<> inline bool isQuodigious<9>(u64 value) noexcept { 
+	// 6 + 3
+	auto result = value % 1000000u;
+	if (!predicates1000000[result]) {
+		return false;
+	}
+	auto sum = sums1000000[result];
+	auto product = products1000000[result];
+	auto current = value / 1000000u;
+	result = current % 1000u;
+	return predicates1000[result] && performQCheck(value, sum + sums1000[result], product * products1000[result]);
+}
 
 template<u64 length>
 inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
