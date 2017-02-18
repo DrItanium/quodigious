@@ -434,6 +434,23 @@ inline bool isQuodigious<13>(u64 value) noexcept {
 }
 
 template<>
+inline bool isQuodigious<14>(u64 value) noexcept {
+	// 7 + 7
+	//7
+	auto result = value % Len7;
+	if (!predicatesLen7[result]) {
+		return false;
+	} 
+	auto product = productsLen7[result];
+	auto sum = sumsLen7[result];
+	auto current = value / Len7;
+
+	// 14
+	result = current % Len7;
+	return predicatesLen7[result] && performQCheck(value, sum + sumsLen7[result], product * productsLen7[result]);
+}
+
+template<>
 inline bool isQuodigious<15>(u64 value) noexcept {
 	static constexpr auto count = Len5;
 	u64 current = value;
