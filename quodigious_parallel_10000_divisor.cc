@@ -488,15 +488,6 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	}
 	return 0;
 }
-template<>
-inline int performQuodigiousCheck<1>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (value >= 2) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
 
 template<>
 inline int performQuodigiousCheck<2>(u64 start, u64 end, vec64& results) noexcept {
@@ -609,9 +600,14 @@ inline void body() noexcept {
 }
 template<>
 inline void body<1>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<1>(2, 10, contents);
-	printout(contents);
+	std::cout << 2 << std::endl;
+	std::cout << 3 << std::endl;
+	std::cout << 4 << std::endl;
+	std::cout << 5 << std::endl;
+	std::cout << 6 << std::endl;
+	std::cout << 7 << std::endl;
+	std::cout << 8 << std::endl;
+	std::cout << 9 << std::endl;
 }
 template<>
 inline void body<2>() noexcept {
@@ -638,6 +634,13 @@ template<>
 inline void body<5>() noexcept {
 	static vec64 contents;
 	performQuodigiousCheck<5>(22222, 100000, contents);
+	printout(contents);
+}
+
+template<>
+inline void body<6>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<6>(222222, 1000000, contents);
 	printout(contents);
 }
 
