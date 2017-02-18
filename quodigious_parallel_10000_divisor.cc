@@ -29,9 +29,9 @@ inline void initialize() noexcept {
 		auto hMul = h;
 		auto hInd = (h * 100000);
 		for (int w = 0; w < 10; ++w) {
-			auto wPred = w >= 2 && hPred;
+			auto wPred = (w >= 2) && hPred;
 			auto wSum = w + hSum;
-			auto wMul = w + hMul;
+			auto wMul = w * hMul;
 			auto wInd = (w * 10000) + hInd;
 			for (int y = 0; y < 10; ++y) {
 				auto yPred = (y >= 2) && wPred;
@@ -263,29 +263,13 @@ inline bool isQuodigious(u64 value) noexcept {
 	u64 sum = 0;
 	u64 product = 1;
 	if (remainder == 3) {
-		auto tmp = current % 10;
-		if (tmp < 2) {
+		auto result = current % 1000u;
+		if (!predicates1000[result]) {
 			return false;
 		}
-		sum = tmp;
-		product = tmp;
-		current /= 10;
-
-		tmp = current % 10;
-		if (tmp < 2) {
-			return false;
-		}
-		sum += tmp;
-		product *= tmp;
-		current /= 10;
-
-		tmp = current % 10;
-		if (tmp < 2) {
-			return false;
-		}
-		sum += tmp;
-		product *= tmp;
-		current /= 10;
+		sum = sums1000[result];
+		product = products1000[result]; 
+		current /= 1000u;
 	} else if (remainder == 2) {
 		auto tmp = current % 10;
 		if (tmp < 2) {
@@ -343,6 +327,21 @@ inline bool isQuodigious<10>(u64 value) noexcept {
 }
 
 template<>
+inline bool isQuodigious<11>(u64 value) noexcept {
+	// 6 + 5
+	auto result = value % 1000000u;
+	if (!predicates1000000[result]) {
+		return false;
+	}
+	auto product = products1000000[result];
+	auto sum = sums1000000[result];
+	auto current = value / 1000000u;
+
+	result = value % 100000u;
+	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
+}
+
+template<>
 inline bool isQuodigious<15>(u64 value) noexcept {
 	static constexpr auto count = 100000u;
 	u64 current = value;
@@ -391,9 +390,9 @@ inline bool isQuodigious<2>(u64 value) noexcept {
 	return (result >= 2) &&performQCheck(value, sum + result, prod * result);
 }
 
-template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicates1000[value] && performQCheck(value, sums1000[value], products1000[value]); }
-template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicates10000[value] && performQCheck(value, sums10000[value], products10000[value]); }
-template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicates100000[value] && performQCheck(value, sums100000[value], products100000[value]); }
+template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicates1000[value]    && performQCheck(value, sums1000[value],    products1000[value]); }
+template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicates10000[value]   && performQCheck(value, sums10000[value],   products10000[value]); }
+template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicates100000[value]  && performQCheck(value, sums100000[value],  products100000[value]); }
 template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicates1000000[value] && performQCheck(value, sums1000000[value], products1000000[value]); }
 
 template<> 
