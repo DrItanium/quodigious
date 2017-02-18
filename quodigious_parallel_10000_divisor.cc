@@ -374,15 +374,15 @@ template<> inline bool isQuodigious<8>(u64 value) noexcept {
 }
 template<> inline bool isQuodigious<9>(u64 value) noexcept { 
 	// 6 + 3
-	auto result = value % Len6;
-	if (!predicatesLen6[result]) {
+	auto result = value % Len3;
+	if (!predicatesLen3[result]) {
 		return false;
 	}
 	auto sum = sums[result];
-	auto product = productsLen6[result];
-	auto current = value / Len6;
-	result = current % Len3;
-	return predicatesLen3[result] && performQCheck(value, sum + sums[result], product * productsLen3[result]);
+	auto product = productsLen3[result];
+	auto current = value / Len3;
+	result = current % Len6;
+	return predicatesLen6[result] && performQCheck(value, sum + sums[result], product * productsLen6[result]);
 }
 
 template<>
@@ -473,30 +473,27 @@ inline bool isQuodigious<14>(u64 value) noexcept {
 
 template<>
 inline bool isQuodigious<15>(u64 value) noexcept {
-	static constexpr auto count = Len5;
-	// 5, 5, 5
-	u64 current = value;
-	//5
-	auto result = current % count;
-	if (!predicatesLen5[result]) {
+	// 1, 7, 7 (we can do a cheap kick out if we fail out!)
+	//1
+	auto result = value % 10u;
+	if (result < 2) {
+		return false;
+	}
+	u64 product = result;
+	u64 sum = result;
+	u64 current = value / 10u;
+	//8
+	result = current % Len7;
+	if (!predicatesLen7[result]) {
 		return false;
 	} 
-	u64 product = productsLen5[result];
-	u64 sum = sums[result];
-	current /= count;
-
-	//10
-	result = current % count;
-	if (!predicatesLen5[result]) {
-		return false;
-	} 
-	product *= productsLen5[result];
+	product *= productsLen7[result];
 	sum += sums[result];
-	current /= count;
+	current /= Len7;
 
 	//15
-	result = current % count;
-	return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
+	result = current % Len7;
+	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
 }
 
 template<u64 length>
