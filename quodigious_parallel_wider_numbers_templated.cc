@@ -149,6 +149,7 @@ template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
+	static constexpr auto skip5 = length > 8 && length < 14;
 	auto base = static_cast<u64>(pow(10, length - 1));
 	auto st = static_cast<u64>(factor * base);
 
@@ -156,12 +157,11 @@ inline void body() noexcept {
 	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
 	auto fut2 = std::async(std::launch::async, [start = st + (base * 2), end = 5 * base]() { return performQuodigiousCheck<length>( start, end, l2); });
 
-	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return (length > 8 && length < 14) ? 0 : performQuodigiousCheck<length>( start, end, l3); });
+	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return skip5 ? 0 : performQuodigiousCheck<length>( start, end, l3); });
 
 	auto fut4 = std::async(std::launch::async, [start = st + (base * 4), end = 7 * base]() { return performQuodigiousCheck<length>( start, end, l4); });
 	auto fut5 = std::async(std::launch::async, [start = st + (base * 5), end = 8 * base]() { return performQuodigiousCheck<length>( start, end, l5); });
 	auto fut6 = std::async(std::launch::async, [start = st + (base * 6), end = 9 * base]() { return performQuodigiousCheck<length>( start, end, l6); });
-	// use the primary thread to compute the last portion of this range!
 	performQuodigiousCheck<length>(st + (base * 7), 10 * base, l7);
 	fut0.get();
 	fut1.get();
