@@ -372,11 +372,19 @@ inline bool isQuodigious<10>(u64 value) noexcept {
 	} 
 	auto product = productsLen5[result];
 	auto sum = sums[result];
+	auto previous = result;
 	auto current = value / count;
 
 	//10
 	result = current % count;
-	return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
+	if (previous == result) {
+		// if the two halves are the same and we got this far then we don't
+		// need to check again!
+		return performQCheck(value, sum + sum, product * product);
+	} else {
+		// if they aren't equal, then perform actions as normal
+		return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
+	}
 }
 
 
