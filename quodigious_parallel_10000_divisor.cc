@@ -490,62 +490,6 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 }
 
 template<>
-inline int performQuodigiousCheck<2>(u64 start, u64 end, vec64& results) noexcept {
-	static constexpr auto divisor = 10u;
-
-	for (auto value = start; value < end; ++value) {
-		auto result = value % divisor;
-		if (result >= 2) {
-			u64 prod = result;
-			u64 sum = result;
-			u64 current = value / divisor;
-			result = current % divisor;
-			if ((result >= 2) && performQCheck(value, sum + result, prod * result)) {
-				results.emplace_back(value);
-			}
-		}
-	}
-	return 0;
-}
-
-template<>
-inline int performQuodigiousCheck<3>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value])) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
-template<>
-inline int performQuodigiousCheck<4>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value])) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
-
-template<>
-inline int performQuodigiousCheck<5>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value])) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
-template<>
-inline int performQuodigiousCheck<6>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
-}
-template<>
 inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
 		if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
@@ -608,40 +552,64 @@ inline void body<1>() noexcept {
 	std::cout << 7 << std::endl;
 	std::cout << 8 << std::endl;
 	std::cout << 9 << std::endl;
+	std::cout << std::endl;
 }
 template<>
 inline void body<2>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<2>(22, 100, contents);
-	printout(contents);
+	static constexpr auto divisor = 10u;
+	for (auto value = 22; value < 100; ++value) {
+		auto result = value % divisor;
+		if (result >= 2) {
+			u64 prod = result;
+			u64 sum = result;
+			u64 current = value / divisor;
+			result = current % divisor;
+			if ((result >= 2) && performQCheck(value, sum + result, prod * result)) {
+				std::cout << value << std::endl;
+			}
+		}
+	}
+	std::cout << std::endl;
 }
 
 template<>
 inline void body<3>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<3>(222, 1000, contents);
-	printout(contents);
+	for (auto value = 222; value < 1000; ++value) {
+		if (predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value])) {
+			std::cout << value << std::endl;
+		}
+	}
+	std::cout << std::endl;
 }
 
 template<>
 inline void body<4>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<4>(2222, 10000, contents);
-	printout(contents);
+	for (auto value = 2222; value < 10000; ++value) {
+		if (predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value])) {
+			std::cout << value << std::endl;
+		}
+	}
+	std::cout << std::endl;
 }
 
 template<>
 inline void body<5>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<5>(22222, 100000, contents);
-	printout(contents);
+	for (auto value = 22222; value < 100000; ++value) {
+		if (predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value])) {
+			std::cout << value << std::endl;
+		}
+	}
+	std::cout << std::endl;
 }
 
 template<>
 inline void body<6>() noexcept {
-	static vec64 contents;
-	performQuodigiousCheck<6>(222222, 1000000, contents);
-	printout(contents);
+	for (auto value = 222222; value < 1000000; ++value) {
+		if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
+			std::cout << value << std::endl;
+		}
+	}
+	std::cout << std::endl;
 }
 
 int main() {
