@@ -22,10 +22,12 @@ inline bool isQuodigious10(u64 value, u64 length) noexcept {
 	}
 	return (value % sum == 0) && (value % prod == 0);
 }
-
-inline bool isQuodigious1000(u64 value, u64 length) noexcept {
+template<u64 length>
+inline bool isQuodigious1000(u64 value) noexcept {
 	static constexpr auto count = 1000u;
 	static constexpr auto digits = 3;
+	static constexpr auto remainder = length % digits;
+	static constexpr auto len = length - remainder;
 	static bool init = true;
 	static bool predicates[count] = { 0 };
 	static u64 sums[count] = { 0 };
@@ -73,12 +75,9 @@ inline bool isQuodigious1000(u64 value, u64 length) noexcept {
 			}
 		}
 	}
-	u64 len = length;
 	u64 current = value;
 	u64 sum = 0;
 	u64 product = 1;
-	auto remainder = length % digits;
-	len -= remainder;
 	// maximum of two right now
 	if (remainder == 2) {
 		auto tmp = current % 10;
@@ -118,11 +117,20 @@ inline bool isQuodigious1000(u64 value, u64 length) noexcept {
 	}
 	return ((value % sum) == 0) && ((value % product) == 0);
 }
-int performQuodigiousCheck(u64 length, u64 start, u64 end, vec64& results) noexcept {
-	auto fn = length > 8 ? isQuodigious1000 : isQuodigious10;
-	for (auto value = start; value < end; ++value) {
-		if (fn(value, length)) {
-			results.emplace_back(value);
+
+template<u64 length>
+inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
+	if (length > 8) {
+		for (auto value = start; value < end; ++value) {
+			if (isQuodigious1000<length>(value)) {
+				results.emplace_back(value);
+			}
+		}
+	} else {
+		for (auto value = start; value < end; ++value) {
+			if (isQuodigious10(value, length)) {
+				results.emplace_back(value);
+			}
 		}
 	}
 	return 0;
@@ -134,32 +142,59 @@ void printout(auto& future, vec64& l) noexcept {
 	}
 	l.clear();
 }
-int main() {
+template<u64 length>
+inline void body() noexcept {
+	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	vec64 l0, l1, l2, l3, l4, l5, l6, l7;
+	auto base = static_cast<u64>(pow(10, length - 1));
+	auto st = static_cast<u64>(factor * base);
+	auto fut0 = std::async(std::launch::async, [start = st, end = 3 * base]() { return performQuodigiousCheck<length>(start, end, l0); });
+	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
+	auto fut2 = std::async(std::launch::async, [start = st + (base * 2), end = 5 * base]() { return performQuodigiousCheck<length>( start, end, l2); });
+	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return performQuodigiousCheck<length>( start, end, l3); });
+	auto fut4 = std::async(std::launch::async, [start = st + (base * 4), end = 7 * base]() { return performQuodigiousCheck<length>( start, end, l4); });
+	auto fut5 = std::async(std::launch::async, [start = st + (base * 5), end = 8 * base]() { return performQuodigiousCheck<length>( start, end, l5); });
+	auto fut6 = std::async(std::launch::async, [start = st + (base * 6), end = 9 * base]() { return performQuodigiousCheck<length>( start, end, l6); });
+	auto fut7 = std::async(std::launch::async, [start = st + (base * 7), end = 10 * base]() { return performQuodigiousCheck<length>( start, end, l7); });
+	printout(fut0, l0);
+	printout(fut1, l1);
+	printout(fut2, l2);
+	printout(fut3, l3);
+	printout(fut4, l4);
+	printout(fut5, l5);
+	printout(fut6, l6);
+	printout(fut7, l7);
+	std::cout << std::endl;
+}
+int main() {
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
-			auto base = static_cast<u64>(pow(10, currentIndex -1));
-			auto st = static_cast<u64>(factor * base);
-			auto fut0 = std::async(std::launch::async, [len = currentIndex, start = st, end = 3 * base, &l0]() { return performQuodigiousCheck(len, start, end, l0); });
-			auto fut1 = std::async(std::launch::async, [len = currentIndex, start = st + base, end = 4 * base, &l1]() { return performQuodigiousCheck(len, start, end, l1); });
-			auto fut2 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 2), end = 5 * base, &l2]() { return performQuodigiousCheck(len, start, end, l2); });
-			auto fut3 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 3), end = 6 * base, &l3]() { return performQuodigiousCheck(len, start, end, l3); });
-			auto fut4 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 4), end = 7 * base, &l4]() { return performQuodigiousCheck(len, start, end, l4); });
-			auto fut5 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 5), end = 8 * base, &l5]() { return performQuodigiousCheck(len, start, end, l5); });
-			auto fut6 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 6), end = 9 * base, &l6]() { return performQuodigiousCheck(len, start, end, l6); });
-			auto fut7 = std::async(std::launch::async, [len = currentIndex, start = st + (base * 7), end = 10 * base, &l7]() { return performQuodigiousCheck(len, start, end, l7); });
-			printout(fut0, l0);
-			printout(fut1, l1);
-			printout(fut2, l2);
-			printout(fut3, l3);
-			printout(fut4, l4);
-			printout(fut5, l5);
-			printout(fut6, l6);
-			printout(fut7, l7);
-			std::cout << std::endl;
+			switch(currentIndex) {
+				case 1: body<1>(); break;
+				case 2: body<2>(); break;
+				case 3: body<3>(); break;
+				case 4: body<4>(); break;
+				case 5: body<5>(); break;
+				case 6: body<6>(); break;
+				case 7: body<7>(); break;
+				case 8: body<8>(); break;
+				case 9: body<9>(); break;
+				case 10: body<10>(); break;
+				case 11: body<11>(); break;
+				case 12: body<12>(); break;
+				case 13: body<13>(); break;
+				case 14: body<14>(); break;
+				case 15: body<15>(); break;
+				case 16: body<16>(); break;
+				case 17: body<17>(); break;
+				case 18: body<18>(); break;
+				case 19: body<19>(); break;
+				default:
+					std::cerr << "Illegal index " << currentIndex << std::endl;
+					return 1;
+			}
 		}
 	}
 	return 0;
