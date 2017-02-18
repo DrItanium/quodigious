@@ -361,16 +361,16 @@ template<> inline bool isQuodigious<7>(u64 value) noexcept { return predicatesLe
 
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
 	// 7 + 1 (4 + 4 is also valid but this was we reduce the number of memory accesses)
-	auto result = value % Len7;
-	if (!predicatesLen7[result]) {
+	auto result = value % 10u;
+	if (result < 2) {
 		return false;
 	}
-	u64 sum = sums[result];
-	u64 product = productsLen7[result];
-	u64 current = value / Len7;
+	u64 sum = result;
+	u64 product = result;
+	u64 current = value / 10u;
 
-	result = current % 10u;
-	return result >= 2 && performQCheck(value, sum + result, product * result);
+	result = current % Len7;
+	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
 }
 template<> inline bool isQuodigious<9>(u64 value) noexcept { 
 	// 6 + 3
