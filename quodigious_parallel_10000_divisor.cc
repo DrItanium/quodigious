@@ -8,11 +8,8 @@ using u64 = uint64_t;
 using vec64 = std::vector<u64>;
 
 
-constexpr auto Len8 = 100000000u;
-u64 sums[Len8] = { 0 };
-u64 productsLen8[Len8] = { 0 };
-bool predicatesLen8[Len8] = { false };
 constexpr auto Len7 = 10000000u;
+u64 sums[Len7] = { 0 };
 u64 productsLen7[Len7] = { 0 };
 bool predicatesLen7[Len7] = { false };
 constexpr auto Len6 = 1000000u;
@@ -42,122 +39,65 @@ inline void initialize() noexcept {
 	// are three digits, however when it is four digits then it is 0222 and
 	// thus illegal (also the product becomes zero!). Thus we have separate
 	// lists for each number width when dealing with products and predicates
-	// Len8
-	for (int j = 0; j < 10; ++j) {
-		auto jPred = j >= 2;
-		auto jSum = j;
-		auto jProd = j;
-		auto jInd = (j * Len7);
-		for (int k = 0; k < 10; ++k) {
-			auto kPred = (k >= 2) && jPred;
-			auto kSum = k + jSum;
-			auto kMul = k * jProd;
-			auto kInd = (k * Len6) + jInd;
-			for (int h = 0; h < 10; ++h) {
-				auto hPred = (h >= 2) && kPred ;
-				auto hSum = h + kSum;
-				auto hMul = h * kMul;
-				auto hInd = (h * Len5) + kInd;
-				for (int w = 0; w < 10; ++w) {
-					auto wPred = (w >= 2) && hPred;
-					auto wSum = w + hSum;
-					auto wMul = w * hMul;
-					auto wInd = (w * Len4) + hInd;
-					for (int y = 0; y < 10; ++y) {
-						auto yPred = (y >= 2) && wPred;
-						auto ySum = y + wSum;
-						auto yMul = y * wMul;
-						auto yInd = (y * Len3) + wInd;
-						for (int z = 0; z < 10; ++z) {
-							auto zPred = z >= 2 && yPred;
-							auto zSum = z + ySum;
-							auto zMul = z * yMul;
-							auto zInd = (z * 100) + yInd ;
-							for (int x = 0; x < 10; ++x) {
-								auto outerMul = x * zMul;
-								auto combinedInd = (x * 10) + zInd;
-								auto outerSum = x + zSum;
-								auto outerPredicate = ((x >= 2) && zPred);
-								sums[combinedInd + 0] = outerSum;
-								productsLen8[combinedInd + 0] = 0;
-								predicatesLen8[combinedInd + 0] = false;
-								sums[combinedInd + 1] = outerSum + 1;
-								productsLen8[combinedInd + 1] = outerMul ;
-								predicatesLen8[combinedInd + 1] = false;
-								sums[combinedInd + 2] = outerSum + 2;
-								productsLen8[combinedInd + 2] = outerMul * 2;
-								predicatesLen8[combinedInd + 2] = outerPredicate;
-								sums[combinedInd + 3] = outerSum + 3;
-								productsLen8[combinedInd + 3] = outerMul * 3;
-								predicatesLen8[combinedInd + 3] = outerPredicate; 
-								sums[combinedInd + 4] = outerSum + 4;
-								productsLen8[combinedInd + 4] = outerMul * 4;
-								predicatesLen8[combinedInd + 4] = outerPredicate; 
-								sums[combinedInd + 5] = outerSum + 5;
-								productsLen8[combinedInd + 5] = outerMul * 5;
-								predicatesLen8[combinedInd + 5] = outerPredicate;
-								sums[combinedInd + 6] = outerSum + 6;
-								productsLen8[combinedInd + 6] = outerMul * 6;
-								predicatesLen8[combinedInd + 6] = outerPredicate;
-								sums[combinedInd + 7] = outerSum + 7;
-								productsLen8[combinedInd + 7] = outerMul * 7;
-								predicatesLen8[combinedInd + 7] = outerPredicate;
-								sums[combinedInd + 8] = outerSum + 8;
-								productsLen8[combinedInd + 8] = outerMul * 8;
-								predicatesLen8[combinedInd + 8] = outerPredicate;
-								sums[combinedInd + 9] = outerSum + 9;
-								productsLen8[combinedInd + 9] = outerMul * 9;
-								predicatesLen8[combinedInd + 9] = outerPredicate;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 	// Len7
 	for (int k = 0; k < 10; ++k) {
 		auto kPred = k >= 2;
+		auto kSum = k;
 		auto kMul = k;
 		auto kInd = (k * Len6);
 		for (int h = 0; h < 10; ++h) {
 			auto hPred = (h >= 2) && kPred ;
+			auto hSum = h + kSum;
 			auto hMul = h * kMul;
 			auto hInd = (h * Len5) + kInd;
 			for (int w = 0; w < 10; ++w) {
 				auto wPred = (w >= 2) && hPred;
+				auto wSum = w + hSum;
 				auto wMul = w * hMul;
 				auto wInd = (w * Len4) + hInd;
 				for (int y = 0; y < 10; ++y) {
 					auto yPred = (y >= 2) && wPred;
+					auto ySum = y + wSum;
 					auto yMul = y * wMul;
 					auto yInd = (y * Len3) + wInd;
 					for (int z = 0; z < 10; ++z) {
 						auto zPred = z >= 2 && yPred;
+						auto zSum = z + ySum;
 						auto zMul = z * yMul;
 						auto zInd = (z * 100) + yInd ;
 						for (int x = 0; x < 10; ++x) {
 							auto outerMul = x * zMul;
 							auto combinedInd = (x * 10) + zInd;
+							auto outerSum = x + zSum;
 							auto outerPredicate = ((x >= 2) && zPred);
+							sums[combinedInd + 0] = outerSum;
 							productsLen7[combinedInd + 0] = 0;
 							predicatesLen7[combinedInd + 0] = false;
+							sums[combinedInd + 1] = outerSum + 1;
 							productsLen7[combinedInd + 1] = outerMul ;
 							predicatesLen7[combinedInd + 1] = false;
+							sums[combinedInd + 2] = outerSum + 2;
 							productsLen7[combinedInd + 2] = outerMul * 2;
 							predicatesLen7[combinedInd + 2] = outerPredicate;
+							sums[combinedInd + 3] = outerSum + 3;
 							productsLen7[combinedInd + 3] = outerMul * 3;
 							predicatesLen7[combinedInd + 3] = outerPredicate; 
+							sums[combinedInd + 4] = outerSum + 4;
 							productsLen7[combinedInd + 4] = outerMul * 4;
 							predicatesLen7[combinedInd + 4] = outerPredicate; 
+							sums[combinedInd + 5] = outerSum + 5;
 							productsLen7[combinedInd + 5] = outerMul * 5;
 							predicatesLen7[combinedInd + 5] = outerPredicate;
+							sums[combinedInd + 6] = outerSum + 6;
 							productsLen7[combinedInd + 6] = outerMul * 6;
 							predicatesLen7[combinedInd + 6] = outerPredicate;
+							sums[combinedInd + 7] = outerSum + 7;
 							productsLen7[combinedInd + 7] = outerMul * 7;
 							predicatesLen7[combinedInd + 7] = outerPredicate;
+							sums[combinedInd + 8] = outerSum + 8;
 							productsLen7[combinedInd + 8] = outerMul * 8;
 							predicatesLen7[combinedInd + 8] = outerPredicate;
+							sums[combinedInd + 9] = outerSum + 9;
 							productsLen7[combinedInd + 9] = outerMul * 9;
 							predicatesLen7[combinedInd + 9] = outerPredicate;
 						}
@@ -169,6 +109,7 @@ inline void initialize() noexcept {
 	// Len6
 	for (int h = 0; h < 10; ++h) {
 		auto hPred = h >= 2;
+		auto hSum = h;
 		auto hMul = h;
 		auto hInd = (h * Len5);
 		for (int w = 0; w < 10; ++w) {
@@ -404,10 +345,11 @@ inline bool isQuodigious<2>(u64 value) noexcept {
 		return false;
 	}
 	u64 prod = result;
+	u64 sum = result;
 	u64 current = value / divisor;
 
 	result = current % divisor;
-	return (result >= 2) && performQCheck(value, sums[value], prod * result);
+	return (result >= 2) && performQCheck(value, sum + result, prod * result);
 }
 
 template<> inline bool isQuodigious<3>(u64 value) noexcept { return predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value]); }
@@ -415,21 +357,32 @@ template<> inline bool isQuodigious<4>(u64 value) noexcept { return predicatesLe
 template<> inline bool isQuodigious<5>(u64 value) noexcept { return predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value]); }
 template<> inline bool isQuodigious<6>(u64 value) noexcept { return predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value]); }
 template<> inline bool isQuodigious<7>(u64 value) noexcept { return predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value]); }
-template<> inline bool isQuodigious<8>(u64 value) noexcept { return predicatesLen8[value] && performQCheck(value, sums[value], productsLen8[value]); }
 
 
-template<> inline bool isQuodigious<9>(u64 value) noexcept { 
-	// 8 + 1 (5 + 4 is also valid but this was we reduce the number of memory accesses)
-	auto result = value % Len8;
-	if (!predicatesLen8[result]) {
+template<> inline bool isQuodigious<8>(u64 value) noexcept { 
+	// 7 + 1 (4 + 4 is also valid but this was we reduce the number of memory accesses)
+	auto result = value % Len7;
+	if (!predicatesLen7[result]) {
 		return false;
 	}
 	u64 sum = sums[result];
-	u64 product = productsLen8[result];
-	u64 current = value / Len8;
+	u64 product = productsLen7[result];
+	u64 current = value / Len7;
 
 	result = current % 10u;
 	return result >= 2 && performQCheck(value, sum + result, product * result);
+}
+template<> inline bool isQuodigious<9>(u64 value) noexcept { 
+	// 6 + 3
+	auto result = value % Len6;
+	if (!predicatesLen6[result]) {
+		return false;
+	}
+	auto sum = sums[result];
+	auto product = productsLen6[result];
+	auto current = value / Len6;
+	result = current % Len3;
+	return predicatesLen3[result] && performQCheck(value, sum + sums[result], product * productsLen3[result]);
 }
 
 template<>
