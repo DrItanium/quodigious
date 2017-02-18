@@ -6,7 +6,8 @@
 
 using u64 = uint64_t;
 using vec64 = std::vector<u64>;
-inline bool isQuodigious10(u64 value, u64 length) noexcept {
+template<u64 length>
+inline bool isQuodigious10(u64 value) noexcept {
 	u64 current = value;
 	u64 sum = 0;
 	u64 prod = 1;
@@ -22,6 +23,7 @@ inline bool isQuodigious10(u64 value, u64 length) noexcept {
 	}
 	return (value % sum == 0) && (value % prod == 0);
 }
+
 template<u64 length>
 inline bool isQuodigious1000(u64 value) noexcept {
 	static constexpr auto count = 1000u;
@@ -84,8 +86,8 @@ inline bool isQuodigious1000(u64 value) noexcept {
 		if (tmp < 2) {
 			return false;
 		}
-		sum += tmp;
-		product *= tmp;
+		sum = tmp;
+		product = tmp;
 		current /= 10;
 
 		tmp = current % 10;
@@ -101,8 +103,8 @@ inline bool isQuodigious1000(u64 value) noexcept {
 		if (tmp < 2) {
 			return false;
 		}
-		sum += tmp;
-		product *= tmp;
+		sum = tmp;
+		product = tmp;
 		current /= 10;
 	}
 	for (u64 i = 0 ; i < len; i += digits) {
@@ -128,44 +130,57 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 		}
 	} else {
 		for (auto value = start; value < end; ++value) {
-			if (isQuodigious10(value, length)) {
+			if (isQuodigious10<length>(value)) {
 				results.emplace_back(value);
 			}
 		}
 	}
 	return 0;
 }
-void printout(auto& future, vec64& l) noexcept {
-	future.get();
+
+void printout(vec64& l) noexcept {
 	for (auto v : l) {
 		std::cout << v << std::endl;
 	}
 	l.clear();
 }
+
 template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
 	auto base = static_cast<u64>(pow(10, length - 1));
 	auto st = static_cast<u64>(factor * base);
+
 	auto fut0 = std::async(std::launch::async, [start = st, end = 3 * base]() { return performQuodigiousCheck<length>(start, end, l0); });
 	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
 	auto fut2 = std::async(std::launch::async, [start = st + (base * 2), end = 5 * base]() { return performQuodigiousCheck<length>( start, end, l2); });
-	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return performQuodigiousCheck<length>( start, end, l3); });
+
+	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return (length > 8 && length < 14) ? 0 : performQuodigiousCheck<length>( start, end, l3); });
+
 	auto fut4 = std::async(std::launch::async, [start = st + (base * 4), end = 7 * base]() { return performQuodigiousCheck<length>( start, end, l4); });
 	auto fut5 = std::async(std::launch::async, [start = st + (base * 5), end = 8 * base]() { return performQuodigiousCheck<length>( start, end, l5); });
 	auto fut6 = std::async(std::launch::async, [start = st + (base * 6), end = 9 * base]() { return performQuodigiousCheck<length>( start, end, l6); });
 	auto fut7 = std::async(std::launch::async, [start = st + (base * 7), end = 10 * base]() { return performQuodigiousCheck<length>( start, end, l7); });
-	printout(fut0, l0);
-	printout(fut1, l1);
-	printout(fut2, l2);
-	printout(fut3, l3);
-	printout(fut4, l4);
-	printout(fut5, l5);
-	printout(fut6, l6);
-	printout(fut7, l7);
+	fut0.get();
+	fut1.get();
+	fut2.get();
+	fut3.get();
+	fut4.get();
+	fut5.get();
+	fut6.get();
+	fut7.get();
+	printout(l0);
+	printout(l1);
+	printout(l2);
+	printout(l3);
+	printout(l4);
+	printout(l5);
+	printout(l6);
+	printout(l7);
 	std::cout << std::endl;
 }
+
 int main() {
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
