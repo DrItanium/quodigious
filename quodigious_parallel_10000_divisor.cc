@@ -449,27 +449,26 @@ inline bool isQuodigious<14>(u64 value) noexcept {
 
 template<>
 inline bool isQuodigious<15>(u64 value) noexcept {
-	// 1, 7, 7 (we can do a cheap kick out if we fail out!)
-	//1
-	auto result = value % 10u;
-	if (result < 2) {
+	//5 + 5 + 5
+	auto result = value % Len5;
+	if (!predicatesLen5[result]) {
 		return false;
 	}
-	u64 product = result;
-	u64 sum = result;
-	u64 current = value / 10u;
+	u64 product = productsLen5[result];
+	u64 sum = sums[result];
+	u64 current = value / Len5;
 	//8
-	result = current % Len7;
-	if (!predicatesLen7[result]) {
+	result = current % Len5;
+	if (!predicatesLen5[result]) {
 		return false;
 	} 
-	product *= productsLen7[result];
+	product *= productsLen5[result];
 	sum += sums[result];
-	current /= Len7;
+	current /= Len5;
 
 	//15
-	result = current % Len7;
-	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
+	result = current % Len5;
+	return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
 }
 
 template<u64 length>
@@ -607,6 +606,39 @@ inline void body() noexcept {
 	printout(l6);
 	printout(l7);
 	std::cout << std::endl;
+}
+template<>
+inline void body<1>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<1>(2, 10, contents);
+	printout(contents);
+}
+template<>
+inline void body<2>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<2>(22, 100, contents);
+	printout(contents);
+}
+
+template<>
+inline void body<3>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<3>(222, 1000, contents);
+	printout(contents);
+}
+
+template<>
+inline void body<4>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<4>(2222, 10000, contents);
+	printout(contents);
+}
+
+template<>
+inline void body<5>() noexcept {
+	static vec64 contents;
+	performQuodigiousCheck<5>(22222, 100000, contents);
+	printout(contents);
 }
 
 int main() {
