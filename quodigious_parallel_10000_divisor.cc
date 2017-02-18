@@ -360,17 +360,17 @@ template<> inline bool isQuodigious<7>(u64 value) noexcept { return predicatesLe
 
 
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
-	// 7 + 1 (4 + 4 is also valid but this was we reduce the number of memory accesses)
-	auto result = value % 10u;
-	if (result < 2) {
+	// 4 + 4
+	auto result = value % Len4;
+	if (!predicatesLen4[result]) {
 		return false;
 	}
-	u64 sum = result;
-	u64 product = result;
-	u64 current = value / 10u;
+	u64 sum = sums[result];
+	u64 product = productsLen4[result];
+	u64 current = value / Len4;
 
-	result = current % Len7;
-	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
+	result = current % Len4;
+	return predicatesLen4[result] && performQCheck(value, sum + sums[result], product * productsLen4[result]);
 }
 template<> inline bool isQuodigious<9>(u64 value) noexcept { 
 	// 6 + 3
@@ -498,8 +498,75 @@ inline bool isQuodigious<15>(u64 value) noexcept {
 
 template<u64 length>
 inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
+	// assume that we start at 2.222222222222
+	// skip over the 9th and 10th numbers from this position!
+	auto fn = [&results](u64 value) { if (isQuodigious<length>(value)) { results.emplace_back(value); }};
+	for (auto value = start; value < end; value += 10) {
+		fn(value+0);
+		fn(value+1);
+		fn(value+2);
+		fn(value+3);
+		fn(value+4);
+		fn(value+5);
+		fn(value+6);
+		fn(value+7);
+	}
+	return 0;
+}
+template<>
+inline int performQuodigiousCheck<1>(u64 start, u64 end, vec64& results) noexcept {
 	for (auto value = start; value < end; ++value) {
-		if (isQuodigious<length>(value)) {
+		if (isQuodigious<1>(value)) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<2>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (isQuodigious<2>(value)) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<3>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (isQuodigious<3>(value)) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<4>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (isQuodigious<4>(value)) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<5>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (isQuodigious<5>(value)) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<6>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (isQuodigious<6>(value)) {
 			results.emplace_back(value);
 		}
 	}
