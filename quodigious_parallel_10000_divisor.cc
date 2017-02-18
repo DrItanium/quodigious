@@ -328,25 +328,18 @@ inline bool isQuodigious(u64 value) noexcept {
 template<>
 inline bool isQuodigious<10>(u64 value) noexcept {
 	static constexpr auto count = 100000u;
-	u64 current = value;
 	//5
-	auto result = current % count;
+	auto result = value % count;
 	if (!predicates100000[result]) {
 		return false;
 	} 
-	u64 product = products100000[result];
-	u64 sum = sums100000[result];
-	current /= count;
+	auto product = products100000[result];
+	auto sum = sums100000[result];
+	auto current = value / count;
 
 	//10
 	result = current % count;
-	if (!predicates100000[result]) {
-		return false;
-	} 
-	product *= products100000[result];
-	sum += sums100000[result];
-
-	return performQCheck(value, sum, product);
+	return predicates100000[result] && performQCheck(value, sum + sums100000[result], product * products100000[result]);
 }
 
 template<>
