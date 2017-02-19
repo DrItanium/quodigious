@@ -49,7 +49,9 @@ I can't find any quodigious numbers above widths of 3 digits that contain the
 number 5! I haven't been able to verify this for 14-19 digits (without the
 code I have now it would've taken in literal years to compute!) though. So in
 the case of 4 digits through 13 digits I do not even bother computing any
-numbers whose most significant digit is 5!
+numbers whose most significant digit is 5! I have even gone so far as to
+removing all checks for digits which contain 5 as well ! I had to hard code
+body<3> because of this. However, I think this is a safe assumption
 
 
 In essence all of the code I have written is centered around reducing the
