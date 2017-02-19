@@ -90,27 +90,27 @@ inline void initialize() noexcept {
 	// lists for each number width when dealing with products and predicates
 	// Len7
 	for (int k = 0; k < 10; ++k) {
-		auto kPred = k >= 2;
+		auto kPred = k >= 2 && k != 5;
 		auto kSum = k;
 		auto kMul = k;
 		auto kInd = (k * Len6);
 		for (int h = 0; h < 10; ++h) {
-			auto hPred = (h >= 2) && kPred ;
+			auto hPred = (h >= 2) && h != 5 && kPred ;
 			auto hSum = h + kSum;
 			auto hMul = h * kMul;
 			auto hInd = (h * Len5) + kInd;
 			for (int w = 0; w < 10; ++w) {
-				auto wPred = (w >= 2) && hPred;
+				auto wPred = (w >= 2) && w != 5&& hPred;
 				auto wSum = w + hSum;
 				auto wMul = w * hMul;
 				auto wInd = (w * Len4) + hInd;
 				for (int y = 0; y < 10; ++y) {
-					auto yPred = (y >= 2) && wPred;
+					auto yPred = (y >= 2) && y != 5&& wPred;
 					auto ySum = y + wSum;
 					auto yMul = y * wMul;
 					auto yInd = (y * Len3) + wInd;
 					for (int z = 0; z < 10; ++z) {
-						auto zPred = z >= 2 && yPred;
+						auto zPred = z >= 2 && z != 5 && yPred;
 						auto zSum = z + ySum;
 						auto zMul = z * yMul;
 						auto zInd = (z * 100) + yInd ;
@@ -118,7 +118,7 @@ inline void initialize() noexcept {
 							auto outerMul = x * zMul;
 							auto combinedInd = (x * 10) + zInd;
 							auto outerSum = x + zSum;
-							auto outerPredicate = ((x >= 2) && zPred);
+							auto outerPredicate = ((x >= 2) && x != 5 && zPred);
 							sums[combinedInd + 0] = outerSum;
 							productsLen7[combinedInd + 0] = 0;
 							predicatesLen7[combinedInd + 0] = false;
