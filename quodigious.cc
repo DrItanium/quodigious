@@ -780,7 +780,7 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 template<>
 inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
 	// -------------
-	// | 5 | 6 | 1 |
+	// | 5 | 5 | 1 |
 	// -------------
 	quodigiousCheckBody<11, 5, 5>(start, end, results);
 	return 0;
@@ -793,7 +793,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody4Levels<12, 2, 2, 7>(start, end, results);
+	quodigiousCheckBody<12, 4, 7>(start, end, results);
 	return 0;
 }
 
