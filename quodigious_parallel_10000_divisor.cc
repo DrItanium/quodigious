@@ -572,16 +572,12 @@ inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexce
 	static constexpr auto fourDigits = fastPow10<4>();
 	auto start1Wide = start % oneDigit;
 	auto current = start / oneDigit;
-	//std::cout << "current = " << current << std::endl;
 	auto startInner = ((start / oneDigit) % fiveDigits);
 	auto startOuter = (((start / oneDigit) / fiveDigits) % fiveDigits);
 	auto endOuter = ((end / oneDigit) / fiveDigits) % fiveDigits;
 	if (endOuter == 0) {
 		endOuter = fiveDigits;
 	}
-	//std::cout << "startInner = " << startInner << std::endl;
-	//std::cout << "startOuter = " << startOuter << std::endl;
-	//std::cout << "endOuter = " << endOuter << std::endl;
 	for (auto i = startOuter; i < endOuter; ++i) {
 		if (predicatesLen5[i]) {
 			// okay, now compute this out
@@ -782,14 +778,14 @@ int main() {
 				case 9: body<9>(); break;
 				case 10: body<10>(); break;
 				case 11: body<11>(); break;
-				//case 12: body<12>(); break;
-				//case 13: body<13>(); break;
-				//case 14: body<14>(); break;
-				//case 15: body<15>(); break;
-				//case 16: body<16>(); break;
-				//case 17: body<17>(); break;
-				//case 18: body<18>(); break;
-				//case 19: body<19>(); break;
+				case 12: body<12>(); break;
+				case 13: body<13>(); break;
+				case 14: body<14>(); break;
+				case 15: body<15>(); break;
+				case 16: body<16>(); break;
+				case 17: body<17>(); break;
+				case 18: body<18>(); break;
+				case 19: body<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
