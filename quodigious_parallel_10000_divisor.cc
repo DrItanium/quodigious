@@ -494,6 +494,8 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	// skip over the 9th and 10th numbers from this position!
 	auto fn = [&results](u64 value) { if (isQuodigious<length>(value)) { results.emplace_back(value); }};
 	for (auto value = start; value < end; value += 10) {
+		// if we can compute the upper portion of the number ahead of time and
+		// see if it is legal then we could save a ton on checking digits
 		fn(value+0);
 		fn(value+1);
 		fn(value+2);
@@ -505,6 +507,28 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	}
 	return 0;
 }
+template<>
+inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
+	// compute the upper, lower, and 1 bit locations
+	// this should always be at position 2!
+	auto start1Wide = start % 10u;
+	auto start4Wide = ((start / 10u) %  10000u);
+	auto start5Wide = (((start / 10u) / 10000u) % 100000u);
+	auto end1Wide = end % 10u;
+	auto end4Wide = (end / 10u) % 10000u;
+	auto end5Wide = ((end / 10u) / 10000u) % 100000u;
+	std::cout << "start = " << start << std::endl;
+	std::cout << "start1Wide = " << start1Wide << std::endl;
+	std::cout << "start4Wide = " << start4Wide << std::endl;
+	std::cout << "start5Wide = " << start5Wide << std::endl;
+	std::cout << "end = " << end << std::endl;
+	std::cout << "end1Wide = " << end1Wide << std::endl;
+	std::cout << "end4Wide = " << end4Wide << std::endl;
+	std::cout << "end5Wide = " << end5Wide << std::endl;
+	return 0;
+}
+
+
 
 template<>
 inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
@@ -528,7 +552,7 @@ template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	static constexpr auto skip5 = length > 8 && length < 14;
+	static constexpr auto skip5 = length > 4 && length < 14;
 	auto base = static_cast<u64>(pow(10, length - 1));
 	auto st = static_cast<u64>(factor * base);
 
@@ -620,11 +644,37 @@ inline void body<5>() noexcept {
 
 template<>
 inline void body<6>() noexcept {
-	for (auto value = 222222u; value < 1000000u; ++value) {
-		if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
-			std::cout << value << std::endl;
+	auto fn = [](auto start, auto end) {
+		for (auto value = start; value < end; ++value) {
+			if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
+				std::cout << value << std::endl;
+			}
 		}
-	}
+	};
+	fn(222222u, 300000u);
+	fn(322222u, 400000u);
+	fn(422222u, 500000u);
+	// skip the 500000 - 622222 range
+	fn(622222u, 700000u);
+	fn(722222u, 800000u);
+	fn(822222u, 900000u);
+	fn(922222u, 1000000u);
+	std::cout << std::endl;
+}
+
+template<>
+inline void body<10>() noexcept {
+	auto fn = [](auto start, auto end) {
+		static vec64 tmp;
+		performQuodigiousCheck<10>(start, end, tmp);
+	};
+	fn(2222222222u, 3000000000u);
+	fn(3222222222u, 4000000000u);
+	fn(4222222222u, 5000000000u);
+	fn(6222222222u, 7000000000u);
+	fn(7222222222u, 8000000000u);
+	fn(8222222222u, 9000000000u);
+	fn(9222222222u, 1000000000u);
 	std::cout << std::endl;
 }
 
