@@ -524,7 +524,7 @@ template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	static constexpr auto skip5 = length > 4 && length < 14;
+	static constexpr auto skip5 = length > 4 && length < 15;
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(factor * base);
