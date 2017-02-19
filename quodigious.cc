@@ -410,52 +410,30 @@ inline bool isQuodigious(u64 value) noexcept {
 	// versions.
 	static constexpr auto count = Len4;
 	static constexpr auto digits = 4;
+	static constexpr auto power = fastPow10<digits>();
 	static constexpr auto remainder = length % digits;
 	static constexpr auto len = length - remainder;
+	static constexpr auto remPower = fastPow10<remainder>();
 	u64 current = value;
 	u64 sum = 0;
 	u64 product = 1;
-	if (remainder == 3) {
-		auto result = current % Len3;
-		if (!predicatesLen3[result]) {
+	if (remainder != 0) {
+		auto result = current % remPower;
+		if (!legalValue<remainder>(result)) {
 			return false;
 		}
-		sum = sums[result];
-		product = productsLen3[result]; 
-		current /= Len3;
-	} else if (remainder == 2) {
-		auto tmp = current % 10;
-		if (tmp < 2) {
-			return false;
-		}
-		product = tmp;
-		current /= 10;
-
-		tmp = current % 10;
-		if (tmp < 2) {
-			return false;
-		}
-		sum += tmp;
-		product *= tmp;
-		current /= 10;
-
-	} else if (remainder == 1) {
-		auto tmp = current % 10;
-		if (tmp < 2) {
-			return false;
-		}
-		sum = tmp;
-		product = tmp;
-		current /= 10;
+		sum = getSum<remainder>(result);
+		product = getProduct<remainder>(result);
+		current /= remPower;
 	}
 	for (u64 i = 0 ; i < len; i += digits) {
-		u64 result = current % count;
-		if (!predicatesLen4[result]) {
+		u64 result = current % power;
+		if (!legalValue<count>(result)) {
 			return false;
 		} 
-		product *= productsLen4[result];
-		sum += sums[result];
-		current /= count; // there will be an extra wasted divide because it won't be used!
+		product *= getProduct<count>(result);
+		sum += getSum<count>(result);
+		current /= power; // there will be an extra wasted divide because it won't be used!
 	}
 	return performQCheck(value, sum, product);
 }
@@ -811,7 +789,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody4Levels<12, 4, 5, 2>(start, end, results);
+	quodigiousCheckBody4Levels<12, 4, 4, 3>(start, end, results);
 	return 0;
 }
 
@@ -943,10 +921,10 @@ int main() {
 				case 13: body<13>(); break;
 				case 14: body<14>(); break;
 				case 15: body<15>(); break;
-				case 16: body<16>(); break;
-				case 17: body<17>(); break;
-				case 18: body<18>(); break;
-				case 19: body<19>(); break;
+				//case 16: body<16>(); break;
+				//case 17: body<17>(); break;
+				//case 18: body<18>(); break;
+				//case 19: body<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
