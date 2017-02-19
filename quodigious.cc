@@ -763,7 +763,11 @@ inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcep
 	}
 	return 0;
 }
-
+template<>
+inline int performQuodigiousCheck<9>(u64 start, u64 end, vec64& results) noexcept {
+	quodigiousCheckBody<9, 4, 4>(start, end, results);
+	return 0;
+}
 template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
@@ -789,7 +793,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody4Levels<12, 4, 4, 3>(start, end, results);
+	quodigiousCheckBody4Levels<12, 2, 2, 7>(start, end, results);
 	return 0;
 }
 
