@@ -588,8 +588,9 @@ inline u64 getSum(u64 x) noexcept {
 	}
 }
 
-template<u64 outerDigits, u64 innerDigits, u64 innerMostDigits, u64 upperShift = innerDigits + innerMostDigits, u64 lowerShift = 1, u64 innerMostShift = 0>
+template<u64 width, u64 outerDigits, u64 innerDigits, u64 innerMostDigits = 1, u64 upperShift = innerDigits + innerMostDigits, u64 lowerShift = 1, u64 innerMostShift = 0>
 inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
+	static_assert(width == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
 	static constexpr auto outerFactor = fastPow10<outerDigits>();
 	static constexpr auto innerFactor = fastPow10<innerDigits>();
 	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
@@ -647,7 +648,7 @@ template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
 	// this should always be at position 2!
-	quodigiousCheckBody<5, 4, 1>(start, end, results);
+	quodigiousCheckBody<10, 5, 4>(start, end, results);
 	return 0;
 }
 
@@ -657,7 +658,7 @@ inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody<5, 5, 1>(start, end, results);
+	quodigiousCheckBody<11, 5, 5>(start, end, results);
 	return 0;
 }
 
@@ -668,7 +669,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody<5, 6, 1>(start, end, results);
+	quodigiousCheckBody<12, 5, 6>(start, end, results);
 	return 0;
 }
 
@@ -677,7 +678,7 @@ inline int performQuodigiousCheck<13>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 6 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody<6, 6, 1>(start, end, results);
+	quodigiousCheckBody<13, 6, 6>(start, end, results);
 	return 0;
 }
 
