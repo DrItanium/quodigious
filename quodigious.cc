@@ -662,6 +662,100 @@ inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
 	}
 }
 
+template<u64 width, 
+	u64 level4Digits, 
+	u64 level3Digits, 
+	u64 level2Digits, 
+	u64 level1Digits = 1, 
+	u64 level4Shift = level3Digits + level2Digits + level1Digits, 
+	u64 level3Shift = level2Digits + level1Digits,
+	u64 level2Shift = level1Digits,
+	u64 level1Shift = 0>
+inline void quodigiousCheckBody4Levels(u64 start, u64 end, vec64& results) noexcept {
+	static_assert(width == (level4Digits + level3Digits + level2Digits + level1Digits), "Defined digit layout does not encompass all digits of the given width, make sure that l4, l3, l2, and l1 digits equal the digits width!");
+	static constexpr auto l4Factor = fastPow10<level4Digits>();
+	static constexpr auto l4Section = fastPow10<level4Shift>();
+	static constexpr auto l3Factor = fastPow10<level3Digits>();
+	static constexpr auto l3Section = fastPow10<level3Shift>();
+	static constexpr auto l2Factor = fastPow10<level2Digits>();
+	static constexpr auto l2Section = fastPow10<level2Shift>();
+	static constexpr auto l1Factor = fastPow10<level1Digits>();
+	static constexpr auto l1Section = fastPow10<level1Shift>();
+	auto startL1 = start % l1Factor;
+	auto current = start / l1Factor;
+	auto startL2 = current % l2Factor;
+	current /= l2Factor;
+	auto startL3 = current % l3Factor;
+	current /= l3Factor;
+	auto startL4 = current % l4Factor;
+
+	auto endL1 = end % l1Factor;
+	if (endL1 == 0) {
+		endL1 = l1Factor;
+	}
+	current = end / l1Factor;
+
+	auto endL2 = ((current) % l2Factor);
+	if (endL2 == 0) {
+		endL2 = l2Factor;
+	}
+	current /= l2Factor;
+
+
+	auto endL3 = current % l3Factor;
+	if (endL3 == 0) {
+		endL3 = l3Factor;
+	}
+	current /= l4Factor;
+	auto endL4 = current % l4Factor;
+	if (endL4 == 0) {
+		endL4 = l4Factor;
+	}
+	for (auto l4 = startL4; l4 < endL4; ++l4) {
+		if (legalValue<level4Digits>(l4)) {
+			auto l4Sum = getSum<level4Digits>(l4);
+			auto l4Product = getProduct<level4Digits>(l4);
+			auto l4Index = l4 * l4Section;
+			for (auto l3 = startL3 ; l3 < endL3 ; ++l3) {
+				if (legalValue<level3Digits>(l3)) {
+					auto l3Sum = getSum<level3Digits>(l3) + l4Sum;
+					auto l3Product = getProduct<level3Digits>(l3) * l4Product;
+					auto l3Index = (l3 * l3Section) + l4Index;
+					for (auto l2 = startL2 ; l2 < endL2; ++l2) {
+						if (legalValue<level2Digits>(l2)) {
+							auto l2Sum = getSum<level2Digits>(l2) + l3Sum;
+							auto l2Product = getProduct<level2Digits>(l2) * l3Product;
+							auto l2Index = (l2 * l2Section) + l3Index;
+							for (auto l1 = startL1; l1 < endL1; ++l1) {
+								if (legalValue<level1Digits>(l1)) {
+									auto product = l2Product * getProduct<level1Digits>(l1);
+									auto sum = l2Sum + getSum<level1Digits>(l1);
+									auto value = l2Index + (l1 * l1Section);
+									if (performQCheck(value, sum, product)) {
+										results.emplace_back(value);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
+template<>
+inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
+	for (auto value = start; value < end; ++value) {
+		if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
+			results.emplace_back(value);
+		}
+	}
+	return 0;
+}
+
 template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
@@ -700,17 +794,16 @@ inline int performQuodigiousCheck<13>(u64 start, u64 end, vec64& results) noexce
 	return 0;
 }
 
-
-
 template<>
-inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
-			results.emplace_back(value);
-		}
-	}
+inline int performQuodigiousCheck<14>(u64 start, u64 end, vec64& results) noexcept {
+	// -------------
+	// | 6 | 7 | 1 |
+	// -------------
+	quodigiousCheckBody<14, 6, 7>(start, end, results);
 	return 0;
 }
+
+
 
 
 void printout(vec64& l) noexcept {
