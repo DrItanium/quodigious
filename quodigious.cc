@@ -204,21 +204,21 @@ inline void initialize() noexcept {
 	}
 	// Len5
 	for (int w = 0; w < 10; ++w) {
-		auto wPred = w >= 2;
+		auto wPred = w >= 2 && w != 5;
 		auto wMul = w;
 		auto wInd = (w * Len4);
 		for (int y = 0; y < 10; ++y) {
-			auto yPred = (y >= 2) && wPred;
+			auto yPred = (y >= 2) && y != 5 && wPred;
 			auto yMul = y * wMul;
 			auto yInd = (y * Len3) + wInd;
 			for (int z = 0; z < 10; ++z) {
-				auto zPred = z >= 2 && yPred;
+				auto zPred = (z >= 2) && z != 5  && yPred;
 				auto zMul = z * yMul;
 				auto zInd = (z * 100) + yInd ;
 				for (int x = 0; x < 10; ++x) {
 					auto outerMul = x * zMul;
 					auto combinedInd = (x * 10) + zInd;
-					auto outerPredicate = ((x >= 2) && zPred);
+					auto outerPredicate = ((x >= 2) && x != 5 && zPred);
 					productsLen5[combinedInd + 0] = 0;
 					predicatesLen5[combinedInd + 0] = false;
 					productsLen5[combinedInd + 1] = outerMul ;
