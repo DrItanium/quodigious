@@ -625,6 +625,9 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	current /= innerFactor;
 	auto startOuter = current % outerFactor;
 	auto endInner = ((end / innerMostFactor) % innerFactor);
+	if (endInner == 0) {
+		endInner = innerFactor;
+	}
 	auto endInnerMost = innerMostFactor;
 	auto innerPredicates = predicatesLen6;
 	auto innerProducts = productsLen6;
