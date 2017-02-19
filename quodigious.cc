@@ -281,13 +281,13 @@ inline void initialize() noexcept {
 	}
 	// Len3
 	for (int z = 0; z < 10; ++z) {
-		auto zPred = z >= 2;
+		auto zPred = z >= 2 && z != 5;
 		auto zMul = z;
 		auto zInd = (z * 100);
 		for (int x = 0; x < 10; ++x) {
 			auto outerMul = x * zMul;
 			auto combinedInd = (x * 10) + zInd;
-			auto outerPredicate = ((x >= 2) && zPred);
+			auto outerPredicate = ((x >= 2) && x != 5 && zPred);
 			productsLen3[combinedInd + 0] = 0;
 			predicatesLen3[combinedInd + 0] = false;
 			productsLen3[combinedInd + 1] = outerMul ;
@@ -314,7 +314,7 @@ inline void initialize() noexcept {
 	for (int x = 0; x < 10; ++x) {
 		auto outerMul = x;
 		auto combinedInd = (x * 10);
-		auto outerPredicate = ((x >= 2));
+		auto outerPredicate = ((x >= 2) && x != 5);
 		productsLen2[combinedInd + 0] = 0;
 		predicatesLen2[combinedInd + 0] = false;
 		productsLen2[combinedInd + 1] = outerMul ;
@@ -351,7 +351,7 @@ inline bool legalValue(u64 _) noexcept {
 	static_assert(width < 9, "Too large of a legal value check!");
 	return false;
 }
-template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u; }
+template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u && x != 5; }
 template<> inline bool legalValue<2>(u64 x) noexcept { return predicatesLen2[x]; }
 template<> inline bool legalValue<3>(u64 x) noexcept { return predicatesLen3[x]; }
 template<> inline bool legalValue<4>(u64 x) noexcept { return predicatesLen4[x]; }
@@ -524,7 +524,7 @@ template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	static constexpr auto skip5 = length > 4 && length < 15;
+	static constexpr auto skip5 = length > 4;
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(factor * base);
@@ -559,11 +559,19 @@ inline void body() noexcept {
 
 #define DefSimpleBody(ind) template<> inline void body< ind >() noexcept { singleThreadedSimpleBody< ind >(); }
 	DefSimpleBody(2)
-	DefSimpleBody(3)
 	DefSimpleBody(4)
 	DefSimpleBody(5)
-DefSimpleBody(6)
+	DefSimpleBody(6)
 #undef DefSimpleBody
+template<>
+inline void body<3>() noexcept {
+	// this is the only other qudigious range I know of which has a 5 in it
+	// (besides 1) so just hard code it
+	std::cout << 224 << std::endl;
+	std::cout << 432 << std::endl;
+	std::cout << 624 << std::endl;
+	std::cout << 735 << std::endl;
+}
 
 	template<>
 	inline void body<1>() noexcept {
