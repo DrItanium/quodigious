@@ -522,22 +522,7 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 	auto start1Wide = start % 10u;
 	auto start4Wide = ((start / 10u) %  10000u);
 	auto start5Wide = (((start / 10u) / 10000u) % 100000u);
-	auto end1Wide = 10;
-	auto end4Wide = 10000;
 	auto end5Wide = ((end / 10u) / 10000u) % 100000u;
-	/*
-	std::cout << "start = " << start << std::endl;
-	std::cout << "start1Wide = " << start1Wide << std::endl;
-	std::cout << "start4Wide = " << start4Wide << std::endl;
-	std::cout << "start5Wide = " << start5Wide << std::endl;
-	std::cout << "end = " << end << std::endl;
-	std::cout << "end1Wide = " << end1Wide << std::endl;
-	std::cout << "end4Wide = " << end4Wide << std::endl;
-	std::cout << "end5Wide = " << end5Wide << std::endl;
-	std::cout << "adjusted 5wide = " << fastPow10<5>() * start5Wide << std::endl;
-	std::cout << "adjusted 4wide = " << fastPow10<1>() * start4Wide << std::endl;
-	std::cout << "adjusted start = " << start << std::endl;
-	*/
 	static constexpr auto factor5Wide = fastPow10<5>();
 	static constexpr auto factor4Wide = fastPow10<1>();
 	for (auto i = start5Wide; i < end5Wide; ++i) {
@@ -554,13 +539,13 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 					auto innerProduct = productsLen4[j] * upperProduct;
 					auto innerIndex = (j * factor4Wide) + upperIndex;
 					// okay, start at two here
-					for (auto k = 2; k < 10; ++k) {
+					for (auto k = start1Wide; k < 10; ++k) {
 						// let's just be concise right now
 						auto product = innerProduct * k;
 						auto sum = innerSum + k;
 						auto value = innerIndex + k;
 						if (performQCheck(value, sum, product)) {
-							std::cout << value << std::endl;
+							results.emplace_back(value);
 						}
 					}
 				}
@@ -704,6 +689,7 @@ inline void body<6>() noexcept {
 	std::cout << std::endl;
 }
 
+/*
 template<>
 inline void body<10>() noexcept {
 	auto fn = [](auto start, auto end) {
@@ -719,6 +705,7 @@ inline void body<10>() noexcept {
 	fn(9222222222u, 1000000000u);
 	std::cout << std::endl;
 }
+*/
 
 int main() {
 	initialize();
