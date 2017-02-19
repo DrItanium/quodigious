@@ -519,12 +519,18 @@ template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
 	// this should always be at position 2!
-	auto start1Wide = start % 10u;
-	auto start4Wide = ((start / 10u) %  10000u);
-	auto start5Wide = (((start / 10u) / 10000u) % 100000u);
-	auto end5Wide = ((end / 10u) / 10000u) % 100000u;
 	static constexpr auto factor5Wide = fastPow10<5>();
 	static constexpr auto factor4Wide = fastPow10<1>();
+	static constexpr auto oneDigit = fastPow10<1>();
+	static constexpr auto fourDigits = fastPow10<4>();
+	static constexpr auto fiveDigits = fastPow10<5>();
+	auto start1Wide = start % oneDigit;
+	auto start4Wide = ((start / oneDigit) % fourDigits);
+	auto start5Wide = (((start / oneDigit) / fourDigits) % fiveDigits);
+	auto end5Wide = ((end / oneDigit) / fourDigits) % fiveDigits;
+	if (end5Wide == 0) {
+		end5Wide = fiveDigits;
+	}
 	for (auto i = start5Wide; i < end5Wide; ++i) {
 		if (predicatesLen5[i]) {
 			// okay, now compute this out
@@ -532,14 +538,65 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 			auto upperSum = sums[i];
 			auto upperProduct = productsLen5[i];
 			auto upperIndex = i * factor5Wide;
-			for (auto j = start4Wide; j < 10000; ++j) {
+			for (auto j = start4Wide; j < fourDigits; ++j) {
 				if (predicatesLen4[j]) {
 					// okay, now we're in the right spot
 					auto innerSum = sums[j] + upperSum;
 					auto innerProduct = productsLen4[j] * upperProduct;
 					auto innerIndex = (j * factor4Wide) + upperIndex;
 					// okay, start at two here
-					for (auto k = start1Wide; k < 10; ++k) {
+					for (auto k = start1Wide; k < oneDigit; ++k) {
+						// let's just be concise right now
+						auto product = innerProduct * k;
+						auto sum = innerSum + k;
+						auto value = innerIndex + k;
+						if (performQCheck(value, sum, product)) {
+							results.emplace_back(value);
+						}
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
+	// compute the upper, lower, and 1 bit locations
+	// this should always be at position 2!
+	static constexpr auto upperFactor = fastPow10<6>();
+	static constexpr auto lowerFactor = fastPow10<1>();
+	static constexpr auto oneDigit = fastPow10<1>();
+	static constexpr auto fiveDigits = fastPow10<5>();
+	static constexpr auto fourDigits = fastPow10<4>();
+	auto start1Wide = start % oneDigit;
+	auto current = start / oneDigit;
+	//std::cout << "current = " << current << std::endl;
+	auto startInner = ((start / oneDigit) % fiveDigits);
+	auto startOuter = (((start / oneDigit) / fiveDigits) % fiveDigits);
+	auto endOuter = ((end / oneDigit) / fiveDigits) % fiveDigits;
+	if (endOuter == 0) {
+		endOuter = fiveDigits;
+	}
+	//std::cout << "startInner = " << startInner << std::endl;
+	//std::cout << "startOuter = " << startOuter << std::endl;
+	//std::cout << "endOuter = " << endOuter << std::endl;
+	for (auto i = startOuter; i < endOuter; ++i) {
+		if (predicatesLen5[i]) {
+			// okay, now compute this out
+			// this is the upper 5 bits so we have to do
+			auto upperSum = sums[i];
+			auto upperProduct = productsLen5[i];
+			auto upperIndex = i * upperFactor;
+			for (auto j = startInner; j < fiveDigits; ++j) {
+				if (predicatesLen5[j]) {
+					// okay, now we're in the right spot
+					auto innerSum = sums[j] + upperSum;
+					auto innerProduct = productsLen5[j] * upperProduct;
+					auto innerIndex = (j * lowerFactor)  + upperIndex;
+					// okay, start at two here
+					for (auto k = start1Wide; k < oneDigit; ++k) {
 						// let's just be concise right now
 						auto product = innerProduct * k;
 						auto sum = innerSum + k;
@@ -691,18 +748,18 @@ inline void body<6>() noexcept {
 
 /*
 template<>
-inline void body<10>() noexcept {
+inline void body<11>() noexcept {
 	auto fn = [](auto start, auto end) {
 		static vec64 tmp;
-		performQuodigiousCheck<10>(start, end, tmp);
+		performQuodigiousCheck<11>(start, end, tmp);
 	};
-	fn(2222222222u, 3000000000u);
-	fn(3222222222u, 4000000000u);
-	fn(4222222222u, 5000000000u);
-	fn(6222222222u, 7000000000u);
-	fn(7222222222u, 8000000000u);
-	fn(8222222222u, 9000000000u);
-	fn(9222222222u, 1000000000u);
+	fn(22222222222u, 30000000000u);
+	fn(32222222222u, 40000000000u);
+	fn(42222222222u, 50000000000u);
+	fn(62222222222u, 70000000000u);
+	fn(72222222222u, 80000000000u);
+	fn(82222222222u, 90000000000u);
+	fn(92222222222u, 100000000000u);
 	std::cout << std::endl;
 }
 */
@@ -725,14 +782,14 @@ int main() {
 				case 9: body<9>(); break;
 				case 10: body<10>(); break;
 				case 11: body<11>(); break;
-				case 12: body<12>(); break;
-				case 13: body<13>(); break;
-				case 14: body<14>(); break;
-				case 15: body<15>(); break;
-				case 16: body<16>(); break;
-				case 17: body<17>(); break;
-				case 18: body<18>(); break;
-				case 19: body<19>(); break;
+				//case 12: body<12>(); break;
+				//case 13: body<13>(); break;
+				//case 14: body<14>(); break;
+				//case 15: body<15>(); break;
+				//case 16: body<16>(); break;
+				//case 17: body<17>(); break;
+				//case 18: body<18>(); break;
+				//case 19: body<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
