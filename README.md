@@ -56,6 +56,12 @@ In essence all of the code I have written is centered around reducing the
 scanning space. If there is a constant time solution to this problem I would
 love to know :).
 
+I love using templates to write code for me :D. The problem with using
+templates though is the amount of time it takes to compile. In the case of this
+program, it takes upwards of 18 seconds to compile and consumes at least a
+gigabyte of RAM! The 29k executable balloons to 1.4 megabytes (pre strip) with
+all of the templating I use :D. I'm super lazy!
+
 
 Rant
 ----
