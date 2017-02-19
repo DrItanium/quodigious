@@ -17,8 +17,8 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS = -std=c++14 -O2 
-LXXFLAGS = -lpthread -O2
+CXXFLAGS = -std=c++14 -O3
+LXXFLAGS = -lpthread -O3 -flto -fwhole-program
 TITLE = quodigious
 FILES = quodigious.o
 
