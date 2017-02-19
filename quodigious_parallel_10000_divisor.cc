@@ -333,21 +333,25 @@ inline bool isQuodigious(u64 value) noexcept {
 }
 
 
-
-
 template<> inline bool isQuodigious<8>(u64 value) noexcept { 
 	// 4 + 4
 	auto result = value % Len4;
 	if (!predicatesLen4[result]) {
 		return false;
 	}
-	u64 sum = sums[result];
-	u64 product = productsLen4[result];
-	u64 current = value / Len4;
+	auto sum = sums[result];
+	auto product = productsLen4[result];
+	auto previous = result;
+	auto current = value / Len4;
 
 	result = current % Len4;
-	return predicatesLen4[result] && performQCheck(value, sum + sums[result], product * productsLen4[result]);
+	if (previous == result) {
+		return performQCheck(value, sum + sum, product * product);
+	} else {
+		return predicatesLen4[result] && performQCheck(value, sum + sums[result], product * productsLen4[result]);
+	}
 }
+
 template<> inline bool isQuodigious<9>(u64 value) noexcept { 
 	// 6 + 3
 	auto result = value % Len3;
@@ -414,11 +418,16 @@ inline bool isQuodigious<12>(u64 value) noexcept {
 	} 
 	auto product = productsLen6[result];
 	auto sum = sums[result];
+	auto previous = result;
 	auto current = value / count;
 
 	//12
 	result = current % count;
-	return predicatesLen6[result] && performQCheck(value, sum + sums[result], product * productsLen6[result]);
+	if (previous == result) {
+		return performQCheck(value, sum + sum, product * product);
+	} else {
+		return predicatesLen6[result] && performQCheck(value, sum + sums[result], product * productsLen6[result]);
+	}
 }
 
 template<>
