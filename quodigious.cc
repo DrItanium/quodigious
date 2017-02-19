@@ -245,17 +245,17 @@ inline void initialize() noexcept {
 	}
 	// Len4
 	for (int y = 0; y < 10; ++y) {
-		auto yPred = (y >= 2) ;
+		auto yPred = (y >= 2)  && y != 5;
 		auto yMul = y ;
 		auto yInd = (y * Len3) ;
 		for (int z = 0; z < 10; ++z) {
-			auto zPred = z >= 2 && yPred;
+			auto zPred = z >= 2 && yPred && z != 5;
 			auto zMul = z * yMul;
 			auto zInd = (z * 100) + yInd ;
 			for (int x = 0; x < 10; ++x) {
 				auto outerMul = x * zMul;
 				auto combinedInd = (x * 10) + zInd;
-				auto outerPredicate = ((x >= 2) && zPred);
+				auto outerPredicate = ((x >= 2) && zPred && z != 5);
 				productsLen4[combinedInd + 0] = 0;
 				predicatesLen4[combinedInd + 0] = false;
 				productsLen4[combinedInd + 1] = outerMul ;
