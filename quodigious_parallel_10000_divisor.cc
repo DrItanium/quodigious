@@ -507,6 +507,14 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	}
 	return 0;
 }
+template<u64 length>
+inline constexpr u64 fastPow10() noexcept {
+	return fastPow10<length - 1>() * 10;
+}
+template<>
+inline constexpr u64 fastPow10<0>() noexcept {
+	return 1;
+}
 template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
@@ -514,9 +522,10 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 	auto start1Wide = start % 10u;
 	auto start4Wide = ((start / 10u) %  10000u);
 	auto start5Wide = (((start / 10u) / 10000u) % 100000u);
-	auto end1Wide = end % 10u;
-	auto end4Wide = (end / 10u) % 10000u;
+	auto end1Wide = 10;
+	auto end4Wide = 10000;
 	auto end5Wide = ((end / 10u) / 10000u) % 100000u;
+	/*
 	std::cout << "start = " << start << std::endl;
 	std::cout << "start1Wide = " << start1Wide << std::endl;
 	std::cout << "start4Wide = " << start4Wide << std::endl;
@@ -525,6 +534,39 @@ inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexce
 	std::cout << "end1Wide = " << end1Wide << std::endl;
 	std::cout << "end4Wide = " << end4Wide << std::endl;
 	std::cout << "end5Wide = " << end5Wide << std::endl;
+	std::cout << "adjusted 5wide = " << fastPow10<5>() * start5Wide << std::endl;
+	std::cout << "adjusted 4wide = " << fastPow10<1>() * start4Wide << std::endl;
+	std::cout << "adjusted start = " << start << std::endl;
+	*/
+	static constexpr auto factor5Wide = fastPow10<5>();
+	static constexpr auto factor4Wide = fastPow10<1>();
+	for (auto i = start5Wide; i < end5Wide; ++i) {
+		if (predicatesLen5[i]) {
+			// okay, now compute this out
+			// this is the upper 5 bits so we have to do
+			auto upperSum = sums[i];
+			auto upperProduct = productsLen5[i];
+			auto upperIndex = i * factor5Wide;
+			for (auto j = start4Wide; j < 10000; ++j) {
+				if (predicatesLen4[j]) {
+					// okay, now we're in the right spot
+					auto innerSum = sums[j] + upperSum;
+					auto innerProduct = productsLen4[j] * upperProduct;
+					auto innerIndex = (j * factor4Wide) + upperIndex;
+					// okay, start at two here
+					for (auto k = 2; k < 10; ++k) {
+						// let's just be concise right now
+						auto product = innerProduct * k;
+						auto sum = innerSum + k;
+						auto value = innerIndex + k;
+						if (performQCheck(value, sum, product)) {
+							std::cout << value << std::endl;
+						}
+					}
+				}
+			}
+		}
+	}
 	return 0;
 }
 
