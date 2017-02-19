@@ -515,98 +515,152 @@ template<>
 inline constexpr u64 fastPow10<0>() noexcept {
 	return 1;
 }
+template<u64 width>
+inline bool legalValue(u64 value) noexcept {
+	static_assert(width < 9, "Too large of a legal value check!");
+	static_assert(width != 0, "Zero not allowed!");
+	return false;
+}
+template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u; }
+template<> inline bool legalValue<2>(u64 x) noexcept { return x > 21u && ((x % 10u) >= 2u); }
+template<> inline bool legalValue<3>(u64 x) noexcept { return predicatesLen3[x]; }
+template<> inline bool legalValue<4>(u64 x) noexcept { return predicatesLen4[x]; }
+template<> inline bool legalValue<5>(u64 x) noexcept { return predicatesLen5[x]; }
+template<> inline bool legalValue<6>(u64 x) noexcept { return predicatesLen6[x]; }
+template<> inline bool legalValue<7>(u64 x) noexcept { return predicatesLen7[x]; }
+template<> inline bool legalValue<8>(u64 x) noexcept { return legalValue<1>(x % 10u) && predicatesLen7[x / 10u]; }
+
+template<u64 width>
+inline u64 getProduct(u64 value) noexcept {
+	static_assert(width < 9, "Too large of a product value!");
+	static_assert(width != 0, "Zero not allowed!");
+	return value;
+}
+template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
+template<> inline u64 getProduct<2>(u64 x) noexcept { return (x % 10u) * (x / 10u); }
+template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; } 
+template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; } 
+template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; } 
+template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; } 
+template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; } 
+template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getProduct<7>(x / 10u)); }
+
+template<u64 width>
+inline u64 getSum(u64 x) noexcept {
+	static_assert(width != 0, "Can't have a zero width number!");
+	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
+	switch(width) {
+		case 1:
+			return x;
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			return sums[x];
+		case 8:
+			return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
+		case 9:
+			return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
+		case 10:
+			return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
+		case 11:
+			return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
+		case 12:
+			return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
+		case 13:
+			return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
+		case 14:
+			return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
+		case 15:
+			return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
+		case 16:
+			return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
+		case 17:
+			return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
+		case 18:
+			return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
+		case 19:
+			return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
+		default:
+			throw "Illegal width requested!";
+	}
+}
+
+template<u64 outerDigits, u64 innerDigits, u64 innerMostDigits, u64 upperShift = innerDigits + innerMostDigits, u64 lowerShift = 1, u64 innerMostShift = 0>
+inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
+	static constexpr auto outerFactor = fastPow10<outerDigits>();
+	static constexpr auto innerFactor = fastPow10<innerDigits>();
+	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
+	static constexpr auto upperSection = fastPow10<upperShift>();
+	static constexpr auto lowerSection = fastPow10<lowerShift>();
+	static constexpr auto innerMostSection = fastPow10<innerMostShift>();
+	auto startInnerMost = start % innerMostFactor;
+	auto current = start / innerMostFactor;
+	auto startInner = current % innerFactor;
+	current /= innerFactor;
+	auto startOuter = current % outerFactor;
+
+	auto endInnerMost = end % innerMostFactor;
+	if (endInnerMost == 0) {
+		endInnerMost = innerMostFactor;
+	}
+
+	auto endInner = ((end / innerMostFactor) % innerFactor);
+	if (endInner == 0) {
+		endInner = innerFactor;
+	}
+
+
+	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
+	if (endOuter == 0) {
+		endOuter = outerFactor;
+	}
+	for (auto i = startOuter; i < endOuter; ++i) {
+		if (legalValue<outerDigits>(i)) {
+			auto upperSum = getSum<outerDigits>(i);
+			auto upperProduct = getProduct<outerDigits>(i);
+			auto upperIndex = i * upperSection;
+			for (auto j = startInner; j < endInner; ++j) {
+				if (legalValue<innerDigits>(j)) {
+					auto innerSum = getSum<innerDigits>(j) + upperSum;
+					auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
+					auto innerIndex = (j * lowerSection) + upperIndex;
+					for (auto k = startInnerMost; k < endInnerMost; ++k) {
+						if (legalValue<innerMostDigits>(k)) {
+							auto product = innerProduct * getProduct<innerMostDigits>(k);
+							auto sum = innerSum + getSum<innerMostDigits>(k);
+							auto value = innerIndex + (k * innerMostSection);
+							if (performQCheck(value, sum, product)) {
+								results.emplace_back(value);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 template<>
 inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
 	// compute the upper, lower, and 1 bit locations
 	// this should always be at position 2!
-	static constexpr auto factor5Wide = fastPow10<5>();
-	static constexpr auto factor4Wide = fastPow10<1>();
-	static constexpr auto oneDigit = fastPow10<1>();
-	static constexpr auto fourDigits = fastPow10<4>();
-	static constexpr auto fiveDigits = fastPow10<5>();
-	auto start1Wide = start % oneDigit;
-	auto start4Wide = ((start / oneDigit) % fourDigits);
-	auto start5Wide = (((start / oneDigit) / fourDigits) % fiveDigits);
-	auto end5Wide = ((end / oneDigit) / fourDigits) % fiveDigits;
-	if (end5Wide == 0) {
-		end5Wide = fiveDigits;
-	}
-	for (auto i = start5Wide; i < end5Wide; ++i) {
-		if (predicatesLen5[i]) {
-			// okay, now compute this out
-			// this is the upper 5 bits so we have to do
-			auto upperSum = sums[i];
-			auto upperProduct = productsLen5[i];
-			auto upperIndex = i * factor5Wide;
-			for (auto j = start4Wide; j < fourDigits; ++j) {
-				if (predicatesLen4[j]) {
-					// okay, now we're in the right spot
-					auto innerSum = sums[j] + upperSum;
-					auto innerProduct = productsLen4[j] * upperProduct;
-					auto innerIndex = (j * factor4Wide) + upperIndex;
-					// okay, start at two here
-					for (auto k = start1Wide; k < oneDigit; ++k) {
-						// let's just be concise right now
-						auto product = innerProduct * k;
-						auto sum = innerSum + k;
-						auto value = innerIndex + k;
-						if (performQCheck(value, sum, product)) {
-							results.emplace_back(value);
-						}
-					}
-				}
-			}
-		}
-	}
+	quodigiousCheckBody<5, 4, 1>(start, end, results);
 	return 0;
 }
 
+
 template<>
 inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
-	// compute the upper, lower, and 1 bit locations
-	// this should always be at position 2!
-	static constexpr auto upperFactor = fastPow10<6>();
-	static constexpr auto lowerFactor = fastPow10<1>();
-	static constexpr auto oneDigit = fastPow10<1>();
-	static constexpr auto fiveDigits = fastPow10<5>();
-	static constexpr auto fourDigits = fastPow10<4>();
-	auto start1Wide = start % oneDigit;
-	auto current = start / oneDigit;
-	auto startInner = ((start / oneDigit) % fiveDigits);
-	auto startOuter = (((start / oneDigit) / fiveDigits) % fiveDigits);
-	auto endOuter = ((end / oneDigit) / fiveDigits) % fiveDigits;
-	if (endOuter == 0) {
-		endOuter = fiveDigits;
-	}
-	for (auto i = startOuter; i < endOuter; ++i) {
-		if (predicatesLen5[i]) {
-			// okay, now compute this out
-			// this is the upper 5 bits so we have to do
-			auto upperSum = sums[i];
-			auto upperProduct = productsLen5[i];
-			auto upperIndex = i * upperFactor;
-			for (auto j = startInner; j < fiveDigits; ++j) {
-				if (predicatesLen5[j]) {
-					// okay, now we're in the right spot
-					auto innerSum = sums[j] + upperSum;
-					auto innerProduct = productsLen5[j] * upperProduct;
-					auto innerIndex = (j * lowerFactor)  + upperIndex;
-					// okay, start at two here
-					for (auto k = start1Wide; k < oneDigit; ++k) {
-						// let's just be concise right now
-						auto product = innerProduct * k;
-						auto sum = innerSum + k;
-						auto value = innerIndex + k;
-						if (performQCheck(value, sum, product)) {
-							results.emplace_back(value);
-						}
-					}
-				}
-			}
-		}
-	}
+	// -------------
+	// | 5 | 6 | 1 |
+	// -------------
+	quodigiousCheckBody<5, 5, 1>(start, end, results);
 	return 0;
 }
+
 
 
 template<>
@@ -614,52 +668,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	static constexpr auto outerFactor = fastPow10<5>();
-	static constexpr auto innerFactor = fastPow10<6>();
-	static constexpr auto innerMostFactor = fastPow10<1>();
-	static constexpr auto upperFactor = fastPow10<7>();
-	static constexpr auto lowerFactor = fastPow10<1>();
-	auto startInnerMost = start % innerMostFactor;
-	auto current = start / innerMostFactor;
-	auto startInner = current % innerFactor;
-	current /= innerFactor;
-	auto startOuter = current % outerFactor;
-	auto endInner = ((end / innerMostFactor) % innerFactor);
-	if (endInner == 0) {
-		endInner = innerFactor;
-	}
-	auto endInnerMost = innerMostFactor;
-	auto innerPredicates = predicatesLen6;
-	auto innerProducts = productsLen6;
-	auto outerPredicates = predicatesLen5;
-	auto outerProducts = productsLen5;
-
-	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
-	if (endOuter == 0) {
-		endOuter = outerFactor;
-	}
-	for (auto i = startOuter; i < endOuter; ++i) {
-		if (outerPredicates[i]) {
-			auto upperSum = sums[i];
-			auto upperProduct = outerProducts[i];
-			auto upperIndex = i * upperFactor;
-			for (auto j = startInner; j < endInner; ++j) {
-				if (innerPredicates[j]) {
-					auto innerSum = sums[j] + upperSum;
-					auto innerProduct = innerProducts[j] * upperProduct;
-					auto innerIndex = (j * lowerFactor) + upperIndex;
-					for (auto k = startInnerMost; k < endInnerMost; ++k) {
-						auto product = innerProduct * k;
-						auto sum = innerSum + k;
-						auto value = innerIndex + k;
-						if (performQCheck(value, sum, product)) {
-							results.emplace_back(value);
-						}
-					}
-				}
-			}
-		}
-	}
+	quodigiousCheckBody<5, 6, 1>(start, end, results);
 	return 0;
 }
 
@@ -668,52 +677,7 @@ inline int performQuodigiousCheck<13>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 6 | 6 | 1 |
 	// -------------
-	static constexpr auto outerFactor = fastPow10<6>();
-	static constexpr auto innerFactor = fastPow10<6>();
-	static constexpr auto innerMostFactor = fastPow10<1>();
-	static constexpr auto upperFactor = fastPow10<7>();
-	static constexpr auto lowerFactor = fastPow10<1>();
-	auto startInnerMost = start % innerMostFactor;
-	auto current = start / innerMostFactor;
-	auto startInner = current % innerFactor;
-	current /= innerFactor;
-	auto startOuter = current % outerFactor;
-	auto endInner = ((end / innerMostFactor) % innerFactor);
-	if (endInner == 0) {
-		endInner = innerFactor;
-	}
-	auto endInnerMost = innerMostFactor;
-	auto innerPredicates = predicatesLen6;
-	auto innerProducts = productsLen6;
-	auto outerPredicates = predicatesLen6;
-	auto outerProducts = productsLen6;
-
-	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
-	if (endOuter == 0) {
-		endOuter = outerFactor;
-	}
-	for (auto i = startOuter; i < endOuter; ++i) {
-		if (outerPredicates[i]) {
-			auto upperSum = sums[i];
-			auto upperProduct = outerProducts[i];
-			auto upperIndex = i * upperFactor;
-			for (auto j = startInner; j < endInner; ++j) {
-				if (innerPredicates[j]) {
-					auto innerSum = sums[j] + upperSum;
-					auto innerProduct = innerProducts[j] * upperProduct;
-					auto innerIndex = (j * lowerFactor) + upperIndex;
-					for (auto k = startInnerMost; k < endInnerMost; ++k) {
-						auto product = innerProduct * k;
-						auto sum = innerSum + k;
-						auto value = innerIndex + k;
-						if (performQCheck(value, sum, product)) {
-							results.emplace_back(value);
-						}
-					}
-				}
-			}
-		}
-	}
+	quodigiousCheckBody<6, 6, 1>(start, end, results);
 	return 0;
 }
 
