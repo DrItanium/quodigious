@@ -42,6 +42,9 @@ bool predicatesLen4[Len4] = { false };
 constexpr auto Len3 = 1000u;
 u64 productsLen3[Len3] = { 0 };
 bool predicatesLen3[Len3] = { false };
+constexpr auto Len2 = 100u;
+u64 productsLen2[Len2] = { 0 };
+bool predicatesLen2[Len2] = { false };
 
 inline void initialize() noexcept {
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
@@ -278,6 +281,113 @@ inline void initialize() noexcept {
 			productsLen3[combinedInd + 9] = outerMul * 9;
 			predicatesLen3[combinedInd + 9] = outerPredicate;
 		}
+	}
+	// Len2
+	for (int x = 0; x < 10; ++x) {
+		auto outerMul = x;
+		auto combinedInd = (x * 10);
+		auto outerPredicate = ((x >= 2));
+		productsLen2[combinedInd + 0] = 0;
+		predicatesLen2[combinedInd + 0] = false;
+		productsLen2[combinedInd + 1] = outerMul ;
+		predicatesLen2[combinedInd + 1] = false;
+		productsLen2[combinedInd + 2] = outerMul * 2;
+		predicatesLen2[combinedInd + 2] = outerPredicate;
+		productsLen2[combinedInd + 3] = outerMul * 3;
+		predicatesLen2[combinedInd + 3] = outerPredicate; 
+		productsLen2[combinedInd + 4] = outerMul * 4;
+		predicatesLen2[combinedInd + 4] = outerPredicate; 
+		productsLen2[combinedInd + 5] = outerMul * 5;
+		predicatesLen2[combinedInd + 5] = outerPredicate;
+		productsLen2[combinedInd + 6] = outerMul * 6;
+		predicatesLen2[combinedInd + 6] = outerPredicate;
+		productsLen2[combinedInd + 7] = outerMul * 7;
+		predicatesLen2[combinedInd + 7] = outerPredicate;
+		productsLen2[combinedInd + 8] = outerMul * 8;
+		predicatesLen2[combinedInd + 8] = outerPredicate;
+		productsLen2[combinedInd + 9] = outerMul * 9;
+		predicatesLen2[combinedInd + 9] = outerPredicate;
+	}
+}
+
+template<u64 length>
+inline constexpr u64 fastPow10() noexcept {
+	return fastPow10<length - 1>() * 10;
+}
+template<>
+inline constexpr u64 fastPow10<0>() noexcept {
+	return 1;
+}
+template<u64 width>
+inline bool legalValue(u64 value) noexcept {
+	static_assert(width < 9, "Too large of a legal value check!");
+	static_assert(width != 0, "Zero not allowed!");
+	return false;
+}
+template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u; }
+template<> inline bool legalValue<2>(u64 x) noexcept { return predicatesLen2[x]; }
+template<> inline bool legalValue<3>(u64 x) noexcept { return predicatesLen3[x]; }
+template<> inline bool legalValue<4>(u64 x) noexcept { return predicatesLen4[x]; }
+template<> inline bool legalValue<5>(u64 x) noexcept { return predicatesLen5[x]; }
+template<> inline bool legalValue<6>(u64 x) noexcept { return predicatesLen6[x]; }
+template<> inline bool legalValue<7>(u64 x) noexcept { return predicatesLen7[x]; }
+template<> inline bool legalValue<8>(u64 x) noexcept { return legalValue<1>(x % 10u) && predicatesLen7[x / 10u]; }
+
+template<u64 width>
+inline u64 getProduct(u64 value) noexcept {
+	static_assert(width < 9, "Too large of a product value!");
+	static_assert(width != 0, "Zero not allowed!");
+	return value;
+}
+template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
+template<> inline u64 getProduct<2>(u64 x) noexcept { return productsLen2[x]; }
+template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; } 
+template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; } 
+template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; } 
+template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; } 
+template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; } 
+template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getProduct<7>(x / 10u)); }
+
+template<u64 width>
+inline u64 getSum(u64 x) noexcept {
+	static_assert(width != 0, "Can't have a zero width number!");
+	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
+	switch(width) {
+		case 1:
+			return x;
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+			return sums[x];
+		case 8:
+			return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
+		case 9:
+			return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
+		case 10:
+			return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
+		case 11:
+			return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
+		case 12:
+			return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
+		case 13:
+			return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
+		case 14:
+			return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
+		case 15:
+			return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
+		case 16:
+			return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
+		case 17:
+			return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
+		case 18:
+			return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
+		case 19:
+			return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
+		default:
+			throw "Illegal width requested!";
 	}
 }
 /**
@@ -525,86 +635,6 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	}
 	return 0;
 }
-template<u64 length>
-inline constexpr u64 fastPow10() noexcept {
-	return fastPow10<length - 1>() * 10;
-}
-template<>
-inline constexpr u64 fastPow10<0>() noexcept {
-	return 1;
-}
-template<u64 width>
-inline bool legalValue(u64 value) noexcept {
-	static_assert(width < 9, "Too large of a legal value check!");
-	static_assert(width != 0, "Zero not allowed!");
-	return false;
-}
-template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u; }
-template<> inline bool legalValue<2>(u64 x) noexcept { return x > 21u && ((x % 10u) >= 2u); }
-template<> inline bool legalValue<3>(u64 x) noexcept { return predicatesLen3[x]; }
-template<> inline bool legalValue<4>(u64 x) noexcept { return predicatesLen4[x]; }
-template<> inline bool legalValue<5>(u64 x) noexcept { return predicatesLen5[x]; }
-template<> inline bool legalValue<6>(u64 x) noexcept { return predicatesLen6[x]; }
-template<> inline bool legalValue<7>(u64 x) noexcept { return predicatesLen7[x]; }
-template<> inline bool legalValue<8>(u64 x) noexcept { return legalValue<1>(x % 10u) && predicatesLen7[x / 10u]; }
-
-template<u64 width>
-inline u64 getProduct(u64 value) noexcept {
-	static_assert(width < 9, "Too large of a product value!");
-	static_assert(width != 0, "Zero not allowed!");
-	return value;
-}
-template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
-template<> inline u64 getProduct<2>(u64 x) noexcept { return (x % 10u) * (x / 10u); }
-template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; } 
-template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; } 
-template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; } 
-template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; } 
-template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; } 
-template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getProduct<7>(x / 10u)); }
-
-template<u64 width>
-inline u64 getSum(u64 x) noexcept {
-	static_assert(width != 0, "Can't have a zero width number!");
-	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
-	switch(width) {
-		case 1:
-			return x;
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-			return sums[x];
-		case 8:
-			return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
-		case 9:
-			return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
-		case 10:
-			return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
-		case 11:
-			return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
-		case 12:
-			return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
-		case 13:
-			return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
-		case 14:
-			return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
-		case 15:
-			return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
-		case 16:
-			return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
-		case 17:
-			return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
-		case 18:
-			return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
-		case 19:
-			return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
-		default:
-			throw "Illegal width requested!";
-	}
-}
 
 template<u64 width, u64 outerDigits, u64 innerDigits, u64 innerMostDigits = 1, u64 upperShift = innerDigits + innerMostDigits, u64 lowerShift = 1, u64 innerMostShift = 0>
 inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
@@ -781,7 +811,7 @@ inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexce
 	// -------------
 	// | 5 | 6 | 1 |
 	// -------------
-	quodigiousCheckBody<12, 5, 6>(start, end, results);
+	quodigiousCheckBody4Levels<12, 4, 5, 2>(start, end, results);
 	return 0;
 }
 
@@ -800,6 +830,15 @@ inline int performQuodigiousCheck<14>(u64 start, u64 end, vec64& results) noexce
 	// | 6 | 7 | 1 |
 	// -------------
 	quodigiousCheckBody<14, 6, 7>(start, end, results);
+	return 0;
+}
+
+template<>
+inline int performQuodigiousCheck<15>(u64 start, u64 end, vec64& results) noexcept {
+	// -----------------
+	// | 4 | 5 | 5 | 1 |
+	// -----------------
+	quodigiousCheckBody4Levels<15, 4, 5, 5>(start, end, results);
 	return 0;
 }
 
