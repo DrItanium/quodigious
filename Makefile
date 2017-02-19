@@ -44,3 +44,5 @@ clean:
 	@echo -n cleaning...
 	@rm -rf ${FILES} ${TITLE}
 	@echo done.
+
+quodigious.o: notations.def

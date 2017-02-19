@@ -18,13 +18,41 @@
 
 // Perform quodigious checks on numbers using tons of different C++ tricks 
 #include <iostream>
-#include <cstdint>
 #include <cmath>
 #include <future>
+#include <cstdint>
 #include <vector>
 
 using u64 = uint64_t;
 using vec64 = std::vector<u64>;
+template<u64 width> 
+struct NotationDescription { 
+	static constexpr u64 level3Digits = (width - 1) / 2;
+	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
+	static constexpr u64 level1Digits = 1;
+	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
+};
+template<u64 width>
+constexpr u64 level3Digits() noexcept {
+	return NotationDescription<width>::level3Digits;
+}
+template<u64 width>
+constexpr u64 level2Digits() noexcept {
+	return NotationDescription<width>::level2Digits;
+}
+template<u64 width>
+constexpr u64 level1Digits() noexcept {
+	return NotationDescription<width>::level1Digits;
+}
+#define X(width, l3, l2, l1) \
+	template<> \
+struct NotationDescription< width > { \
+	static constexpr u64 level3Digits = l3 ; \
+	static constexpr u64 level2Digits = l2 ; \
+	static constexpr u64 level1Digits = l1 ; \
+};
+#include "notations.def"
+#undef X
 
 constexpr auto Len7 = 10000000u;
 u64 sums[Len7] = { 0 };
@@ -319,9 +347,8 @@ inline constexpr u64 fastPow10<0>() noexcept {
 	return 1;
 }
 template<u64 width>
-inline bool legalValue(u64 value) noexcept {
+inline bool legalValue(u64 _) noexcept {
 	static_assert(width < 9, "Too large of a legal value check!");
-	static_assert(width != 0, "Zero not allowed!");
 	return false;
 }
 template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u; }
@@ -336,7 +363,6 @@ template<> inline bool legalValue<8>(u64 x) noexcept { return legalValue<1>(x % 
 template<u64 width>
 inline u64 getProduct(u64 value) noexcept {
 	static_assert(width < 9, "Too large of a product value!");
-	static_assert(width != 0, "Zero not allowed!");
 	return value;
 }
 template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
@@ -350,9 +376,10 @@ template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getPro
 
 template<u64 width>
 inline u64 getSum(u64 x) noexcept {
-	static_assert(width != 0, "Can't have a zero width number!");
 	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
 	switch(width) {
+		case 0:
+			return 0;
 		case 1:
 			return x;
 		case 2:
@@ -400,223 +427,17 @@ inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
 }
 
 template<u64 length>
-inline bool isQuodigious(u64 value) noexcept {
-	// If not explicitly specified, we use this much slower implementation of
-	// quodigious but carving out sections that are 4 digits wide. The problem
-	// with this default implementation is that it is SLOW becuase of the loop
-	// at the bottom as well as the remainder checks before hand. I have
-	// optimized it as much as possible but since it is general purpose it
-	// requires more operations to complete compared to the specialized
-	// versions.
-	static constexpr auto count = Len4;
-	static constexpr auto digits = 4;
-	static constexpr auto power = fastPow10<digits>();
-	static constexpr auto remainder = length % digits;
-	static constexpr auto len = length - remainder;
-	static constexpr auto remPower = fastPow10<remainder>();
-	u64 current = value;
-	u64 sum = 0;
-	u64 product = 1;
-	if (remainder != 0) {
-		auto result = current % remPower;
-		if (!legalValue<remainder>(result)) {
-			return false;
-		}
-		sum = getSum<remainder>(result);
-		product = getProduct<remainder>(result);
-		current /= remPower;
-	}
-	for (u64 i = 0 ; i < len; i += digits) {
-		u64 result = current % power;
-		if (!legalValue<count>(result)) {
-			return false;
-		} 
-		product *= getProduct<count>(result);
-		sum += getSum<count>(result);
-		current /= power; // there will be an extra wasted divide because it won't be used!
-	}
-	return performQCheck(value, sum, product);
-}
-
-
-template<> inline bool isQuodigious<8>(u64 value) noexcept { 
-	// 4 + 4
-	auto result = value % Len4;
-	if (!predicatesLen4[result]) {
-		return false;
-	}
-	auto sum = sums[result];
-	auto product = productsLen4[result];
-	auto previous = result;
-	auto current = value / Len4;
-
-	result = current % Len4;
-	if (previous == result) {
-		return performQCheck(value, sum + sum, product * product);
-	} else {
-		return predicatesLen4[result] && performQCheck(value, sum + sums[result], product * productsLen4[result]);
-	}
-}
-
-template<> inline bool isQuodigious<9>(u64 value) noexcept { 
-	// 6 + 3
-	auto result = value % Len3;
-	if (!predicatesLen3[result]) {
-		return false;
-	}
-	auto sum = sums[result];
-	auto product = productsLen3[result];
-	auto current = value / Len3;
-	result = current % Len6;
-	return predicatesLen6[result] && performQCheck(value, sum + sums[result], product * productsLen6[result]);
-}
-
-template<>
-inline bool isQuodigious<10>(u64 value) noexcept {
-	// 5 + 5
-	static constexpr auto count = Len5;
-	//5
-	auto result = value % count;
-	if (!predicatesLen5[result]) {
-		return false;
-	} 
-	auto product = productsLen5[result];
-	auto sum = sums[result];
-	auto previous = result;
-	auto current = value / count;
-
-	//10
-	result = current % count;
-	if (previous == result) {
-		// if the two halves are the same and we got this far then we don't
-		// need to check again!
-		return performQCheck(value, sum + sum, product * product);
-	} else {
-		// if they aren't equal, then perform actions as normal
-		return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
-	}
-}
-
-
-template<>
-inline bool isQuodigious<11>(u64 value) noexcept {
-	// 6 + 5
-	auto result = value % Len6;
-	if (!predicatesLen6[result]) {
-		return false;
-	}
-	auto product = productsLen6[result];
-	auto sum = sums[result];
-	auto current = value / Len6;
-
-	result = current % Len5;
-	return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
-}
-
-template<>
-inline bool isQuodigious<12>(u64 value) noexcept {
-	// 6 + 6
-	static constexpr auto count = Len6;
-	//6
-	auto result = value % count;
-	if (!predicatesLen6[result]) {
-		return false;
-	} 
-	auto product = productsLen6[result];
-	auto sum = sums[result];
-	auto previous = result;
-	auto current = value / count;
-
-	//12
-	result = current % count;
-	if (previous == result) {
-		return performQCheck(value, sum + sum, product * product);
-	} else {
-		return predicatesLen6[result] && performQCheck(value, sum + sums[result], product * productsLen6[result]);
-	}
-}
-
-template<>
-inline bool isQuodigious<13>(u64 value) noexcept {
-	// 6 + 7
-	//6
-	auto result = value % Len6;
-	if (!predicatesLen6[result]) {
-		return false;
-	} 
-	auto product = productsLen6[result];
-	auto sum = sums[result];
-	auto current = value / Len6;
-
-	// 13
-	result = current % Len7;
-	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
-}
-
-template<>
-inline bool isQuodigious<14>(u64 value) noexcept {
-	// 7 + 7
-	//7
-	auto result = value % Len7;
-	if (!predicatesLen7[result]) {
-		return false;
-	} 
-	auto product = productsLen7[result];
-	auto sum = sums[result];
-	auto current = value / Len7;
-
-	// 14
-	result = current % Len7;
-	return predicatesLen7[result] && performQCheck(value, sum + sums[result], product * productsLen7[result]);
-}
-
-template<>
-inline bool isQuodigious<15>(u64 value) noexcept {
-	//5 + 5 + 5
-	auto result = value % Len5;
-	if (!predicatesLen5[result]) {
-		return false;
-	}
-	u64 product = productsLen5[result];
-	u64 sum = sums[result];
-	u64 current = value / Len5;
-	//8
-	result = current % Len5;
-	if (!predicatesLen5[result]) {
-		return false;
-	} 
-	product *= productsLen5[result];
-	sum += sums[result];
-	current /= Len5;
-
-	//15
-	result = current % Len5;
-	return predicatesLen5[result] && performQCheck(value, sum + sums[result], product * productsLen5[result]);
-}
-
-template<u64 length>
 inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	// assume that we start at 2.222222222222
 	// skip over the 9th and 10th numbers from this position!
-	auto fn = [&results](u64 value) { if (isQuodigious<length>(value)) { results.emplace_back(value); }};
-	for (auto value = start; value < end; value += 10) {
-		// if we can compute the upper portion of the number ahead of time and
-		// see if it is legal then we could save a ton on checking digits
-		fn(value+0);
-		fn(value+1);
-		fn(value+2);
-		fn(value+3);
-		fn(value+4);
-		fn(value+5);
-		fn(value+6);
-		fn(value+7);
-	}
-	return 0;
-}
 
-template<u64 width, u64 outerDigits, u64 innerDigits, u64 innerMostDigits = 1, u64 upperShift = innerDigits + innerMostDigits, u64 lowerShift = 1, u64 innerMostShift = 0>
-inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
-	static_assert(width == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
+	static constexpr auto outerDigits = level3Digits<length>();
+	static constexpr auto innerDigits = level2Digits<length>();
+	static constexpr auto innerMostDigits = level1Digits<length>();
+	static constexpr auto innerMostShift = 0u;
+	static constexpr auto lowerShift = innerMostDigits;
+	static constexpr auto upperShift = innerDigits + innerMostDigits;
+	static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
 	static constexpr auto outerFactor = fastPow10<outerDigits>();
 	static constexpr auto innerFactor = fastPow10<innerDigits>();
 	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
@@ -638,7 +459,6 @@ inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
 	if (endInner == 0) {
 		endInner = innerFactor;
 	}
-
 
 	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
 	if (endOuter == 0) {
@@ -670,89 +490,6 @@ inline void quodigiousCheckBody(u64 start, u64 end, vec64& results) noexcept {
 	}
 }
 
-template<u64 width, 
-	u64 level4Digits, 
-	u64 level3Digits, 
-	u64 level2Digits, 
-	u64 level1Digits = 1, 
-	u64 level4Shift = level3Digits + level2Digits + level1Digits, 
-	u64 level3Shift = level2Digits + level1Digits,
-	u64 level2Shift = level1Digits,
-	u64 level1Shift = 0>
-inline void quodigiousCheckBody4Levels(u64 start, u64 end, vec64& results) noexcept {
-	static_assert(width == (level4Digits + level3Digits + level2Digits + level1Digits), "Defined digit layout does not encompass all digits of the given width, make sure that l4, l3, l2, and l1 digits equal the digits width!");
-	static constexpr auto l4Factor = fastPow10<level4Digits>();
-	static constexpr auto l4Section = fastPow10<level4Shift>();
-	static constexpr auto l3Factor = fastPow10<level3Digits>();
-	static constexpr auto l3Section = fastPow10<level3Shift>();
-	static constexpr auto l2Factor = fastPow10<level2Digits>();
-	static constexpr auto l2Section = fastPow10<level2Shift>();
-	static constexpr auto l1Factor = fastPow10<level1Digits>();
-	static constexpr auto l1Section = fastPow10<level1Shift>();
-	auto startL1 = start % l1Factor;
-	auto current = start / l1Factor;
-	auto startL2 = current % l2Factor;
-	current /= l2Factor;
-	auto startL3 = current % l3Factor;
-	current /= l3Factor;
-	auto startL4 = current % l4Factor;
-
-	auto endL1 = end % l1Factor;
-	if (endL1 == 0) {
-		endL1 = l1Factor;
-	}
-	current = end / l1Factor;
-
-	auto endL2 = ((current) % l2Factor);
-	if (endL2 == 0) {
-		endL2 = l2Factor;
-	}
-	current /= l2Factor;
-
-
-	auto endL3 = current % l3Factor;
-	if (endL3 == 0) {
-		endL3 = l3Factor;
-	}
-	current /= l4Factor;
-	auto endL4 = current % l4Factor;
-	if (endL4 == 0) {
-		endL4 = l4Factor;
-	}
-	for (auto l4 = startL4; l4 < endL4; ++l4) {
-		if (legalValue<level4Digits>(l4)) {
-			auto l4Sum = getSum<level4Digits>(l4);
-			auto l4Product = getProduct<level4Digits>(l4);
-			auto l4Index = l4 * l4Section;
-			for (auto l3 = startL3 ; l3 < endL3 ; ++l3) {
-				if (legalValue<level3Digits>(l3)) {
-					auto l3Sum = getSum<level3Digits>(l3) + l4Sum;
-					auto l3Product = getProduct<level3Digits>(l3) * l4Product;
-					auto l3Index = (l3 * l3Section) + l4Index;
-					for (auto l2 = startL2 ; l2 < endL2; ++l2) {
-						if (legalValue<level2Digits>(l2)) {
-							auto l2Sum = getSum<level2Digits>(l2) + l3Sum;
-							auto l2Product = getProduct<level2Digits>(l2) * l3Product;
-							auto l2Index = (l2 * l2Section) + l3Index;
-							for (auto l1 = startL1; l1 < endL1; ++l1) {
-								if (legalValue<level1Digits>(l1)) {
-									auto product = l2Product * getProduct<level1Digits>(l1);
-									auto sum = l2Sum + getSum<level1Digits>(l1);
-									auto value = l2Index + (l1 * l1Section);
-									if (performQCheck(value, sum, product)) {
-										results.emplace_back(value);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-}
-
 
 template<>
 inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
@@ -763,68 +500,6 @@ inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcep
 	}
 	return 0;
 }
-template<>
-inline int performQuodigiousCheck<9>(u64 start, u64 end, vec64& results) noexcept {
-	quodigiousCheckBody<9, 4, 4>(start, end, results);
-	return 0;
-}
-template<>
-inline int performQuodigiousCheck<10>(u64 start, u64 end, vec64& results) noexcept {
-	// compute the upper, lower, and 1 bit locations
-	// this should always be at position 2!
-	quodigiousCheckBody<10, 5, 4>(start, end, results);
-	return 0;
-}
-
-
-template<>
-inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
-	// -------------
-	// | 5 | 5 | 1 |
-	// -------------
-	quodigiousCheckBody<11, 5, 5>(start, end, results);
-	return 0;
-}
-
-
-
-template<>
-inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexcept {
-	// -------------
-	// | 5 | 6 | 1 |
-	// -------------
-	quodigiousCheckBody<12, 4, 7>(start, end, results);
-	return 0;
-}
-
-template<>
-inline int performQuodigiousCheck<13>(u64 start, u64 end, vec64& results) noexcept {
-	// -------------
-	// | 6 | 6 | 1 |
-	// -------------
-	quodigiousCheckBody<13, 6, 6>(start, end, results);
-	return 0;
-}
-
-template<>
-inline int performQuodigiousCheck<14>(u64 start, u64 end, vec64& results) noexcept {
-	// -------------
-	// | 6 | 7 | 1 |
-	// -------------
-	quodigiousCheckBody<14, 6, 7>(start, end, results);
-	return 0;
-}
-
-template<>
-inline int performQuodigiousCheck<15>(u64 start, u64 end, vec64& results) noexcept {
-	// -----------------
-	// | 4 | 5 | 5 | 1 |
-	// -----------------
-	quodigiousCheckBody4Levels<15, 4, 5, 5>(start, end, results);
-	return 0;
-}
-
-
 
 
 void printout(vec64& l) noexcept {
@@ -887,21 +562,21 @@ inline void body() noexcept {
 	DefSimpleBody(3)
 	DefSimpleBody(4)
 	DefSimpleBody(5)
-	DefSimpleBody(6)
+DefSimpleBody(6)
 #undef DefSimpleBody
 
-template<>
-inline void body<1>() noexcept {
-	std::cout << 2 << std::endl;
-	std::cout << 3 << std::endl;
-	std::cout << 4 << std::endl;
-	std::cout << 5 << std::endl;
-	std::cout << 6 << std::endl;
-	std::cout << 7 << std::endl;
-	std::cout << 8 << std::endl;
-	std::cout << 9 << std::endl;
-	std::cout << std::endl;
-}
+	template<>
+	inline void body<1>() noexcept {
+		std::cout << 2 << std::endl;
+		std::cout << 3 << std::endl;
+		std::cout << 4 << std::endl;
+		std::cout << 5 << std::endl;
+		std::cout << 6 << std::endl;
+		std::cout << 7 << std::endl;
+		std::cout << 8 << std::endl;
+		std::cout << 9 << std::endl;
+		std::cout << std::endl;
+	}
 
 int main() {
 	initialize();
@@ -925,10 +600,10 @@ int main() {
 				case 13: body<13>(); break;
 				case 14: body<14>(); break;
 				case 15: body<15>(); break;
-				//case 16: body<16>(); break;
-				//case 17: body<17>(); break;
-				//case 18: body<18>(); break;
-				//case 19: body<19>(); break;
+						 //case 16: body<16>(); break;
+						 //case 17: body<17>(); break;
+						 //case 18: body<18>(); break;
+						 //case 19: body<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
