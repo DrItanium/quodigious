@@ -609,6 +609,58 @@ inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexce
 }
 
 
+template<>
+inline int performQuodigiousCheck<12>(u64 start, u64 end, vec64& results) noexcept {
+	// -------------
+	// | 5 | 6 | 1 |
+	// -------------
+	static constexpr auto outerFactor = fastPow10<5>();
+	static constexpr auto innerFactor = fastPow10<6>();
+	static constexpr auto innerMostFactor = fastPow10<1>();
+	static constexpr auto upperFactor = fastPow10<7>();
+	static constexpr auto lowerFactor = fastPow10<1>();
+	auto startInnerMost = start % innerMostFactor;
+	auto current = start / innerMostFactor;
+	auto startInner = current % innerFactor;
+	current /= innerFactor;
+	auto startOuter = current % outerFactor;
+	auto endInner = ((end / innerMostFactor) % innerFactor);
+	auto endInnerMost = innerMostFactor;
+	auto innerPredicates = predicatesLen6;
+	auto innerProducts = productsLen6;
+	auto outerPredicates = predicatesLen5;
+	auto outerProducts = productsLen5;
+
+	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
+	if (endOuter == 0) {
+		endOuter = outerFactor;
+	}
+	for (auto i = startOuter; i < endOuter; ++i) {
+		if (outerPredicates[i]) {
+			auto upperSum = sums[i];
+			auto upperProduct = outerProducts[i];
+			auto upperIndex = i * upperFactor;
+			for (auto j = startInner; j < endInner; ++j) {
+				if (innerPredicates[j]) {
+					auto innerSum = sums[j] + upperSum;
+					auto innerProduct = innerProducts[j] * upperProduct;
+					auto innerIndex = (j * lowerFactor) + upperIndex;
+					for (auto k = startInnerMost; k < endInnerMost; ++k) {
+						auto product = innerProduct * k;
+						auto sum = innerSum + k;
+						auto value = innerIndex + k;
+						if (performQCheck(value, sum, product)) {
+							results.emplace_back(value);
+						}
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+
 
 template<>
 inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
