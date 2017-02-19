@@ -721,12 +721,24 @@ void printout(vec64& l) noexcept {
 }
 
 template<u64 length>
+inline void singleThreadedSimpleBody() noexcept {
+	static constexpr auto factor = 2.0 + (2.0 / 9.0);
+	for (auto value = (factor * fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
+		if (legalValue<length>(value) && performQCheck(value, getSum<length>(value), getProduct<length>(value))) {
+			std::cout << value << std::endl;
+		}
+	}
+	std::cout << std::endl;
+}
+
+template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
 	static constexpr auto skip5 = length > 4 && length < 14;
-	auto base = static_cast<u64>(pow(10, length - 1));
-	auto st = static_cast<u64>(factor * base);
+	// this is not going to change ever!
+	static constexpr auto base = fastPow10<length - 1>();
+	static constexpr auto st = static_cast<u64>(factor * base);
 
 	auto fut0 = std::async(std::launch::async, [start = st, end = 3 * base]() { return performQuodigiousCheck<length>(start, end, l0); });
 	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
@@ -756,6 +768,14 @@ inline void body() noexcept {
 	std::cout << std::endl;
 }
 
+#define DefSimpleBody(ind) template<> inline void body< ind >() noexcept { singleThreadedSimpleBody< ind >(); }
+	DefSimpleBody(2)
+	DefSimpleBody(3)
+	DefSimpleBody(4)
+	DefSimpleBody(5)
+	DefSimpleBody(6)
+#undef DefSimpleBody
+
 template<>
 inline void body<1>() noexcept {
 	std::cout << 2 << std::endl;
@@ -768,89 +788,6 @@ inline void body<1>() noexcept {
 	std::cout << 9 << std::endl;
 	std::cout << std::endl;
 }
-template<>
-inline void body<2>() noexcept {
-	static constexpr auto divisor = 10u;
-	for (auto value = 22; value < 100; ++value) {
-		auto result = value % divisor;
-		if (result >= 2) {
-			u64 temp = result;
-			result = (value / divisor) % divisor;
-			if ((result >= 2) && performQCheck(value, temp + result, temp * result)) {
-				std::cout << value << std::endl;
-			}
-		}
-	}
-	std::cout << std::endl;
-}
-
-template<>
-inline void body<3>() noexcept {
-	for (auto value = 222u; value < 1000u; ++value) {
-		if (predicatesLen3[value] && performQCheck(value, sums[value], productsLen3[value])) {
-			std::cout << value << std::endl;
-		}
-	}
-	std::cout << std::endl;
-}
-
-template<>
-inline void body<4>() noexcept {
-	for (auto value = 2222u; value < 10000u; ++value) {
-		if (predicatesLen4[value] && performQCheck(value, sums[value], productsLen4[value])) {
-			std::cout << value << std::endl;
-		}
-	}
-	std::cout << std::endl;
-}
-
-template<>
-inline void body<5>() noexcept {
-	for (auto value = 22222u; value < 100000u; ++value) {
-		if (predicatesLen5[value] && performQCheck(value, sums[value], productsLen5[value])) {
-			std::cout << value << std::endl;
-		}
-	}
-	std::cout << std::endl;
-}
-
-template<>
-inline void body<6>() noexcept {
-	auto fn = [](auto start, auto end) {
-		for (auto value = start; value < end; ++value) {
-			if (predicatesLen6[value] && performQCheck(value, sums[value], productsLen6[value])) {
-				std::cout << value << std::endl;
-			}
-		}
-	};
-	fn(222222u, 300000u);
-	fn(322222u, 400000u);
-	fn(422222u, 500000u);
-	// skip the 500000 - 622222 range
-	fn(622222u, 700000u);
-	fn(722222u, 800000u);
-	fn(822222u, 900000u);
-	fn(922222u, 1000000u);
-	std::cout << std::endl;
-}
-
-/*
-template<>
-inline void body<11>() noexcept {
-	auto fn = [](auto start, auto end) {
-		static vec64 tmp;
-		performQuodigiousCheck<11>(start, end, tmp);
-	};
-	fn(22222222222u, 30000000000u);
-	fn(32222222222u, 40000000000u);
-	fn(42222222222u, 50000000000u);
-	fn(62222222222u, 70000000000u);
-	fn(72222222222u, 80000000000u);
-	fn(82222222222u, 90000000000u);
-	fn(92222222222u, 100000000000u);
-	std::cout << std::endl;
-}
-*/
 
 int main() {
 	initialize();
