@@ -489,6 +489,10 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 		}
 	}
 }
+template<u64 width>
+inline void printDigitalLayout() noexcept {
+	std::cout << width << ":" << level3Digits<length>() << ":" << level2Digits<length>() << ":" << level1Digits<length>() << std::endl;
+}
 
 
 template<>
@@ -528,7 +532,7 @@ inline void body() noexcept {
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(factor * base);
-
+	printDigitalLayout<length>();
 	auto fut0 = std::async(std::launch::async, [start = st, end = 3 * base]() { return performQuodigiousCheck<length>(start, end, l0); });
 	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
 	auto fut2 = std::async(std::launch::async, [start = st + (base * 2), end = 5 * base]() { return performQuodigiousCheck<length>( start, end, l2); });
