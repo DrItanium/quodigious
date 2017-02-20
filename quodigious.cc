@@ -616,10 +616,10 @@ int main() {
 				case 13: body<13>(); break;
 				case 14: body<14>(); break;
 				case 15: body<15>(); break;
-						 //case 16: body<16>(); break;
-						 //case 17: body<17>(); break;
-						 //case 18: body<18>(); break;
-						 //case 19: body<19>(); break;
+				case 16: body<16>(); break;
+				case 17: body<17>(); break;
+				case 18: body<18>(); break;
+				case 19: body<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
