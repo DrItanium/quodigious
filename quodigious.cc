@@ -500,10 +500,12 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	return 0;
 }
 
+#ifdef DEBUG
 template<u64 width>
 inline void printDigitalLayout() noexcept {
 	std::cout << width << ":" << level3Digits<width>() << ":" << level2Digits<width>() << ":" << level1Digits<width>() << std::endl;
 }
+#endif
 
 
 void printout(vec64& l) noexcept {
@@ -516,7 +518,7 @@ void printout(vec64& l) noexcept {
 template<u64 length>
 inline void singleThreadedSimpleBody() noexcept {
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	for (auto value = (factor * fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
+	for (auto value = static_cast<u64>(factor * fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
 		if (legalValue<length>(value) && performQCheck(value, getSum<length>(value), getProduct<length>(value))) {
 			std::cout << value << std::endl;
 		}
@@ -532,7 +534,9 @@ inline void body() noexcept {
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(factor * base);
+#ifdef DEBUG
 	printDigitalLayout<length>();
+#endif
 	auto fut0 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st, 3 * base>(l0); });
 	auto fut1 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + base, 4 * base>(l1); });
 	auto fut2 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 2), 5 * base>(l2); });
@@ -540,7 +544,7 @@ inline void body() noexcept {
 	auto fut4 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 4), 7 * base>(l4); });
 	auto fut5 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 5), 8 * base>(l5); });
 	auto fut6 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 6), 9 * base>(l6); });
-	performQuodigiousCheck<length, st + (base * 7), 10 * base>(l0);
+	performQuodigiousCheck<length, st + (base * 7), 10 * base>(l7);
 	fut0.get();
 	fut1.get();
 	fut2.get();
@@ -574,6 +578,7 @@ inline void body<3>() noexcept {
 	std::cout << 432 << std::endl;
 	std::cout << 624 << std::endl;
 	std::cout << 735 << std::endl;
+	std::cout << std::endl;
 }
 
 	template<>
