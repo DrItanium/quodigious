@@ -22,6 +22,7 @@
 #include <future>
 #include <cstdint>
 #include <vector>
+#include <functional>
 
 using u64 = uint64_t;
 using vec64 = std::vector<u64>;
@@ -464,6 +465,7 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	if (endOuter == 0) {
 		endOuter = outerFactor;
 	}
+	
 	for (auto i = startOuter; i < endOuter; ++i) {
 		if (legalValue<outerDigits>(i)) {
 			auto upperSum = getSum<outerDigits>(i);
@@ -488,10 +490,95 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 			}
 		}
 	}
+	return 0;
 }
+
+using LoopFunction = std::function<void(u64, u64, u64)>;
+template<u64 digits, u64 shift>
+inline LoopFunction digitalLoop(u64 start, u64 end, LoopFunction innerFunction) noexcept {
+	static constexpr auto section = fastPow10<shift>();
+	return [start, end, innerFunction](u64 outerSum, u64 outerProduct, u64 outerIndex) {
+		for (auto i = start; i < end; ++i) {
+			if (legalValue<digits>(i)) {
+				auto sum = outerSum + getSum<digits>(i);
+				auto product = outerProduct * getProduct<digits>(i);
+				auto index = outerIndex + (i * section);
+				innerFunction(sum, product, index);
+			}
+		}
+	};
+}
+template<>
+inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
+	static constexpr auto length = 11u;
+	static constexpr auto outerDigits = level3Digits<length>();
+	static constexpr auto innerDigits = level2Digits<length>();
+	static constexpr auto innerMostDigits = level1Digits<length>();
+	static constexpr auto innerMostShift = 0u;
+	static constexpr auto lowerShift = innerMostDigits;
+	static constexpr auto upperShift = innerDigits + innerMostDigits;
+	static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
+	static constexpr auto outerFactor = fastPow10<outerDigits>();
+	static constexpr auto innerFactor = fastPow10<innerDigits>();
+	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
+	static constexpr auto upperSection = fastPow10<upperShift>();
+	static constexpr auto lowerSection = fastPow10<lowerShift>();
+	static constexpr auto innerMostSection = fastPow10<innerMostShift>();
+	auto startInnerMost = start % innerMostFactor;
+	auto current = start / innerMostFactor;
+	auto startInner = current % innerFactor;
+	current /= innerFactor;
+	auto startOuter = current % outerFactor;
+
+	auto endInnerMost = end % innerMostFactor;
+	if (endInnerMost == 0) {
+		endInnerMost = innerMostFactor;
+	}
+
+	auto endInner = ((end / innerMostFactor) % innerFactor);
+	if (endInner == 0) {
+		endInner = innerFactor;
+	}
+
+	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
+	if (endOuter == 0) {
+		endOuter = outerFactor;
+	}
+	auto loop = digitalLoop<outerDigits, upperShift>(startOuter, endOuter, 
+			digitalLoop<innerDigits, lowerShift>(startInner, endInner, 
+				digitalLoop<innerMostDigits, innerMostShift>(startInnerMost, endInnerMost, 
+					[&results](u64 sum, u64 product, u64 value) { if(performQCheck(value, sum, product)) { results.emplace_back(value); } })));
+	loop(0u, 1u, 0u);
+	//for (auto i = startOuter; i < endOuter; ++i) {
+	//	if (legalValue<outerDigits>(i)) {
+	//		auto upperSum = getSum<outerDigits>(i);
+	//		auto upperProduct = getProduct<outerDigits>(i);
+	//		auto upperIndex = i * upperSection;
+	//		for (auto j = startInner; j < endInner; ++j) {
+	//			if (legalValue<innerDigits>(j)) {
+	//				auto innerSum = getSum<innerDigits>(j) + upperSum;
+	//				auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
+	//				auto innerIndex = (j * lowerSection) + upperIndex;
+	//				for (auto k = startInnerMost; k < endInnerMost; ++k) {
+	//					if (legalValue<innerMostDigits>(k)) {
+	//						auto product = innerProduct * getProduct<innerMostDigits>(k);
+	//						auto sum = innerSum + getSum<innerMostDigits>(k);
+	//						auto value = innerIndex + (k * innerMostSection);
+	//						if (performQCheck(value, sum, product)) {
+	//							results.emplace_back(value);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	return 0;
+}
+
 template<u64 width>
 inline void printDigitalLayout() noexcept {
-	std::cout << width << ":" << level3Digits<length>() << ":" << level2Digits<length>() << ":" << level1Digits<length>() << std::endl;
+	std::cout << width << ":" << level3Digits<width>() << ":" << level2Digits<width>() << ":" << level1Digits<width>() << std::endl;
 }
 
 
