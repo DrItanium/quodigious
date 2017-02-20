@@ -428,61 +428,68 @@ inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
 }
 
 template<u64 length>
-inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
+constexpr u64 startIndex() noexcept {
+	constexpr auto factor = 2.0 + (2.0 / 9.0);
+	return static_cast<u64>(factor * fastPow10<length - 1>());
+}
+template<u64 length>
+constexpr u64 endIndex() noexcept {
+	return fastPow10<length>();
+}
+template<u64 length, u64 start, u64 end>
+inline int performQuodigiousCheck(vec64& results) noexcept {
 	// assume that we start at 2.222222222222
 	// skip over the 9th and 10th numbers from this position!
+	if (length == 7) {
+		for (auto value = start; value < end; ++value) {
+			if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
+				results.emplace_back(value);
+			}
+		}
+	} else {
+		// precompute the fuck out of all of this!
+		// Compilers hate me, I am the TEMPLATE MASTER
+		static constexpr auto outerDigits = level3Digits<length>();
+		static constexpr auto innerDigits = level2Digits<length>();
+		static constexpr auto innerMostDigits = level1Digits<length>();
+		static constexpr auto innerMostShift = 0u;
+		static constexpr auto lowerShift = innerMostDigits;
+		static constexpr auto upperShift = innerDigits + innerMostDigits;
+		static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
+		static constexpr auto outerFactor = fastPow10<outerDigits>();
+		static constexpr auto innerFactor = fastPow10<innerDigits>();
+		static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
+		static constexpr auto upperSection = fastPow10<upperShift>();
+		static constexpr auto lowerSection = fastPow10<lowerShift>();
+		static constexpr auto innerMostSection = fastPow10<innerMostShift>();
+		static constexpr auto startInnerMost = start % innerMostFactor;
+		static constexpr auto startInner = (start / innerMostFactor) % innerFactor;
+		static constexpr auto startOuter = ((start / innerMostFactor) / innerFactor) % outerFactor;
+		static constexpr auto attemptEndInnerMost = end % innerMostFactor;
+		static constexpr auto endInnerMost = attemptEndInnerMost == 0 ? innerMostFactor : attemptEndInnerMost;
+		static constexpr auto attemptEndInner = ((end / innerMostFactor) % innerFactor);
+		static constexpr auto endInner = attemptEndInner == 0 ? innerFactor : attemptEndInner;
+		static constexpr auto attemptEndOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
+		static constexpr auto endOuter = attemptEndOuter == 0 ? outerFactor : attemptEndOuter;
 
-	static constexpr auto outerDigits = level3Digits<length>();
-	static constexpr auto innerDigits = level2Digits<length>();
-	static constexpr auto innerMostDigits = level1Digits<length>();
-	static constexpr auto innerMostShift = 0u;
-	static constexpr auto lowerShift = innerMostDigits;
-	static constexpr auto upperShift = innerDigits + innerMostDigits;
-	static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
-	static constexpr auto outerFactor = fastPow10<outerDigits>();
-	static constexpr auto innerFactor = fastPow10<innerDigits>();
-	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
-	static constexpr auto upperSection = fastPow10<upperShift>();
-	static constexpr auto lowerSection = fastPow10<lowerShift>();
-	static constexpr auto innerMostSection = fastPow10<innerMostShift>();
-	auto startInnerMost = start % innerMostFactor;
-	auto current = start / innerMostFactor;
-	auto startInner = current % innerFactor;
-	current /= innerFactor;
-	auto startOuter = current % outerFactor;
-
-	auto endInnerMost = end % innerMostFactor;
-	if (endInnerMost == 0) {
-		endInnerMost = innerMostFactor;
-	}
-
-	auto endInner = ((end / innerMostFactor) % innerFactor);
-	if (endInner == 0) {
-		endInner = innerFactor;
-	}
-
-	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
-	if (endOuter == 0) {
-		endOuter = outerFactor;
-	}
-	
-	for (auto i = startOuter; i < endOuter; ++i) {
-		if (legalValue<outerDigits>(i)) {
-			auto upperSum = getSum<outerDigits>(i);
-			auto upperProduct = getProduct<outerDigits>(i);
-			auto upperIndex = i * upperSection;
-			for (auto j = startInner; j < endInner; ++j) {
-				if (legalValue<innerDigits>(j)) {
-					auto innerSum = getSum<innerDigits>(j) + upperSum;
-					auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
-					auto innerIndex = (j * lowerSection) + upperIndex;
-					for (auto k = startInnerMost; k < endInnerMost; ++k) {
-						if (legalValue<innerMostDigits>(k)) {
-							auto product = innerProduct * getProduct<innerMostDigits>(k);
-							auto sum = innerSum + getSum<innerMostDigits>(k);
-							auto value = innerIndex + (k * innerMostSection);
-							if (performQCheck(value, sum, product)) {
-								results.emplace_back(value);
+		for (auto i = startOuter; i < endOuter; ++i) {
+			if (legalValue<outerDigits>(i)) {
+				auto upperSum = getSum<outerDigits>(i);
+				auto upperProduct = getProduct<outerDigits>(i);
+				auto upperIndex = i * upperSection;
+				for (auto j = startInner; j < endInner; ++j) {
+					if (legalValue<innerDigits>(j)) {
+						auto innerSum = getSum<innerDigits>(j) + upperSum;
+						auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
+						auto innerIndex = (j * lowerSection) + upperIndex;
+						for (auto k = startInnerMost; k < endInnerMost; ++k) {
+							if (legalValue<innerMostDigits>(k)) {
+								auto product = innerProduct * getProduct<innerMostDigits>(k);
+								auto sum = innerSum + getSum<innerMostDigits>(k);
+								auto value = innerIndex + (k * innerMostSection);
+								if (performQCheck(value, sum, product)) {
+									results.emplace_back(value);
+								}
 							}
 						}
 					}
@@ -493,103 +500,9 @@ inline int performQuodigiousCheck(u64 start, u64 end, vec64& results) noexcept {
 	return 0;
 }
 
-using LoopFunction = std::function<void(u64, u64, u64)>;
-template<u64 digits, u64 shift>
-inline LoopFunction digitalLoop(u64 start, u64 end, LoopFunction innerFunction) noexcept {
-	static constexpr auto section = fastPow10<shift>();
-	return [start, end, innerFunction](u64 outerSum, u64 outerProduct, u64 outerIndex) {
-		for (auto i = start; i < end; ++i) {
-			if (legalValue<digits>(i)) {
-				auto sum = outerSum + getSum<digits>(i);
-				auto product = outerProduct * getProduct<digits>(i);
-				auto index = outerIndex + (i * section);
-				innerFunction(sum, product, index);
-			}
-		}
-	};
-}
-template<>
-inline int performQuodigiousCheck<11>(u64 start, u64 end, vec64& results) noexcept {
-	static constexpr auto length = 11u;
-	static constexpr auto outerDigits = level3Digits<length>();
-	static constexpr auto innerDigits = level2Digits<length>();
-	static constexpr auto innerMostDigits = level1Digits<length>();
-	static constexpr auto innerMostShift = 0u;
-	static constexpr auto lowerShift = innerMostDigits;
-	static constexpr auto upperShift = innerDigits + innerMostDigits;
-	static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
-	static constexpr auto outerFactor = fastPow10<outerDigits>();
-	static constexpr auto innerFactor = fastPow10<innerDigits>();
-	static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
-	static constexpr auto upperSection = fastPow10<upperShift>();
-	static constexpr auto lowerSection = fastPow10<lowerShift>();
-	static constexpr auto innerMostSection = fastPow10<innerMostShift>();
-	auto startInnerMost = start % innerMostFactor;
-	auto current = start / innerMostFactor;
-	auto startInner = current % innerFactor;
-	current /= innerFactor;
-	auto startOuter = current % outerFactor;
-
-	auto endInnerMost = end % innerMostFactor;
-	if (endInnerMost == 0) {
-		endInnerMost = innerMostFactor;
-	}
-
-	auto endInner = ((end / innerMostFactor) % innerFactor);
-	if (endInner == 0) {
-		endInner = innerFactor;
-	}
-
-	auto endOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
-	if (endOuter == 0) {
-		endOuter = outerFactor;
-	}
-	auto loop = digitalLoop<outerDigits, upperShift>(startOuter, endOuter, 
-			digitalLoop<innerDigits, lowerShift>(startInner, endInner, 
-				digitalLoop<innerMostDigits, innerMostShift>(startInnerMost, endInnerMost, 
-					[&results](u64 sum, u64 product, u64 value) { if(performQCheck(value, sum, product)) { results.emplace_back(value); } })));
-	loop(0u, 1u, 0u);
-	//for (auto i = startOuter; i < endOuter; ++i) {
-	//	if (legalValue<outerDigits>(i)) {
-	//		auto upperSum = getSum<outerDigits>(i);
-	//		auto upperProduct = getProduct<outerDigits>(i);
-	//		auto upperIndex = i * upperSection;
-	//		for (auto j = startInner; j < endInner; ++j) {
-	//			if (legalValue<innerDigits>(j)) {
-	//				auto innerSum = getSum<innerDigits>(j) + upperSum;
-	//				auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
-	//				auto innerIndex = (j * lowerSection) + upperIndex;
-	//				for (auto k = startInnerMost; k < endInnerMost; ++k) {
-	//					if (legalValue<innerMostDigits>(k)) {
-	//						auto product = innerProduct * getProduct<innerMostDigits>(k);
-	//						auto sum = innerSum + getSum<innerMostDigits>(k);
-	//						auto value = innerIndex + (k * innerMostSection);
-	//						if (performQCheck(value, sum, product)) {
-	//							results.emplace_back(value);
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-	return 0;
-}
-
 template<u64 width>
 inline void printDigitalLayout() noexcept {
 	std::cout << width << ":" << level3Digits<width>() << ":" << level2Digits<width>() << ":" << level1Digits<width>() << std::endl;
-}
-
-
-template<>
-inline int performQuodigiousCheck<7>(u64 start, u64 end, vec64& results) noexcept {
-	for (auto value = start; value < end; ++value) {
-		if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
-			results.emplace_back(value);
-		}
-	}
-	return 0;
 }
 
 
@@ -620,16 +533,14 @@ inline void body() noexcept {
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(factor * base);
 	printDigitalLayout<length>();
-	auto fut0 = std::async(std::launch::async, [start = st, end = 3 * base]() { return performQuodigiousCheck<length>(start, end, l0); });
-	auto fut1 = std::async(std::launch::async, [start = st + base, end = 4 * base]() { return performQuodigiousCheck<length>(start, end, l1); });
-	auto fut2 = std::async(std::launch::async, [start = st + (base * 2), end = 5 * base]() { return performQuodigiousCheck<length>( start, end, l2); });
-
-	auto fut3 = std::async(std::launch::async, [start = st + (base * 3), end = 6 * base]() { return skip5 ? 0 : performQuodigiousCheck<length>( start, end, l3); });
-
-	auto fut4 = std::async(std::launch::async, [start = st + (base * 4), end = 7 * base]() { return performQuodigiousCheck<length>( start, end, l4); });
-	auto fut5 = std::async(std::launch::async, [start = st + (base * 5), end = 8 * base]() { return performQuodigiousCheck<length>( start, end, l5); });
-	auto fut6 = std::async(std::launch::async, [start = st + (base * 6), end = 9 * base]() { return performQuodigiousCheck<length>( start, end, l6); });
-	performQuodigiousCheck<length>(st + (base * 7), 10 * base, l7);
+	auto fut0 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st, 3 * base>(l0); });
+	auto fut1 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + base, 4 * base>(l1); });
+	auto fut2 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 2), 5 * base>(l2); });
+	auto fut3 = std::async(std::launch::async, []() { return skip5 ? 0 : performQuodigiousCheck<length, st + (base * 3), 6 * base>(l3); });
+	auto fut4 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 4), 7 * base>(l4); });
+	auto fut5 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 5), 8 * base>(l5); });
+	auto fut6 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 6), 9 * base>(l6); });
+	performQuodigiousCheck<length, st + (base * 7), 10 * base>(l0);
 	fut0.get();
 	fut1.get();
 	fut2.get();
@@ -653,6 +564,7 @@ inline void body() noexcept {
 	DefSimpleBody(4)
 	DefSimpleBody(5)
 	DefSimpleBody(6)
+	DefSimpleBody(7);
 #undef DefSimpleBody
 template<>
 inline void body<3>() noexcept {
