@@ -306,52 +306,96 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	} else {
 		// precompute the fuck out of all of this!
 		// Compilers hate me, I am the TEMPLATE MASTER
-		static constexpr auto l3Digits = level3Digits<length>();
-		static constexpr auto l2Digits = level2Digits<length>();
-		static constexpr auto l1Digits = level1Digits<length>();
-		static constexpr auto l1Shift = 0u;
-		static constexpr auto l2Shift = l1Digits;
-		static constexpr auto l3Shift = l2Digits + l1Digits;
-		static_assert(length == (l3Digits + l2Digits + l1Digits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
-		static constexpr auto l3Factor = fastPow10<l3Digits>();
-		static constexpr auto l2Factor = fastPow10<l2Digits>();
-		static constexpr auto l1Factor = fastPow10<l1Digits>();
-		static constexpr auto l3Section = fastPow10<l3Shift>();
-		static constexpr auto l2Section = fastPow10<l2Shift>();
-		static constexpr auto l1Section = fastPow10<l1Shift>();
-		static constexpr auto startL1 = start % l1Factor;
-		static constexpr auto startL2 = (start / l1Factor) % l2Factor;
-		static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
-		static constexpr auto attemptEndL1 = end % l1Factor;
-		static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
-		static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
-		static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
-		static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
-		static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
+			static constexpr auto l3Digits = level3Digits<length>();
+			static constexpr auto l2Digits = level2Digits<length>();
+			static constexpr auto l1Digits = level1Digits<length>();
+			static constexpr auto l1Shift = 0u;
+			static constexpr auto l2Shift = l1Digits;
+			static constexpr auto l3Shift = l2Digits + l1Digits;
+			static constexpr auto l3Factor = fastPow10<l3Digits>();
+			static constexpr auto l2Factor = fastPow10<l2Digits>();
+			static constexpr auto l1Factor = fastPow10<l1Digits>();
+			static constexpr auto l3Section = fastPow10<l3Shift>();
+			static constexpr auto l2Section = fastPow10<l2Shift>();
+			static constexpr auto l1Section = fastPow10<l1Shift>();
+			static constexpr auto startL1 = start % l1Factor;
+			static constexpr auto startL2 = (start / l1Factor) % l2Factor;
+			static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+			static constexpr auto attemptEndL1 = end % l1Factor;
+			static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+			static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+			static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+			static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+			static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
 
-		for (auto i = startL3; i < endL3; ++i) {
-			if (legalValue<l3Digits>(i)) {
-				auto l3Sum = getSum<l3Digits>(i);
-				auto l3Product = getProduct<l3Digits>(i);
-				auto l3Index = indexOffset<l3Section>(i);
-				for (auto j = startL2; j < endL2; ++j) {
-					if (legalValue<l2Digits>(j)) {
-						auto l2Sum = getSum<l2Digits>(j) + l3Sum;
-						auto l2Product = getProduct<l2Digits>(j) * l3Product;
-						auto l2Index = indexOffset<l2Section>(j) + l3Index;
-						for (auto k = startL1; k < endL1; ++k) {
-							if (legalValue<l1Digits>(k)) {
-								auto l1Product = l2Product * getProduct<l1Digits>(k);
-								auto l1Sum = l2Sum + getSum<l1Digits>(k);
-                                auto l1Value = indexOffset<l1Section>(k) + l2Index;
-								if (isQuodigious(l1Value, l1Sum, l1Product)) {
-									results.emplace_back(l1Value);
+		if (numberOfLevels<length>() == 4) {
+			static constexpr auto l4Digits = level4Digits<length>();
+			static constexpr auto l4Shift = l3Digits + l2Digits + l1Digits;
+			static constexpr auto l4Factor = fastPow10<l4Digits>();
+			static constexpr auto l4Section = fastPow10<l4Shift>();
+			static constexpr auto startL4 = (((start / l1Factor) / l2Factor) / l3Factor) % l4Factor;
+			static constexpr auto attemptEndL4 = (((end / l1Factor) / l2Factor) / l3Factor) % l4Factor;
+			static constexpr auto endL4 = attemptEndL4 == 0 ? l4Factor : attemptEndL4;
+
+			for (auto a = startL4; a < endL4; ++a) {
+				auto l4Sum = getSum<l4Digits>(a);
+				auto l4Product = getProduct<l4Digits>(a);
+				auto l4Index = indexOffset<l4Section>(a);
+				if (legalValue<l4Digits>(a)) {
+					for (auto i = startL3; i < endL3; ++i) {
+						if (legalValue<l3Digits>(i)) {
+							auto l3Sum = getSum<l3Digits>(i) + l4Sum ;
+							auto l3Product = getProduct<l3Digits>(i) * l4Product;
+							auto l3Index = indexOffset<l3Section>(i) + l4Index;
+							for (auto j = startL2; j < endL2; ++j) {
+								if (legalValue<l2Digits>(j)) {
+									auto l2Sum = getSum<l2Digits>(j) + l3Sum;
+									auto l2Product = getProduct<l2Digits>(j) * l3Product;
+									auto l2Index = indexOffset<l2Section>(j) + l3Index;
+									for (auto k = startL1; k < endL1; ++k) {
+										if (legalValue<l1Digits>(k)) {
+											auto l1Product = l2Product * getProduct<l1Digits>(k);
+											auto l1Sum = l2Sum + getSum<l1Digits>(k);
+											auto l1Value = indexOffset<l1Section>(k) + l2Index;
+											if (isQuodigious(l1Value, l1Sum, l1Product)) {
+												results.emplace_back(l1Value);
+											}
+										}
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+		} else if (numberOfLevels<length>() == 3) {
+			for (auto i = startL3; i < endL3; ++i) {
+				if (legalValue<l3Digits>(i)) {
+					auto l3Sum = getSum<l3Digits>(i);
+					auto l3Product = getProduct<l3Digits>(i);
+					auto l3Index = indexOffset<l3Section>(i);
+					for (auto j = startL2; j < endL2; ++j) {
+						if (legalValue<l2Digits>(j)) {
+							auto l2Sum = getSum<l2Digits>(j) + l3Sum;
+							auto l2Product = getProduct<l2Digits>(j) * l3Product;
+							auto l2Index = indexOffset<l2Section>(j) + l3Index;
+							for (auto k = startL1; k < endL1; ++k) {
+								if (legalValue<l1Digits>(k)) {
+									auto l1Product = l2Product * getProduct<l1Digits>(k);
+									auto l1Sum = l2Sum + getSum<l1Digits>(k);
+									auto l1Value = indexOffset<l1Section>(k) + l2Index;
+									if (isQuodigious(l1Value, l1Sum, l1Product)) {
+										results.emplace_back(l1Value);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			std::cerr << "can't use " << numberOfLevels<length>() << " as a legal value!" << std::endl;
+			throw 0;
 		}
 	}
 	return 0;

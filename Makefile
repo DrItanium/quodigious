@@ -17,33 +17,25 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS = -std=c++14 -O1
+CXXFLAGS = -std=c++14 -O3
 #LXXFLAGS = -lpthread -O3 -flto -fwhole-program
-LXXFLAGS = -lpthread -O1
+LXXFLAGS = -lpthread -O3
 TITLE = quodigious
 FILES = quodigious.o
 
-TITLE2 = quodigious16
-FILES2 = quodigious16.o
-
-all: q8 q16
+all: q8
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the program"
 	@echo "  - q8: compiles the program (8 thread version)"
-	@echo "  - q16: compiles the program (16 thread version)"
 	@echo "  - clean : cleans the program artifacts"
 
-q8: ${TITLE} quodigious.o
+q8: quodigious.o
 	@echo -n Building ${TITLE} ...
 	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
 	@echo done.
 
-q16: ${TITLE2} quodigious16.o
-	@echo -n Building ${TITLE2} ...
-	@${CXX} ${LXXFLAGS} -o ${TITLE2} ${FILES2}
-	@echo done.
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -52,8 +44,7 @@ q16: ${TITLE2} quodigious16.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} ${FILES2} ${TITLE2}
+	@rm -rf ${FILES} ${TITLE} 
 	@echo done.
 
 quodigious.o: qlib.h notations.def
-quodigious16.o: qlib.h notations.def

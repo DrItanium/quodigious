@@ -38,7 +38,7 @@ inline constexpr u64 fastPow10<0>() noexcept {
  */
 template<typename T>
 inline constexpr bool isQuodigious(T value, T sum, T product) noexcept {
-    return ((value % sum) == 0) && ((value % product) == 0);
+	return ((value % sum) == 0) && ((value % product) == 0);
 }
 
 /**
@@ -62,11 +62,8 @@ inline constexpr u64 numberOfLevels() noexcept {
 }
 template<u64 width>
 inline constexpr u64 level4Digits() noexcept {
-	return NotationDescription<width>::level4Digits;
+	return numberOfLevels<width>() >= 4 ? NotationDescription<width>::level4Digits : 0u;
 }
-template<> inline constexpr u64 level4Digits<1>() { return 0; }
-template<> inline constexpr u64 level4Digits<2>() { return 0; }
-template<> inline constexpr u64 level4Digits<3>() { return 0; }
 template<u64 width>
 inline constexpr u64 level3Digits() noexcept {
 	return NotationDescription<width>::level3Digits;
@@ -79,6 +76,7 @@ template<u64 width>
 inline constexpr u64 level1Digits() noexcept {
 	return NotationDescription<width>::level1Digits;
 }
+
 #define Y(width, l4, l3, l2, l1) \
 	template<> \
 struct NotationDescription < width > { \
@@ -87,6 +85,7 @@ struct NotationDescription < width > { \
 	static constexpr u64 level3Digits = l3 ; \
 	static constexpr u64 level2Digits = l2 ; \
 	static constexpr u64 level1Digits = l1 ; \
+	static_assert(width == (l4 + l3 + l2 + l1) , "Number of digits allocated != width of number!"); \
 };
 #define X(width, l3, l2, l1) \
 	template<> \
@@ -95,10 +94,16 @@ struct NotationDescription< width > { \
 	static constexpr u64 level3Digits = l3 ; \
 	static constexpr u64 level2Digits = l2 ; \
 	static constexpr u64 level1Digits = l1 ; \
-};
+	static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!"); \
+}; \
+template<> inline constexpr u64 level4Digits< width > () noexcept { return 0; }
 #include "notations.def"
 #undef X
 #undef Y
+
+template<> inline constexpr u64 level4Digits<1>() noexcept { return 0; }
+template<> inline constexpr u64 level4Digits<2>() noexcept { return 0; }
+template<> inline constexpr u64 level4Digits<3>() noexcept { return 0; }
 
 
 #endif // end QLIB_H__
