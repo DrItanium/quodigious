@@ -18,8 +18,7 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++14 -O3
-#LXXFLAGS = -lpthread -O3 -flto -fwhole-program
-LXXFLAGS = -lpthread -O3
+LXXFLAGS = -lpthread -O3 -flto -fwhole-program
 TITLE = quodigious
 FILES = quodigious.o
 
