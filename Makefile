@@ -35,12 +35,12 @@ help:
 	@echo "  - q16: compiles the program (16 thread version)"
 	@echo "  - clean : cleans the program artifacts"
 
-q8: quodigious.o
+q8: ${TITLE} quodigious.o
 	@echo -n Building ${TITLE} ...
 	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
 	@echo done.
 
-q16: quodigious16.o
+q16: ${TITLE2} quodigious16.o
 	@echo -n Building ${TITLE2} ...
 	@${CXX} ${LXXFLAGS} -o ${TITLE2} ${FILES2}
 	@echo done.
@@ -55,5 +55,5 @@ clean:
 	@rm -rf ${FILES} ${TITLE} ${FILES2} ${TITLE2}
 	@echo done.
 
-quodigious.o: notations.def
-quodigious16.o: notations.def
+quodigious.o: qlib.h notations.def
+quodigious16.o: qlib.h notations.def
