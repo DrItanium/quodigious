@@ -22,17 +22,26 @@ LXXFLAGS = -lpthread -O3 -flto -fwhole-program
 TITLE = quodigious
 FILES = quodigious.o
 
-all: program
+TITLE2 = quodigious16
+FILES2 = quodigious16.o
+
+all: q8 q16
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the program"
-	@echo "  - program : compiles the program"
+	@echo "  - q8: compiles the program (8 thread version)"
+	@echo "  - q16: compiles the program (16 thread version)"
 	@echo "  - clean : cleans the program artifacts"
 
-program: quodigious.o
+q8: quodigious.o
 	@echo -n Building ${TITLE} ...
 	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
+	@echo done.
+
+q16: quodigious16.o
+	@echo -n Building ${TITLE2} ...
+	@${CXX} ${LXXFLAGS} -o ${TITLE2} ${FILES2}
 	@echo done.
 
 %.o: %.cc
@@ -42,7 +51,8 @@ program: quodigious.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE}
+	@rm -rf ${FILES} ${TITLE} ${FILES2} ${TITLE2}
 	@echo done.
 
 quodigious.o: notations.def
+quodigious16.o: notations.def
