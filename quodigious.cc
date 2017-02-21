@@ -329,7 +329,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	// skip over the 9th and 10th numbers from this position!
 	if (length == 7) {
 		for (auto value = start; value < end; ++value) {
-			if (predicatesLen7[value] && isQuodigious(value, sums[value], productsLen7[value])) {
+            if (legalValue<7>(value) && isQuodigious(value, getSum<7>(value), getProduct<7>(value))) {
 				results.emplace_back(value);
 			}
 		}
@@ -404,7 +404,7 @@ void printout(vec64& l) noexcept {
 
 template<u64 length>
 inline void singleThreadedSimpleBody() noexcept {
-	for (auto value = static_cast<u64>(shaveFactor* fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
+    for (auto value = startIndex<length>(); value < endIndex<length>(); ++value) {
 		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
 			std::cout << value << std::endl;
 		}
