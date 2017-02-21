@@ -16,18 +16,18 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 
-// Perform quodigious checks on numbers using tons of different C++ tricks 
+// Perform quodigious checks on numbers using tons of different C++ tricks
 #include <iostream>
 #include <cmath>
 #include <future>
 #include <cstdint>
 #include <vector>
 #include <functional>
+#include "qlib.h"
 
-using u64 = uint64_t;
 using vec64 = std::vector<u64>;
-template<u64 width> 
-struct NotationDescription { 
+template<u64 width>
+struct NotationDescription {
 	static constexpr u64 level3Digits = (width - 1) / 2;
 	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
 	static constexpr u64 level1Digits = 1;
@@ -131,10 +131,10 @@ inline void initialize() noexcept {
 							predicatesLen7[combinedInd + 2] = outerPredicate;
 							sums[combinedInd + 3] = outerSum + 3;
 							productsLen7[combinedInd + 3] = outerMul * 3;
-							predicatesLen7[combinedInd + 3] = outerPredicate; 
+							predicatesLen7[combinedInd + 3] = outerPredicate;
 							sums[combinedInd + 4] = outerSum + 4;
 							productsLen7[combinedInd + 4] = outerMul * 4;
-							predicatesLen7[combinedInd + 4] = outerPredicate; 
+							predicatesLen7[combinedInd + 4] = outerPredicate;
 							sums[combinedInd + 5] = outerSum + 5;
 							productsLen7[combinedInd + 5] = outerMul * 5;
 							predicatesLen7[combinedInd + 5] = outerPredicate;
@@ -185,9 +185,9 @@ inline void initialize() noexcept {
 						productsLen6[combinedInd + 2] = outerMul * 2;
 						predicatesLen6[combinedInd + 2] = outerPredicate;
 						productsLen6[combinedInd + 3] = outerMul * 3;
-						predicatesLen6[combinedInd + 3] = outerPredicate; 
+						predicatesLen6[combinedInd + 3] = outerPredicate;
 						productsLen6[combinedInd + 4] = outerMul * 4;
-						predicatesLen6[combinedInd + 4] = outerPredicate; 
+						predicatesLen6[combinedInd + 4] = outerPredicate;
 						productsLen6[combinedInd + 5] = outerMul * 5;
 						predicatesLen6[combinedInd + 5] = outerPredicate;
 						productsLen6[combinedInd + 6] = outerMul * 6;
@@ -227,9 +227,9 @@ inline void initialize() noexcept {
 					productsLen5[combinedInd + 2] = outerMul * 2;
 					predicatesLen5[combinedInd + 2] = outerPredicate;
 					productsLen5[combinedInd + 3] = outerMul * 3;
-					predicatesLen5[combinedInd + 3] = outerPredicate; 
+					predicatesLen5[combinedInd + 3] = outerPredicate;
 					productsLen5[combinedInd + 4] = outerMul * 4;
-					predicatesLen5[combinedInd + 4] = outerPredicate; 
+					predicatesLen5[combinedInd + 4] = outerPredicate;
 					productsLen5[combinedInd + 5] = outerMul * 5;
 					predicatesLen5[combinedInd + 5] = outerPredicate;
 					productsLen5[combinedInd + 6] = outerMul * 6;
@@ -264,9 +264,9 @@ inline void initialize() noexcept {
 				productsLen4[combinedInd + 2] = outerMul * 2;
 				predicatesLen4[combinedInd + 2] = outerPredicate;
 				productsLen4[combinedInd + 3] = outerMul * 3;
-				predicatesLen4[combinedInd + 3] = outerPredicate; 
+				predicatesLen4[combinedInd + 3] = outerPredicate;
 				productsLen4[combinedInd + 4] = outerMul * 4;
-				predicatesLen4[combinedInd + 4] = outerPredicate; 
+				predicatesLen4[combinedInd + 4] = outerPredicate;
 				productsLen4[combinedInd + 5] = outerMul * 5;
 				predicatesLen4[combinedInd + 5] = outerPredicate;
 				productsLen4[combinedInd + 6] = outerMul * 6;
@@ -296,9 +296,9 @@ inline void initialize() noexcept {
 			productsLen3[combinedInd + 2] = outerMul * 2;
 			predicatesLen3[combinedInd + 2] = outerPredicate;
 			productsLen3[combinedInd + 3] = outerMul * 3;
-			predicatesLen3[combinedInd + 3] = outerPredicate; 
+			predicatesLen3[combinedInd + 3] = outerPredicate;
 			productsLen3[combinedInd + 4] = outerMul * 4;
-			predicatesLen3[combinedInd + 4] = outerPredicate; 
+			predicatesLen3[combinedInd + 4] = outerPredicate;
 			productsLen3[combinedInd + 5] = outerMul * 5;
 			predicatesLen3[combinedInd + 5] = outerPredicate;
 			productsLen3[combinedInd + 6] = outerMul * 6;
@@ -323,9 +323,9 @@ inline void initialize() noexcept {
 		productsLen2[combinedInd + 2] = outerMul * 2;
 		predicatesLen2[combinedInd + 2] = outerPredicate;
 		productsLen2[combinedInd + 3] = outerMul * 3;
-		predicatesLen2[combinedInd + 3] = outerPredicate; 
+		predicatesLen2[combinedInd + 3] = outerPredicate;
 		productsLen2[combinedInd + 4] = outerMul * 4;
-		predicatesLen2[combinedInd + 4] = outerPredicate; 
+		predicatesLen2[combinedInd + 4] = outerPredicate;
 		productsLen2[combinedInd + 5] = outerMul * 5;
 		predicatesLen2[combinedInd + 5] = outerPredicate;
 		productsLen2[combinedInd + 6] = outerMul * 6;
@@ -339,14 +339,6 @@ inline void initialize() noexcept {
 	}
 }
 
-template<u64 length>
-inline constexpr u64 fastPow10() noexcept {
-	return fastPow10<length - 1>() * 10;
-}
-template<>
-inline constexpr u64 fastPow10<0>() noexcept {
-	return 1;
-}
 template<u64 width>
 inline bool legalValue(u64 _) noexcept {
 	static_assert(width < 9, "Too large of a legal value check!");
@@ -368,11 +360,11 @@ inline u64 getProduct(u64 value) noexcept {
 }
 template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
 template<> inline u64 getProduct<2>(u64 x) noexcept { return productsLen2[x]; }
-template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; } 
-template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; } 
-template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; } 
-template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; } 
-template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; } 
+template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; }
+template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; }
+template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; }
+template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; }
+template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; }
 template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getProduct<7>(x / 10u)); }
 
 template<u64 width>
@@ -418,14 +410,6 @@ inline u64 getSum(u64 x) noexcept {
 			throw "Illegal width requested!";
 	}
 }
-/**
- * This is used all over the place, it is the actual code to check to see if a
- * number is actuall quodigious. All of the work before hand is to get the sum
- * and products (if we get this far).
- */
-inline constexpr bool performQCheck(u64 value, u64 sum, u64 prod) noexcept {
-	return (value % sum == 0) && (value % prod == 0);
-}
 
 template<u64 length>
 constexpr u64 startIndex() noexcept {
@@ -442,7 +426,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	// skip over the 9th and 10th numbers from this position!
 	if (length == 7) {
 		for (auto value = start; value < end; ++value) {
-			if (predicatesLen7[value] && performQCheck(value, sums[value], productsLen7[value])) {
+			if (predicatesLen7[value] && isQuodigious(value, sums[value], productsLen7[value])) {
 				results.emplace_back(value);
 			}
 		}
@@ -487,7 +471,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 								auto product = innerProduct * getProduct<innerMostDigits>(k);
 								auto sum = innerSum + getSum<innerMostDigits>(k);
 								auto value = innerIndex + (k * innerMostSection);
-								if (performQCheck(value, sum, product)) {
+								if (isQuodigious(value, sum, product)) {
 									results.emplace_back(value);
 								}
 							}
@@ -519,7 +503,7 @@ template<u64 length>
 inline void singleThreadedSimpleBody() noexcept {
 	static constexpr auto factor = 2.0 + (2.0 / 9.0);
 	for (auto value = static_cast<u64>(factor * fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
-		if (legalValue<length>(value) && performQCheck(value, getSum<length>(value), getProduct<length>(value))) {
+		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
 			std::cout << value << std::endl;
 		}
 	}
