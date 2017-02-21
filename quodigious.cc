@@ -82,10 +82,40 @@ inline constexpr bool isLegalDigit(u64 value) noexcept {
     }
     return baseResult;
 }
+template<u64 value, bool includeFives>
+inline constexpr bool isLegalDigitSingular() noexcept {
+    static_assert(value<= 9, "Offset shouldn't be larger than 9!");
+    return value >= 2 && (includeFives ? true : value != 5);
+}
 template<u64 offset>
 inline constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
 }
+template<u64 offset, bool includeFives, bool updateSums = false>
+inline void updateTables(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    static_assert(offset <= 9, "Offset shouldn't be larger than 9!");
+    static constexpr auto innerPredicate = isLegalDigitSingular<offset, includeFives>();
+    if (updateSums) {
+        sums[baseOffset + offset] = actualSum + offset;
+    }
+    product[baseOffset + offset] = actualProduct * offset;
+    predicates[baseOffset + offset] = innerPredicate && actualPredicate;
+}
+
+template<bool includeFives, bool updateSums = false>
+inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
+    updateTables<0, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<1, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<2, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<3, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<4, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<5, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<6, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<7, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<8, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    updateTables<9, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+}
+
 template<bool includeFives = false>
 inline void initialize() noexcept {
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
@@ -133,36 +163,7 @@ inline void initialize() noexcept {
 							auto combinedInd = indexOffset<10>(x) + zInd;
 							auto outerSum = x + zSum;
 							auto outerPredicate = check(x) && zPred;
-							sums[combinedInd + 0] = outerSum;
-							productsLen7[combinedInd + 0] = 0;
-							predicatesLen7[combinedInd + 0] = false;
-							sums[combinedInd + 1] = outerSum + 1;
-							productsLen7[combinedInd + 1] = outerMul ;
-							predicatesLen7[combinedInd + 1] = false;
-							sums[combinedInd + 2] = outerSum + 2;
-							productsLen7[combinedInd + 2] = outerMul * 2;
-							predicatesLen7[combinedInd + 2] = outerPredicate;
-							sums[combinedInd + 3] = outerSum + 3;
-							productsLen7[combinedInd + 3] = outerMul * 3;
-							predicatesLen7[combinedInd + 3] = outerPredicate;
-							sums[combinedInd + 4] = outerSum + 4;
-							productsLen7[combinedInd + 4] = outerMul * 4;
-							predicatesLen7[combinedInd + 4] = outerPredicate;
-							sums[combinedInd + 5] = outerSum + 5;
-							productsLen7[combinedInd + 5] = outerMul * 5;
-							predicatesLen7[combinedInd + 5] = outerPredicate;
-							sums[combinedInd + 6] = outerSum + 6;
-							productsLen7[combinedInd + 6] = outerMul * 6;
-							predicatesLen7[combinedInd + 6] = outerPredicate;
-							sums[combinedInd + 7] = outerSum + 7;
-							productsLen7[combinedInd + 7] = outerMul * 7;
-							predicatesLen7[combinedInd + 7] = outerPredicate;
-							sums[combinedInd + 8] = outerSum + 8;
-							productsLen7[combinedInd + 8] = outerMul * 8;
-							predicatesLen7[combinedInd + 8] = outerPredicate;
-							sums[combinedInd + 9] = outerSum + 9;
-							productsLen7[combinedInd + 9] = outerMul * 9;
-							predicatesLen7[combinedInd + 9] = outerPredicate;
+                            updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen7, predicatesLen7);
 						}
 					}
 				}
@@ -191,26 +192,7 @@ inline void initialize() noexcept {
 						auto outerMul = x * zMul;
 						auto combinedInd = indexOffset<10>(x) + zInd;
                         auto outerPredicate = check(x) && zPred;
-						productsLen6[combinedInd + 0] = 0;
-						predicatesLen6[combinedInd + 0] = false;
-						productsLen6[combinedInd + 1] = outerMul ;
-						predicatesLen6[combinedInd + 1] = false;
-						productsLen6[combinedInd + 2] = outerMul * 2;
-						predicatesLen6[combinedInd + 2] = outerPredicate;
-						productsLen6[combinedInd + 3] = outerMul * 3;
-						predicatesLen6[combinedInd + 3] = outerPredicate;
-						productsLen6[combinedInd + 4] = outerMul * 4;
-						predicatesLen6[combinedInd + 4] = outerPredicate;
-						productsLen6[combinedInd + 5] = outerMul * 5;
-						predicatesLen6[combinedInd + 5] = outerPredicate;
-						productsLen6[combinedInd + 6] = outerMul * 6;
-						predicatesLen6[combinedInd + 6] = outerPredicate;
-						productsLen6[combinedInd + 7] = outerMul * 7;
-						predicatesLen6[combinedInd + 7] = outerPredicate;
-						productsLen6[combinedInd + 8] = outerMul * 8;
-						predicatesLen6[combinedInd + 8] = outerPredicate;
-						productsLen6[combinedInd + 9] = outerMul * 9;
-						predicatesLen6[combinedInd + 9] = outerPredicate;
+                        updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen6, predicatesLen6);
 					}
 				}
 			}
@@ -233,26 +215,7 @@ inline void initialize() noexcept {
 					auto outerMul = x * zMul;
 					auto combinedInd = indexOffset<10>(x) + zInd;
 					auto outerPredicate = check(x) && zPred;
-					productsLen5[combinedInd + 0] = 0;
-					predicatesLen5[combinedInd + 0] = false;
-					productsLen5[combinedInd + 1] = outerMul ;
-					predicatesLen5[combinedInd + 1] = false;
-					productsLen5[combinedInd + 2] = outerMul * 2;
-					predicatesLen5[combinedInd + 2] = outerPredicate;
-					productsLen5[combinedInd + 3] = outerMul * 3;
-					predicatesLen5[combinedInd + 3] = outerPredicate;
-					productsLen5[combinedInd + 4] = outerMul * 4;
-					predicatesLen5[combinedInd + 4] = outerPredicate;
-					productsLen5[combinedInd + 5] = outerMul * 5;
-					predicatesLen5[combinedInd + 5] = outerPredicate;
-					productsLen5[combinedInd + 6] = outerMul * 6;
-					predicatesLen5[combinedInd + 6] = outerPredicate;
-					productsLen5[combinedInd + 7] = outerMul * 7;
-					predicatesLen5[combinedInd + 7] = outerPredicate;
-					productsLen5[combinedInd + 8] = outerMul * 8;
-					predicatesLen5[combinedInd + 8] = outerPredicate;
-					productsLen5[combinedInd + 9] = outerMul * 9;
-					predicatesLen5[combinedInd + 9] = outerPredicate;
+                    updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen5, predicatesLen5);
 				}
 			}
 		}
@@ -270,26 +233,7 @@ inline void initialize() noexcept {
 				auto outerMul = x * zMul;
 				auto combinedInd = indexOffset<10>(x) + zInd;
 				auto outerPredicate = check(x) && zPred;
-				productsLen4[combinedInd + 0] = 0;
-				predicatesLen4[combinedInd + 0] = false;
-				productsLen4[combinedInd + 1] = outerMul ;
-				predicatesLen4[combinedInd + 1] = false;
-				productsLen4[combinedInd + 2] = outerMul * 2;
-				predicatesLen4[combinedInd + 2] = outerPredicate;
-				productsLen4[combinedInd + 3] = outerMul * 3;
-				predicatesLen4[combinedInd + 3] = outerPredicate;
-				productsLen4[combinedInd + 4] = outerMul * 4;
-				predicatesLen4[combinedInd + 4] = outerPredicate;
-				productsLen4[combinedInd + 5] = outerMul * 5;
-				predicatesLen4[combinedInd + 5] = outerPredicate;
-				productsLen4[combinedInd + 6] = outerMul * 6;
-				predicatesLen4[combinedInd + 6] = outerPredicate;
-				productsLen4[combinedInd + 7] = outerMul * 7;
-				predicatesLen4[combinedInd + 7] = outerPredicate;
-				productsLen4[combinedInd + 8] = outerMul * 8;
-				predicatesLen4[combinedInd + 8] = outerPredicate;
-				productsLen4[combinedInd + 9] = outerMul * 9;
-				predicatesLen4[combinedInd + 9] = outerPredicate;
+                updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen4, predicatesLen4);
 			}
 		}
 	}
@@ -302,26 +246,7 @@ inline void initialize() noexcept {
 			auto outerMul = x * zMul;
 			auto combinedInd = indexOffset<10>(x) + zInd;
 			auto outerPredicate = check(x) && zPred;
-			productsLen3[combinedInd + 0] = 0;
-			predicatesLen3[combinedInd + 0] = false;
-			productsLen3[combinedInd + 1] = outerMul ;
-			predicatesLen3[combinedInd + 1] = false;
-			productsLen3[combinedInd + 2] = outerMul * 2;
-			predicatesLen3[combinedInd + 2] = outerPredicate;
-			productsLen3[combinedInd + 3] = outerMul * 3;
-			predicatesLen3[combinedInd + 3] = outerPredicate;
-			productsLen3[combinedInd + 4] = outerMul * 4;
-			predicatesLen3[combinedInd + 4] = outerPredicate;
-			productsLen3[combinedInd + 5] = outerMul * 5;
-			predicatesLen3[combinedInd + 5] = outerPredicate;
-			productsLen3[combinedInd + 6] = outerMul * 6;
-			predicatesLen3[combinedInd + 6] = outerPredicate;
-			productsLen3[combinedInd + 7] = outerMul * 7;
-			predicatesLen3[combinedInd + 7] = outerPredicate;
-			productsLen3[combinedInd + 8] = outerMul * 8;
-			predicatesLen3[combinedInd + 8] = outerPredicate;
-			productsLen3[combinedInd + 9] = outerMul * 9;
-			predicatesLen3[combinedInd + 9] = outerPredicate;
+            updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen3, predicatesLen3);
 		}
 	}
 	// Len2
@@ -329,26 +254,7 @@ inline void initialize() noexcept {
 		auto outerMul = x;
 		auto combinedInd = indexOffset<10>(x);
 		auto outerPredicate = check(x);
-		productsLen2[combinedInd + 0] = 0;
-		predicatesLen2[combinedInd + 0] = false;
-		productsLen2[combinedInd + 1] = outerMul ;
-		predicatesLen2[combinedInd + 1] = false;
-		productsLen2[combinedInd + 2] = outerMul * 2;
-		predicatesLen2[combinedInd + 2] = outerPredicate;
-		productsLen2[combinedInd + 3] = outerMul * 3;
-		predicatesLen2[combinedInd + 3] = outerPredicate;
-		productsLen2[combinedInd + 4] = outerMul * 4;
-		predicatesLen2[combinedInd + 4] = outerPredicate;
-		productsLen2[combinedInd + 5] = outerMul * 5;
-		predicatesLen2[combinedInd + 5] = outerPredicate;
-		productsLen2[combinedInd + 6] = outerMul * 6;
-		predicatesLen2[combinedInd + 6] = outerPredicate;
-		productsLen2[combinedInd + 7] = outerMul * 7;
-		predicatesLen2[combinedInd + 7] = outerPredicate;
-		productsLen2[combinedInd + 8] = outerMul * 8;
-		predicatesLen2[combinedInd + 8] = outerPredicate;
-		productsLen2[combinedInd + 9] = outerMul * 9;
-		predicatesLen2[combinedInd + 9] = outerPredicate;
+        updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen2, predicatesLen2);
 	}
 }
 
@@ -384,43 +290,27 @@ template<u64 width>
 inline u64 getSum(u64 x) noexcept {
 	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
 	switch(width) {
-		case 0:
-			return 0;
-		case 1:
-			return x;
+		case 0: return 0;
+		case 1: return x;
 		case 2:
 		case 3:
 		case 4:
 		case 5:
 		case 6:
-		case 7:
-			return sums[x];
-		case 8:
-			return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
-		case 9:
-			return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
-		case 10:
-			return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
-		case 11:
-			return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
-		case 12:
-			return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
-		case 13:
-			return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
-		case 14:
-			return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
-		case 15:
-			return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
-		case 16:
-			return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
-		case 17:
-			return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
-		case 18:
-			return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
-		case 19:
-			return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
-		default:
-			throw "Illegal width requested!";
+		case 7: return sums[x];
+		case 8: return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
+		case 9: return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
+		case 10: return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
+		case 11: return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
+		case 12: return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
+		case 13: return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
+		case 14: return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
+		case 15: return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
+		case 16: return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
+		case 17: return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
+		case 18: return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
+		case 19: return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
+		default: throw "Illegal width requested!";
 	}
 }
 
