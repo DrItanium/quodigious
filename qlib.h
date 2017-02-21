@@ -19,6 +19,7 @@
 #ifndef QLIB_H__
 #define QLIB_H__
 #include <cstdint>
+#include <vector>
 using u64 = uint64_t;
 
 template<u64 length>
@@ -44,5 +45,60 @@ inline constexpr bool isQuodigious(T value, T sum, T product) noexcept {
  * Represents the starting offset of any base number for any width!
  */
 constexpr auto shaveFactor = 2.0 + (2.0 / 9.0);
+
+
+using vec64 = std::vector<u64>;
+template<u64 width>
+struct NotationDescription {
+	static constexpr u64 numberOfLevels = 3;
+	static constexpr u64 level3Digits = (width - 1) / 2;
+	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
+	static constexpr u64 level1Digits = 1;
+	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
+};
+template<u64 width>
+inline constexpr u64 numberOfLevels() noexcept {
+	return NotationDescription<width>::numberOfLevels;
+}
+template<u64 width>
+inline constexpr u64 level4Digits() noexcept {
+	return NotationDescription<width>::level4Digits;
+}
+template<> inline constexpr u64 level4Digits<1>() { return 0; }
+template<> inline constexpr u64 level4Digits<2>() { return 0; }
+template<> inline constexpr u64 level4Digits<3>() { return 0; }
+template<u64 width>
+inline constexpr u64 level3Digits() noexcept {
+	return NotationDescription<width>::level3Digits;
+}
+template<u64 width>
+inline constexpr u64 level2Digits() noexcept {
+	return NotationDescription<width>::level2Digits;
+}
+template<u64 width>
+inline constexpr u64 level1Digits() noexcept {
+	return NotationDescription<width>::level1Digits;
+}
+#define Y(width, l4, l3, l2, l1) \
+	template<> \
+struct NotationDescription < width > { \
+	static constexpr u64 numberOfLevels = 4; \
+	static constexpr u64 level4Digits = l4; \
+	static constexpr u64 level3Digits = l3 ; \
+	static constexpr u64 level2Digits = l2 ; \
+	static constexpr u64 level1Digits = l1 ; \
+};
+#define X(width, l3, l2, l1) \
+	template<> \
+struct NotationDescription< width > { \
+	static constexpr u64 numberOfLevels = 3; \
+	static constexpr u64 level3Digits = l3 ; \
+	static constexpr u64 level2Digits = l2 ; \
+	static constexpr u64 level1Digits = l1 ; \
+};
+#include "notations.def"
+#undef X
+#undef Y
+
 
 #endif // end QLIB_H__

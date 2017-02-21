@@ -25,35 +25,6 @@
 #include <functional>
 #include "qlib.h"
 
-using vec64 = std::vector<u64>;
-template<u64 width>
-struct NotationDescription {
-	static constexpr u64 level3Digits = (width - 1) / 2;
-	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
-	static constexpr u64 level1Digits = 1;
-	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
-};
-template<u64 width>
-constexpr u64 level3Digits() noexcept {
-	return NotationDescription<width>::level3Digits;
-}
-template<u64 width>
-constexpr u64 level2Digits() noexcept {
-	return NotationDescription<width>::level2Digits;
-}
-template<u64 width>
-constexpr u64 level1Digits() noexcept {
-	return NotationDescription<width>::level1Digits;
-}
-#define X(width, l3, l2, l1) \
-	template<> \
-struct NotationDescription< width > { \
-	static constexpr u64 level3Digits = l3 ; \
-	static constexpr u64 level2Digits = l2 ; \
-	static constexpr u64 level1Digits = l1 ; \
-};
-#include "notations.def"
-#undef X
 
 constexpr auto Len7 = fastPow10<7>();
 u64 sums[Len7] = { 0 };
@@ -324,6 +295,8 @@ constexpr u64 endIndex() noexcept {
 	return fastPow10<length>();
 }
 template<u64 length, u64 start, u64 end>
+
+template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// assume that we start at 2.222222222222
 	// skip over the 9th and 10th numbers from this position!
@@ -411,29 +384,7 @@ inline void singleThreadedSimpleBody() noexcept {
 	}
 	std::cout << std::endl;
 }
-template<u64 length, u64 start, u64 end, u64 half>
-inline int dividedCheck(vec64& v) noexcept {
-	static vec64 l0, l1;
 
-	// divide this into sub sections
-	static constexpr auto startLowerHalf = start;
-	static constexpr auto endLowerHalf = start + half;
-	static constexpr auto startUpperHalf = endLowerHalf;
-	static constexpr auto endUpperHalf = end;
-	auto fut0 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, startLowerHalf, endLowerHalf>(l0); });
-	auto fut1 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, startUpperHalf, endUpperHalf>(l1); });
-	fut0.get();
-	for(auto i : l0) {
-		v.emplace_back(i);
-	} 
-	l0.clear();
-	fut1.get();
-	for (auto i : l1) {
-		v.emplace_back(i);
-	}
-	l1.clear();
-	return 0;
-}
 template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
@@ -441,22 +392,21 @@ inline void body() noexcept {
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
 	static constexpr auto st = static_cast<u64>(shaveFactor * base);
-	static constexpr auto half = base / 2;
 #ifdef DEBUG
 	printDigitalLayout<length>();
 #endif
-	auto fut0 = std::async(std::launch::async, []() { return dividedCheck<length, st, 3 * base, half>(l0); });
-	auto fut1 = std::async(std::launch::async, []() { return dividedCheck<length, st + base, 4 * base, half>(l1); });
-	auto fut2 = std::async(std::launch::async, []() { return dividedCheck<length, st + (base * 2), 5 * base, half>(l2); });
-	auto fut3 = std::async(std::launch::async, []() { return skip5 ? 0 : dividedCheck<length, st + (base * 3), 6 * base, half>(l3); });
+	auto fut0 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st, 3 * base>(l0); });
+	auto fut1 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + base, 4 * base>(l1); });
+	auto fut2 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 2), 5 * base>(l2); });
+	auto fut3 = std::async(std::launch::async, []() { return skip5 ? 0 : performQuodigiousCheck<length, st + (base * 3), 6 * base>(l3); });
+	auto fut4 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 4), 7 * base>(l4); });
+	auto fut5 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 5), 8 * base>(l5); });
+	auto fut6 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 6), 9 * base>(l6); });
+	auto fut7 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 7), 10 * base>(l7); });
 	fut0.get();
 	fut1.get();
 	fut2.get();
 	fut3.get();
-	auto fut4 = std::async(std::launch::async, []() { return dividedCheck<length, st + (base * 4), 7 * base, half>(l4); });
-	auto fut5 = std::async(std::launch::async, []() { return dividedCheck<length, st + (base * 5), 8 * base, half>(l5); });
-	auto fut6 = std::async(std::launch::async, []() { return dividedCheck<length, st + (base * 6), 9 * base, half>(l6); });
-	auto fut7 = std::async(std::launch::async, []() { return dividedCheck<length, st + (base * 7), 10 * base, half>(l7); });
 	fut4.get();
 	fut5.get();
 	fut6.get();

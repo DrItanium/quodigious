@@ -25,36 +25,6 @@
 #include <functional>
 #include "qlib.h"
 
-using vec64 = std::vector<u64>;
-template<u64 width>
-struct NotationDescription {
-	static constexpr u64 level3Digits = (width - 1) / 2;
-	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
-	static constexpr u64 level1Digits = 1;
-	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
-};
-template<u64 width>
-constexpr u64 level3Digits() noexcept {
-	return NotationDescription<width>::level3Digits;
-}
-template<u64 width>
-constexpr u64 level2Digits() noexcept {
-	return NotationDescription<width>::level2Digits;
-}
-template<u64 width>
-constexpr u64 level1Digits() noexcept {
-	return NotationDescription<width>::level1Digits;
-}
-#define X(width, l3, l2, l1) \
-	template<> \
-struct NotationDescription< width > { \
-	static constexpr u64 level3Digits = l3 ; \
-	static constexpr u64 level2Digits = l2 ; \
-	static constexpr u64 level1Digits = l1 ; \
-};
-#include "notations.def"
-#undef X
-
 constexpr auto Len7 = fastPow10<7>();
 u64 sums[Len7] = { 0 };
 u64 productsLen7[Len7] = { 0 };
