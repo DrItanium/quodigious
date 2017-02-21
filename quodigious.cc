@@ -74,6 +74,7 @@ bool predicatesLen3[Len3] = { false };
 constexpr auto Len2 = 100u;
 u64 productsLen2[Len2] = { 0 };
 bool predicatesLen2[Len2] = { false };
+constexpr auto Len1 = 10u;
 template<bool includeFives>
 inline constexpr bool isLegalDigit(u64 value) noexcept {
     auto baseResult = value >=2;
@@ -157,10 +158,10 @@ inline void initialize() noexcept {
 						auto zPred = check(z) && yPred;
 						auto zSum = z + ySum;
 						auto zMul = z * yMul;
-						auto zInd = indexOffset<100>(z) + yInd;
+						auto zInd = indexOffset<Len2>(z) + yInd;
 						for (int x = 0; x < 10; ++x) {
 							auto outerMul = x * zMul;
-							auto combinedInd = indexOffset<10>(x) + zInd;
+							auto combinedInd = indexOffset<Len1>(x) + zInd;
 							auto outerSum = x + zSum;
 							auto outerPredicate = check(x) && zPred;
                             updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen7, predicatesLen7);
@@ -187,10 +188,10 @@ inline void initialize() noexcept {
 				for (int z = 0; z < 10; ++z) {
                     auto zPred = check(z) && yPred;
 					auto zMul = z * yMul;
-					auto zInd = indexOffset<100>(z) + yInd;
+					auto zInd = indexOffset<Len2>(z) + yInd;
 					for (int x = 0; x < 10; ++x) {
 						auto outerMul = x * zMul;
-						auto combinedInd = indexOffset<10>(x) + zInd;
+						auto combinedInd = indexOffset<Len1>(x) + zInd;
                         auto outerPredicate = check(x) && zPred;
                         updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen6, predicatesLen6);
 					}
@@ -210,10 +211,10 @@ inline void initialize() noexcept {
 			for (int z = 0; z < 10; ++z) {
 				auto zPred = check(z) && yPred;
 				auto zMul = z * yMul;
-				auto zInd = indexOffset<100>(z) + yInd;
+				auto zInd = indexOffset<Len2>(z) + yInd;
 				for (int x = 0; x < 10; ++x) {
 					auto outerMul = x * zMul;
-					auto combinedInd = indexOffset<10>(x) + zInd;
+					auto combinedInd = indexOffset<Len1>(x) + zInd;
 					auto outerPredicate = check(x) && zPred;
                     updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen5, predicatesLen5);
 				}
@@ -228,10 +229,10 @@ inline void initialize() noexcept {
 		for (int z = 0; z < 10; ++z) {
 			auto zPred = check(z) && yPred;
 			auto zMul = z * yMul;
-			auto zInd = indexOffset<100>(z) + yInd;
+			auto zInd = indexOffset<Len2>(z) + yInd;
 			for (int x = 0; x < 10; ++x) {
 				auto outerMul = x * zMul;
-				auto combinedInd = indexOffset<10>(x) + zInd;
+				auto combinedInd = indexOffset<Len1>(x) + zInd;
 				auto outerPredicate = check(x) && zPred;
                 updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen4, predicatesLen4);
 			}
@@ -241,10 +242,10 @@ inline void initialize() noexcept {
 	for (int z = 0; z < 10; ++z) {
         auto zPred = check(z);
 		auto zMul = z;
-        auto zInd = indexOffset<100>(z);
+        auto zInd = indexOffset<Len2>(z);
 		for (int x = 0; x < 10; ++x) {
 			auto outerMul = x * zMul;
-			auto combinedInd = indexOffset<10>(x) + zInd;
+			auto combinedInd = indexOffset<Len1>(x) + zInd;
 			auto outerPredicate = check(x) && zPred;
             updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen3, predicatesLen3);
 		}
@@ -252,7 +253,7 @@ inline void initialize() noexcept {
 	// Len2
 	for (int x = 0; x < 10; ++x) {
 		auto outerMul = x;
-		auto combinedInd = indexOffset<10>(x);
+		auto combinedInd = indexOffset<Len1>(x);
 		auto outerPredicate = check(x);
         updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen2, predicatesLen2);
 	}
@@ -335,46 +336,46 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	} else {
 		// precompute the fuck out of all of this!
 		// Compilers hate me, I am the TEMPLATE MASTER
-		static constexpr auto outerDigits = level3Digits<length>();
-		static constexpr auto innerDigits = level2Digits<length>();
-		static constexpr auto innerMostDigits = level1Digits<length>();
-		static constexpr auto innerMostShift = 0u;
-		static constexpr auto lowerShift = innerMostDigits;
-		static constexpr auto upperShift = innerDigits + innerMostDigits;
-		static_assert(length == (outerDigits + innerDigits + innerMostDigits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
-		static constexpr auto outerFactor = fastPow10<outerDigits>();
-		static constexpr auto innerFactor = fastPow10<innerDigits>();
-		static constexpr auto innerMostFactor = fastPow10<innerMostDigits>();
-		static constexpr auto upperSection = fastPow10<upperShift>();
-		static constexpr auto lowerSection = fastPow10<lowerShift>();
-		static constexpr auto innerMostSection = fastPow10<innerMostShift>();
-		static constexpr auto startInnerMost = start % innerMostFactor;
-		static constexpr auto startInner = (start / innerMostFactor) % innerFactor;
-		static constexpr auto startOuter = ((start / innerMostFactor) / innerFactor) % outerFactor;
-		static constexpr auto attemptEndInnerMost = end % innerMostFactor;
-		static constexpr auto endInnerMost = attemptEndInnerMost == 0 ? innerMostFactor : attemptEndInnerMost;
-		static constexpr auto attemptEndInner = ((end / innerMostFactor) % innerFactor);
-		static constexpr auto endInner = attemptEndInner == 0 ? innerFactor : attemptEndInner;
-		static constexpr auto attemptEndOuter = ((end / innerMostFactor) / innerFactor) % outerFactor;
-		static constexpr auto endOuter = attemptEndOuter == 0 ? outerFactor : attemptEndOuter;
+		static constexpr auto l3Digits = level3Digits<length>();
+		static constexpr auto l2Digits = level2Digits<length>();
+		static constexpr auto l1Digits = level1Digits<length>();
+		static constexpr auto l1Shift = 0u;
+		static constexpr auto l2Shift = l1Digits;
+		static constexpr auto l3Shift = l2Digits + l1Digits;
+		static_assert(length == (l3Digits + l2Digits + l1Digits), "Defined digit layout does not encompass all digits of the given width, make sure that outer, inner, and innerMost equal the digit width!");
+		static constexpr auto l3Factor = fastPow10<l3Digits>();
+		static constexpr auto l2Factor = fastPow10<l2Digits>();
+		static constexpr auto l1Factor = fastPow10<l1Digits>();
+		static constexpr auto l3Section = fastPow10<l3Shift>();
+		static constexpr auto l2Section = fastPow10<l2Shift>();
+		static constexpr auto l1Section = fastPow10<l1Shift>();
+		static constexpr auto startL1 = start % l1Factor;
+		static constexpr auto startL2 = (start / l1Factor) % l2Factor;
+		static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+		static constexpr auto attemptEndL1 = end % l1Factor;
+		static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+		static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+		static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+		static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+		static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
 
-		for (auto i = startOuter; i < endOuter; ++i) {
-			if (legalValue<outerDigits>(i)) {
-				auto upperSum = getSum<outerDigits>(i);
-				auto upperProduct = getProduct<outerDigits>(i);
-				auto upperIndex = i * upperSection;
-				for (auto j = startInner; j < endInner; ++j) {
-					if (legalValue<innerDigits>(j)) {
-						auto innerSum = getSum<innerDigits>(j) + upperSum;
-						auto innerProduct = getProduct<innerDigits>(j) * upperProduct;
-						auto innerIndex = (j * lowerSection) + upperIndex;
-						for (auto k = startInnerMost; k < endInnerMost; ++k) {
-							if (legalValue<innerMostDigits>(k)) {
-								auto product = innerProduct * getProduct<innerMostDigits>(k);
-								auto sum = innerSum + getSum<innerMostDigits>(k);
-								auto value = innerIndex + (k * innerMostSection);
-								if (isQuodigious(value, sum, product)) {
-									results.emplace_back(value);
+		for (auto i = startL3; i < endL3; ++i) {
+			if (legalValue<l3Digits>(i)) {
+				auto l3Sum = getSum<l3Digits>(i);
+				auto l3Product = getProduct<l3Digits>(i);
+				auto l3Index = indexOffset<l3Section>(i);
+				for (auto j = startL2; j < endL2; ++j) {
+					if (legalValue<l2Digits>(j)) {
+						auto l2Sum = getSum<l2Digits>(j) + l3Sum;
+						auto l2Product = getProduct<l2Digits>(j) * l3Product;
+						auto l2Index = indexOffset<l2Section>(j) + l3Index;
+						for (auto k = startL1; k < endL1; ++k) {
+							if (legalValue<l1Digits>(k)) {
+								auto l1Product = l2Product * getProduct<l1Digits>(k);
+								auto l1Sum = l2Sum + getSum<l1Digits>(k);
+                                auto l1Value = indexOffset<l1Section>(k) + l2Index;
+								if (isQuodigious(l1Value, l1Sum, l1Product)) {
+									results.emplace_back(l1Value);
 								}
 							}
 						}
