@@ -74,7 +74,19 @@ bool predicatesLen3[Len3] = { false };
 constexpr auto Len2 = 100u;
 u64 productsLen2[Len2] = { 0 };
 bool predicatesLen2[Len2] = { false };
-
+template<bool includeFives>
+inline constexpr bool isLegalDigit(u64 value) noexcept {
+    auto baseResult = value >=2;
+    if (!includeFives) {
+        baseResult = baseResult && value != 5;
+    }
+    return baseResult;
+}
+template<u64 offset>
+inline constexpr u64 indexOffset(u64 value) noexcept {
+    return value * offset;
+}
+template<bool includeFives = false>
 inline void initialize() noexcept {
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
 	// It is super fast to do and only consumes space. That way when we iterate
@@ -90,36 +102,37 @@ inline void initialize() noexcept {
 	// thus illegal (also the product becomes zero!). Thus we have separate
 	// lists for each number width when dealing with products and predicates
 	// Len7
+    static constexpr auto check = isLegalDigit<includeFives>;
 	for (int k = 0; k < 10; ++k) {
-		auto kPred = k >= 2 && k != 5;
+		auto kPred = check(k);
 		auto kSum = k;
 		auto kMul = k;
-		auto kInd = (k * Len6);
+		auto kInd = indexOffset<Len6>(k);
 		for (int h = 0; h < 10; ++h) {
-			auto hPred = (h >= 2) && h != 5 && kPred ;
+			auto hPred = check(h) && kPred;
 			auto hSum = h + kSum;
 			auto hMul = h * kMul;
-			auto hInd = (h * Len5) + kInd;
+			auto hInd = indexOffset<Len5>(h) + kInd;
 			for (int w = 0; w < 10; ++w) {
-				auto wPred = (w >= 2) && w != 5&& hPred;
+				auto wPred = check(w) && hPred;
 				auto wSum = w + hSum;
 				auto wMul = w * hMul;
-				auto wInd = (w * Len4) + hInd;
+				auto wInd = indexOffset<Len4>(w) + hInd;
 				for (int y = 0; y < 10; ++y) {
-					auto yPred = (y >= 2) && y != 5&& wPred;
+                    auto yPred = check(y) && wPred;
 					auto ySum = y + wSum;
 					auto yMul = y * wMul;
-					auto yInd = (y * Len3) + wInd;
+					auto yInd = indexOffset<Len3>(y) + wInd;
 					for (int z = 0; z < 10; ++z) {
-						auto zPred = z >= 2 && z != 5 && yPred;
+						auto zPred = check(z) && yPred;
 						auto zSum = z + ySum;
 						auto zMul = z * yMul;
-						auto zInd = (z * 100) + yInd ;
+						auto zInd = indexOffset<100>(z) + yInd;
 						for (int x = 0; x < 10; ++x) {
 							auto outerMul = x * zMul;
-							auto combinedInd = (x * 10) + zInd;
+							auto combinedInd = indexOffset<10>(x) + zInd;
 							auto outerSum = x + zSum;
-							auto outerPredicate = ((x >= 2) && x != 5 && zPred);
+							auto outerPredicate = check(x) && zPred;
 							sums[combinedInd + 0] = outerSum;
 							productsLen7[combinedInd + 0] = 0;
 							predicatesLen7[combinedInd + 0] = false;
@@ -158,26 +171,26 @@ inline void initialize() noexcept {
 	}
 	// Len6
 	for (int h = 0; h < 10; ++h) {
-		auto hPred = h >= 2;
+        auto hPred = check(h);
 		auto hSum = h;
 		auto hMul = h;
-		auto hInd = (h * Len5);
+		auto hInd = indexOffset<Len5>(h);
 		for (int w = 0; w < 10; ++w) {
-			auto wPred = (w >= 2) && hPred;
+			auto wPred = check(w) && hPred;
 			auto wMul = w * hMul;
-			auto wInd = (w * Len4) + hInd;
+			auto wInd = indexOffset<Len4>(w) + hInd;
 			for (int y = 0; y < 10; ++y) {
-				auto yPred = (y >= 2) && wPred;
+                auto yPred = check(y) && wPred;
 				auto yMul = y * wMul;
-				auto yInd = (y * Len3) + wInd;
+				auto yInd = indexOffset<Len3>(y) + wInd;
 				for (int z = 0; z < 10; ++z) {
-					auto zPred = z >= 2 && yPred;
+                    auto zPred = check(z) && yPred;
 					auto zMul = z * yMul;
-					auto zInd = (z * 100) + yInd ;
+					auto zInd = indexOffset<100>(z) + yInd;
 					for (int x = 0; x < 10; ++x) {
 						auto outerMul = x * zMul;
-						auto combinedInd = (x * 10) + zInd;
-						auto outerPredicate = ((x >= 2) && zPred);
+						auto combinedInd = indexOffset<10>(x) + zInd;
+                        auto outerPredicate = check(x) && zPred;
 						productsLen6[combinedInd + 0] = 0;
 						predicatesLen6[combinedInd + 0] = false;
 						productsLen6[combinedInd + 1] = outerMul ;
@@ -205,21 +218,21 @@ inline void initialize() noexcept {
 	}
 	// Len5
 	for (int w = 0; w < 10; ++w) {
-		auto wPred = w >= 2 && w != 5;
+		auto wPred = check(w);
 		auto wMul = w;
-		auto wInd = (w * Len4);
+		auto wInd = indexOffset<Len4>(w);
 		for (int y = 0; y < 10; ++y) {
-			auto yPred = (y >= 2) && y != 5 && wPred;
+			auto yPred = check(y) && wPred;
 			auto yMul = y * wMul;
-			auto yInd = (y * Len3) + wInd;
+			auto yInd = indexOffset<Len3>(y) + wInd;
 			for (int z = 0; z < 10; ++z) {
-				auto zPred = (z >= 2) && z != 5  && yPred;
+				auto zPred = check(z) && yPred;
 				auto zMul = z * yMul;
-				auto zInd = (z * 100) + yInd ;
+				auto zInd = indexOffset<100>(z) + yInd;
 				for (int x = 0; x < 10; ++x) {
 					auto outerMul = x * zMul;
-					auto combinedInd = (x * 10) + zInd;
-					auto outerPredicate = ((x >= 2) && x != 5 && zPred);
+					auto combinedInd = indexOffset<10>(x) + zInd;
+					auto outerPredicate = check(x) && zPred;
 					productsLen5[combinedInd + 0] = 0;
 					predicatesLen5[combinedInd + 0] = false;
 					productsLen5[combinedInd + 1] = outerMul ;
@@ -246,17 +259,17 @@ inline void initialize() noexcept {
 	}
 	// Len4
 	for (int y = 0; y < 10; ++y) {
-		auto yPred = (y >= 2)  && y != 5;
+		auto yPred = check(y);
 		auto yMul = y ;
-		auto yInd = (y * Len3) ;
+		auto yInd = indexOffset<Len3>(y);
 		for (int z = 0; z < 10; ++z) {
-			auto zPred = z >= 2 && yPred && z != 5;
+			auto zPred = check(z) && yPred;
 			auto zMul = z * yMul;
-			auto zInd = (z * 100) + yInd ;
+			auto zInd = indexOffset<100>(z) + yInd;
 			for (int x = 0; x < 10; ++x) {
 				auto outerMul = x * zMul;
-				auto combinedInd = (x * 10) + zInd;
-				auto outerPredicate = ((x >= 2) && zPred && z != 5);
+				auto combinedInd = indexOffset<10>(x) + zInd;
+				auto outerPredicate = check(x) && zPred;
 				productsLen4[combinedInd + 0] = 0;
 				predicatesLen4[combinedInd + 0] = false;
 				productsLen4[combinedInd + 1] = outerMul ;
@@ -282,13 +295,13 @@ inline void initialize() noexcept {
 	}
 	// Len3
 	for (int z = 0; z < 10; ++z) {
-		auto zPred = z >= 2 && z != 5;
+        auto zPred = check(z);
 		auto zMul = z;
-		auto zInd = (z * 100);
+        auto zInd = indexOffset<100>(z);
 		for (int x = 0; x < 10; ++x) {
 			auto outerMul = x * zMul;
-			auto combinedInd = (x * 10) + zInd;
-			auto outerPredicate = ((x >= 2) && x != 5 && zPred);
+			auto combinedInd = indexOffset<10>(x) + zInd;
+			auto outerPredicate = check(x) && zPred;
 			productsLen3[combinedInd + 0] = 0;
 			predicatesLen3[combinedInd + 0] = false;
 			productsLen3[combinedInd + 1] = outerMul ;
@@ -314,8 +327,8 @@ inline void initialize() noexcept {
 	// Len2
 	for (int x = 0; x < 10; ++x) {
 		auto outerMul = x;
-		auto combinedInd = (x * 10);
-		auto outerPredicate = ((x >= 2) && x != 5);
+		auto combinedInd = indexOffset<10>(x);
+		auto outerPredicate = check(x);
 		productsLen2[combinedInd + 0] = 0;
 		predicatesLen2[combinedInd + 0] = false;
 		productsLen2[combinedInd + 1] = outerMul ;
@@ -413,8 +426,7 @@ inline u64 getSum(u64 x) noexcept {
 
 template<u64 length>
 constexpr u64 startIndex() noexcept {
-	constexpr auto factor = 2.0 + (2.0 / 9.0);
-	return static_cast<u64>(factor * fastPow10<length - 1>());
+	return static_cast<u64>(shaveFactor * fastPow10<length - 1>());
 }
 template<u64 length>
 constexpr u64 endIndex() noexcept {
@@ -501,8 +513,7 @@ void printout(vec64& l) noexcept {
 
 template<u64 length>
 inline void singleThreadedSimpleBody() noexcept {
-	static constexpr auto factor = 2.0 + (2.0 / 9.0);
-	for (auto value = static_cast<u64>(factor * fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
+	for (auto value = static_cast<u64>(shaveFactor* fastPow10<length - 1>()); value < fastPow10<length>(); ++value) {
 		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
 			std::cout << value << std::endl;
 		}
@@ -513,11 +524,10 @@ inline void singleThreadedSimpleBody() noexcept {
 template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
-	static constexpr auto factor = 2.0 + (2.0 / 9.0);
 	static constexpr auto skip5 = length > 4;
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>();
-	static constexpr auto st = static_cast<u64>(factor * base);
+	static constexpr auto st = static_cast<u64>(shaveFactor * base);
 #ifdef DEBUG
 	printDigitalLayout<length>();
 #endif
