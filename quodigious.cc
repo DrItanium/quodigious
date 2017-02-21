@@ -55,26 +55,26 @@ struct NotationDescription< width > { \
 #include "notations.def"
 #undef X
 
-constexpr auto Len7 = 10000000u;
+constexpr auto Len7 = fastPow10<7>();
 u64 sums[Len7] = { 0 };
 u64 productsLen7[Len7] = { 0 };
 bool predicatesLen7[Len7] = { false };
-constexpr auto Len6 = 1000000u;
+constexpr auto Len6 = fastPow10<6>();
 u64 productsLen6[Len6] = { 0 };
 bool predicatesLen6[Len6] = { false };
-constexpr auto Len5 = 100000u;
+constexpr auto Len5 = fastPow10<5>();
 u64 productsLen5[Len5] = { 0 };
 bool predicatesLen5[Len5] = { false };
-constexpr auto Len4 = 10000u;
+constexpr auto Len4 = fastPow10<4>();
 u64 productsLen4[Len4] = { 0 };
 bool predicatesLen4[Len4] = { false };
-constexpr auto Len3 = 1000u;
+constexpr auto Len3 = fastPow10<3>();
 u64 productsLen3[Len3] = { 0 };
 bool predicatesLen3[Len3] = { false };
-constexpr auto Len2 = 100u;
+constexpr auto Len2 = fastPow10<2>();
 u64 productsLen2[Len2] = { 0 };
 bool predicatesLen2[Len2] = { false };
-constexpr auto Len1 = 10u;
+constexpr auto Len1 = fastPow10<1>();
 template<bool includeFives>
 inline constexpr bool isLegalDigit(u64 value) noexcept {
     auto baseResult = value >=2;
