@@ -301,6 +301,7 @@ constexpr u64 endIndex() noexcept {
 inline constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
+
 template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// assume that we start at 2.222222222222
@@ -309,7 +310,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	// 3,5,7,9,735, all other numbers so far have been even!
 	if (length == 7) {
 		for (auto value = start; value < end; ++value) {
-            if (legalValue<7>(value) && isQuodigious(value, getSum<7>(value), getProduct<7>(value))) {
+            if (isEven(value) && legalValue<7>(value) && isQuodigious(value, getSum<7>(value), getProduct<7>(value))) {
 				results.emplace_back(value);
 			}
 		}
@@ -337,6 +338,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
 			static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
 			static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
+
 
 		if (numberOfLevels<length>() == 4) {
 			static constexpr auto l4Digits = level4Digits<length>();
