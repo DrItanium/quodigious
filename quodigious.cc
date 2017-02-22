@@ -102,6 +102,11 @@ inline void initialize() noexcept {
 	// are three digits, however when it is four digits then it is 0222 and
 	// thus illegal (also the product becomes zero!). Thus we have separate
 	// lists for each number width when dealing with products and predicates
+	//
+	// Using numeric analysis of the results, I noticed that all of the values
+	// are even! The only exceptions are 3,5,7,9,735
+	//
+	
 	// Len7
     static constexpr auto check = isLegalDigit<includeFives>;
 	for (int k = 0; k < 10; ++k) {
@@ -293,10 +298,15 @@ template<u64 length>
 constexpr u64 endIndex() noexcept {
 	return fastPow10<length>();
 }
+inline constexpr bool isEven(u64 value) noexcept {
+	return (value == ((value >> 1) << 1));
+}
 template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// assume that we start at 2.222222222222
 	// skip over the 9th and 10th numbers from this position!
+	// I also noticed that the only time we run into odd numbers is
+	// 3,5,7,9,735, all other numbers so far have been even!
 	if (length == 7) {
 		for (auto value = start; value < end; ++value) {
             if (legalValue<7>(value) && isQuodigious(value, getSum<7>(value), getProduct<7>(value))) {
@@ -353,7 +363,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 									auto l2Product = getProduct<l2Digits>(j) * l3Product;
 									auto l2Index = indexOffset<l2Section>(j) + l3Index;
 									for (auto k = startL1; k < endL1; ++k) {
-										if (legalValue<l1Digits>(k)) {
+										if (legalValue<l1Digits>(k) && isEven(k)) {
 											auto l1Product = l2Product * getProduct<l1Digits>(k);
 											auto l1Sum = l2Sum + getSum<l1Digits>(k);
 											auto l1Value = indexOffset<l1Section>(k) + l2Index;
@@ -380,7 +390,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 							auto l2Product = getProduct<l2Digits>(j) * l3Product;
 							auto l2Index = indexOffset<l2Section>(j) + l3Index;
 							for (auto k = startL1; k < endL1; ++k) {
-								if (legalValue<l1Digits>(k)) {
+								if (legalValue<l1Digits>(k) && isEven(k)) {
 									auto l1Product = l2Product * getProduct<l1Digits>(k);
 									auto l1Sum = l2Sum + getSum<l1Digits>(k);
 									auto l1Value = indexOffset<l1Section>(k) + l2Index;
