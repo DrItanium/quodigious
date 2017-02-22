@@ -390,7 +390,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 							auto l2Product = getProduct<l2Digits>(j) * l3Product;
 							auto l2Index = indexOffset<l2Section>(j) + l3Index;
 							for (auto k = startL1; k < endL1; ++k) {
-								if (legalValue<l1Digits>(k) && isEven(k)) {
+								if (isEven(k) && legalValue<l1Digits>(k)) {
 									auto l1Product = l2Product * getProduct<l1Digits>(k);
 									auto l1Sum = l2Sum + getSum<l1Digits>(k);
 									auto l1Value = indexOffset<l1Section>(k) + l2Index;
