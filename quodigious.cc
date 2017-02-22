@@ -363,7 +363,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 									auto l2Product = getProduct<l2Digits>(j) * l3Product;
 									auto l2Index = indexOffset<l2Section>(j) + l3Index;
 									for (auto k = startL1; k < endL1; ++k) {
-										if (legalValue<l1Digits>(k) && isEven(k)) {
+										if (isEven(k) && legalValue<l1Digits>(k)) {
 											auto l1Product = l2Product * getProduct<l1Digits>(k);
 											auto l1Sum = l2Sum + getSum<l1Digits>(k);
 											auto l1Value = indexOffset<l1Section>(k) + l2Index;
@@ -398,6 +398,24 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 										results.emplace_back(l1Value);
 									}
 								}
+							}
+						}
+					}
+				}
+			}
+		} else if (numberOfLevels<length>() == 2) {
+			for (auto j = startL2; j < endL2; ++j) {
+				if (legalValue<l2Digits>(j)) {
+					auto l2Sum = getSum<l2Digits>(j);
+					auto l2Product = getProduct<l2Digits>(j);
+					auto l2Index = indexOffset<l2Section>(j);
+					for (auto k = startL1; k < endL1; ++k) {
+						if (isEven(k) && legalValue<l1Digits>(k)) {
+							auto l1Product = l2Product * getProduct<l1Digits>(k);
+							auto l1Sum = l2Sum + getSum<l1Digits>(k);
+							auto l1Value = indexOffset<l1Section>(k) + l2Index;
+							if (isQuodigious(l1Value, l1Sum, l1Product)) {
+								results.emplace_back(l1Value);
 							}
 						}
 					}
