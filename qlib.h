@@ -20,6 +20,7 @@
 #define QLIB_H__
 #include <cstdint>
 #include <vector>
+#include <tuple>
 using u64 = uint64_t;
 
 template<u64 length>
@@ -105,5 +106,24 @@ template<> inline constexpr u64 level4Digits<1>() noexcept { return 0; }
 template<> inline constexpr u64 level4Digits<2>() noexcept { return 0; }
 template<> inline constexpr u64 level4Digits<3>() noexcept { return 0; }
 
+
+/**
+ * Useful for getting information about a given number, not used during
+ * quodigious computation because it gets really slow with larger numbers!
+ */
+template<u64 length>
+std::tuple<u64, u64> digitSumAndProduct(u64 value) noexcept {
+	static_assert(length != 0, "Can't have a length of zero!");
+	static_assert(length < 20, "Maximum of 19 digits!");
+	u64 current = value;
+	u64 sum = 0u;
+	u64 product = 1u;
+	for(auto count = 0; count < length; ++count) {
+		auto back = current % 10u;
+		sum += back;
+		product *= back;
+	}
+	return std::tuple<u64, u64>(sum, product);
+}
 
 #endif // end QLIB_H__

@@ -22,7 +22,7 @@ LXXFLAGS = -lpthread -O3 -flto -fwhole-program
 TITLE = quodigious
 FILES = quodigious.o
 
-all: q8
+all: q8 qsinglenumbercheck
 
 help:
 	@echo "available options: "
@@ -35,6 +35,12 @@ q8: quodigious.o
 	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
 	@echo done.
 
+qsinglenumbercheck: singlenumbercheck.o
+	@echo -n Building ${TITLE} ...
+	@${CXX} ${LXXFLAGS} -o qsinglenumbercheck singlenumbercheck.o
+	@echo done.
+
+
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -43,7 +49,9 @@ q8: quodigious.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} 
+	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck
 	@echo done.
 
 quodigious.o: qlib.h notations.def
+
+singlenumbercheck.o: qlib.h
