@@ -23,21 +23,54 @@
 #include <cstdint>
 #include <vector>
 #include <functional>
+#include <string>
 #include "qlib.h"
 
+template<typename T>
+void field(std::ostream& out, const std::string& title, T value, bool newline = true) {
+	out << "(" << title << " " << value << ")";
+	if (newline) {
+		out << '\n';
+	} else {
+		out << " ";
+	}
+}
+template<u64 length>
+void printoutInformation(u64 number, std::tuple<u64, u64> tup) noexcept {
+	std::cout << "(qnum ";
+	field(std::cout, "length", length, false);
+	field(std::cout, "number", number, false);
+	field(std::cout, "sum", std::get<0>(tup), false);
+	field(std::cout, "product", std::get<1>(tup), false);
+	std::cout << ")\n";
+}
 template<u64 length>
 void body(u64 number) noexcept {
 	auto tup = digitSumAndProduct<length>(number);
-	std::cout << number << ": " << std::get<0>(tup) << ", " << std::get<1>(tup) << std::endl;
+	printoutInformation<length>(number, tup);
+}
+template<>
+void body<0>(u64 number) noexcept {
+	std::cout << "0: " << number << ": " << number << ", " << number << std::endl;
+	printoutInformation<0>(number, std::tuple<u64, u64>(number, number));
 }
 
+u64 numberLength(u64 input) noexcept {
+	u64 count = 0u;
+	do {
+		++count;
+		input /= 10u;
+	} while(input != 0);
+	return count;
+}
 int main() {
 	while(std::cin.good()) {
 		u64 currentValue = 0u;
 		std::cin >> currentValue;
 		// compute the length using log10 + 1
-		auto almostLength = static_cast<u64>(std::round(std::log10(currentValue)));
+		auto almostLength = numberLength(currentValue);
 		switch(almostLength) {
+				case 0: body<0>(currentValue); break;
 				case 1: body<1>(currentValue); break;
 				case 2: body<2>(currentValue); break;
 				case 3: body<3>(currentValue); break;
@@ -58,7 +91,7 @@ int main() {
 				case 18: body<18>(currentValue); break;
 				case 19: body<19>(currentValue); break;
 				default:
-						 std::cerr << "Illegal value " << currentValue << " with length " << almostLength + 1 << std::endl;
+						 std::cerr << "Illegal value " << currentValue << " with length " << almostLength << std::endl;
 						 return 1;
 		}
 	}
