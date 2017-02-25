@@ -122,6 +122,7 @@ std::tuple<u64, u64> digitSumAndProduct(u64 value) noexcept {
 		auto back = current % 10u;
 		sum += back;
 		product *= back;
+		current /= 10u;
 	}
 	return std::tuple<u64, u64>(sum, product);
 }

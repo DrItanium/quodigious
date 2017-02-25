@@ -36,8 +36,8 @@ int main() {
 		u64 currentValue = 0u;
 		std::cin >> currentValue;
 		// compute the length using log10 + 1
-		auto almostLength = static_cast<u64>(std::floor(std::log10(currentValue)));
-		switch(almostLength + 1) {
+		auto almostLength = static_cast<u64>(std::round(std::log10(currentValue)));
+		switch(almostLength) {
 				case 1: body<1>(currentValue); break;
 				case 2: body<2>(currentValue); break;
 				case 3: body<3>(currentValue); break;
