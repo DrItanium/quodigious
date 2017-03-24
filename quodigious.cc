@@ -455,7 +455,10 @@ inline void singleThreadedSimpleBody() noexcept {
 	}
 	std::cout << std::endl;
 }
-
+template<u64 length, u64 base, u64 st, u64 startFactor, u64 endFactor>
+inline int doQuodigious(vec64& input) noexcept {
+	return performQuodigiousCheck<length, (st + (base * startFactor)), base * endFactor>(input);
+}
 template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
@@ -466,14 +469,14 @@ inline void body() noexcept {
 #ifdef DEBUG
 	printDigitalLayout<length>();
 #endif
-	auto fut0 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st, 3 * base>(l0); });
-	auto fut1 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + base, 4 * base>(l1); });
-	auto fut2 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 2), 5 * base>(l2); });
-	auto fut3 = std::async(std::launch::async, []() { return skip5 ? 0 : performQuodigiousCheck<length, st + (base * 3), 6 * base>(l3); });
-	auto fut4 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 4), 7 * base>(l4); });
-	auto fut5 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 5), 8 * base>(l5); });
-	auto fut6 = std::async(std::launch::async, []() { return performQuodigiousCheck<length, st + (base * 6), 9 * base>(l6); });
-	performQuodigiousCheck<length, st + (base * 7), 10 * base>(l7);
+	auto fut0 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 0, 3>(l0); });
+	auto fut1 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 1, 4>(l1); });
+	auto fut2 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 2, 5>(l2); });
+	auto fut3 = std::async(std::launch::async, []() { return skip5 ? 0 : doQuodigious<length, base, st, 3, 6>(l3); });
+	auto fut4 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 4, 7 >(l4); });
+	auto fut5 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 5, 8 >(l5); });
+	auto fut6 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 6, 9 >(l6); });
+	doQuodigious<length, base, st, 7, 10>(l7);
 	fut0.get();
 	fut1.get();
 	fut2.get();
