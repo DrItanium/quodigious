@@ -29,7 +29,6 @@
 	constexpr auto title = fastPow10< width > ; \
 	u64 products ## title [ title ] = { 0 }; \
 	bool predicates ## title [ title ] = { false }
-buildLengthPrecomputation(Len9, 9);
 buildLengthPrecomputation(Len8, 8);
 buildLengthPrecomputation(Len7, 7);
 buildLengthPrecomputation(Len6, 6);
@@ -105,86 +104,43 @@ inline void initialize() noexcept {
 	
     static constexpr auto check = isLegalDigit<includeFives>;
 
-	// Len9
-	for (int j = 0; j < 10; ++j) {	
-		auto jPred = check(j);
-		auto jSum = j;
-		auto jMul = j;
-		auto jInd = indexOffset<Len8>(j);
-		for (int i = 0; i < 10; ++i) {
-			auto iPred = jInd && check(i);
-			auto iSum = i + jSum;
-			auto iMul = i * jSum;
-			auto iInd = indexOffset<Len7>(i) + jInd;
-			for (int k = 0; k < 10; ++k) {
-				auto kPred = iPred && check(k);
-				auto kSum = k + iSum;
-				auto kMul = k * iMul;
-				auto kInd = indexOffset<Len6>(k) + iInd;
-				for (int h = 0; h < 10; ++h) {
-					auto hPred = kPred && check(h);
-					auto hSum = h + kSum;
-					auto hMul = h * kMul;
-					auto hInd = indexOffset<Len5>(h) + kInd;
-					for (int w = 0; w < 10; ++w) {
-						auto wPred = hPred && check(w);
-						auto wSum = w + hSum;
-						auto wMul = w * hMul;
-						auto wInd = indexOffset<Len4>(w) + hInd;
-						for (int y = 0; y < 10; ++y) {
-							auto yPred = wPred && check(y);
-							auto ySum = y + wSum;
-							auto yMul = y * wMul;
-							auto yInd = indexOffset<Len3>(y) + wInd;
-							for (int z = 0; z < 10; ++z) {
-								auto zPred = yPred && check(z);
-								auto zSum = z + ySum;
-								auto zMul = z * yMul;
-								auto zInd = indexOffset<Len2>(z) + yInd;
-								for (int x = 0; x < 10; ++x) {
-									auto outerMul = x * zMul;
-									auto combinedInd = indexOffset<Len1>(x) + zInd;
-									auto outerSum = x + zSum;
-									auto outerPredicate = zPred && check(x);
-									updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen9, predicatesLen9);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 	// Len8
 	for (int i = 0; i < 10; ++i) {
 		auto iPred = check(i);
+		auto iSum = i;
 		auto iMul = i;
 		auto iInd = indexOffset<Len7>(i);
 		for (int k = 0; k < 10; ++k) {
 			auto kPred = iPred && check(k);
+			auto kSum = k + iSum;
 			auto kMul = k * iMul;
 			auto kInd = indexOffset<Len6>(k) + iInd;
 			for (int h = 0; h < 10; ++h) {
 				auto hPred = kPred && check(h);
+				auto hSum = h + kSum;
 				auto hMul = h * kMul;
 				auto hInd = indexOffset<Len5>(h) + kInd;
 				for (int w = 0; w < 10; ++w) {
 					auto wPred = hPred && check(w);
+					auto wSum = w + hSum;
 					auto wMul = w * hMul;
 					auto wInd = indexOffset<Len4>(w) + hInd;
 					for (int y = 0; y < 10; ++y) {
 						auto yPred = wPred && check(y);
+						auto ySum = y + wSum;
 						auto yMul = y * wMul;
 						auto yInd = indexOffset<Len3>(y) + wInd;
 						for (int z = 0; z < 10; ++z) {
 							auto zPred = yPred && check(z);
+							auto zSum = z + ySum;
 							auto zMul = z * yMul;
 							auto zInd = indexOffset<Len2>(z) + yInd;
 							for (int x = 0; x < 10; ++x) {
 								auto outerMul = x * zMul;
 								auto combinedInd = indexOffset<Len1>(x) + zInd;
+								auto outerSum = x + zSum;
 								auto outerPredicate = zPred && check(x);
-								updateTables10<includeFives>(combinedInd, 0, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+								updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
 							}
 						}
 					}
@@ -314,7 +270,7 @@ inline void initialize() noexcept {
 
 template<u64 width>
 inline bool legalValue(u64 x) noexcept {
-	static_assert(width < 10, "Too large of a legal value check!");
+	static_assert(width < 9, "Too large of a legal value check!");
 	switch(width) {
 		case 1: return x >= 2u && x != 5;
 		case 2: return predicatesLen2[x];
@@ -324,7 +280,6 @@ inline bool legalValue(u64 x) noexcept {
 		case 6: return predicatesLen6[x];
 		case 7: return predicatesLen7[x];
 		case 8: return predicatesLen8[x];
-		case 9: return predicatesLen9[x];
 		default: return false;
 	}
 }
@@ -351,17 +306,17 @@ inline u64 getProduct(u64 x) noexcept {
 		case 6: return productsLen6[x];
 		case 7: return productsLen7[x];
 		case 8: return productsLen8[x];
-		case 9: return productsLen8[x];
-		case 10: return getInnerProduct<1, 9>(x);
-		case 11: return getInnerProduct<2, 9>(x);
-		case 12: return getInnerProduct<3, 9>(x);
-		case 13: return getInnerProduct<4, 9>(x);
-		case 14: return getInnerProduct<5, 9>(x);
-		case 15: return getInnerProduct<6, 9>(x);
-		case 16: return getInnerProduct<7, 9>(x);
-		case 17: return getInnerProduct<8, 9>(x);
-		case 18: return getInnerProduct<9, 9>(x);
-		case 19: return getInnerProduct<1, 18>(x);
+		case 9: return getInnerProduct<1, 8>(x);
+		case 10: return getInnerProduct<2, 8>(x);
+		case 11: return getInnerProduct<3, 8>(x);
+		case 12: return getInnerProduct<4, 8>(x);
+		case 13: return getInnerProduct<5, 8>(x);
+		case 14: return getInnerProduct<6, 8>(x);
+		case 15: return getInnerProduct<7, 8>(x);
+		case 16: return getInnerProduct<8, 8>(x);
+		case 17: return getInnerProduct<1, 16>(x);
+		case 18: return getInnerProduct<2, 16>(x);
+		case 19: return getInnerProduct<3, 16>(x);
 		default: return x;
 	}
 }
@@ -388,18 +343,18 @@ inline u64 getSum(u64 x) noexcept {
 		case 5:
 		case 6:
 		case 7: 
-		case 8: 
-		case 9: return sums[x];
-		case 10: return getInnerSum<1, 9>(x);
-		case 11: return getInnerSum<2, 9>(x);
-		case 12: return getInnerSum<3, 9>(x);
-		case 13: return getInnerSum<4, 9>(x);
-		case 14: return getInnerSum<5, 9>(x);
-		case 15: return getInnerSum<6, 9>(x);
-		case 16: return getInnerSum<7, 9>(x);
-		case 17: return getInnerSum<8, 9>(x);
-		case 18: return getInnerSum<9, 9>(x);
-		case 19: return getInnerSum<1, 18>(x);
+		case 8: return sums[x];
+		case 9: return getInnerSum<1, 8>(x);
+		case 10: return getInnerSum<2, 8>(x);
+		case 11: return getInnerSum<3, 8>(x);
+		case 12: return getInnerSum<4, 8>(x);
+		case 13: return getInnerSum<5, 8>(x);
+		case 14: return getInnerSum<6, 8>(x);
+		case 15: return getInnerSum<7, 8>(x);
+		case 16: return getInnerSum<8, 8>(x);
+		case 17: return getInnerSum<1, 16>(x);
+		case 18: return getInnerSum<2, 16>(x);
+		case 19: return getInnerSum<3, 16>(x);
 		default: return x;
 	}
 }
@@ -419,6 +374,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 	static constexpr auto l3Digits = level3Digits<length>;
 	static constexpr auto l2Digits = level2Digits<length>;
 	static constexpr auto l1Digits = level1Digits<length>;
+	static_assert((l3Digits + l2Digits + l1Digits) == length, "Illegal digit layout!");
 	static constexpr auto l1Shift = 0u;
 	static constexpr auto l2Shift = l1Digits;
 	static constexpr auto l3Shift = l2Digits + l1Digits;
