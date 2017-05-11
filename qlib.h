@@ -52,63 +52,24 @@ constexpr auto shaveFactor = 2.0 + (2.0 / 9.0);
 
 
 using vec64 = std::vector<u64>;
-template<u64 width>
-struct NotationDescription {
-	static constexpr u64 numberOfLevels = 3;
-	static constexpr u64 level3Digits = (width - 1) / 2;
-	static constexpr u64 level2Digits = (width - 1) - level3Digits; // whats left over?
-	static constexpr u64 level1Digits = 1;
-	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
-};
-template<u64 width>
-constexpr u64 numberOfLevels() noexcept {
-	return NotationDescription<width>::numberOfLevels;
-}
-template<u64 width>
-constexpr u64 level4Digits() noexcept {
-	return numberOfLevels<width>() >= 4 ? NotationDescription<width>::level4Digits : 0u;
-}
-template<u64 width>
-constexpr u64 level3Digits() noexcept {
-	return NotationDescription<width>::level3Digits;
-}
-template<u64 width>
-constexpr u64 level2Digits() noexcept {
-	return NotationDescription<width>::level2Digits;
-}
-template<u64 width>
-constexpr u64 level1Digits() noexcept {
-	return NotationDescription<width>::level1Digits;
-}
 
-#define Y(width, l4, l3, l2, l1) \
-	template<> \
-struct NotationDescription < width > { \
-	static constexpr u64 numberOfLevels = 4; \
-	static constexpr u64 level4Digits = l4; \
-	static constexpr u64 level3Digits = l3 ; \
-	static constexpr u64 level2Digits = l2 ; \
-	static constexpr u64 level1Digits = l1 ; \
-	static_assert(width == (l4 + l3 + l2 + l1) , "Number of digits allocated != width of number!"); \
-};
+template<u64 width>
+constexpr u64 level3Digits = (width - 1) / 2;
+
+template<u64 width>
+constexpr u64 level2Digits = (width - 1) - level3Digits<width>; // what's left over
+
+template<u64 width>
+constexpr u64 level1Digits = 1;
+
 #define X(width, l3, l2, l1) \
-	template<> \
-struct NotationDescription< width > { \
-	static constexpr u64 numberOfLevels = 3; \
-	static constexpr u64 level3Digits = l3 ; \
-	static constexpr u64 level2Digits = l2 ; \
-	static constexpr u64 level1Digits = l1 ; \
-	static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!"); \
-}; \
-template<> constexpr u64 level4Digits< width > () noexcept { return 0; }
+template<> constexpr u64 level3Digits< width > = l3; \
+template<> constexpr u64 level2Digits< width > = l2; \
+template<> constexpr u64 level1Digits< width > = l1; \
+static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!"); 
+
 #include "notations.def"
 #undef X
-#undef Y
-
-template<> constexpr u64 level4Digits<1>() noexcept { return 0; }
-template<> constexpr u64 level4Digits<2>() noexcept { return 0; }
-template<> constexpr u64 level4Digits<3>() noexcept { return 0; }
-
 
 /**
  * Useful for getting information about a given number, not used during

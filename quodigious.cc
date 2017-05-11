@@ -45,6 +45,7 @@ constexpr auto Len2 = fastPow10<2>;
 u64 productsLen2[Len2] = { 0 };
 bool predicatesLen2[Len2] = { false };
 constexpr auto Len1 = fastPow10<1>;
+
 template<bool includeFives>
 constexpr bool isLegalDigit(u64 value) noexcept {
     auto baseResult = value >=2;
@@ -115,22 +116,22 @@ inline void initialize() noexcept {
 		auto kMul = k;
 		auto kInd = indexOffset<Len6>(k);
 		for (int h = 0; h < 10; ++h) {
-			auto hPred = check(h) && kPred;
+			auto hPred = kPred && check(h);
 			auto hSum = h + kSum;
 			auto hMul = h * kMul;
 			auto hInd = indexOffset<Len5>(h) + kInd;
 			for (int w = 0; w < 10; ++w) {
-				auto wPred = check(w) && hPred;
+				auto wPred = hPred && check(w);
 				auto wSum = w + hSum;
 				auto wMul = w * hMul;
 				auto wInd = indexOffset<Len4>(w) + hInd;
 				for (int y = 0; y < 10; ++y) {
-                    auto yPred = check(y) && wPred;
+                    auto yPred = wPred && check(y);
 					auto ySum = y + wSum;
 					auto yMul = y * wMul;
 					auto yInd = indexOffset<Len3>(y) + wInd;
 					for (int z = 0; z < 10; ++z) {
-						auto zPred = check(z) && yPred;
+						auto zPred = yPred && check(z);
 						auto zSum = z + ySum;
 						auto zMul = z * yMul;
 						auto zInd = indexOffset<Len2>(z) + yInd;
@@ -138,7 +139,7 @@ inline void initialize() noexcept {
 							auto outerMul = x * zMul;
 							auto combinedInd = indexOffset<Len1>(x) + zInd;
 							auto outerSum = x + zSum;
-							auto outerPredicate = check(x) && zPred;
+							auto outerPredicate = zPred && check(x);
                             updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen7, predicatesLen7);
 						}
 					}
@@ -153,21 +154,21 @@ inline void initialize() noexcept {
 		auto hMul = h;
 		auto hInd = indexOffset<Len5>(h);
 		for (int w = 0; w < 10; ++w) {
-			auto wPred = check(w) && hPred;
+			auto wPred = hPred && check(w);
 			auto wMul = w * hMul;
 			auto wInd = indexOffset<Len4>(w) + hInd;
 			for (int y = 0; y < 10; ++y) {
-                auto yPred = check(y) && wPred;
+                auto yPred = wPred && check(y);
 				auto yMul = y * wMul;
 				auto yInd = indexOffset<Len3>(y) + wInd;
 				for (int z = 0; z < 10; ++z) {
-                    auto zPred = check(z) && yPred;
+                    auto zPred = yPred && check(z);
 					auto zMul = z * yMul;
 					auto zInd = indexOffset<Len2>(z) + yInd;
 					for (int x = 0; x < 10; ++x) {
 						auto outerMul = x * zMul;
 						auto combinedInd = indexOffset<Len1>(x) + zInd;
-                        auto outerPredicate = check(x) && zPred;
+                        auto outerPredicate = zPred && check(x);
                         updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen6, predicatesLen6);
 					}
 				}
@@ -180,17 +181,17 @@ inline void initialize() noexcept {
 		auto wMul = w;
 		auto wInd = indexOffset<Len4>(w);
 		for (int y = 0; y < 10; ++y) {
-			auto yPred = check(y) && wPred;
+			auto yPred = wPred && check(y);
 			auto yMul = y * wMul;
 			auto yInd = indexOffset<Len3>(y) + wInd;
 			for (int z = 0; z < 10; ++z) {
-				auto zPred = check(z) && yPred;
+				auto zPred = yPred && check(z);
 				auto zMul = z * yMul;
 				auto zInd = indexOffset<Len2>(z) + yInd;
 				for (int x = 0; x < 10; ++x) {
 					auto outerMul = x * zMul;
 					auto combinedInd = indexOffset<Len1>(x) + zInd;
-					auto outerPredicate = check(x) && zPred;
+					auto outerPredicate = zPred && check(x);
                     updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen5, predicatesLen5);
 				}
 			}
@@ -202,13 +203,13 @@ inline void initialize() noexcept {
 		auto yMul = y ;
 		auto yInd = indexOffset<Len3>(y);
 		for (int z = 0; z < 10; ++z) {
-			auto zPred = check(z) && yPred;
+			auto zPred = yPred && check(z);
 			auto zMul = z * yMul;
 			auto zInd = indexOffset<Len2>(z) + yInd;
 			for (int x = 0; x < 10; ++x) {
 				auto outerMul = x * zMul;
 				auto combinedInd = indexOffset<Len1>(x) + zInd;
-				auto outerPredicate = check(x) && zPred;
+				auto outerPredicate = zPred && check(x);
                 updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen4, predicatesLen4);
 			}
 		}
@@ -221,7 +222,7 @@ inline void initialize() noexcept {
 		for (int x = 0; x < 10; ++x) {
 			auto outerMul = x * zMul;
 			auto combinedInd = indexOffset<Len1>(x) + zInd;
-			auto outerPredicate = check(x) && zPred;
+			auto outerPredicate = zPred && check(x);
             updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen3, predicatesLen3);
 		}
 	}
@@ -251,9 +252,19 @@ inline bool legalValue(u64 x) noexcept {
 }
 
 template<u64 width>
+inline u64 getProduct(u64 x) noexcept;
+
+template<u64 partA, u64 partB>
+inline u64 getInnerProduct(u64 x) noexcept {
+	static_assert((partA + partB) < 20, "Can't express numbers 20 digits or higher!");
+	static constexpr auto divisor = fastPow10<partA>;
+	return getProduct<partA>(x % divisor) * getProduct<partB>(x / divisor);
+}
+template<u64 width>
 inline u64 getProduct(u64 x) noexcept {
-	static_assert(width < 9, "Too large of a product value!");
+	static_assert(width < 20, "Too large of a product value!");
 	switch(width) {
+		case 0: return 1;
 		case 1: return x;
 		case 2: return productsLen2[x];
 		case 3: return productsLen3[x];
@@ -261,9 +272,30 @@ inline u64 getProduct(u64 x) noexcept {
 		case 5: return productsLen5[x];
 		case 6: return productsLen6[x];
 		case 7: return productsLen7[x];
-		case 8: return (x % 10u) * (getProduct<7>(x / 10u));
+		case 8: return getInnerProduct<1, 7>(x);
+		case 9: return getInnerProduct<2, 7>(x);
+		case 10: return getInnerProduct<3, 7>(x);
+		case 11: return getInnerProduct<4, 7>(x);
+		case 12: return getInnerProduct<5, 7>(x);
+		case 13: return getInnerProduct<6, 7>(x);
+		case 14: return getInnerProduct<7, 7>(x);
+		case 15: return getInnerProduct<1, 14>(x);
+		case 16: return getInnerProduct<2, 14>(x);
+		case 17: return getInnerProduct<3, 14>(x);
+		case 18: return getInnerProduct<4, 14>(x);
+		case 19: return getInnerProduct<5, 14>(x);
 		default: return x;
 	}
+}
+
+template<u64 width>
+inline u64 getSum(u64) noexcept;
+
+template<u64 partA, u64 partB>
+inline u64 getInnerSum(u64 x) noexcept {
+	static_assert((partA + partB) < 20, "Can't express numbers 20 digits or higher!");
+	static constexpr auto divisor = fastPow10<partA>;
+	return getSum<partA>(x % divisor) + getSum<partB>(x / divisor);
 }
 
 template<u64 width>
@@ -278,19 +310,19 @@ inline u64 getSum(u64 x) noexcept {
 		case 5:
 		case 6:
 		case 7: return sums[x];
-		case 8: return getSum<1>(x % fastPow10<1>) + getSum<7>(x / fastPow10<1>);
-		case 9: return getSum<2>(x % fastPow10<2>) + getSum<7>(x / fastPow10<2>);
-		case 10: return getSum<3>(x % fastPow10<3>) + getSum<7>(x / fastPow10<3>);
-		case 11: return getSum<4>(x % fastPow10<4>) + getSum<7>(x / fastPow10<4>);
-		case 12: return getSum<5>(x % fastPow10<5>) + getSum<7>(x / fastPow10<5>);
-		case 13: return getSum<6>(x % fastPow10<6>) + getSum<7>(x / fastPow10<6>);
-		case 14: return getSum<7>(x % fastPow10<7>) + getSum<7>(x / fastPow10<7>);
-		case 15: return getSum<1>(x % fastPow10<1>) + getSum<14>(x / fastPow10<1>);
-		case 16: return getSum<2>(x % fastPow10<2>) + getSum<14>(x / fastPow10<2>);
-		case 17: return getSum<3>(x % fastPow10<3>) + getSum<14>(x / fastPow10<3>);
-		case 18: return getSum<4>(x % fastPow10<4>) + getSum<14>(x / fastPow10<4>);
-		case 19: return getSum<5>(x % fastPow10<5>) + getSum<14>(x / fastPow10<5>);
-		default: throw "Illegal width requested!";
+		case 8: return getInnerSum<1, 7>(x);
+		case 9: return getInnerSum<2, 7>(x);
+		case 10: return getInnerSum<3, 7>(x);
+		case 11: return getInnerSum<4, 7>(x);
+		case 12: return getInnerSum<5, 7>(x);
+		case 13: return getInnerSum<6, 7>(x);
+		case 14: return getInnerSum<7, 7>(x);
+		case 15: return getInnerSum<1, 14>(x);
+		case 16: return getInnerSum<2, 14>(x);
+		case 17: return getInnerSum<3, 14>(x);
+		case 18: return getInnerSum<4, 14>(x);
+		case 19: return getInnerSum<5, 14>(x);
+		default: return x;
 	}
 }
 
@@ -298,123 +330,45 @@ template<u64 length>
 constexpr u64 startIndex() noexcept {
 	return static_cast<u64>(shaveFactor * fastPow10<length - 1>);
 }
-template<u64 length>
-constexpr u64 endIndex() noexcept {
-	return fastPow10<length>;
-}
 constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
 template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
-	// assume that we start at 2.222222222222
-	// skip over the 9th and 10th numbers from this position!
-	// I also noticed that the only time we run into odd numbers is
-	// 3,5,7,9,735, all other numbers so far have been even!
-	if (length == 7) {
-		for (auto value = start; value < end; ++value) {
-            if (isEven(value) && legalValue<7>(value) && isQuodigious(value, getSum<7>(value), getProduct<7>(value))) {
-				results.emplace_back(value);
-			}
-		}
-	} else {
-		// precompute the fuck out of all of this!
-		// Compilers hate me, I am the TEMPLATE MASTER
-			static constexpr auto l3Digits = level3Digits<length>();
-			static constexpr auto l2Digits = level2Digits<length>();
-			static constexpr auto l1Digits = level1Digits<length>();
-			static constexpr auto l1Shift = 0u;
-			static constexpr auto l2Shift = l1Digits;
-			static constexpr auto l3Shift = l2Digits + l1Digits;
-			static constexpr auto l3Factor = fastPow10<l3Digits>;
-			static constexpr auto l2Factor = fastPow10<l2Digits>;
-			static constexpr auto l1Factor = fastPow10<l1Digits>;
-			static constexpr auto l3Section = fastPow10<l3Shift>;
-			static constexpr auto l2Section = fastPow10<l2Shift>;
-			static constexpr auto l1Section = fastPow10<l1Shift>;
-			static constexpr auto startL1 = start % l1Factor;
-			static constexpr auto startL2 = (start / l1Factor) % l2Factor;
-			static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
-			static constexpr auto attemptEndL1 = end % l1Factor;
-			static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
-			static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
-			static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
-			static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
-			static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
-
-
-		if (numberOfLevels<length>() == 4) {
-			static constexpr auto l4Digits = level4Digits<length>();
-			static constexpr auto l4Shift = l3Digits + l2Digits + l1Digits;
-			static constexpr auto l4Factor = fastPow10<l4Digits>;
-			static constexpr auto l4Section = fastPow10<l4Shift>;
-			static constexpr auto startL4 = (((start / l1Factor) / l2Factor) / l3Factor) % l4Factor;
-			static constexpr auto attemptEndL4 = (((end / l1Factor) / l2Factor) / l3Factor) % l4Factor;
-			static constexpr auto endL4 = attemptEndL4 == 0 ? l4Factor : attemptEndL4;
-
-			for (auto a = startL4; a < endL4; ++a) {
-				auto l4Sum = getSum<l4Digits>(a);
-				auto l4Product = getProduct<l4Digits>(a);
-				auto l4Index = indexOffset<l4Section>(a);
-				if (legalValue<l4Digits>(a)) {
-					for (auto i = startL3; i < endL3; ++i) {
-						if (legalValue<l3Digits>(i)) {
-							auto l3Sum = getSum<l3Digits>(i) + l4Sum ;
-							auto l3Product = getProduct<l3Digits>(i) * l4Product;
-							auto l3Index = indexOffset<l3Section>(i) + l4Index;
-							for (auto j = startL2; j < endL2; ++j) {
-								if (legalValue<l2Digits>(j)) {
-									auto l2Sum = getSum<l2Digits>(j) + l3Sum;
-									auto l2Product = getProduct<l2Digits>(j) * l3Product;
-									auto l2Index = indexOffset<l2Section>(j) + l3Index;
-									for (auto k = startL1; k < endL1; ++k) {
-										if (isEven(k) && legalValue<l1Digits>(k)) {
-											auto l1Product = l2Product * getProduct<l1Digits>(k);
-											auto l1Sum = l2Sum + getSum<l1Digits>(k);
-											auto l1Value = indexOffset<l1Section>(k) + l2Index;
-											if (isQuodigious(l1Value, l1Sum, l1Product)) {
-												results.emplace_back(l1Value);
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if (numberOfLevels<length>() == 3) {
-			for (auto i = startL3; i < endL3; ++i) {
-				if (legalValue<l3Digits>(i)) {
-					auto l3Sum = getSum<l3Digits>(i);
-					auto l3Product = getProduct<l3Digits>(i);
-					auto l3Index = indexOffset<l3Section>(i);
-					for (auto j = startL2; j < endL2; ++j) {
-						if (legalValue<l2Digits>(j)) {
-							auto l2Sum = getSum<l2Digits>(j) + l3Sum;
-							auto l2Product = getProduct<l2Digits>(j) * l3Product;
-							auto l2Index = indexOffset<l2Section>(j) + l3Index;
-							for (auto k = startL1; k < endL1; ++k) {
-								if (isEven(k) && legalValue<l1Digits>(k)) {
-									auto l1Product = l2Product * getProduct<l1Digits>(k);
-									auto l1Sum = l2Sum + getSum<l1Digits>(k);
-									auto l1Value = indexOffset<l1Section>(k) + l2Index;
-									if (isQuodigious(l1Value, l1Sum, l1Product)) {
-										results.emplace_back(l1Value);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if (numberOfLevels<length>() == 2) {
+	// precompute the fuck out of all of this!
+	// Compilers hate me, I am the TEMPLATE MASTER
+	static constexpr auto l3Digits = level3Digits<length>;
+	static constexpr auto l2Digits = level2Digits<length>;
+	static constexpr auto l1Digits = level1Digits<length>;
+	static constexpr auto l1Shift = 0u;
+	static constexpr auto l2Shift = l1Digits;
+	static constexpr auto l3Shift = l2Digits + l1Digits;
+	static constexpr auto l3Factor = fastPow10<l3Digits>;
+	static constexpr auto l2Factor = fastPow10<l2Digits>;
+	static constexpr auto l1Factor = fastPow10<l1Digits>;
+	static constexpr auto l3Section = fastPow10<l3Shift>;
+	static constexpr auto l2Section = fastPow10<l2Shift>;
+	static constexpr auto l1Section = fastPow10<l1Shift>;
+	static constexpr auto startL1 = start % l1Factor;
+	static constexpr auto startL2 = (start / l1Factor) % l2Factor;
+	static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+	static constexpr auto attemptEndL1 = end % l1Factor;
+	static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+	static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+	static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+	static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+	static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
+	for (auto i = startL3; i < endL3; ++i) {
+		if (legalValue<l3Digits>(i)) {
+			auto l3Sum = getSum<l3Digits>(i);
+			auto l3Product = getProduct<l3Digits>(i);
+			auto l3Index = indexOffset<l3Section>(i);
 			for (auto j = startL2; j < endL2; ++j) {
 				if (legalValue<l2Digits>(j)) {
-					auto l2Sum = getSum<l2Digits>(j);
-					auto l2Product = getProduct<l2Digits>(j);
-					auto l2Index = indexOffset<l2Section>(j);
+					auto l2Sum = getSum<l2Digits>(j) + l3Sum;
+					auto l2Product = getProduct<l2Digits>(j) * l3Product;
+					auto l2Index = indexOffset<l2Section>(j) + l3Index;
 					for (auto k = startL1; k < endL1; ++k) {
 						if (isEven(k) && legalValue<l1Digits>(k)) {
 							auto l1Product = l2Product * getProduct<l1Digits>(k);
@@ -427,9 +381,6 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 					}
 				}
 			}
-		} else {
-			std::cerr << "can't use " << numberOfLevels<length>() << " as a legal value!" << std::endl;
-			throw 0;
 		}
 	}
 	return 0;
@@ -438,7 +389,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 #ifdef DEBUG
 template<u64 width>
 inline void printDigitalLayout() noexcept {
-	std::cout << width << ":" << level3Digits<width>() << ":" << level2Digits<width>() << ":" << level1Digits<width>() << std::endl;
+	std::cout << width << ":" << level3Digits<width> << ":" << level2Digits<width> << ":" << level1Digits<width> << std::endl;
 }
 #endif
 
@@ -450,19 +401,11 @@ void printout(vec64& l) noexcept {
 	l.clear();
 }
 
-template<u64 length>
-inline void singleThreadedSimpleBody() noexcept {
-    for (auto value = startIndex<length>(); value < endIndex<length>(); ++value) {
-		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
-			std::cout << value << std::endl;
-		}
-	}
-	std::cout << std::endl;
-}
 template<u64 length, u64 base, u64 st, u64 startFactor, u64 endFactor>
 inline int doQuodigious(vec64& input) noexcept {
 	return performQuodigiousCheck<length, (st + (base * startFactor)), base * endFactor>(input);
 }
+
 template<u64 length>
 inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
@@ -480,7 +423,7 @@ inline void body() noexcept {
 	auto fut4 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 4, 7 >(l4); });
 	auto fut5 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 5, 8 >(l5); });
 	auto fut6 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 6, 9 >(l6); });
-	doQuodigious<length, base, st, 7, 10>(l7);
+	auto fut7 = std::async(std::launch::async, []() { return doQuodigious<length, base, st, 7, 10>(l7); });
 	fut0.get();
 	fut1.get();
 	fut2.get();
@@ -488,6 +431,7 @@ inline void body() noexcept {
 	fut4.get();
 	fut5.get();
 	fut6.get();
+	fut7.get();
 	printout(l0);
 	printout(l1);
 	printout(l2);
@@ -496,6 +440,19 @@ inline void body() noexcept {
 	printout(l5);
 	printout(l6);
 	printout(l7);
+	std::cout << std::endl;
+}
+
+template<u64 length>
+constexpr auto endIndex = fastPow10<length>;
+
+template<u64 length>
+inline void singleThreadedSimpleBody() noexcept {
+    for (auto value = startIndex<length>(); value < endIndex<length>; ++value) {
+		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
+			std::cout << value << std::endl;
+		}
+	}
 	std::cout << std::endl;
 }
 
