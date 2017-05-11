@@ -146,7 +146,7 @@ inline void initialize() noexcept {
 									auto combinedInd = indexOffset<Len1>(x) + zInd;
 									auto outerSum = x + zSum;
 									auto outerPredicate = zPred && check(x);
-									updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+									updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen9, predicatesLen9);
 								}
 							}
 						}
