@@ -235,32 +235,36 @@ inline void initialize() noexcept {
 }
 
 template<u64 width>
-inline bool legalValue(u64 _) noexcept {
+inline bool legalValue(u64 x) noexcept {
 	static_assert(width < 9, "Too large of a legal value check!");
-	return false;
+	switch(width) {
+		case 1: return x >= 2u && x != 5;
+		case 2: return predicatesLen2[x];
+		case 3: return predicatesLen3[x];
+		case 4: return predicatesLen4[x];
+		case 5: return predicatesLen5[x];
+		case 6: return predicatesLen6[x];
+		case 7: return predicatesLen7[x];
+		case 8: return legalValue<1>(x % 10u) && legalValue<7>(x / 10u);
+		default: return false;
+	}
 }
-template<> inline bool legalValue<1>(u64 x) noexcept { return x >= 2u && x != 5; }
-template<> inline bool legalValue<2>(u64 x) noexcept { return predicatesLen2[x]; }
-template<> inline bool legalValue<3>(u64 x) noexcept { return predicatesLen3[x]; }
-template<> inline bool legalValue<4>(u64 x) noexcept { return predicatesLen4[x]; }
-template<> inline bool legalValue<5>(u64 x) noexcept { return predicatesLen5[x]; }
-template<> inline bool legalValue<6>(u64 x) noexcept { return predicatesLen6[x]; }
-template<> inline bool legalValue<7>(u64 x) noexcept { return predicatesLen7[x]; }
-template<> inline bool legalValue<8>(u64 x) noexcept { return legalValue<1>(x % 10u) && predicatesLen7[x / 10u]; }
 
 template<u64 width>
-inline u64 getProduct(u64 value) noexcept {
+inline u64 getProduct(u64 x) noexcept {
 	static_assert(width < 9, "Too large of a product value!");
-	return value;
+	switch(width) {
+		case 1: return x;
+		case 2: return productsLen2[x];
+		case 3: return productsLen3[x];
+		case 4: return productsLen4[x];
+		case 5: return productsLen5[x];
+		case 6: return productsLen6[x];
+		case 7: return productsLen7[x];
+		case 8: return (x % 10u) * (getProduct<7>(x / 10u));
+		default: return x;
+	}
 }
-template<> inline u64 getProduct<1>(u64 x) noexcept { return x; }
-template<> inline u64 getProduct<2>(u64 x) noexcept { return productsLen2[x]; }
-template<> inline u64 getProduct<3>(u64 x) noexcept { return productsLen3[x]; }
-template<> inline u64 getProduct<4>(u64 x) noexcept { return productsLen4[x]; }
-template<> inline u64 getProduct<5>(u64 x) noexcept { return productsLen5[x]; }
-template<> inline u64 getProduct<6>(u64 x) noexcept { return productsLen6[x]; }
-template<> inline u64 getProduct<7>(u64 x) noexcept { return productsLen7[x]; }
-template<> inline u64 getProduct<8>(u64 x) noexcept { return (x % 10u) * (getProduct<7>(x / 10u)); }
 
 template<u64 width>
 inline u64 getSum(u64 x) noexcept {

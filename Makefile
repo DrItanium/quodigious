@@ -17,8 +17,12 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS = -std=c++14 -O3
-LXXFLAGS = -lpthread -O3 -flto -fwhole-program
+CXXFLAGS = -std=c++14 -O3 
+# comment this out if you want to make a roughly system agnostic binary
+CXXFLAGS += -march=native
+LXXFLAGS = -lpthread -O3 -flto -fwhole-program 
+# comment this out if you want to make a roughly system agnostic binary
+LXXFLAGS += -march=native
 TITLE = quodigious
 FILES = quodigious.o
 
