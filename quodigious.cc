@@ -25,28 +25,28 @@
 #include <functional>
 #include "qlib.h"
 
-constexpr auto Len7 = fastPow10<7>();
+constexpr auto Len7 = fastPow10<7>;
 u64 sums[Len7] = { 0 };
 u64 productsLen7[Len7] = { 0 };
 bool predicatesLen7[Len7] = { false };
-constexpr auto Len6 = fastPow10<6>();
+constexpr auto Len6 = fastPow10<6>;
 u64 productsLen6[Len6] = { 0 };
 bool predicatesLen6[Len6] = { false };
-constexpr auto Len5 = fastPow10<5>();
+constexpr auto Len5 = fastPow10<5>;
 u64 productsLen5[Len5] = { 0 };
 bool predicatesLen5[Len5] = { false };
-constexpr auto Len4 = fastPow10<4>();
+constexpr auto Len4 = fastPow10<4>;
 u64 productsLen4[Len4] = { 0 };
 bool predicatesLen4[Len4] = { false };
-constexpr auto Len3 = fastPow10<3>();
+constexpr auto Len3 = fastPow10<3>;
 u64 productsLen3[Len3] = { 0 };
 bool predicatesLen3[Len3] = { false };
-constexpr auto Len2 = fastPow10<2>();
+constexpr auto Len2 = fastPow10<2>;
 u64 productsLen2[Len2] = { 0 };
 bool predicatesLen2[Len2] = { false };
-constexpr auto Len1 = fastPow10<1>();
+constexpr auto Len1 = fastPow10<1>;
 template<bool includeFives>
-inline constexpr bool isLegalDigit(u64 value) noexcept {
+constexpr bool isLegalDigit(u64 value) noexcept {
     auto baseResult = value >=2;
     if (!includeFives) {
         baseResult = baseResult && value != 5;
@@ -54,12 +54,12 @@ inline constexpr bool isLegalDigit(u64 value) noexcept {
     return baseResult;
 }
 template<u64 value, bool includeFives>
-inline constexpr bool isLegalDigitSingular() noexcept {
+constexpr bool isLegalDigitSingular() noexcept {
     static_assert(value<= 9, "Offset shouldn't be larger than 9!");
     return value >= 2 && (includeFives ? true : value != 5);
 }
 template<u64 offset>
-inline constexpr u64 indexOffset(u64 value) noexcept {
+constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
 }
 template<u64 offset, bool includeFives, bool updateSums = false>
@@ -274,31 +274,31 @@ inline u64 getSum(u64 x) noexcept {
 		case 5:
 		case 6:
 		case 7: return sums[x];
-		case 8: return getSum<1>(x % fastPow10<1>()) + getSum<7>(x / fastPow10<1>());
-		case 9: return getSum<2>(x % fastPow10<2>()) + getSum<7>(x / fastPow10<2>());
-		case 10: return getSum<3>(x % fastPow10<3>()) + getSum<7>(x / fastPow10<3>());
-		case 11: return getSum<4>(x % fastPow10<4>()) + getSum<7>(x / fastPow10<4>());
-		case 12: return getSum<5>(x % fastPow10<5>()) + getSum<7>(x / fastPow10<5>());
-		case 13: return getSum<6>(x % fastPow10<6>()) + getSum<7>(x / fastPow10<6>());
-		case 14: return getSum<7>(x % fastPow10<7>()) + getSum<7>(x / fastPow10<7>());
-		case 15: return getSum<1>(x % fastPow10<1>()) + getSum<14>(x / fastPow10<1>());
-		case 16: return getSum<2>(x % fastPow10<2>()) + getSum<14>(x / fastPow10<2>());
-		case 17: return getSum<3>(x % fastPow10<3>()) + getSum<14>(x / fastPow10<3>());
-		case 18: return getSum<4>(x % fastPow10<4>()) + getSum<14>(x / fastPow10<4>());
-		case 19: return getSum<5>(x % fastPow10<5>()) + getSum<14>(x / fastPow10<5>());
+		case 8: return getSum<1>(x % fastPow10<1>) + getSum<7>(x / fastPow10<1>);
+		case 9: return getSum<2>(x % fastPow10<2>) + getSum<7>(x / fastPow10<2>);
+		case 10: return getSum<3>(x % fastPow10<3>) + getSum<7>(x / fastPow10<3>);
+		case 11: return getSum<4>(x % fastPow10<4>) + getSum<7>(x / fastPow10<4>);
+		case 12: return getSum<5>(x % fastPow10<5>) + getSum<7>(x / fastPow10<5>);
+		case 13: return getSum<6>(x % fastPow10<6>) + getSum<7>(x / fastPow10<6>);
+		case 14: return getSum<7>(x % fastPow10<7>) + getSum<7>(x / fastPow10<7>);
+		case 15: return getSum<1>(x % fastPow10<1>) + getSum<14>(x / fastPow10<1>);
+		case 16: return getSum<2>(x % fastPow10<2>) + getSum<14>(x / fastPow10<2>);
+		case 17: return getSum<3>(x % fastPow10<3>) + getSum<14>(x / fastPow10<3>);
+		case 18: return getSum<4>(x % fastPow10<4>) + getSum<14>(x / fastPow10<4>);
+		case 19: return getSum<5>(x % fastPow10<5>) + getSum<14>(x / fastPow10<5>);
 		default: throw "Illegal width requested!";
 	}
 }
 
 template<u64 length>
 constexpr u64 startIndex() noexcept {
-	return static_cast<u64>(shaveFactor * fastPow10<length - 1>());
+	return static_cast<u64>(shaveFactor * fastPow10<length - 1>);
 }
 template<u64 length>
 constexpr u64 endIndex() noexcept {
-	return fastPow10<length>();
+	return fastPow10<length>;
 }
-inline constexpr bool isEven(u64 value) noexcept {
+constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
@@ -323,12 +323,12 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			static constexpr auto l1Shift = 0u;
 			static constexpr auto l2Shift = l1Digits;
 			static constexpr auto l3Shift = l2Digits + l1Digits;
-			static constexpr auto l3Factor = fastPow10<l3Digits>();
-			static constexpr auto l2Factor = fastPow10<l2Digits>();
-			static constexpr auto l1Factor = fastPow10<l1Digits>();
-			static constexpr auto l3Section = fastPow10<l3Shift>();
-			static constexpr auto l2Section = fastPow10<l2Shift>();
-			static constexpr auto l1Section = fastPow10<l1Shift>();
+			static constexpr auto l3Factor = fastPow10<l3Digits>;
+			static constexpr auto l2Factor = fastPow10<l2Digits>;
+			static constexpr auto l1Factor = fastPow10<l1Digits>;
+			static constexpr auto l3Section = fastPow10<l3Shift>;
+			static constexpr auto l2Section = fastPow10<l2Shift>;
+			static constexpr auto l1Section = fastPow10<l1Shift>;
 			static constexpr auto startL1 = start % l1Factor;
 			static constexpr auto startL2 = (start / l1Factor) % l2Factor;
 			static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
@@ -343,8 +343,8 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 		if (numberOfLevels<length>() == 4) {
 			static constexpr auto l4Digits = level4Digits<length>();
 			static constexpr auto l4Shift = l3Digits + l2Digits + l1Digits;
-			static constexpr auto l4Factor = fastPow10<l4Digits>();
-			static constexpr auto l4Section = fastPow10<l4Shift>();
+			static constexpr auto l4Factor = fastPow10<l4Digits>;
+			static constexpr auto l4Section = fastPow10<l4Shift>;
 			static constexpr auto startL4 = (((start / l1Factor) / l2Factor) / l3Factor) % l4Factor;
 			static constexpr auto attemptEndL4 = (((end / l1Factor) / l2Factor) / l3Factor) % l4Factor;
 			static constexpr auto endL4 = attemptEndL4 == 0 ? l4Factor : attemptEndL4;
@@ -464,7 +464,7 @@ inline void body() noexcept {
 	static vec64 l0, l1, l2, l3, l4, l5, l6, l7;
 	static constexpr auto skip5 = length > 4;
 	// this is not going to change ever!
-	static constexpr auto base = fastPow10<length - 1>();
+	static constexpr auto base = fastPow10<length - 1>;
 	static constexpr auto st = static_cast<u64>(shaveFactor * base);
 #ifdef DEBUG
 	printDigitalLayout<length>();

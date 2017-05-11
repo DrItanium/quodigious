@@ -24,13 +24,16 @@
 using u64 = uint64_t;
 
 template<u64 length>
-inline constexpr u64 fastPow10() noexcept {
-	return fastPow10<length - 1>() * 10;
+constexpr u64 quickPow10() noexcept {
+	return quickPow10<length - 1>() * 10;
 }
 template<>
-inline constexpr u64 fastPow10<0>() noexcept {
+constexpr u64 quickPow10<0>() noexcept {
 	return 1;
 }
+
+template<u64 length>
+constexpr auto fastPow10 = quickPow10<length>();
 
 /**
  * This is used all over the place, it is the actual code to check to see if a
@@ -38,7 +41,7 @@ inline constexpr u64 fastPow10<0>() noexcept {
  * and products (if we get this far).
  */
 template<typename T>
-inline constexpr bool isQuodigious(T value, T sum, T product) noexcept {
+constexpr bool isQuodigious(T value, T sum, T product) noexcept {
 	return ((value % sum) == 0) && ((value % product) == 0);
 }
 
@@ -58,23 +61,23 @@ struct NotationDescription {
 	static_assert(width == (level3Digits + level2Digits + level1Digits), "Not enough digits defined!");
 };
 template<u64 width>
-inline constexpr u64 numberOfLevels() noexcept {
+constexpr u64 numberOfLevels() noexcept {
 	return NotationDescription<width>::numberOfLevels;
 }
 template<u64 width>
-inline constexpr u64 level4Digits() noexcept {
+constexpr u64 level4Digits() noexcept {
 	return numberOfLevels<width>() >= 4 ? NotationDescription<width>::level4Digits : 0u;
 }
 template<u64 width>
-inline constexpr u64 level3Digits() noexcept {
+constexpr u64 level3Digits() noexcept {
 	return NotationDescription<width>::level3Digits;
 }
 template<u64 width>
-inline constexpr u64 level2Digits() noexcept {
+constexpr u64 level2Digits() noexcept {
 	return NotationDescription<width>::level2Digits;
 }
 template<u64 width>
-inline constexpr u64 level1Digits() noexcept {
+constexpr u64 level1Digits() noexcept {
 	return NotationDescription<width>::level1Digits;
 }
 
@@ -97,14 +100,14 @@ struct NotationDescription< width > { \
 	static constexpr u64 level1Digits = l1 ; \
 	static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!"); \
 }; \
-template<> inline constexpr u64 level4Digits< width > () noexcept { return 0; }
+template<> constexpr u64 level4Digits< width > () noexcept { return 0; }
 #include "notations.def"
 #undef X
 #undef Y
 
-template<> inline constexpr u64 level4Digits<1>() noexcept { return 0; }
-template<> inline constexpr u64 level4Digits<2>() noexcept { return 0; }
-template<> inline constexpr u64 level4Digits<3>() noexcept { return 0; }
+template<> constexpr u64 level4Digits<1>() noexcept { return 0; }
+template<> constexpr u64 level4Digits<2>() noexcept { return 0; }
+template<> constexpr u64 level4Digits<3>() noexcept { return 0; }
 
 
 /**
