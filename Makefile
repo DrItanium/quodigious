@@ -17,11 +17,11 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS = -std=c++14 -O3 
+CXXFLAGS = -std=c++14 -O3 -mcmodel=medium
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -lpthread -O3 -flto -fwhole-program 
+LXXFLAGS = -lpthread -O3 -flto -fwhole-program -mcmodel=medium
 TITLE = quodigious
 FILES = quodigious.o
 
