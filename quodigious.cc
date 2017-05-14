@@ -383,6 +383,33 @@ void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexc
 	}
 }
 
+template<u64 start, u64 end, u64 digitCount, u64 section>
+void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+	if (digitCount == 1) {
+		singleDigitInnerLoop<section, digitCount, 2>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 3>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 4>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 5>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 6>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 7>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 8>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 9>(product, sum, index, results);
+	} else {
+		for (auto k = start; k < end; ++k) {
+			if (isEven(k) && legalValue<digitCount>(k)) {
+				auto l1Sum = sum + getSum<digitCount>(k);
+				auto l1Value = indexOffset<section>(k) + index;
+				if (componentQuodigious(l1Value, l1Sum)) {
+					auto l1Product = product * getProduct<digitCount>(k);
+					if (componentQuodigious(l1Value, l1Product)) {
+						results.emplace_back(l1Value);
+					}
+				}
+			}
+		}
+	}
+}
+
 
 template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
@@ -420,29 +447,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 					auto l2Sum = getSum<l2Digits>(j) + l3Sum;
 					auto l2Product = getProduct<l2Digits>(j) * l3Product;
 					auto l2Index = indexOffset<l2Section>(j) + l3Index;
-					if (l1Digits == 1) {
-						singleDigitInnerLoop<l1Section, l1Digits, 2>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 3>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 4>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 5>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 6>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 7>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 8>(l2Product, l2Sum, l2Index, results);
-						singleDigitInnerLoop<l1Section, l1Digits, 9>(l2Product, l2Sum, l2Index, results);
-					} else {
-						for (auto k = startL1; k < endL1; ++k) {
-							if (isEven(k) && legalValue<l1Digits>(k)) {
-								auto l1Sum = l2Sum + getSum<l1Digits>(k);
-								auto l1Value = indexOffset<l1Section>(k) + l2Index;
-								if (componentQuodigious(l1Value, l1Sum)) {
-									auto l1Product = l2Product * getProduct<l1Digits>(k);
-									if (componentQuodigious(l1Value, l1Product)) {
-										results.emplace_back(l1Value);
-									}
-								}
-							}
-						}
-					}
+					innermostLoopBody<startL1, endL1, l1Digits, l1Section>(l2Sum, l2Product, l2Index, results);
 				}
 			}
 		}
