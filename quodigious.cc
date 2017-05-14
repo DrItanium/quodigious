@@ -369,7 +369,7 @@ constexpr bool isEven(u64 value) noexcept {
 }
 
 template<u64 section, u64 digitCount, u64 k>
-void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
 	if (isEven(k) && legalValue<digitCount>(k)) {
 		auto ns = sum + getSum<digitCount>(k);
 		auto nv = indexOffset<section>(k) + value;
@@ -384,16 +384,16 @@ void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexc
 }
 
 template<u64 start, u64 end, u64 digitCount, u64 section>
-void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
 		singleDigitInnerLoop<section, digitCount, 2>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 3>(product, sum, index, results);
+		//singleDigitInnerLoop<section, digitCount, 3>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 4>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 5>(product, sum, index, results);
+		//singleDigitInnerLoop<section, digitCount, 5>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 6>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 7>(product, sum, index, results);
+		//singleDigitInnerLoop<section, digitCount, 7>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 8>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 9>(product, sum, index, results);
+		//singleDigitInnerLoop<section, digitCount, 9>(product, sum, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
