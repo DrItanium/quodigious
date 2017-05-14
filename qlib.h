@@ -35,6 +35,11 @@ constexpr u64 quickPow10<0>() noexcept {
 template<u64 length>
 constexpr auto fastPow10 = quickPow10<length>();
 
+
+template<typename T>
+constexpr bool componentQuodigious(T value, T compare) noexcept {
+	return (value % compare) == 0;
+}
 /**
  * This is used all over the place, it is the actual code to check to see if a
  * number is actuall quodigious. All of the work before hand is to get the sum
@@ -42,8 +47,10 @@ constexpr auto fastPow10 = quickPow10<length>();
  */
 template<typename T>
 constexpr bool isQuodigious(T value, T sum, T product) noexcept {
-	return ((value % sum) == 0) && ((value % product) == 0);
+	return componentQuodigious<T>(value, sum) && componentQuodigious(value, product);
 }
+
+
 
 /**
  * Represents the starting offset of any base number for any width!

@@ -57,6 +57,7 @@ template<u64 offset>
 constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
 }
+
 template<u64 offset, bool includeFives, bool updateSums = false>
 inline void updateTables(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
     static_assert(offset <= 9, "Offset shouldn't be larger than 9!");
@@ -367,6 +368,22 @@ constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
+template<u64 section, u64 digitCount, u64 k>
+void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+	if (isEven(k) && legalValue<digitCount>(k)) {
+		auto ns = sum + getSum<digitCount>(k);
+		auto nv = indexOffset<section>(k) + value;
+		if (componentQuodigious(nv, ns)) {
+			// only compute the product if the sum is divisible
+			auto np = product * getProduct<digitCount>(k);
+			if (componentQuodigious(nv, np)) {
+				results.emplace_back(nv);
+			}
+		}
+	}
+}
+
+
 template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// precompute the fuck out of all of this!
@@ -403,13 +420,26 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 					auto l2Sum = getSum<l2Digits>(j) + l3Sum;
 					auto l2Product = getProduct<l2Digits>(j) * l3Product;
 					auto l2Index = indexOffset<l2Section>(j) + l3Index;
-					for (auto k = startL1; k < endL1; ++k) {
-						if (isEven(k) && legalValue<l1Digits>(k)) {
-							auto l1Product = l2Product * getProduct<l1Digits>(k);
-							auto l1Sum = l2Sum + getSum<l1Digits>(k);
-							auto l1Value = indexOffset<l1Section>(k) + l2Index;
-							if (isQuodigious(l1Value, l1Sum, l1Product)) {
-								results.emplace_back(l1Value);
+					if (l1Digits == 1) {
+						singleDigitInnerLoop<l1Section, l1Digits, 2>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 3>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 4>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 5>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 6>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 7>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 8>(l2Product, l2Sum, l2Index, results);
+						singleDigitInnerLoop<l1Section, l1Digits, 9>(l2Product, l2Sum, l2Index, results);
+					} else {
+						for (auto k = startL1; k < endL1; ++k) {
+							if (isEven(k) && legalValue<l1Digits>(k)) {
+								auto l1Sum = l2Sum + getSum<l1Digits>(k);
+								auto l1Value = indexOffset<l1Section>(k) + l2Index;
+								if (componentQuodigious(l1Value, l1Sum)) {
+									auto l1Product = l2Product * getProduct<l1Digits>(k);
+									if (componentQuodigious(l1Value, l1Product)) {
+										results.emplace_back(l1Value);
+									}
+								}
 							}
 						}
 					}
