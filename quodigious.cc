@@ -149,6 +149,11 @@ inline void initialize() noexcept {
 			}
 		}
 	}
+	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
+		for (int x = 0; x < 10; ++x) {
+			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && check(x), sums, prods, preds);
+		}
+	};
 	// Len7
 	for (int k = 0; k < 10; ++k) {
 		auto kPred = check(k);
@@ -170,12 +175,7 @@ inline void initialize() noexcept {
 						auto zPred = yPred && check(z);
 						auto zMul = z * yMul;
 						auto zInd = indexOffset<Len2>(z) + yInd;
-						for (int x = 0; x < 10; ++x) {
-							auto outerMul = x * zMul;
-							auto combinedInd = indexOffset<Len1>(x) + zInd;
-							auto outerPredicate = zPred && check(x);
-                            updateTables10<includeFives>(combinedInd, 0, outerMul, outerPredicate, sums, productsLen7, predicatesLen7);
-						}
+						innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen7, predicatesLen7);
 					}
 				}
 			}
@@ -199,12 +199,7 @@ inline void initialize() noexcept {
                     auto zPred = yPred && check(z);
 					auto zMul = z * yMul;
 					auto zInd = indexOffset<Len2>(z) + yInd;
-					for (int x = 0; x < 10; ++x) {
-						auto outerMul = x * zMul;
-						auto combinedInd = indexOffset<Len1>(x) + zInd;
-                        auto outerPredicate = zPred && check(x);
-                        updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen6, predicatesLen6);
-					}
+					innerMostBodyNoSumUpdate(zMul, 0u,  zInd, zPred, productsLen6, predicatesLen6);
 				}
 			}
 		}
@@ -222,12 +217,7 @@ inline void initialize() noexcept {
 				auto zPred = yPred && check(z);
 				auto zMul = z * yMul;
 				auto zInd = indexOffset<Len2>(z) + yInd;
-				for (int x = 0; x < 10; ++x) {
-					auto outerMul = x * zMul;
-					auto combinedInd = indexOffset<Len1>(x) + zInd;
-					auto outerPredicate = zPred && check(x);
-                    updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen5, predicatesLen5);
-				}
+				innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen5, predicatesLen5);
 			}
 		}
 	}
@@ -240,12 +230,7 @@ inline void initialize() noexcept {
 			auto zPred = yPred && check(z);
 			auto zMul = z * yMul;
 			auto zInd = indexOffset<Len2>(z) + yInd;
-			for (int x = 0; x < 10; ++x) {
-				auto outerMul = x * zMul;
-				auto combinedInd = indexOffset<Len1>(x) + zInd;
-				auto outerPredicate = zPred && check(x);
-                updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen4, predicatesLen4);
-			}
+			innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen4, predicatesLen4);
 		}
 	}
 	// Len3
@@ -253,19 +238,11 @@ inline void initialize() noexcept {
         auto zPred = check(z);
 		auto zMul = z;
         auto zInd = indexOffset<Len2>(z);
-		for (int x = 0; x < 10; ++x) {
-			auto outerMul = x * zMul;
-			auto combinedInd = indexOffset<Len1>(x) + zInd;
-			auto outerPredicate = zPred && check(x);
-            updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen3, predicatesLen3);
-		}
+		innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen3, predicatesLen3);
 	}
 	// Len2
 	for (int x = 0; x < 10; ++x) {
-		auto outerMul = x;
-		auto combinedInd = indexOffset<Len1>(x);
-		auto outerPredicate = check(x);
-        updateTables10<includeFives>(combinedInd, 0u, outerMul, outerPredicate, sums, productsLen2, predicatesLen2);
+        updateTables10<includeFives>(indexOffset<Len1>(x), 0u, x, check(x), sums, productsLen2, predicatesLen2);
 	}
 }
 
@@ -361,14 +338,13 @@ inline u64 getSum(u64 x) noexcept {
 }
 
 template<u64 length>
-constexpr u64 startIndex() noexcept {
-	return static_cast<u64>(shaveFactor * fastPow10<length - 1>);
-}
+constexpr auto startIndex = static_cast<u64>(shaveFactor * fastPow10<length - 1>);
 
-template<> constexpr u64 startIndex<19u>() noexcept { return 2222222222222222222u; }
-template<> constexpr u64 startIndex<18u>() noexcept { return 222222222222222222u; }
-template<> constexpr u64 startIndex<17u>() noexcept { return 22222222222222222u; }
-template<> constexpr u64 startIndex<16u>() noexcept { return 2222222222222222u; }
+template<> constexpr u64 startIndex<19u> = 2222222222222222222u;
+template<> constexpr u64 startIndex<18u> = 222222222222222222u; 
+template<> constexpr u64 startIndex<17u> = 22222222222222222u; 
+template<> constexpr u64 startIndex<16u> = 2222222222222222u; 
+template<> constexpr u64 startIndex<15u> = 222222222222222u; 
 
 constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
@@ -387,6 +363,41 @@ inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results
 			if (componentQuodigious(nv, np)) {
 				results.emplace_back(nv);
 			}
+		}
+	}
+}
+template<>
+inline void singleDigitInnerLoop<1u, 1u, 2u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+	auto ns = sum + 2u;
+	auto nv = indexOffset<1u>(2u) + value;
+	if (componentQuodigious(nv, ns)) {
+		auto np = product << 1; // shift left by 1 is the same as multiplying by two
+		if (componentQuodigious(nv, np)) {
+			results.emplace_back(nv);
+		}
+	}
+}
+
+template<>
+inline void singleDigitInnerLoop<1u, 1u, 4u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+	auto ns = sum + 4u;
+	auto nv = indexOffset<1u>(4u) + value;
+	if (componentQuodigious(nv, ns)) {
+		auto np = product << 2; // shift left by 1 is the same as multiplying by two
+		if (componentQuodigious(nv, np)) {
+			results.emplace_back(nv);
+		}
+	}
+}
+
+template<>
+inline void singleDigitInnerLoop<1u, 1u, 8u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+	auto ns = sum + 8u;
+	auto nv = indexOffset<1u>(8u) + value;
+	if (componentQuodigious(nv, ns)) {
+		auto np = product << 3; // shift left by 1 is the same as multiplying by two
+		if (componentQuodigious(nv, np)) {
+			results.emplace_back(nv);
 		}
 	}
 }
@@ -489,7 +500,7 @@ inline void body() noexcept {
 	static constexpr auto skip5 = length > 4;
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>;
-	static constexpr auto st = startIndex<length>();
+	static constexpr auto st = startIndex<length>;
 #ifdef DEBUG
 	printDigitalLayout<length>();
 #endif
@@ -525,7 +536,7 @@ constexpr auto endIndex = fastPow10<length>;
 
 template<u64 length>
 inline void singleThreadedSimpleBody() noexcept {
-    for (auto value = startIndex<length>(); value < endIndex<length>; ++value) {
+    for (auto value = startIndex<length>; value < endIndex<length>; ++value) {
 		if (legalValue<length>(value) && isQuodigious(value, getSum<length>(value), getProduct<length>(value))) {
 			std::cout << value << std::endl;
 		}
