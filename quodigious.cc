@@ -364,12 +364,20 @@ template<u64 length>
 constexpr u64 startIndex() noexcept {
 	return static_cast<u64>(shaveFactor * fastPow10<length - 1>);
 }
+
+template<> constexpr u64 startIndex<19u>() noexcept { return 2222222222222222222u; }
+template<> constexpr u64 startIndex<18u>() noexcept { return 222222222222222222u; }
+template<> constexpr u64 startIndex<17u>() noexcept { return 22222222222222222u; }
+template<> constexpr u64 startIndex<16u>() noexcept { return 2222222222222222u; }
+
 constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
 template<u64 section, u64 digitCount, u64 k>
 inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+	static_assert(k != 0, "Can't have a legal digit which is 0. Ever!");
+	static_assert(k != 1, "Can't have a legal digit which is 1. Ever!");
 	if (isEven(k) && legalValue<digitCount>(k)) {
 		auto ns = sum + getSum<digitCount>(k);
 		auto nv = indexOffset<section>(k) + value;
@@ -481,7 +489,7 @@ inline void body() noexcept {
 	static constexpr auto skip5 = length > 4;
 	// this is not going to change ever!
 	static constexpr auto base = fastPow10<length - 1>;
-	static constexpr auto st = static_cast<u64>(shaveFactor * base);
+	static constexpr auto st = startIndex<length>();
 #ifdef DEBUG
 	printDigitalLayout<length>();
 #endif
