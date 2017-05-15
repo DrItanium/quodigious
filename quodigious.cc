@@ -400,6 +400,7 @@ inline void singleDigitInnerLoop<1u, 1u, 8u>(u64 product, u64 sum, u64 value, ve
 	}
 }
 
+
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
@@ -541,7 +542,7 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 		singleDigitInnerLoop<section, digitCount, 494>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 496>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 498>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 222>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 522>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 524>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 526>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 528>(product, sum, index, results);
