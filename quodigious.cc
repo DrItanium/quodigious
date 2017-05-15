@@ -103,36 +103,34 @@ inline void initialize() noexcept {
 	// are even! The only exceptions are 3,5,7,9,735
 	//
 	
-    static constexpr auto check = isLegalDigit<includeFives>;
-
 	// Len8
 	for (int i = 0; i < 10; ++i) {
-		auto iPred = check(i);
+		auto iPred = isLegalDigit<includeFives>(i);
 		auto iSum = i;
 		auto iMul = i;
 		auto iInd = indexOffset<Len7>(i);
 		for (int k = 0; k < 10; ++k) {
-			auto kPred = iPred && check(k);
+			auto kPred = iPred && isLegalDigit<includeFives>(k);
 			auto kSum = k + iSum;
 			auto kMul = k * iMul;
 			auto kInd = indexOffset<Len6>(k) + iInd;
 			for (int h = 0; h < 10; ++h) {
-				auto hPred = kPred && check(h);
+				auto hPred = kPred && isLegalDigit<includeFives>(h);
 				auto hSum = h + kSum;
 				auto hMul = h * kMul;
 				auto hInd = indexOffset<Len5>(h) + kInd;
 				for (int w = 0; w < 10; ++w) {
-					auto wPred = hPred && check(w);
+					auto wPred = hPred && isLegalDigit<includeFives>(w);
 					auto wSum = w + hSum;
 					auto wMul = w * hMul;
 					auto wInd = indexOffset<Len4>(w) + hInd;
 					for (int y = 0; y < 10; ++y) {
-						auto yPred = wPred && check(y);
+						auto yPred = wPred && isLegalDigit<includeFives>(y);
 						auto ySum = y + wSum;
 						auto yMul = y * wMul;
 						auto yInd = indexOffset<Len3>(y) + wInd;
 						for (int z = 0; z < 10; ++z) {
-							auto zPred = yPred && check(z);
+							auto zPred = yPred && isLegalDigit<includeFives>(z);
 							auto zSum = z + ySum;
 							auto zMul = z * yMul;
 							auto zInd = indexOffset<Len2>(z) + yInd;
@@ -140,7 +138,7 @@ inline void initialize() noexcept {
 								auto outerMul = x * zMul;
 								auto combinedInd = indexOffset<Len1>(x) + zInd;
 								auto outerSum = x + zSum;
-								auto outerPredicate = zPred && check(x);
+								auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
 								updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
 							}
 						}
@@ -151,28 +149,28 @@ inline void initialize() noexcept {
 	}
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
 		for (int x = 0; x < 10; ++x) {
-			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && check(x), sums, prods, preds);
+			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
 		}
 	};
 	// Len7
 	for (int k = 0; k < 10; ++k) {
-		auto kPred = check(k);
+		auto kPred = isLegalDigit<includeFives>(k);
 		auto kMul = k;
 		auto kInd = indexOffset<Len6>(k);
 		for (int h = 0; h < 10; ++h) {
-			auto hPred = kPred && check(h);
+			auto hPred = kPred && isLegalDigit<includeFives>(h);
 			auto hMul = h * kMul;
 			auto hInd = indexOffset<Len5>(h) + kInd;
 			for (int w = 0; w < 10; ++w) {
-				auto wPred = hPred && check(w);
+				auto wPred = hPred && isLegalDigit<includeFives>(w);
 				auto wMul = w * hMul;
 				auto wInd = indexOffset<Len4>(w) + hInd;
 				for (int y = 0; y < 10; ++y) {
-                    auto yPred = wPred && check(y);
+                    auto yPred = wPred && isLegalDigit<includeFives>(y);
 					auto yMul = y * wMul;
 					auto yInd = indexOffset<Len3>(y) + wInd;
 					for (int z = 0; z < 10; ++z) {
-						auto zPred = yPred && check(z);
+						auto zPred = yPred && isLegalDigit<includeFives>(z);
 						auto zMul = z * yMul;
 						auto zInd = indexOffset<Len2>(z) + yInd;
 						innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen7, predicatesLen7);
@@ -183,20 +181,20 @@ inline void initialize() noexcept {
 	}
 	// Len6
 	for (int h = 0; h < 10; ++h) {
-        auto hPred = check(h);
+        auto hPred = isLegalDigit<includeFives>(h);
 		auto hSum = h;
 		auto hMul = h;
 		auto hInd = indexOffset<Len5>(h);
 		for (int w = 0; w < 10; ++w) {
-			auto wPred = hPred && check(w);
+			auto wPred = hPred && isLegalDigit<includeFives>(w);
 			auto wMul = w * hMul;
 			auto wInd = indexOffset<Len4>(w) + hInd;
 			for (int y = 0; y < 10; ++y) {
-                auto yPred = wPred && check(y);
+                auto yPred = wPred && isLegalDigit<includeFives>(y);
 				auto yMul = y * wMul;
 				auto yInd = indexOffset<Len3>(y) + wInd;
 				for (int z = 0; z < 10; ++z) {
-                    auto zPred = yPred && check(z);
+                    auto zPred = yPred && isLegalDigit<includeFives>(z);
 					auto zMul = z * yMul;
 					auto zInd = indexOffset<Len2>(z) + yInd;
 					innerMostBodyNoSumUpdate(zMul, 0u,  zInd, zPred, productsLen6, predicatesLen6);
@@ -206,15 +204,15 @@ inline void initialize() noexcept {
 	}
 	// Len5
 	for (int w = 0; w < 10; ++w) {
-		auto wPred = check(w);
+		auto wPred = isLegalDigit<includeFives>(w);
 		auto wMul = w;
 		auto wInd = indexOffset<Len4>(w);
 		for (int y = 0; y < 10; ++y) {
-			auto yPred = wPred && check(y);
+			auto yPred = wPred && isLegalDigit<includeFives>(y);
 			auto yMul = y * wMul;
 			auto yInd = indexOffset<Len3>(y) + wInd;
 			for (int z = 0; z < 10; ++z) {
-				auto zPred = yPred && check(z);
+				auto zPred = yPred && isLegalDigit<includeFives>(z);
 				auto zMul = z * yMul;
 				auto zInd = indexOffset<Len2>(z) + yInd;
 				innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen5, predicatesLen5);
@@ -223,11 +221,11 @@ inline void initialize() noexcept {
 	}
 	// Len4
 	for (int y = 0; y < 10; ++y) {
-		auto yPred = check(y);
+		auto yPred = isLegalDigit<includeFives>(y);
 		auto yMul = y ;
 		auto yInd = indexOffset<Len3>(y);
 		for (int z = 0; z < 10; ++z) {
-			auto zPred = yPred && check(z);
+			auto zPred = yPred && isLegalDigit<includeFives>(z);
 			auto zMul = z * yMul;
 			auto zInd = indexOffset<Len2>(z) + yInd;
 			innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen4, predicatesLen4);
@@ -235,14 +233,14 @@ inline void initialize() noexcept {
 	}
 	// Len3
 	for (int z = 0; z < 10; ++z) {
-        auto zPred = check(z);
+        auto zPred = isLegalDigit<includeFives>(z);
 		auto zMul = z;
         auto zInd = indexOffset<Len2>(z);
 		innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen3, predicatesLen3);
 	}
 	// Len2
 	for (int x = 0; x < 10; ++x) {
-        updateTables10<includeFives>(indexOffset<Len1>(x), 0u, x, check(x), sums, productsLen2, predicatesLen2);
+        updateTables10<includeFives>(indexOffset<Len1>(x), 0u, x, isLegalDigit<includeFives>(x), sums, productsLen2, predicatesLen2);
 	}
 }
 
@@ -413,6 +411,296 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 		//singleDigitInnerLoop<section, digitCount, 7>(product, sum, index, results);
 		singleDigitInnerLoop<section, digitCount, 8>(product, sum, index, results);
 		//singleDigitInnerLoop<section, digitCount, 9>(product, sum, index, results);
+	} else if (digitCount == 2) {
+		singleDigitInnerLoop<section, digitCount, 22>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 24>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 26>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 28>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 32>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 34>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 36>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 38>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 42>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 44>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 46>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 48>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 52>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 54>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 56>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 58>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 62>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 64>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 66>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 68>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 72>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 74>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 76>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 78>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 82>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 84>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 86>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 88>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 92>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 94>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 96>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 98>(product, sum, index, results);
+	} else if (digitCount == 3) {
+		singleDigitInnerLoop<section, digitCount, 222>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 224>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 226>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 228>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 232>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 234>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 236>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 238>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 242>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 244>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 246>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 248>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 252>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 254>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 256>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 258>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 262>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 264>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 266>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 268>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 272>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 274>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 276>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 278>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 282>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 284>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 286>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 288>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 292>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 294>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 296>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 298>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 322>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 324>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 326>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 328>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 332>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 334>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 336>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 338>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 342>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 344>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 346>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 348>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 352>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 354>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 356>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 358>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 362>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 364>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 366>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 368>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 372>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 374>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 376>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 378>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 382>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 384>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 386>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 388>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 392>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 394>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 396>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 398>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 422>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 424>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 426>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 428>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 432>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 434>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 436>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 438>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 442>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 444>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 446>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 448>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 452>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 454>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 456>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 458>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 462>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 464>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 466>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 468>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 472>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 474>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 476>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 478>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 482>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 484>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 486>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 488>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 492>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 494>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 496>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 498>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 222>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 524>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 526>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 528>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 532>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 534>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 536>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 538>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 542>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 544>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 546>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 548>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 552>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 554>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 556>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 558>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 562>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 564>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 566>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 568>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 572>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 574>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 576>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 578>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 582>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 584>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 586>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 588>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 592>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 594>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 596>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 598>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 622>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 624>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 626>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 628>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 632>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 634>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 636>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 638>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 642>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 644>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 646>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 648>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 652>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 654>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 656>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 658>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 662>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 664>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 666>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 668>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 672>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 674>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 676>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 678>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 682>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 684>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 686>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 688>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 692>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 694>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 696>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 698>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 722>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 724>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 726>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 728>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 732>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 734>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 736>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 738>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 742>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 744>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 746>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 748>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 752>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 754>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 756>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 758>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 762>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 764>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 766>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 768>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 772>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 774>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 776>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 778>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 782>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 784>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 786>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 788>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 792>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 794>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 796>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 798>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 822>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 824>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 826>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 828>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 832>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 834>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 836>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 838>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 842>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 844>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 846>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 848>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 852>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 854>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 856>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 858>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 862>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 864>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 866>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 868>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 872>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 874>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 876>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 878>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 882>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 884>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 886>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 888>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 892>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 894>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 896>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 898>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 922>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 924>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 926>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 928>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 932>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 934>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 936>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 938>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 942>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 944>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 946>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 948>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 952>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 954>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 956>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 958>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 962>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 964>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 966>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 968>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 972>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 974>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 976>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 978>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 982>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 984>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 986>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 988>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 992>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 994>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 996>(product, sum, index, results);
+		singleDigitInnerLoop<section, digitCount, 998>(product, sum, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
