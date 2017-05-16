@@ -69,49 +69,39 @@ constexpr u64 indexOffset<1>(u64 value) noexcept {
 template<u64 offset, bool includeFives, bool updateSums = false>
 inline void updateTables(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
     static_assert(offset <= 9, "Offset shouldn't be larger than 9!");
-    static constexpr auto innerPredicate = isLegalDigitSingular<offset, includeFives>();
     if (updateSums) {
         sums[baseOffset + offset] = actualSum + offset;
     }
     product[baseOffset + offset] = actualProduct * offset;
-    predicates[baseOffset + offset] = innerPredicate && actualPredicate;
+    predicates[baseOffset + offset] = isLegalDigitSingular<offset, includeFives>() && actualPredicate;
 }
 
 template<>
 inline void updateTables<5,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 5] = actualProduct * 5;
+    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
     predicates[baseOffset + 5] = false;
 }
 
 template<>
 inline void updateTables<5,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 5] = actualProduct * 5;
+    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
     predicates[baseOffset + 5] = actualPredicate;
 }
 
 template<>
-inline void updateTables<0,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset] = 0;
-    predicates[baseOffset] = false;
+inline void updateTables<5,false,true>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    sums[baseOffset + 5] = actualSum + 5;
+    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
+    predicates[baseOffset + 5] = false;
 }
 
 template<>
-inline void updateTables<0,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset] = 0;
-    predicates[baseOffset] = false;
+inline void updateTables<5,true,true>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    sums[baseOffset + 5] = actualSum + 5;
+    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
+    predicates[baseOffset + 5] = actualPredicate;
 }
 
-template<>
-inline void updateTables<1,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 1] = actualProduct;
-    predicates[baseOffset + 1] = false;
-}
-
-template<>
-inline void updateTables<1,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 1] = actualProduct;
-    predicates[baseOffset + 1] = false;
-}
 
 template<>
 inline void updateTables<2,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
@@ -175,8 +165,16 @@ inline void updateTables<8,true,false>(u64 baseOffset, u64 actualSum, u64 actual
 
 template<bool includeFives, bool updateSums = false>
 inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
-    updateTables<0, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<1, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    if (updateSums) {
+        sums[offset] = sum;
+    }
+    product[offset] = 0;
+    predicates[offset] = false;
+    if (updateSums) {
+        sums[offset+1] = sum + 1;
+    }
+    product[offset+1] = product;
+    predicates[offset+1] = false;
     updateTables<2, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
     updateTables<3, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
     updateTables<4, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
