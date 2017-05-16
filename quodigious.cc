@@ -144,7 +144,7 @@ inline void initialize() noexcept {
 							auto zMul = z * yMul;
 							auto zInd = indexOffset<Len2>(z) + yInd;
 							for (int x = 0; x < 10; ++x) {
-								auto outerMul = x * zMul;
+								auto outerMul = x == 0 ? 0 : x * zMul;
 								auto combinedInd = indexOffset<Len1>(x) + zInd;
 								auto outerSum = x + zSum;
 								auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
@@ -158,7 +158,7 @@ inline void initialize() noexcept {
 	}
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
 		for (int x = 0; x < 10; ++x) {
-			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
+			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x == 0 ? 0 : x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
 		}
 	};
 	// Len7
