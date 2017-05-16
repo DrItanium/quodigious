@@ -43,17 +43,19 @@ u64 *sums = nullptr;
 
 template<bool includeFives>
 constexpr bool isLegalDigit(u64 value) noexcept {
-    auto baseResult = value >=2;
-    if (!includeFives) {
-        baseResult = baseResult && value != 5;
-    }
-    return baseResult;
+    return value >= 2 && (includeFives ? true : value != 5);
 }
 template<u64 value, bool includeFives>
 constexpr bool isLegalDigitSingular() noexcept {
     static_assert(value<= 9, "Offset shouldn't be larger than 9!");
     return value >= 2 && (includeFives ? true : value != 5);
 }
+template<> constexpr bool isLegalDigitSingular<5, true>() noexcept { return true; }
+template<> constexpr bool isLegalDigitSingular<5, false>() noexcept { return false; }
+template<> constexpr bool isLegalDigitSingular<0, true>() noexcept { return false; }
+template<> constexpr bool isLegalDigitSingular<0, false>() noexcept { return false; }
+template<> constexpr bool isLegalDigitSingular<1, true>() noexcept { return false; }
+template<> constexpr bool isLegalDigitSingular<1, false>() noexcept { return false; }
 template<u64 offset>
 constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
@@ -73,6 +75,54 @@ inline void updateTables(u64 baseOffset, u64 actualSum, u64 actualProduct, bool 
     }
     product[baseOffset + offset] = actualProduct * offset;
     predicates[baseOffset + offset] = innerPredicate && actualPredicate;
+}
+
+template<>
+inline void updateTables<5,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 5] = actualProduct * 5;
+    predicates[baseOffset + 5] = false;
+}
+
+template<>
+inline void updateTables<5,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 5] = actualProduct * 5;
+    predicates[baseOffset + 5] = actualPredicate;
+}
+
+template<>
+inline void updateTables<0,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset] = 0;
+    predicates[baseOffset] = false;
+}
+
+template<>
+inline void updateTables<0,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset] = 0;
+    predicates[baseOffset] = false;
+}
+
+template<>
+inline void updateTables<1,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 1] = actualProduct;
+    predicates[baseOffset + 1] = false;
+}
+
+template<>
+inline void updateTables<1,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 1] = actualProduct;
+    predicates[baseOffset + 1] = false;
+}
+
+template<>
+inline void updateTables<2,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 2] = actualProduct << 1;
+    predicates[baseOffset + 2] = actualPredicate;
+}
+
+template<>
+inline void updateTables<2,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 2] = actualProduct << 1;
+    predicates[baseOffset + 2] = actualPredicate;
 }
 
 template<bool includeFives, bool updateSums = false>
@@ -158,7 +208,7 @@ inline void initialize() noexcept {
 	}
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
 		for (int x = 0; x < 10; ++x) {
-			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x == 0 ? 0 : x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
+			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
 		}
 	};
 	// Len7
