@@ -125,6 +125,54 @@ inline void updateTables<2,true,false>(u64 baseOffset, u64 actualSum, u64 actual
     predicates[baseOffset + 2] = actualPredicate;
 }
 
+template<>
+inline void updateTables<3,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 3] = (actualProduct << 1) + actualProduct;
+    predicates[baseOffset + 3] = actualPredicate;
+}
+
+template<>
+inline void updateTables<3,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 3] = (actualProduct << 1) + actualProduct;
+    predicates[baseOffset + 3] = actualPredicate;
+}
+
+template<>
+inline void updateTables<4,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 4] = actualProduct << 2;
+    predicates[baseOffset + 4] = actualPredicate;
+}
+
+template<>
+inline void updateTables<4,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 4] = actualProduct << 2;
+    predicates[baseOffset + 4] = actualPredicate;
+}
+
+template<>
+inline void updateTables<6,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 6] = (actualProduct << 2) + (actualProduct << 1);
+    predicates[baseOffset + 6] = actualPredicate;
+}
+
+template<>
+inline void updateTables<6,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 6] = (actualProduct << 2) + (actualProduct << 1);
+    predicates[baseOffset + 6] = actualPredicate;
+}
+
+template<>
+inline void updateTables<8,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 8] = actualProduct << 3;
+    predicates[baseOffset + 8] = actualPredicate;
+}
+
+template<>
+inline void updateTables<8,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
+    product[baseOffset + 8] = actualProduct << 3;
+    predicates[baseOffset + 8] = actualPredicate;
+}
+
 template<bool includeFives, bool updateSums = false>
 inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
     updateTables<0, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
