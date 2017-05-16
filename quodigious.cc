@@ -38,7 +38,8 @@ buildLengthPrecomputation(Len3, 3);
 buildLengthPrecomputation(Len2, 2);
 constexpr auto Len1 = fastPow10<1>;
 
-u64 sums[Len8] = { 0 };
+u64 *sums = nullptr;
+//u64 sums[Len8] = { 0 };
 
 template<bool includeFives>
 constexpr bool isLegalDigit(u64 value) noexcept {
@@ -56,6 +57,11 @@ constexpr bool isLegalDigitSingular() noexcept {
 template<u64 offset>
 constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
+}
+
+template<>
+constexpr u64 indexOffset<1>(u64 value) noexcept {
+    return value;
 }
 
 template<u64 offset, bool includeFives, bool updateSums = false>
@@ -85,6 +91,9 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
 
 template<bool includeFives = false>
 inline void initialize() noexcept {
+    if(sums == nullptr) {
+        sums = new u64[Len8];
+    }
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
 	// It is super fast to do and only consumes space. That way when we iterate
 	// through numbers we can reduce the number of divides, remainders, adds,
@@ -102,7 +111,7 @@ inline void initialize() noexcept {
 	// Using numeric analysis of the results, I noticed that all of the values
 	// are even! The only exceptions are 3,5,7,9,735
 	//
-	
+
 	// Len8
 	for (int i = 0; i < 10; ++i) {
 		auto iPred = isLegalDigit<includeFives>(i);
@@ -318,7 +327,7 @@ inline u64 getSum(u64 x) noexcept {
 		case 4:
 		case 5:
 		case 6:
-		case 7: 
+		case 7:
 		case 8: return sums[x];
 		case 9: return getInnerSum<1, 8>(x);
 		case 10: return getInnerSum<2, 8>(x);
@@ -339,10 +348,10 @@ template<u64 length>
 constexpr auto startIndex = static_cast<u64>(shaveFactor * fastPow10<length - 1>);
 
 template<> constexpr u64 startIndex<19u> = 2222222222222222222u;
-template<> constexpr u64 startIndex<18u> = 222222222222222222u; 
-template<> constexpr u64 startIndex<17u> = 22222222222222222u; 
-template<> constexpr u64 startIndex<16u> = 2222222222222222u; 
-template<> constexpr u64 startIndex<15u> = 222222222222222u; 
+template<> constexpr u64 startIndex<18u> = 222222222222222222u;
+template<> constexpr u64 startIndex<17u> = 22222222222222222u;
+template<> constexpr u64 startIndex<16u> = 2222222222222222u;
+template<> constexpr u64 startIndex<15u> = 222222222222222u;
 
 constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
@@ -374,6 +383,18 @@ inline void singleDigitInnerLoop<1u, 1u, 2u>(u64 product, u64 sum, u64 value, ve
 			results.emplace_back(nv);
 		}
 	}
+}
+
+template<>
+inline void singleDigitInnerLoop<1u, 1u, 6u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
+    auto ns = sum + 6u;
+    auto nv = indexOffset<1u>(6u) + value;
+    if (componentQuodigious(nv, ns)) {
+        auto np = (product << 2) + (product << 1);
+        if (componentQuodigious(nv, np)) {
+            results.emplace_back(nv);
+        }
+    }
 }
 
 template<>
@@ -900,5 +921,9 @@ int main() {
 			}
 		}
 	}
+    if (sums != nullptr) {
+        delete[] sums;
+        sums = nullptr;
+    }
 	return 0;
 }

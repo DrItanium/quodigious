@@ -73,7 +73,7 @@ constexpr u64 level1Digits = 1;
 template<> constexpr u64 level3Digits< width > = l3; \
 template<> constexpr u64 level2Digits< width > = l2; \
 template<> constexpr u64 level1Digits< width > = l1; \
-static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!"); 
+static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!");
 
 #include "notations.def"
 #undef X

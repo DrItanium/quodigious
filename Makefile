@@ -1,5 +1,5 @@
 # Copyright (c) 2017 Joshua Scoggins
-# 
+#
 # This software is provided 'as-is', without any express or implied
 # warranty. In no event will the authors be held liable for any damages
 # arising from the use of this software.
@@ -18,13 +18,13 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++14
-CXXFLAGS += -O3
+CXXFLAGS += -O3 -march=native
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -lpthread 
-LXXFLAGS += -O3 -flto -fwhole-program
+LXXFLAGS = -lpthread
+LXXFLAGS += -O3 -flto -fwhole-program -march=native
 TITLE = quodigious
 FILES = quodigious.o
 
