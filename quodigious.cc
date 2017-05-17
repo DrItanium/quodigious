@@ -56,30 +56,82 @@ constexpr u64 indexOffset<1>(u64 value) noexcept {
 }
 
 
-template<bool includeFives, bool updateSums = false>
+template<bool includeFives>
 inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
-    if (updateSums) {
-        u64* sumPtr = sums + offset;
-        *sumPtr = sum;
-        ++sumPtr;
-        *sumPtr = sum + 1;
-        ++sumPtr;
-        *sumPtr = sum + 2;
-        ++sumPtr;
-        *sumPtr = sum + 3;
-        ++sumPtr;
-        *sumPtr = sum + 4;
-        ++sumPtr;
-        *sumPtr = sum + 5;
-        ++sumPtr;
-        *sumPtr = sum + 6;
-        ++sumPtr;
-        *sumPtr = sum + 7;
-        ++sumPtr;
-        *sumPtr = sum + 8;
-        ++sumPtr;
-        *sumPtr = sum + 9;
-    }
+    u64* sumPtr = sums + offset;
+    bool* predPtr = predicates + offset;
+    u64* prodPtr = products + offset;
+    *sumPtr = sum;
+    ++sumPtr;
+    *sumPtr = sum + 1;
+    ++sumPtr;
+    *sumPtr = sum + 2;
+    ++sumPtr;
+    *sumPtr = sum + 3;
+    ++sumPtr;
+    *sumPtr = sum + 4;
+    ++sumPtr;
+    *sumPtr = sum + 5;
+    ++sumPtr;
+    *sumPtr = sum + 6;
+    ++sumPtr;
+    *sumPtr = sum + 7;
+    ++sumPtr;
+    *sumPtr = sum + 8;
+    ++sumPtr;
+    *sumPtr = sum + 9;
+    // 0
+    *predPtr = false;
+    *prodPtr = 0;
+    // 1
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = false;
+    *prodPtr = product;
+    // 2
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = product << 1;
+    // 3
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = (product << 1) + product;
+    // 4
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = product << 2;
+    // 5
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = includeFives && legal;
+    *prodPtr = (product << 2) + product;
+    // 6
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = (product << 2) + (product << 1);
+    // 7
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = (product << 2) + (product << 1) + product;
+    // 8
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = product << 3;
+    // 9
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = (product << 3) + product;
+}
+
+template<bool includeFives>
+inline void updateTables10NoSum(u64 offset, u64 product, bool legal, u64* products, bool* predicates) noexcept {
     bool* predPtr = predicates + offset;
     u64* prodPtr = products + offset;
     // 0
@@ -186,14 +238,14 @@ inline void initialize() noexcept {
 							auto zSum = z + ySum;
 							auto zMul = z == 0 ? 0 : z * yMul;
 							auto zInd = indexOffset<Len2>(z) + yInd;
-                            updateTables10<includeFives, true>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
-                            updateTables10<includeFives, true>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
+                            updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
+                            updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
 							for (int x = 2; x < 10; ++x) {
 								auto outerMul = x * zMul;
 								auto combinedInd = indexOffset<Len1>(x) + zInd;
 								auto outerSum = x + zSum;
 								auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
-								updateTables10<includeFives, true>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+								updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
 							}
 						}
 					}
@@ -201,11 +253,11 @@ inline void initialize() noexcept {
 			}
 		}
 	}
-	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
-        updateTables10<includeFives>(oInd, oSum, 0, false, nullptr, prods, preds);
-        updateTables10<includeFives>(oInd + indexOffset<Len1>(1), oSum, oPred, false, nullptr, prods, preds);
+	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oInd, auto oPred, auto prods, auto preds) noexcept {
+        updateTables10NoSum<includeFives>(oInd, 0, false, prods, preds);
+        updateTables10NoSum<includeFives>(oInd + indexOffset<Len1>(1), oPred, false, prods, preds);
 		for (int x = 2; x < 10; ++x) {
-			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), nullptr, prods, preds);
+			updateTables10NoSum<includeFives>(indexOffset<Len1>(x) + oInd, x * oMul, oPred && isLegalDigit<includeFives>(x), prods, preds);
 		}
 	};
 	// Len7
@@ -229,7 +281,7 @@ inline void initialize() noexcept {
 						auto zPred = yPred && isLegalDigit<includeFives>(z);
 						auto zMul = z * yMul;
 						auto zInd = indexOffset<Len2>(z) + yInd;
-						innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen7, predicatesLen7);
+						innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen7, predicatesLen7);
 					}
 				}
 			}
@@ -253,7 +305,7 @@ inline void initialize() noexcept {
                     auto zPred = yPred && isLegalDigit<includeFives>(z);
 					auto zMul = z * yMul;
 					auto zInd = indexOffset<Len2>(z) + yInd;
-					innerMostBodyNoSumUpdate(zMul, 0u,  zInd, zPred, productsLen6, predicatesLen6);
+					innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen6, predicatesLen6);
 				}
 			}
 		}
@@ -271,7 +323,7 @@ inline void initialize() noexcept {
 				auto zPred = yPred && isLegalDigit<includeFives>(z);
 				auto zMul = z * yMul;
 				auto zInd = indexOffset<Len2>(z) + yInd;
-				innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen5, predicatesLen5);
+				innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen5, predicatesLen5);
 			}
 		}
 	}
@@ -284,7 +336,7 @@ inline void initialize() noexcept {
 			auto zPred = yPred && isLegalDigit<includeFives>(z);
 			auto zMul = z * yMul;
 			auto zInd = indexOffset<Len2>(z) + yInd;
-			innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen4, predicatesLen4);
+			innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen4, predicatesLen4);
 		}
 	}
 	// Len3
@@ -292,11 +344,11 @@ inline void initialize() noexcept {
         auto zPred = isLegalDigit<includeFives>(z);
 		auto zMul = z;
         auto zInd = indexOffset<Len2>(z);
-		innerMostBodyNoSumUpdate(zMul, 0u, zInd, zPred, productsLen3, predicatesLen3);
+		innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen3, predicatesLen3);
 	}
 	// Len2
 	for (int x = 0; x < 10; ++x) {
-        updateTables10<includeFives>(indexOffset<Len1>(x), 0u, x, isLegalDigit<includeFives>(x), sums, productsLen2, predicatesLen2);
+        updateTables10NoSum<includeFives>(indexOffset<Len1>(x), x, isLegalDigit<includeFives>(x), productsLen2, predicatesLen2);
 	}
 }
 
