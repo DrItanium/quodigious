@@ -99,7 +99,7 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
     ++prodPtr;
     ++predPtr;
     *predPtr = legal;
-    *prodPtr = product * 3;
+    *prodPtr = (product << 1) + product;
     // 4
     ++prodPtr;
     ++predPtr;
@@ -109,17 +109,17 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
     ++predPtr;
     ++prodPtr;
     *predPtr = includeFives && legal;
-    *prodPtr = product * 5;
+    *prodPtr = (product << 2) + product;
     // 6
     ++predPtr;
     ++prodPtr;
     *predPtr = legal;
-    *prodPtr = product * 6;
+    *prodPtr = (product << 2) + (product << 1);
     // 7
     ++predPtr;
     ++prodPtr;
     *predPtr = legal;
-    *prodPtr = product * 7;
+    *prodPtr = (product << 2) + (product << 1) + product;
     // 8
     ++predPtr;
     ++prodPtr;
@@ -129,7 +129,7 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
     ++predPtr;
     ++prodPtr;
     *predPtr = legal;
-    *prodPtr = product * 9;
+    *prodPtr = (product << 3) + product;
 }
 
 template<bool includeFives = false>
@@ -184,10 +184,12 @@ inline void initialize() noexcept {
 						for (int z = 0; z < 10; ++z) {
 							auto zPred = yPred && isLegalDigit<includeFives>(z);
 							auto zSum = z + ySum;
-							auto zMul = z * yMul;
+							auto zMul = z == 0 ? 0 : z * yMul;
 							auto zInd = indexOffset<Len2>(z) + yInd;
-							for (int x = 0; x < 10; ++x) {
-								auto outerMul = x == 0 ? 0 : x * zMul;
+                            updateTables10<includeFives, true>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
+                            updateTables10<includeFives, true>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
+							for (int x = 2; x < 10; ++x) {
+								auto outerMul = x * zMul;
 								auto combinedInd = indexOffset<Len1>(x) + zInd;
 								auto outerSum = x + zSum;
 								auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
@@ -200,8 +202,10 @@ inline void initialize() noexcept {
 		}
 	}
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oSum, auto oInd, auto oPred, auto prods, auto preds) noexcept {
-		for (int x = 0; x < 10; ++x) {
-			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), sums, prods, preds);
+        updateTables10<includeFives>(oInd, oSum, 0, false, nullptr, prods, preds);
+        updateTables10<includeFives>(oInd + indexOffset<Len1>(1), oSum, oPred, false, nullptr, prods, preds);
+		for (int x = 2; x < 10; ++x) {
+			updateTables10<includeFives>(indexOffset<Len1>(x) + oInd, oSum, x * oMul, oPred && isLegalDigit<includeFives>(x), nullptr, prods, preds);
 		}
 	};
 	// Len7
