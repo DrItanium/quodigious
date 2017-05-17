@@ -45,17 +45,6 @@ template<bool includeFives>
 constexpr bool isLegalDigit(u64 value) noexcept {
     return value >= 2 && (includeFives ? true : value != 5);
 }
-template<u64 value, bool includeFives>
-constexpr bool isLegalDigitSingular() noexcept {
-    static_assert(value<= 9, "Offset shouldn't be larger than 9!");
-    return value >= 2 && (includeFives ? true : value != 5);
-}
-template<> constexpr bool isLegalDigitSingular<5, true>() noexcept { return true; }
-template<> constexpr bool isLegalDigitSingular<5, false>() noexcept { return false; }
-template<> constexpr bool isLegalDigitSingular<0, true>() noexcept { return false; }
-template<> constexpr bool isLegalDigitSingular<0, false>() noexcept { return false; }
-template<> constexpr bool isLegalDigitSingular<1, true>() noexcept { return false; }
-template<> constexpr bool isLegalDigitSingular<1, false>() noexcept { return false; }
 template<u64 offset>
 constexpr u64 indexOffset(u64 value) noexcept {
     return value * offset;
@@ -66,123 +55,81 @@ constexpr u64 indexOffset<1>(u64 value) noexcept {
     return value;
 }
 
-template<u64 offset, bool includeFives, bool updateSums = false>
-inline void updateTables(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    static_assert(offset <= 9, "Offset shouldn't be larger than 9!");
-    if (updateSums) {
-        sums[baseOffset + offset] = actualSum + offset;
-    }
-    product[baseOffset + offset] = actualProduct * offset;
-    predicates[baseOffset + offset] = isLegalDigitSingular<offset, includeFives>() && actualPredicate;
-}
-
-template<>
-inline void updateTables<5,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
-    predicates[baseOffset + 5] = false;
-}
-
-template<>
-inline void updateTables<5,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
-    predicates[baseOffset + 5] = actualPredicate;
-}
-
-template<>
-inline void updateTables<5,false,true>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    sums[baseOffset + 5] = actualSum + 5;
-    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
-    predicates[baseOffset + 5] = false;
-}
-
-template<>
-inline void updateTables<5,true,true>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    sums[baseOffset + 5] = actualSum + 5;
-    product[baseOffset + 5] = (actualProduct << 2) + actualProduct;
-    predicates[baseOffset + 5] = actualPredicate;
-}
-
-
-template<>
-inline void updateTables<2,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 2] = actualProduct << 1;
-    predicates[baseOffset + 2] = actualPredicate;
-}
-
-template<>
-inline void updateTables<2,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 2] = actualProduct << 1;
-    predicates[baseOffset + 2] = actualPredicate;
-}
-
-template<>
-inline void updateTables<3,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 3] = (actualProduct << 1) + actualProduct;
-    predicates[baseOffset + 3] = actualPredicate;
-}
-
-template<>
-inline void updateTables<3,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 3] = (actualProduct << 1) + actualProduct;
-    predicates[baseOffset + 3] = actualPredicate;
-}
-
-template<>
-inline void updateTables<4,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 4] = actualProduct << 2;
-    predicates[baseOffset + 4] = actualPredicate;
-}
-
-template<>
-inline void updateTables<4,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 4] = actualProduct << 2;
-    predicates[baseOffset + 4] = actualPredicate;
-}
-
-template<>
-inline void updateTables<6,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 6] = (actualProduct << 2) + (actualProduct << 1);
-    predicates[baseOffset + 6] = actualPredicate;
-}
-
-template<>
-inline void updateTables<6,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 6] = (actualProduct << 2) + (actualProduct << 1);
-    predicates[baseOffset + 6] = actualPredicate;
-}
-
-template<>
-inline void updateTables<8,false,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 8] = actualProduct << 3;
-    predicates[baseOffset + 8] = actualPredicate;
-}
-
-template<>
-inline void updateTables<8,true,false>(u64 baseOffset, u64 actualSum, u64 actualProduct, bool actualPredicate, u64* sums, u64* product, bool* predicates) noexcept {
-    product[baseOffset + 8] = actualProduct << 3;
-    predicates[baseOffset + 8] = actualPredicate;
-}
 
 template<bool includeFives, bool updateSums = false>
 inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
     if (updateSums) {
-        sums[offset] = sum;
+        u64* sumPtr = sums + offset;
+        *sumPtr = sum;
+        ++sumPtr;
+        *sumPtr = sum + 1;
+        ++sumPtr;
+        *sumPtr = sum + 2;
+        ++sumPtr;
+        *sumPtr = sum + 3;
+        ++sumPtr;
+        *sumPtr = sum + 4;
+        ++sumPtr;
+        *sumPtr = sum + 5;
+        ++sumPtr;
+        *sumPtr = sum + 6;
+        ++sumPtr;
+        *sumPtr = sum + 7;
+        ++sumPtr;
+        *sumPtr = sum + 8;
+        ++sumPtr;
+        *sumPtr = sum + 9;
     }
-    product[offset] = 0;
-    predicates[offset] = false;
-    if (updateSums) {
-        sums[offset+1] = sum + 1;
-    }
-    product[offset+1] = product;
-    predicates[offset+1] = false;
-    updateTables<2, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<3, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<4, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<5, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<6, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<7, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<8, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
-    updateTables<9, includeFives, updateSums>(offset, sum, product, legal, sums, products, predicates);
+    bool* predPtr = predicates + offset;
+    u64* prodPtr = products + offset;
+    // 0
+    *predPtr = false;
+    *prodPtr = 0;
+    // 1
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = false;
+    *prodPtr = product;
+    // 2
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = product << 1;
+    // 3
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = product * 3;
+    // 4
+    ++prodPtr;
+    ++predPtr;
+    *predPtr = legal;
+    *prodPtr = product << 2;
+    // 5
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = includeFives && legal;
+    *prodPtr = product * 5;
+    // 6
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = product * 6;
+    // 7
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = product * 7;
+    // 8
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = product << 3;
+    // 9
+    ++predPtr;
+    ++prodPtr;
+    *predPtr = legal;
+    *prodPtr = product * 9;
 }
 
 template<bool includeFives = false>
