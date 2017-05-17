@@ -112,6 +112,7 @@ inline void updateTables10NoSum(u64 offset, u64 product, bool legal, u64* produc
 template<bool includeFives>
 inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
     u64* sumPtr = sums + offset;
+    //we only have to do this 10 times so unroll it and do it by hand :D
     *sumPtr = sum;
     ++sumPtr;
     ++sum;
