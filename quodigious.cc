@@ -144,7 +144,6 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
     updateTables10NoSum<includeFives>(offset, product, legal, products, predicates);
 }
 
-
 template<bool includeFives = false>
 inline void initialize() noexcept {
     if(sums == nullptr) {
