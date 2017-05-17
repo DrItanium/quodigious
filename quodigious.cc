@@ -57,80 +57,6 @@ constexpr u64 indexOffset<1>(u64 value) noexcept {
 
 
 template<bool includeFives>
-inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
-    u64* sumPtr = sums + offset;
-    bool* predPtr = predicates + offset;
-    u64* prodPtr = products + offset;
-    *sumPtr = sum;
-    ++sumPtr;
-    *sumPtr = sum + 1;
-    ++sumPtr;
-    *sumPtr = sum + 2;
-    ++sumPtr;
-    *sumPtr = sum + 3;
-    ++sumPtr;
-    *sumPtr = sum + 4;
-    ++sumPtr;
-    *sumPtr = sum + 5;
-    ++sumPtr;
-    *sumPtr = sum + 6;
-    ++sumPtr;
-    *sumPtr = sum + 7;
-    ++sumPtr;
-    *sumPtr = sum + 8;
-    ++sumPtr;
-    *sumPtr = sum + 9;
-    // 0
-    *predPtr = false;
-    *prodPtr = 0;
-    // 1
-    ++prodPtr;
-    ++predPtr;
-    *predPtr = false;
-    *prodPtr = product;
-    // 2
-    ++prodPtr;
-    ++predPtr;
-    *predPtr = legal;
-    *prodPtr = product << 1;
-    // 3
-    ++prodPtr;
-    ++predPtr;
-    *predPtr = legal;
-    *prodPtr = (product << 1) + product;
-    // 4
-    ++prodPtr;
-    ++predPtr;
-    *predPtr = legal;
-    *prodPtr = product << 2;
-    // 5
-    ++predPtr;
-    ++prodPtr;
-    *predPtr = includeFives && legal;
-    *prodPtr = (product << 2) + product;
-    // 6
-    ++predPtr;
-    ++prodPtr;
-    *predPtr = legal;
-    *prodPtr = (product << 2) + (product << 1);
-    // 7
-    ++predPtr;
-    ++prodPtr;
-    *predPtr = legal;
-    *prodPtr = (product << 2) + (product << 1) + product;
-    // 8
-    ++predPtr;
-    ++prodPtr;
-    *predPtr = legal;
-    *prodPtr = product << 3;
-    // 9
-    ++predPtr;
-    ++prodPtr;
-    *predPtr = legal;
-    *prodPtr = (product << 3) + product;
-}
-
-template<bool includeFives>
 inline void updateTables10NoSum(u64 offset, u64 product, bool legal, u64* products, bool* predicates) noexcept {
     bool* predPtr = predicates + offset;
     u64* prodPtr = products + offset;
@@ -183,6 +109,31 @@ inline void updateTables10NoSum(u64 offset, u64 product, bool legal, u64* produc
     *predPtr = legal;
     *prodPtr = (product << 3) + product;
 }
+template<bool includeFives>
+inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* sums, u64* products, bool* predicates) noexcept {
+    u64* sumPtr = sums + offset;
+    *sumPtr = sum;
+    ++sumPtr;
+    *sumPtr = sum + 1;
+    ++sumPtr;
+    *sumPtr = sum + 2;
+    ++sumPtr;
+    *sumPtr = sum + 3;
+    ++sumPtr;
+    *sumPtr = sum + 4;
+    ++sumPtr;
+    *sumPtr = sum + 5;
+    ++sumPtr;
+    *sumPtr = sum + 6;
+    ++sumPtr;
+    *sumPtr = sum + 7;
+    ++sumPtr;
+    *sumPtr = sum + 8;
+    ++sumPtr;
+    *sumPtr = sum + 9;
+    updateTables10NoSum<includeFives>(offset, product, legal, products, predicates);
+}
+
 
 template<bool includeFives = false>
 inline void initialize() noexcept {
