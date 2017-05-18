@@ -168,51 +168,54 @@ inline void initialize() noexcept {
 	//
 
 	// Len8
-	for (int i = 0; i < 10; ++i) {
-		auto iPred = isLegalDigit<includeFives>(i);
-		auto iSum = i;
-		auto iMul = i;
-		auto iInd = indexOffset<Len7>(i);
-		for (int k = 0; k < 10; ++k) {
-			auto kPred = iPred && isLegalDigit<includeFives>(k);
-			auto kSum = k + iSum;
-			auto kMul = k * iMul;
-			auto kInd = indexOffset<Len6>(k) + iInd;
-			for (int h = 0; h < 10; ++h) {
-				auto hPred = kPred && isLegalDigit<includeFives>(h);
-				auto hSum = h + kSum;
-				auto hMul = h * kMul;
-				auto hInd = indexOffset<Len5>(h) + kInd;
-				for (int w = 0; w < 10; ++w) {
-					auto wPred = hPred && isLegalDigit<includeFives>(w);
-					auto wSum = w + hSum;
-					auto wMul = w * hMul;
-					auto wInd = indexOffset<Len4>(w) + hInd;
-					for (int y = 0; y < 10; ++y) {
-						auto yPred = wPred && isLegalDigit<includeFives>(y);
-						auto ySum = y + wSum;
-						auto yMul = y * wMul;
-						auto yInd = indexOffset<Len3>(y) + wInd;
-						for (int z = 0; z < 10; ++z) {
-							auto zPred = yPred && isLegalDigit<includeFives>(z);
-							auto zSum = z + ySum;
-							auto zMul = z == 0 ? 0 : z * yMul;
-							auto zInd = indexOffset<Len2>(z) + yInd;
-                            updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
-                            updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
-							for (int x = 2; x < 10; ++x) {
-								auto outerMul = x * zMul;
-								auto combinedInd = indexOffset<Len1>(x) + zInd;
-								auto outerSum = x + zSum;
-								auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
-								updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+    auto len8 = std::async(std::launch::async, []() {
+	    for (int i = 0; i < 10; ++i) {
+	    	auto iPred = isLegalDigit<includeFives>(i);
+	    	auto iSum = i;
+	    	auto iMul = i;
+	    	auto iInd = indexOffset<Len7>(i);
+	    	for (int k = 0; k < 10; ++k) {
+	    		auto kPred = iPred && isLegalDigit<includeFives>(k);
+	    		auto kSum = k + iSum;
+	    		auto kMul = k * iMul;
+	    		auto kInd = indexOffset<Len6>(k) + iInd;
+	    		for (int h = 0; h < 10; ++h) {
+	    			auto hPred = kPred && isLegalDigit<includeFives>(h);
+	    			auto hSum = h + kSum;
+	    			auto hMul = h * kMul;
+	    			auto hInd = indexOffset<Len5>(h) + kInd;
+	    			for (int w = 0; w < 10; ++w) {
+	    				auto wPred = hPred && isLegalDigit<includeFives>(w);
+	    				auto wSum = w + hSum;
+	    				auto wMul = w * hMul;
+	    				auto wInd = indexOffset<Len4>(w) + hInd;
+	    				for (int y = 0; y < 10; ++y) {
+	    					auto yPred = wPred && isLegalDigit<includeFives>(y);
+	    					auto ySum = y + wSum;
+	    					auto yMul = y * wMul;
+	    					auto yInd = indexOffset<Len3>(y) + wInd;
+	    					for (int z = 0; z < 10; ++z) {
+	    						auto zPred = yPred && isLegalDigit<includeFives>(z);
+	    						auto zSum = z + ySum;
+	    						auto zMul = z * yMul;
+	    						auto zInd = indexOffset<Len2>(z) + yInd;
+                                updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
+                                updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
+	    						for (int x = 2; x < 10; ++x) {
+	    							auto outerMul = x * zMul;
+	    							auto combinedInd = indexOffset<Len1>(x) + zInd;
+	    							auto outerSum = x + zSum;
+	    							auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
+	    							updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+	    						}
+	    					}
+	    				}
+	    			}
+	    		}
+	    	}
+	    }
+        return 0;
+    });
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oInd, auto oPred, auto prods, auto preds) noexcept {
         updateTables10NoSum<includeFives>(oInd, 0, false, prods, preds);
         updateTables10NoSum<includeFives>(oInd + indexOffset<Len1>(1), oPred, false, prods, preds);
@@ -220,6 +223,7 @@ inline void initialize() noexcept {
 			updateTables10NoSum<includeFives>(indexOffset<Len1>(x) + oInd, x * oMul, oPred && isLegalDigit<includeFives>(x), prods, preds);
 		}
 	};
+    auto len7 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
 	// Len7
 	for (int k = 0; k < 10; ++k) {
 		auto kPred = isLegalDigit<includeFives>(k);
@@ -247,29 +251,35 @@ inline void initialize() noexcept {
 			}
 		}
 	}
-	// Len6
-	for (int h = 0; h < 10; ++h) {
-        auto hPred = isLegalDigit<includeFives>(h);
-		auto hSum = h;
-		auto hMul = h;
-		auto hInd = indexOffset<Len5>(h);
-		for (int w = 0; w < 10; ++w) {
-			auto wPred = hPred && isLegalDigit<includeFives>(w);
-			auto wMul = w * hMul;
-			auto wInd = indexOffset<Len4>(w) + hInd;
-			for (int y = 0; y < 10; ++y) {
-                auto yPred = wPred && isLegalDigit<includeFives>(y);
-				auto yMul = y * wMul;
-				auto yInd = indexOffset<Len3>(y) + wInd;
-				for (int z = 0; z < 10; ++z) {
-                    auto zPred = yPred && isLegalDigit<includeFives>(z);
-					auto zMul = z * yMul;
-					auto zInd = indexOffset<Len2>(z) + yInd;
-					innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen6, predicatesLen6);
-				}
-			}
-		}
-	}
+    return 0;
+    });
+    auto len6 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
+	    // Len6
+	    for (int h = 0; h < 10; ++h) {
+            auto hPred = isLegalDigit<includeFives>(h);
+	    	auto hSum = h;
+	    	auto hMul = h;
+	    	auto hInd = indexOffset<Len5>(h);
+	    	for (int w = 0; w < 10; ++w) {
+	    		auto wPred = hPred && isLegalDigit<includeFives>(w);
+	    		auto wMul = w * hMul;
+	    		auto wInd = indexOffset<Len4>(w) + hInd;
+	    		for (int y = 0; y < 10; ++y) {
+                    auto yPred = wPred && isLegalDigit<includeFives>(y);
+	    			auto yMul = y * wMul;
+	    			auto yInd = indexOffset<Len3>(y) + wInd;
+	    			for (int z = 0; z < 10; ++z) {
+                        auto zPred = yPred && isLegalDigit<includeFives>(z);
+	    				auto zMul = z * yMul;
+	    				auto zInd = indexOffset<Len2>(z) + yInd;
+	    				innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen6, predicatesLen6);
+	    			}
+	    		}
+	    	}
+	    }
+        return 0;
+    });
+    auto len5 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
 	// Len5
 	for (int w = 0; w < 10; ++w) {
 		auto wPred = isLegalDigit<includeFives>(w);
@@ -287,6 +297,8 @@ inline void initialize() noexcept {
 			}
 		}
 	}
+    return 0;
+    });
 	// Len4
 	for (int y = 0; y < 10; ++y) {
 		auto yPred = isLegalDigit<includeFives>(y);
@@ -310,6 +322,10 @@ inline void initialize() noexcept {
 	for (int x = 0; x < 10; ++x) {
         updateTables10NoSum<includeFives>(indexOffset<Len1>(x), x, isLegalDigit<includeFives>(x), productsLen2, predicatesLen2);
 	}
+    len5.get();
+    len6.get();
+    len7.get();
+    len8.get();
 }
 
 template<u64 width>
