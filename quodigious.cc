@@ -495,69 +495,62 @@ inline void singleDigitInnerLoop<1u, 1u, 8u>(u64 product, u64 sum, u64 value, ve
 		}
 	}
 }
-
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void oneDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    singleDigitInnerLoop<section, digitCount, (offset * 10) + 2>(product, sum, index, results);
+    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 3>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, (offset * 10) + 4>(product, sum, index, results);
+    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 5>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, (offset * 10) + 6>(product, sum, index, results);
+    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 7>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, (offset * 10) + 8>(product, sum, index, results);
+    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 9>(product, sum, index, results);
+}
 template<u64 section, u64 digitCount, u64 offset = 0>
 inline void twoDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 22>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 24>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 26>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 28>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 32>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 34>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 36>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 38>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 42>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 44>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 46>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 48>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 52>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 54>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 56>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 58>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 62>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 64>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 66>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 68>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 72>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 74>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 76>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 78>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 82>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 84>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 86>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 88>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 92>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 94>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 96>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, (offset * 100) + 98>(product, sum, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
+    oneDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
 }
-template<u64 section, u64 digitCount>
+template<u64 section, u64 digitCount, u64 offset = 0>
 inline void threeDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    twoDigitBody<section, digitCount, 2>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 3>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 4>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 5>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 6>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 7>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 8>(sum, product, index, results);
-    twoDigitBody<section, digitCount, 9>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
+    twoDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
+}
+
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    threeDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
+    threeDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
 }
 
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
-		singleDigitInnerLoop<section, digitCount, 2>(product, sum, index, results);
-		//singleDigitInnerLoop<section, digitCount, 3>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 4>(product, sum, index, results);
-		//singleDigitInnerLoop<section, digitCount, 5>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 6>(product, sum, index, results);
-		//singleDigitInnerLoop<section, digitCount, 7>(product, sum, index, results);
-		singleDigitInnerLoop<section, digitCount, 8>(product, sum, index, results);
-		//singleDigitInnerLoop<section, digitCount, 9>(product, sum, index, results);
+        oneDigitBody<section, digitCount>(sum, product, index, results);
 	} else if (digitCount == 2) {
         twoDigitBody<section, digitCount>(sum, product, index, results);
 	} else if (digitCount == 3) {
 		threeDigitBody<section, digitCount>(sum, product, index, results);
+    } else if (digitCount == 4) {
+        fourDigitBody<section, digitCount>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
