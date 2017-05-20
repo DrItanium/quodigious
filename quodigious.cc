@@ -27,8 +27,18 @@
 
 #define buildLengthPrecomputation(title, width) \
 	constexpr auto title = fastPow10< width > ; \
-	u64 products ## title [ title ] = { 0 }; \
-	bool predicates ## title [ title ] = { false }
+	u64* products ## title = nullptr; \
+	bool* predicates ## title = nullptr; \
+	void initStorage ## title () noexcept { \
+		if ( products ## title == nullptr) { \
+			products ## title = new u64[ title ] ; \
+		} \
+		if ( predicates ## title == nullptr) { \
+			predicates ## title = new bool [ title ] ; \
+		} \
+	}
+
+buildLengthPrecomputation(Len9, 9);
 buildLengthPrecomputation(Len8, 8);
 buildLengthPrecomputation(Len7, 7);
 buildLengthPrecomputation(Len6, 6);
@@ -38,8 +48,14 @@ buildLengthPrecomputation(Len3, 3);
 buildLengthPrecomputation(Len2, 2);
 constexpr auto Len1 = fastPow10<1>;
 
+constexpr auto sumLength = Len9;
 u64 *sums = nullptr;
-//u64 sums[Len8] = { 0 };
+
+void initStorageSums() noexcept {
+	if (sums == nullptr) {
+		sums = new u64[sumLength];
+	}
+}
 
 template<bool includeFives>
 constexpr bool isLegalDigit(u64 value) noexcept {
@@ -146,9 +162,15 @@ inline void updateTables10(u64 offset, u64 sum, u64 product, bool legal, u64* su
 
 template<bool includeFives = false>
 inline void initialize() noexcept {
-    if(sums == nullptr) {
-        sums = new u64[Len8];
-    }
+	initStorageLen2();
+	initStorageLen3();
+	initStorageLen4();
+	initStorageLen5();
+	initStorageLen6();
+	initStorageLen7();
+	initStorageLen8();
+	initStorageLen9();
+	initStorageSums();
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
 	// It is super fast to do and only consumes space. That way when we iterate
 	// through numbers we can reduce the number of divides, remainders, adds,
@@ -167,53 +189,59 @@ inline void initialize() noexcept {
 	// are even! The only exceptions are 3,5,7,9,735
 	//
 
-	// Len8
-    auto len8 = std::async(std::launch::async, []() {
-	    for (int i = 0; i < 10; ++i) {
-	    	auto iPred = isLegalDigit<includeFives>(i);
-	    	auto iSum = i;
-	    	auto iMul = i;
-	    	auto iInd = indexOffset<Len7>(i);
-	    	for (int k = 0; k < 10; ++k) {
-	    		auto kPred = iPred && isLegalDigit<includeFives>(k);
-	    		auto kSum = k + iSum;
-	    		auto kMul = k * iMul;
-	    		auto kInd = indexOffset<Len6>(k) + iInd;
-	    		for (int h = 0; h < 10; ++h) {
-	    			auto hPred = kPred && isLegalDigit<includeFives>(h);
-	    			auto hSum = h + kSum;
-	    			auto hMul = h * kMul;
-	    			auto hInd = indexOffset<Len5>(h) + kInd;
-	    			for (int w = 0; w < 10; ++w) {
-	    				auto wPred = hPred && isLegalDigit<includeFives>(w);
-	    				auto wSum = w + hSum;
-	    				auto wMul = w * hMul;
-	    				auto wInd = indexOffset<Len4>(w) + hInd;
-	    				for (int y = 0; y < 10; ++y) {
-	    					auto yPred = wPred && isLegalDigit<includeFives>(y);
-	    					auto ySum = y + wSum;
-	    					auto yMul = y * wMul;
-	    					auto yInd = indexOffset<Len3>(y) + wInd;
-	    					for (int z = 0; z < 10; ++z) {
-	    						auto zPred = yPred && isLegalDigit<includeFives>(z);
-	    						auto zSum = z + ySum;
-	    						auto zMul = z * yMul;
-	    						auto zInd = indexOffset<Len2>(z) + yInd;
-                                updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
-                                updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
-	    						for (int x = 2; x < 10; ++x) {
-	    							auto outerMul = x * zMul;
-	    							auto combinedInd = indexOffset<Len1>(x) + zInd;
-	    							auto outerSum = x + zSum;
-	    							auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
-	    							updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+	// Len9
+    auto len9 = std::async(std::launch::async, []() {
+			for (int h = 0; h < 10; ++h) {
+				auto hPred = isLegalDigit<includeFives>(h);
+				auto hSum = h;
+				auto hMul = h;
+				auto hInd = indexOffset<Len8>(h);
+	    		for (int i = 0; i < 10; ++i) {
+	    			auto iPred = isLegalDigit<includeFives>(i) && hPred;
+	    			auto iSum = i + hSum;
+	    			auto iMul = i * hMul;
+	    			auto iInd = indexOffset<Len7>(i) + hInd;
+	    			for (int k = 0; k < 10; ++k) {
+	    				auto kPred = iPred && isLegalDigit<includeFives>(k);
+	    				auto kSum = k + iSum;
+	    				auto kMul = k * iMul;
+	    				auto kInd = indexOffset<Len6>(k) + iInd;
+	    				for (int h = 0; h < 10; ++h) {
+	    					auto hPred = kPred && isLegalDigit<includeFives>(h);
+	    					auto hSum = h + kSum;
+	    					auto hMul = h * kMul;
+	    					auto hInd = indexOffset<Len5>(h) + kInd;
+	    					for (int w = 0; w < 10; ++w) {
+	    						auto wPred = hPred && isLegalDigit<includeFives>(w);
+	    						auto wSum = w + hSum;
+	    						auto wMul = w * hMul;
+	    						auto wInd = indexOffset<Len4>(w) + hInd;
+	    						for (int y = 0; y < 10; ++y) {
+	    							auto yPred = wPred && isLegalDigit<includeFives>(y);
+	    							auto ySum = y + wSum;
+	    							auto yMul = y * wMul;
+	    							auto yInd = indexOffset<Len3>(y) + wInd;
+	    							for (int z = 0; z < 10; ++z) {
+	    								auto zPred = yPred && isLegalDigit<includeFives>(z);
+	    								auto zSum = z + ySum;
+	    								auto zMul = z * yMul;
+	    								auto zInd = indexOffset<Len2>(z) + yInd;
+        		                        updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
+        		                        updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
+	    								for (int x = 2; x < 10; ++x) {
+	    									auto outerMul = x * zMul;
+	    									auto combinedInd = indexOffset<Len1>(x) + zInd;
+	    									auto outerSum = x + zSum;
+	    									auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
+	    									updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
+	    								}
+	    							}
 	    						}
 	    					}
 	    				}
 	    			}
 	    		}
-	    	}
-	    }
+			}
         return 0;
     });
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oInd, auto oPred, auto prods, auto preds) noexcept {
@@ -223,6 +251,41 @@ inline void initialize() noexcept {
 			updateTables10NoSum<includeFives>(indexOffset<Len1>(x) + oInd, x * oMul, oPred && isLegalDigit<includeFives>(x), prods, preds);
 		}
 	};
+	// Len8
+    auto len8 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
+	    for (int i = 0; i < 10; ++i) {
+	    	auto iPred = isLegalDigit<includeFives>(i);
+	    	auto iMul = i;
+	    	auto iInd = indexOffset<Len7>(i);
+	    	for (int k = 0; k < 10; ++k) {
+	    		auto kPred = iPred && isLegalDigit<includeFives>(k);
+	    		auto kMul = k * iMul;
+	    		auto kInd = indexOffset<Len6>(k) + iInd;
+	    		for (int h = 0; h < 10; ++h) {
+	    			auto hPred = kPred && isLegalDigit<includeFives>(h);
+	    			auto hMul = h * kMul;
+	    			auto hInd = indexOffset<Len5>(h) + kInd;
+	    			for (int w = 0; w < 10; ++w) {
+	    				auto wPred = hPred && isLegalDigit<includeFives>(w);
+	    				auto wMul = w * hMul;
+	    				auto wInd = indexOffset<Len4>(w) + hInd;
+	    				for (int y = 0; y < 10; ++y) {
+	    					auto yPred = wPred && isLegalDigit<includeFives>(y);
+	    					auto yMul = y * wMul;
+	    					auto yInd = indexOffset<Len3>(y) + wInd;
+	    					for (int z = 0; z < 10; ++z) {
+	    						auto zPred = yPred && isLegalDigit<includeFives>(z);
+	    						auto zMul = z * yMul;
+	    						auto zInd = indexOffset<Len2>(z) + yInd;
+								innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen8, predicatesLen8);
+	    					}
+	    				}
+	    			}
+	    		}
+	    	}
+	    }
+        return 0;
+    });
     auto len7 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
 	// Len7
 	for (int k = 0; k < 10; ++k) {
@@ -326,6 +389,7 @@ inline void initialize() noexcept {
     len6.get();
     len7.get();
     len8.get();
+	len9.get();
 }
 
 template<u64 width>
@@ -366,17 +430,17 @@ inline u64 getProduct(u64 x) noexcept {
 		case 6: return productsLen6[x];
 		case 7: return productsLen7[x];
 		case 8: return productsLen8[x];
-		case 9: return getInnerProduct<1, 8>(x);
-		case 10: return getInnerProduct<2, 8>(x);
-		case 11: return getInnerProduct<3, 8>(x);
-		case 12: return getInnerProduct<4, 8>(x);
-		case 13: return getInnerProduct<5, 8>(x);
-		case 14: return getInnerProduct<6, 8>(x);
-		case 15: return getInnerProduct<7, 8>(x);
-		case 16: return getInnerProduct<8, 8>(x);
-		case 17: return getInnerProduct<1, 16>(x);
-		case 18: return getInnerProduct<2, 16>(x);
-		case 19: return getInnerProduct<3, 16>(x);
+		case 9: return productsLen9[x];
+		case 10: return getInnerProduct<1, 9>(x);
+		case 11: return getInnerProduct<2, 9>(x);
+		case 12: return getInnerProduct<3, 9>(x);
+		case 13: return getInnerProduct<4, 9>(x);
+		case 14: return getInnerProduct<5, 9>(x);
+		case 15: return getInnerProduct<6, 9>(x);
+		case 16: return getInnerProduct<7, 9>(x);
+		case 17: return getInnerProduct<8, 9>(x);
+		case 18: return getInnerProduct<9, 9>(x);
+		case 19: return getInnerProduct<1, 18>(x);
 		default: return x;
 	}
 }
@@ -403,18 +467,18 @@ inline u64 getSum(u64 x) noexcept {
 		case 5:
 		case 6:
 		case 7:
-		case 8: return sums[x];
-		case 9: return getInnerSum<1, 8>(x);
-		case 10: return getInnerSum<2, 8>(x);
-		case 11: return getInnerSum<3, 8>(x);
-		case 12: return getInnerSum<4, 8>(x);
-		case 13: return getInnerSum<5, 8>(x);
-		case 14: return getInnerSum<6, 8>(x);
-		case 15: return getInnerSum<7, 8>(x);
-		case 16: return getInnerSum<8, 8>(x);
-		case 17: return getInnerSum<1, 16>(x);
-		case 18: return getInnerSum<2, 16>(x);
-		case 19: return getInnerSum<3, 16>(x);
+		case 8:
+		case 9: return sums[x];
+		case 10: return getInnerSum<1, 9>(x);
+		case 11: return getInnerSum<2, 9>(x);
+		case 12: return getInnerSum<3, 9>(x);
+		case 13: return getInnerSum<4, 9>(x);
+		case 14: return getInnerSum<5, 9>(x);
+		case 15: return getInnerSum<6, 9>(x);
+		case 16: return getInnerSum<7, 9>(x);
+		case 17: return getInnerSum<8, 9>(x);
+		case 18: return getInnerSum<9, 9>(x);
+		case 19: return getInnerSum<1, 18>(x);
 		default: return x;
 	}
 }
@@ -439,7 +503,12 @@ struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) * C
 template<u64 value>
 struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + ComputeSum<value / 10>{}> { };
 
-#define GenerateLeaves(cl, v) template<> struct cl < v > : std::integral_constant<u64, v > { }
+template<u64 value> struct CheckValueLegality : std::integral_constant<bool, isLegalDigit<false>(value % 10) && CheckValueLegality<value / 10>{}> { };
+
+
+#define GenerateLeavesFull(cl, v, r) template<> struct cl < v > : std::integral_constant<u64, r > { }
+
+#define GenerateLeaves(cl, v) GenerateLeavesFull(cl, v, v)
 
 #define GenerateLowerTen(cl) \
 	GenerateLeaves(cl, 0); \
@@ -455,6 +524,17 @@ struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + Compu
 
 GenerateLowerTen(ComputeSum);
 GenerateLowerTen(ComputeProduct);
+
+GenerateLeavesFull(CheckValueLegality, 0, false);
+GenerateLeavesFull(CheckValueLegality, 1, false);
+GenerateLeavesFull(CheckValueLegality, 5, false); // this is hardcoded for now
+GenerateLeavesFull(CheckValueLegality, 2, true);
+GenerateLeavesFull(CheckValueLegality, 3, true);
+GenerateLeavesFull(CheckValueLegality, 4, true);
+GenerateLeavesFull(CheckValueLegality, 6, true);
+GenerateLeavesFull(CheckValueLegality, 7, true);
+GenerateLeavesFull(CheckValueLegality, 8, true);
+GenerateLeavesFull(CheckValueLegality, 9, true);
 
 template<u64 times>
 constexpr u64 multiply(u64 product) noexcept {
