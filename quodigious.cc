@@ -38,7 +38,6 @@
 		} \
 	}
 
-buildLengthPrecomputation(Len9, 9);
 buildLengthPrecomputation(Len8, 8);
 buildLengthPrecomputation(Len7, 7);
 buildLengthPrecomputation(Len6, 6);
@@ -48,7 +47,8 @@ buildLengthPrecomputation(Len3, 3);
 buildLengthPrecomputation(Len2, 2);
 constexpr auto Len1 = fastPow10<1>;
 
-constexpr auto sumLength = Len9;
+constexpr auto sumLength = Len8;
+
 u64 *sums = nullptr;
 
 void initStorageSums() noexcept {
@@ -70,6 +70,9 @@ template<>
 constexpr u64 indexOffset<1>(u64 value) noexcept {
     return value;
 }
+
+template<u64 factor, u64 offset>
+struct ComputeIndexOffset : std::integral_constant<u64, factor * offset> { };
 
 
 template<bool includeFives>
@@ -169,7 +172,6 @@ inline void initialize() noexcept {
 	initStorageLen6();
 	initStorageLen7();
 	initStorageLen8();
-	initStorageLen9();
 	initStorageSums();
 	// precompute all of the sums and products for 7 digit numbers and below (not 100 or 10 though!)
 	// It is super fast to do and only consumes space. That way when we iterate
@@ -190,58 +192,52 @@ inline void initialize() noexcept {
 	//
 
 	// Len9
-    auto len9 = std::async(std::launch::async, []() {
-			for (int h = 0; h < 10; ++h) {
-				auto hPred = isLegalDigit<includeFives>(h);
-				auto hSum = h;
-				auto hMul = h;
-				auto hInd = indexOffset<Len8>(h);
-	    		for (int i = 0; i < 10; ++i) {
-	    			auto iPred = isLegalDigit<includeFives>(i) && hPred;
-	    			auto iSum = i + hSum;
-	    			auto iMul = i * hMul;
-	    			auto iInd = indexOffset<Len7>(i) + hInd;
-	    			for (int k = 0; k < 10; ++k) {
-	    				auto kPred = iPred && isLegalDigit<includeFives>(k);
-	    				auto kSum = k + iSum;
-	    				auto kMul = k * iMul;
-	    				auto kInd = indexOffset<Len6>(k) + iInd;
-	    				for (int h = 0; h < 10; ++h) {
-	    					auto hPred = kPred && isLegalDigit<includeFives>(h);
-	    					auto hSum = h + kSum;
-	    					auto hMul = h * kMul;
-	    					auto hInd = indexOffset<Len5>(h) + kInd;
-	    					for (int w = 0; w < 10; ++w) {
-	    						auto wPred = hPred && isLegalDigit<includeFives>(w);
-	    						auto wSum = w + hSum;
-	    						auto wMul = w * hMul;
-	    						auto wInd = indexOffset<Len4>(w) + hInd;
-	    						for (int y = 0; y < 10; ++y) {
-	    							auto yPred = wPred && isLegalDigit<includeFives>(y);
-	    							auto ySum = y + wSum;
-	    							auto yMul = y * wMul;
-	    							auto yInd = indexOffset<Len3>(y) + wInd;
-	    							for (int z = 0; z < 10; ++z) {
-	    								auto zPred = yPred && isLegalDigit<includeFives>(z);
-	    								auto zSum = z + ySum;
-	    								auto zMul = z * yMul;
-	    								auto zInd = indexOffset<Len2>(z) + yInd;
-        		                        updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
-        		                        updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
-	    								for (int x = 2; x < 10; ++x) {
-	    									auto outerMul = x * zMul;
-	    									auto combinedInd = indexOffset<Len1>(x) + zInd;
-	    									auto outerSum = x + zSum;
-	    									auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
-	    									updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
-	    								}
-	    							}
+    auto len8 = std::async(std::launch::async, []() {
+	    for (int i = 0; i < 10; ++i) {
+	    	auto iPred = isLegalDigit<includeFives>(i);
+	    	auto iSum = i;
+	    	auto iMul = i;
+	    	auto iInd = indexOffset<Len7>(i);
+	    	for (int k = 0; k < 10; ++k) {
+	    		auto kPred = iPred && isLegalDigit<includeFives>(k);
+	    		auto kSum = k + iSum;
+	    		auto kMul = k * iMul;
+	    		auto kInd = indexOffset<Len6>(k) + iInd;
+	    		for (int h = 0; h < 10; ++h) {
+	    			auto hPred = kPred && isLegalDigit<includeFives>(h);
+	    			auto hSum = h + kSum;
+	    			auto hMul = h * kMul;
+	    			auto hInd = indexOffset<Len5>(h) + kInd;
+	    			for (int w = 0; w < 10; ++w) {
+	    				auto wPred = hPred && isLegalDigit<includeFives>(w);
+	    				auto wSum = w + hSum;
+	    				auto wMul = w * hMul;
+	    				auto wInd = indexOffset<Len4>(w) + hInd;
+	    				for (int y = 0; y < 10; ++y) {
+	    					auto yPred = wPred && isLegalDigit<includeFives>(y);
+	    					auto ySum = y + wSum;
+	    					auto yMul = y * wMul;
+	    					auto yInd = indexOffset<Len3>(y) + wInd;
+	    					for (int z = 0; z < 10; ++z) {
+	    						auto zPred = yPred && isLegalDigit<includeFives>(z);
+	    						auto zSum = z + ySum;
+	    						auto zMul = z * yMul;
+	    						auto zInd = indexOffset<Len2>(z) + yInd;
+                                updateTables10<includeFives>(zInd, zSum, 0, false, sums, productsLen8, predicatesLen8);
+                                updateTables10<includeFives>(zInd + indexOffset<Len1>(1), zSum + 1, zMul, false, sums, productsLen8, predicatesLen8);
+	    						for (int x = 2; x < 10; ++x) {
+	    							auto outerMul = x * zMul;
+	    							auto combinedInd = indexOffset<Len1>(x) + zInd;
+	    							auto outerSum = x + zSum;
+	    							auto outerPredicate = zPred && isLegalDigit<includeFives>(x);
+	    							updateTables10<includeFives>(combinedInd, outerSum, outerMul, outerPredicate, sums, productsLen8, predicatesLen8);
 	    						}
 	    					}
 	    				}
 	    			}
 	    		}
-			}
+	    	}
+	    }
         return 0;
     });
 	auto innerMostBodyNoSumUpdate  = [](auto oMul, auto oInd, auto oPred, auto prods, auto preds) noexcept {
@@ -252,40 +248,6 @@ inline void initialize() noexcept {
 		}
 	};
 	// Len8
-    auto len8 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
-	    for (int i = 0; i < 10; ++i) {
-	    	auto iPred = isLegalDigit<includeFives>(i);
-	    	auto iMul = i;
-	    	auto iInd = indexOffset<Len7>(i);
-	    	for (int k = 0; k < 10; ++k) {
-	    		auto kPred = iPred && isLegalDigit<includeFives>(k);
-	    		auto kMul = k * iMul;
-	    		auto kInd = indexOffset<Len6>(k) + iInd;
-	    		for (int h = 0; h < 10; ++h) {
-	    			auto hPred = kPred && isLegalDigit<includeFives>(h);
-	    			auto hMul = h * kMul;
-	    			auto hInd = indexOffset<Len5>(h) + kInd;
-	    			for (int w = 0; w < 10; ++w) {
-	    				auto wPred = hPred && isLegalDigit<includeFives>(w);
-	    				auto wMul = w * hMul;
-	    				auto wInd = indexOffset<Len4>(w) + hInd;
-	    				for (int y = 0; y < 10; ++y) {
-	    					auto yPred = wPred && isLegalDigit<includeFives>(y);
-	    					auto yMul = y * wMul;
-	    					auto yInd = indexOffset<Len3>(y) + wInd;
-	    					for (int z = 0; z < 10; ++z) {
-	    						auto zPred = yPred && isLegalDigit<includeFives>(z);
-	    						auto zMul = z * yMul;
-	    						auto zInd = indexOffset<Len2>(z) + yInd;
-								innerMostBodyNoSumUpdate(zMul, zInd, zPred, productsLen8, predicatesLen8);
-	    					}
-	    				}
-	    			}
-	    		}
-	    	}
-	    }
-        return 0;
-    });
     auto len7 = std::async(std::launch::async, [innerMostBodyNoSumUpdate]() {
 	// Len7
 	for (int k = 0; k < 10; ++k) {
@@ -389,7 +351,6 @@ inline void initialize() noexcept {
     len6.get();
     len7.get();
     len8.get();
-	len9.get();
 }
 
 template<u64 width>
@@ -419,7 +380,7 @@ inline u64 getInnerProduct(u64 x) noexcept {
 }
 template<u64 width>
 inline u64 getProduct(u64 x) noexcept {
-	static_assert(width < 20, "Too large of a product value!");
+	static_assert(width < 9, "Too large of a product value!");
 	switch(width) {
 		case 0: return 1;
 		case 1: return x;
@@ -430,17 +391,6 @@ inline u64 getProduct(u64 x) noexcept {
 		case 6: return productsLen6[x];
 		case 7: return productsLen7[x];
 		case 8: return productsLen8[x];
-		case 9: return productsLen9[x];
-		case 10: return getInnerProduct<1, 9>(x);
-		case 11: return getInnerProduct<2, 9>(x);
-		case 12: return getInnerProduct<3, 9>(x);
-		case 13: return getInnerProduct<4, 9>(x);
-		case 14: return getInnerProduct<5, 9>(x);
-		case 15: return getInnerProduct<6, 9>(x);
-		case 16: return getInnerProduct<7, 9>(x);
-		case 17: return getInnerProduct<8, 9>(x);
-		case 18: return getInnerProduct<9, 9>(x);
-		case 19: return getInnerProduct<1, 18>(x);
 		default: return x;
 	}
 }
@@ -457,7 +407,7 @@ inline u64 getInnerSum(u64 x) noexcept {
 
 template<u64 width>
 inline u64 getSum(u64 x) noexcept {
-	static_assert(width < 20, "Can't express numbers 20 digits or higher!");
+	static_assert(width < 9, "Can't express numbers 20 digits or higher!");
 	switch(width) {
 		case 0: return 0;
 		case 1: return x;
@@ -467,18 +417,7 @@ inline u64 getSum(u64 x) noexcept {
 		case 5:
 		case 6:
 		case 7:
-		case 8:
-		case 9: return sums[x];
-		case 10: return getInnerSum<1, 9>(x);
-		case 11: return getInnerSum<2, 9>(x);
-		case 12: return getInnerSum<3, 9>(x);
-		case 13: return getInnerSum<4, 9>(x);
-		case 14: return getInnerSum<5, 9>(x);
-		case 15: return getInnerSum<6, 9>(x);
-		case 16: return getInnerSum<7, 9>(x);
-		case 17: return getInnerSum<8, 9>(x);
-		case 18: return getInnerSum<9, 9>(x);
-		case 19: return getInnerSum<1, 18>(x);
+		case 8: return sums[x];
 		default: return x;
 	}
 }
@@ -496,6 +435,25 @@ constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
+template<u64 k>
+struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
+
+template<u64 times>
+constexpr u64 multiply(u64 product) noexcept {
+	return times * product;
+}
+
+template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
+template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
+template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
+template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
+template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
+template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
+template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
+template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
+template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
+template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
+template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
 template<u64 value>
 struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) * ComputeProduct<value / 10>()> { };
@@ -503,7 +461,7 @@ struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) * C
 template<u64 value>
 struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + ComputeSum<value / 10>{}> { };
 
-template<u64 value> struct CheckValueLegality : std::integral_constant<bool, isLegalDigit<false>(value % 10) && CheckValueLegality<value / 10>{}> { };
+template<u64 value> struct CheckValueLegality : std::integral_constant<bool, CheckValueLegality<value % 10>{ } && CheckValueLegality<value / 10>{}> { };
 
 
 #define GenerateLeavesFull(cl, v, r) template<> struct cl < v > : std::integral_constant<u64, r > { }
@@ -536,30 +494,14 @@ GenerateLeavesFull(CheckValueLegality, 7, true);
 GenerateLeavesFull(CheckValueLegality, 8, true);
 GenerateLeavesFull(CheckValueLegality, 9, true);
 
-template<u64 times>
-constexpr u64 multiply(u64 product) noexcept {
-	return times * product;
-}
 
-template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
-template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
-template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
-template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
-template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
-template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
-template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
-template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
-template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
-template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
-template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
-
-template<u64 section, u64 digitCount, u64 k>
+template<u64 section, u64 k>
 inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
 	static_assert(k != 0, "Can't have a legal digit which is 0. Ever!");
 	static_assert(k != 1, "Can't have a legal digit which is 1. Ever!");
-	if (isEven(k) && legalValue<digitCount>(k)) {
+	if (EvenCheck<k>::value && CheckValueLegality<k>::value) {
 		auto ns = sum + ComputeSum<k>::value;
-		auto nv = indexOffset<section>(k) + value;
+		auto nv = ComputeIndexOffset<section, k>::value + value;
 		if (componentQuodigious(nv, ns)) {
 			// only compute the product if the sum is divisible
 			auto np = multiply<ComputeProduct<k>::value>(product);
@@ -570,110 +512,62 @@ inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results
 	}
 }
 
-template<>
-inline void singleDigitInnerLoop<1u, 1u, 2u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
-	auto ns = sum + 2u;
-	auto nv = indexOffset<1u>(2u) + value;
-	if (componentQuodigious(nv, ns)) {
-		auto np = product << 1; // shift left by 1 is the same as multiplying by two
-		if (componentQuodigious(nv, np)) {
-			results.emplace_back(nv);
-		}
-	}
-}
-
-template<>
-inline void singleDigitInnerLoop<1u, 1u, 6u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
-    auto ns = sum + 6u;
-    auto nv = indexOffset<1u>(6u) + value;
-    if (componentQuodigious(nv, ns)) {
-        auto np = (product << 2) + (product << 1);
-        if (componentQuodigious(nv, np)) {
-            results.emplace_back(nv);
-        }
-    }
-}
-
-template<>
-inline void singleDigitInnerLoop<1u, 1u, 4u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
-	auto ns = sum + 4u;
-	auto nv = indexOffset<1u>(4u) + value;
-	if (componentQuodigious(nv, ns)) {
-		auto np = product << 2; // shift left by 1 is the same as multiplying by two
-		if (componentQuodigious(nv, np)) {
-			results.emplace_back(nv);
-		}
-	}
-}
-
-template<>
-inline void singleDigitInnerLoop<1u, 1u, 8u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
-	auto ns = sum + 8u;
-	auto nv = indexOffset<1u>(8u) + value;
-	if (componentQuodigious(nv, ns)) {
-		auto np = product << 3; // shift left by 1 is the same as multiplying by two
-		if (componentQuodigious(nv, np)) {
-			results.emplace_back(nv);
-		}
-	}
-}
-
 constexpr u64 computeBodyOffset(u64 offset, u64 add) noexcept {
     return (offset << 3) + (offset << 1) + add;
 }
 
-template<u64 section, u64 digitCount, u64 offset = 0>
+template<u64 section, u64 offset = 0>
 inline void oneDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 2)>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 4)>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 6)>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 8)>(product, sum, index, results);
+    singleDigitInnerLoop<section, computeBodyOffset(offset, 2)>(product, sum, index, results);
+    singleDigitInnerLoop<section, computeBodyOffset(offset, 4)>(product, sum, index, results);
+    singleDigitInnerLoop<section, computeBodyOffset(offset, 6)>(product, sum, index, results);
+    singleDigitInnerLoop<section, computeBodyOffset(offset, 8)>(product, sum, index, results);
 }
-template<u64 section, u64 digitCount, u64 offset = 0>
+template<u64 section, u64 offset = 0>
 inline void twoDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
-    oneDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    oneDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
-template<u64 section, u64 digitCount, u64 offset = 0>
+template<u64 section, u64 offset = 0>
 inline void threeDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
-    twoDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    twoDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 section, u64 digitCount, u64 offset = 0>
+template<u64 section, u64 offset = 0>
 inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
-    threeDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    threeDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
-        oneDigitBody<section, digitCount>(sum, product, index, results);
+        oneDigitBody<section>(sum, product, index, results);
 	} else if (digitCount == 2) {
-        twoDigitBody<section, digitCount>(sum, product, index, results);
+        twoDigitBody<section>(sum, product, index, results);
 	} else if (digitCount == 3) {
-		threeDigitBody<section, digitCount>(sum, product, index, results);
+		threeDigitBody<section>(sum, product, index, results);
 	} else if (digitCount == 4) {
-		fourDigitBody<section, digitCount>(sum, product, index, results);
+		fourDigitBody<section>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
@@ -868,9 +762,5 @@ int main() {
 			}
 		}
 	}
-    if (sums != nullptr) {
-        delete[] sums;
-        sums = nullptr;
-    }
 	return 0;
 }
