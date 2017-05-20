@@ -432,22 +432,74 @@ constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
+template<u64 width, u64 value>
+constexpr u64 computeSum() noexcept {
+    return (value % 10) + computeSum<width - 1, value / 10>();
+}
+template<> constexpr u64 computeSum<1, 0>() noexcept { return 0; }
+template<> constexpr u64 computeSum<1, 1>() noexcept { return 1; }
+template<> constexpr u64 computeSum<1, 2>() noexcept { return 2; }
+template<> constexpr u64 computeSum<1, 3>() noexcept { return 3; }
+template<> constexpr u64 computeSum<1, 4>() noexcept { return 4; }
+template<> constexpr u64 computeSum<1, 5>() noexcept { return 5; }
+template<> constexpr u64 computeSum<1, 6>() noexcept { return 6; }
+template<> constexpr u64 computeSum<1, 7>() noexcept { return 7; }
+template<> constexpr u64 computeSum<1, 8>() noexcept { return 8; }
+template<> constexpr u64 computeSum<1, 9>() noexcept { return 9; }
+template<> constexpr u64 computeSum<0, 0>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 1>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 2>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 3>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 4>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 5>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 6>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 7>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 8>() noexcept { return 0; }
+template<> constexpr u64 computeSum<0, 9>() noexcept { return 0; }
+
+template<u64 width, u64 value>
+constexpr u64 computeProduct() noexcept {
+    return (value % 10) * computeProduct<width - 1, value / 10>();
+}
+
+template<> constexpr u64 computeProduct<1, 0>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<1, 1>() noexcept { return 1; }
+template<> constexpr u64 computeProduct<1, 2>() noexcept { return 2; }
+template<> constexpr u64 computeProduct<1, 3>() noexcept { return 3; }
+template<> constexpr u64 computeProduct<1, 4>() noexcept { return 4; }
+template<> constexpr u64 computeProduct<1, 5>() noexcept { return 5; }
+template<> constexpr u64 computeProduct<1, 6>() noexcept { return 6; }
+template<> constexpr u64 computeProduct<1, 7>() noexcept { return 7; }
+template<> constexpr u64 computeProduct<1, 8>() noexcept { return 8; }
+template<> constexpr u64 computeProduct<1, 9>() noexcept { return 9; }
+template<> constexpr u64 computeProduct<0, 0>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 1>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 2>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 3>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 4>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 5>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 6>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 7>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 8>() noexcept { return 0; }
+template<> constexpr u64 computeProduct<0, 9>() noexcept { return 0; }
+
 template<u64 section, u64 digitCount, u64 k>
 inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
 	static_assert(k != 0, "Can't have a legal digit which is 0. Ever!");
 	static_assert(k != 1, "Can't have a legal digit which is 1. Ever!");
 	if (isEven(k) && legalValue<digitCount>(k)) {
-		auto ns = sum + getSum<digitCount>(k);
+		auto ns = sum + computeSum<digitCount, k>();
 		auto nv = indexOffset<section>(k) + value;
 		if (componentQuodigious(nv, ns)) {
 			// only compute the product if the sum is divisible
-			auto np = product * getProduct<digitCount>(k);
+			auto np = product * computeProduct<digitCount, k>();
 			if (componentQuodigious(nv, np)) {
 				results.emplace_back(nv);
 			}
 		}
 	}
 }
+
 template<>
 inline void singleDigitInnerLoop<1u, 1u, 2u>(u64 product, u64 sum, u64 value, vec64& results) noexcept {
 	auto ns = sum + 2u;
