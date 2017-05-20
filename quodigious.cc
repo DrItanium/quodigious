@@ -584,18 +584,6 @@ inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexc
     threeDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 section, u64 digitCount, u64 offset = 0>
-inline void fiveDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
-    fourDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
-}
-
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
@@ -606,8 +594,6 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 		threeDigitBody<section, digitCount>(sum, product, index, results);
 	} else if (digitCount == 4) {
 		fourDigitBody<section, digitCount>(sum, product, index, results);
-	} else if (digitCount == 5) {
-		fiveDigitBody<section, digitCount>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
