@@ -541,7 +541,11 @@ inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexc
 
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	if (digitCount == 1) {
+	if (digitCount == 0) {
+		if (componentQuodigious(index, sum) && componentQuodigious(index, product)) {
+			results.emplace_back(index);
+		}
+	} else if (digitCount == 1) {
         oneDigitBody<section>(sum, product, index, results);
 	} else if (digitCount == 2) {
         twoDigitBody<section>(sum, product, index, results);
@@ -560,6 +564,28 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 						results.emplace_back(l1Value);
 					}
 				}
+			}
+		}
+	}
+}
+
+template<u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
+inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+	if (l2Digits == 1) {
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 2, multiply<2>(product), index + ComputeIndexOffset<l2Section, 2>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 3, multiply<3>(product), index + ComputeIndexOffset<l2Section, 3>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 4, multiply<4>(product), index + ComputeIndexOffset<l2Section, 4>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 6, multiply<6>(product), index + ComputeIndexOffset<l2Section, 6>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 7, multiply<7>(product), index + ComputeIndexOffset<l2Section, 7>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 8, multiply<8>(product), index + ComputeIndexOffset<l2Section, 8>::value, results);
+		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + 9, multiply<9>(product), index + ComputeIndexOffset<l2Section, 9>::value, results);
+	} else {
+		for (auto j = startL2; j < endL2; ++j) {
+			if (legalValue<l2Digits>(j)) {
+				auto l2Sum = getSum<l2Digits>(j) + sum;
+				auto l2Product = getProduct<l2Digits>(j) * product;
+				auto l2Index = indexOffset<l2Section>(j) + index;
+				innermostLoopBody<startL1, endL1, l1Digits, l1Section>(l2Sum, l2Product, l2Index, results);
 			}
 		}
 	}
@@ -597,14 +623,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			auto l3Sum = getSum<l3Digits>(i);
 			auto l3Product = getProduct<l3Digits>(i);
 			auto l3Index = indexOffset<l3Section>(i);
-			for (auto j = startL2; j < endL2; ++j) {
-				if (legalValue<l2Digits>(j)) {
-					auto l2Sum = getSum<l2Digits>(j) + l3Sum;
-					auto l2Product = getProduct<l2Digits>(j) * l3Product;
-					auto l2Index = indexOffset<l2Section>(j) + l3Index;
-					innermostLoopBody<startL1, endL1, l1Digits, l1Section>(l2Sum, l2Product, l2Index, results);
-				}
-			}
+			l2Body<startL2, endL2, l2Digits, l2Section, startL1, endL1, l1Digits, l1Section>(l3Sum, l3Product, l3Index, results);
 		}
 	}
 	return 0;
