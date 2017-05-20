@@ -434,7 +434,7 @@ constexpr bool isEven(u64 value) noexcept {
 
 
 template<u64 value>
-struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) + ComputeProduct<value / 10>()> { };
+struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) * ComputeProduct<value / 10>()> { };
 
 template<u64 value>
 struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + ComputeSum<value / 10>{}> { };
@@ -456,8 +456,22 @@ struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + Compu
 GenerateLowerTen(ComputeSum);
 GenerateLowerTen(ComputeProduct);
 
+template<u64 times>
+constexpr u64 multiply(u64 product) noexcept {
+	return times * product;
+}
 
-
+template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
+template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
+template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
+template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
+template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
+template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
+template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
+template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
+template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
+template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
+template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
 template<u64 section, u64 digitCount, u64 k>
 inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
@@ -468,7 +482,7 @@ inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results
 		auto nv = indexOffset<section>(k) + value;
 		if (componentQuodigious(nv, ns)) {
 			// only compute the product if the sum is divisible
-			auto np = product * ComputeProduct<k>();
+			auto np = multiply<ComputeProduct<k>::value>(product);
 			if (componentQuodigious(nv, np)) {
 				results.emplace_back(nv);
 			}
@@ -558,6 +572,30 @@ inline void threeDigitBody(u64 sum, u64 product, u64 index, vec64& results) noex
     twoDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    threeDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+}
+
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void fiveDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    fourDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+}
+
 template<u64 start, u64 end, u64 digitCount, u64 section>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (digitCount == 1) {
@@ -566,6 +604,10 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
         twoDigitBody<section, digitCount>(sum, product, index, results);
 	} else if (digitCount == 3) {
 		threeDigitBody<section, digitCount>(sum, product, index, results);
+	} else if (digitCount == 4) {
+		fourDigitBody<section, digitCount>(sum, product, index, results);
+	} else if (digitCount == 5) {
+		fiveDigitBody<section, digitCount>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
