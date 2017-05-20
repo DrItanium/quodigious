@@ -495,50 +495,39 @@ inline void singleDigitInnerLoop<1u, 1u, 8u>(u64 product, u64 sum, u64 value, ve
 		}
 	}
 }
-template<u64 section, u64 digitCount, u64 offset = 0>
-inline void oneDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    singleDigitInnerLoop<section, digitCount, (offset * 10) + 2>(product, sum, index, results);
-    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 3>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, (offset * 10) + 4>(product, sum, index, results);
-    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 5>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, (offset * 10) + 6>(product, sum, index, results);
-    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 7>(product, sum, index, results);
-    singleDigitInnerLoop<section, digitCount, (offset * 10) + 8>(product, sum, index, results);
-    //singleDigitInnerLoop<section, digitCount, (offset * 10) + 9>(product, sum, index, results);
-}
-template<u64 section, u64 digitCount, u64 offset = 0>
-inline void twoDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    oneDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
-    oneDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
-}
-template<u64 section, u64 digitCount, u64 offset = 0>
-inline void threeDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    twoDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
-    twoDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
+
+constexpr u64 computeBodyOffset(u64 offset, u64 add) noexcept {
+    return (offset << 3) + (offset << 1) + add;
 }
 
 template<u64 section, u64 digitCount, u64 offset = 0>
-inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    threeDigitBody<section, digitCount, (offset * 10) + 2>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 3>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 4>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 5>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 6>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 7>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 8>(sum, product, index, results);
-    threeDigitBody<section, digitCount, (offset * 10) + 9>(sum, product, index, results);
+inline void oneDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 2)>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 4)>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 6)>(product, sum, index, results);
+    singleDigitInnerLoop<section, digitCount, computeBodyOffset(offset, 8)>(product, sum, index, results);
+}
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void twoDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    oneDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
+}
+template<u64 section, u64 digitCount, u64 offset = 0>
+inline void threeDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 2)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 3)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 4)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 5)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 6)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 7)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 8)>(sum, product, index, results);
+    twoDigitBody<section, digitCount, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
 template<u64 start, u64 end, u64 digitCount, u64 section>
@@ -549,8 +538,6 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
         twoDigitBody<section, digitCount>(sum, product, index, results);
 	} else if (digitCount == 3) {
 		threeDigitBody<section, digitCount>(sum, product, index, results);
-    } else if (digitCount == 4) {
-        fourDigitBody<section, digitCount>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<digitCount>(k)) {
