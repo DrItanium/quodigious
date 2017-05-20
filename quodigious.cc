@@ -569,21 +569,35 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 	}
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 offset>
+template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
 inline void oneDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<2>::value, multiply<ComputeProduct<2>::value>(product), index + ComputeIndexOffset<offset, 2>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<3>::value, multiply<ComputeProduct<3>::value>(product), index + ComputeIndexOffset<offset, 3>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<4>::value, multiply<ComputeProduct<4>::value>(product), index + ComputeIndexOffset<offset, 4>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<6>::value, multiply<ComputeProduct<6>::value>(product), index + ComputeIndexOffset<offset, 6>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<7>::value, multiply<ComputeProduct<7>::value>(product), index + ComputeIndexOffset<offset, 7>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<8>::value, multiply<ComputeProduct<8>::value>(product), index + ComputeIndexOffset<offset, 8>::value, results);
-		innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<9>::value, multiply<ComputeProduct<9>::value>(product), index + ComputeIndexOffset<offset, 9>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 2)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 2)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 2)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 3)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 3)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 3)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 4)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 4)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 4)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 6)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 6)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 6)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 7)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 7)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 7)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 8)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 8)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 8)>::value, results);
+	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 9)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 9)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 9)>::value, results);
+}
+
+template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+inline void twoDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
+	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
 template<u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
 inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	if (l2Digits == 1) {
 		oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
+	} else if (l2Digits == 2) {
+		twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
 	} else {
 		for (auto j = startL2; j < endL2; ++j) {
 			if (legalValue<l2Digits>(j)) {
