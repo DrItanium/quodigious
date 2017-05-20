@@ -18,7 +18,7 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++14
-CXXFLAGS += -O3 -march=native
+CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3

@@ -432,67 +432,43 @@ constexpr bool isEven(u64 value) noexcept {
 	return (value == ((value >> 1) << 1));
 }
 
-template<u64 width, u64 value>
-constexpr u64 computeSum() noexcept {
-    return (value % 10) + computeSum<width - 1, value / 10>();
-}
-template<> constexpr u64 computeSum<1, 0>() noexcept { return 0; }
-template<> constexpr u64 computeSum<1, 1>() noexcept { return 1; }
-template<> constexpr u64 computeSum<1, 2>() noexcept { return 2; }
-template<> constexpr u64 computeSum<1, 3>() noexcept { return 3; }
-template<> constexpr u64 computeSum<1, 4>() noexcept { return 4; }
-template<> constexpr u64 computeSum<1, 5>() noexcept { return 5; }
-template<> constexpr u64 computeSum<1, 6>() noexcept { return 6; }
-template<> constexpr u64 computeSum<1, 7>() noexcept { return 7; }
-template<> constexpr u64 computeSum<1, 8>() noexcept { return 8; }
-template<> constexpr u64 computeSum<1, 9>() noexcept { return 9; }
-template<> constexpr u64 computeSum<0, 0>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 1>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 2>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 3>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 4>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 5>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 6>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 7>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 8>() noexcept { return 0; }
-template<> constexpr u64 computeSum<0, 9>() noexcept { return 0; }
 
-template<u64 width, u64 value>
-constexpr u64 computeProduct() noexcept {
-    return (value % 10) * computeProduct<width - 1, value / 10>();
-}
+template<u64 value>
+struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) + ComputeProduct<value / 10>()> { };
 
-template<> constexpr u64 computeProduct<1, 0>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<1, 1>() noexcept { return 1; }
-template<> constexpr u64 computeProduct<1, 2>() noexcept { return 2; }
-template<> constexpr u64 computeProduct<1, 3>() noexcept { return 3; }
-template<> constexpr u64 computeProduct<1, 4>() noexcept { return 4; }
-template<> constexpr u64 computeProduct<1, 5>() noexcept { return 5; }
-template<> constexpr u64 computeProduct<1, 6>() noexcept { return 6; }
-template<> constexpr u64 computeProduct<1, 7>() noexcept { return 7; }
-template<> constexpr u64 computeProduct<1, 8>() noexcept { return 8; }
-template<> constexpr u64 computeProduct<1, 9>() noexcept { return 9; }
-template<> constexpr u64 computeProduct<0, 0>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 1>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 2>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 3>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 4>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 5>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 6>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 7>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 8>() noexcept { return 0; }
-template<> constexpr u64 computeProduct<0, 9>() noexcept { return 0; }
+template<u64 value>
+struct ComputeSum : std::integral_constant<decltype(value), (value % 10) + ComputeSum<value / 10>{}> { };
+
+#define GenerateLeaves(cl, v) template<> struct cl < v > : std::integral_constant<u64, v > { }
+
+#define GenerateLowerTen(cl) \
+	GenerateLeaves(cl, 0); \
+	GenerateLeaves(cl, 1); \
+	GenerateLeaves(cl, 2); \
+	GenerateLeaves(cl, 3); \
+	GenerateLeaves(cl, 4); \
+	GenerateLeaves(cl, 5); \
+	GenerateLeaves(cl, 6); \
+	GenerateLeaves(cl, 7); \
+	GenerateLeaves(cl, 8); \
+	GenerateLeaves(cl, 9)
+
+GenerateLowerTen(ComputeSum);
+GenerateLowerTen(ComputeProduct);
+
+
+
 
 template<u64 section, u64 digitCount, u64 k>
 inline void singleDigitInnerLoop(u64 product, u64 sum, u64 value, vec64& results) noexcept {
 	static_assert(k != 0, "Can't have a legal digit which is 0. Ever!");
 	static_assert(k != 1, "Can't have a legal digit which is 1. Ever!");
 	if (isEven(k) && legalValue<digitCount>(k)) {
-		auto ns = sum + computeSum<digitCount, k>();
+		auto ns = sum + ComputeSum<k>::value;
 		auto nv = indexOffset<section>(k) + value;
 		if (componentQuodigious(nv, ns)) {
 			// only compute the product if the sum is divisible
-			auto np = product * computeProduct<digitCount, k>();
+			auto np = product * ComputeProduct<k>();
 			if (componentQuodigious(nv, np)) {
 				results.emplace_back(nv);
 			}
