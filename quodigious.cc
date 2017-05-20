@@ -370,15 +370,6 @@ inline bool legalValue(u64 x) noexcept {
 }
 
 template<u64 width>
-inline u64 getProduct(u64 x) noexcept;
-
-template<u64 partA, u64 partB>
-inline u64 getInnerProduct(u64 x) noexcept {
-	static_assert((partA + partB) < 20, "Can't express numbers 20 digits or higher!");
-	static constexpr auto divisor = fastPow10<partA>;
-	return getProduct<partA>(x % divisor) * getProduct<partB>(x / divisor);
-}
-template<u64 width>
 inline u64 getProduct(u64 x) noexcept {
 	static_assert(width < 9, "Too large of a product value!");
 	switch(width) {
@@ -393,16 +384,6 @@ inline u64 getProduct(u64 x) noexcept {
 		case 8: return productsLen8[x];
 		default: return x;
 	}
-}
-
-template<u64 width>
-inline u64 getSum(u64) noexcept;
-
-template<u64 partA, u64 partB>
-inline u64 getInnerSum(u64 x) noexcept {
-	static_assert((partA + partB) < 20, "Can't express numbers 20 digits or higher!");
-	static constexpr auto divisor = fastPow10<partA>;
-	return getSum<partA>(x % divisor) + getSum<partB>(x / divisor);
 }
 
 template<u64 width>
