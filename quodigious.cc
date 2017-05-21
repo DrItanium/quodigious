@@ -539,17 +539,6 @@ inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexc
     threeDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 section, u64 offset = 0>
-inline void fiveDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-    fourDigitBody<section, computeBodyOffset(offset, 2)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 3)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 4)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 5)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 6)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 7)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 8)>(sum, product, index, results);
-    fourDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
-}
 
 template<u64 length, u64 start, u64 end>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
@@ -586,8 +575,6 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 		threeDigitBody<l1Section>(sum, product, index, results);
 	} else if (l1Digits == 4) {
 		fourDigitBody<l1Section>(sum, product, index, results);
-	} else if (l1Digits == 5) {
-		fiveDigitBody<l1Section>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
 			if (isEven(k) && legalValue<l1Digits>(k)) {
@@ -654,18 +641,6 @@ inline void fourDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noe
 	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 length, u64 start, u64 end, u64 offset = 0>
-inline void fiveDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 2)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 3)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 4)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 5)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 6)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 7)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 8)>(sum, product, index, results);
-	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
-}
-
 template<u64 length, u64 start, u64 end>
 inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	constexpr auto l3Digits = Level3Digits<length>::value;
@@ -697,8 +672,6 @@ inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 		threeDigitBodyL2<length, start, end >(sum, product, index, results);
 	} else if (l2Digits == 4) { 
 		fourDigitBodyL2<length, start, end >(sum, product, index, results);
-	} else if (l2Digits == 5) { 
-		fiveDigitBodyL2<length, start, end >(sum, product, index, results);
 	} else {
 		for (auto j = startL2 ; j < endL2; ++j) {
 			if (legalValue<l2Digits>(j)) {
