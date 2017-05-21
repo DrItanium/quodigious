@@ -551,29 +551,50 @@ inline void fiveDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexc
     fourDigitBody<section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 start, u64 end, u64 digitCount, u64 section>
+template<u64 length, u64 start, u64 end>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	if (digitCount == 0) {
+	constexpr auto l3Digits = Level3Digits<length>::value;
+	constexpr auto l2Digits = Level2Digits<length>::value;
+	constexpr auto l1Digits = Level1Digits<length>::value;
+	constexpr auto l1Shift = 0u;
+	constexpr auto l2Shift = l1Digits;
+	constexpr auto l3Shift = l2Digits + l1Digits;
+	constexpr auto l3Factor = fastPow10<l3Digits>;
+	constexpr auto l2Factor = fastPow10<l2Digits>;
+	constexpr auto l1Factor = fastPow10<l1Digits>;
+	constexpr auto l3Section = fastPow10<l3Shift>;
+	constexpr auto l2Section = fastPow10<l2Shift>;
+	constexpr auto l1Section = fastPow10<l1Shift>;
+	constexpr auto startL1 = start % l1Factor;
+	constexpr auto startL2 = (start / l1Factor) % l2Factor;
+	constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto attemptEndL1 = end % l1Factor;
+	constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+	constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+	constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+	constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
+	if (l1Digits == 0) {
 		if (componentQuodigious(index, sum) && componentQuodigious(index, product)) {
 			results.emplace_back(index);
 		}
-	} else if (digitCount == 1) {
-        oneDigitBody<section>(sum, product, index, results);
-	} else if (digitCount == 2) {
-        twoDigitBody<section>(sum, product, index, results);
-	} else if (digitCount == 3) {
-		threeDigitBody<section>(sum, product, index, results);
-	} else if (digitCount == 4) {
-		fourDigitBody<section>(sum, product, index, results);
-	} else if (digitCount == 5) {
-		fiveDigitBody<section>(sum, product, index, results);
+	} else if (l1Digits == 1) {
+        oneDigitBody<l1Section>(sum, product, index, results);
+	} else if (l1Digits == 2) {
+        twoDigitBody<l1Section>(sum, product, index, results);
+	} else if (l1Digits == 3) {
+		threeDigitBody<l1Section>(sum, product, index, results);
+	} else if (l1Digits == 4) {
+		fourDigitBody<l1Section>(sum, product, index, results);
+	} else if (l1Digits == 5) {
+		fiveDigitBody<l1Section>(sum, product, index, results);
 	} else {
 		for (auto k = start; k < end; ++k) {
-			if (isEven(k) && legalValue<digitCount>(k)) {
-				auto l1Sum = sum + getSum<digitCount>(k);
-				auto l1Value = indexOffset<section>(k) + index;
+			if (isEven(k) && legalValue<l1Digits>(k)) {
+				auto l1Sum = sum + getSum<l1Digits>(k);
+				auto l1Value = indexOffset<l1Section>(k) + index;
 				if (componentQuodigious(l1Value, l1Sum)) {
-					auto l1Product = product * getProduct<digitCount>(k);
+					auto l1Product = product * getProduct<l1Digits>(k);
 					if (componentQuodigious(l1Value, l1Product)) {
 						results.emplace_back(l1Value);
 					}
@@ -583,85 +604,109 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 	}
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+template<u64 length, u64 start, u64 end, u64 offset = 0>
 inline void oneDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 2)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 2)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 2)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 3)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 3)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 3)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 4)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 4)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 4)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 6)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 6)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 6)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 7)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 7)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 7)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 8)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 8)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 8)>::value, results);
-	innermostLoopBody<startL1, endL1, l1Digits, l1Section>(sum + ComputeSum<computeBodyOffset(offset, 9)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 9)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 9)>::value, results);
+	constexpr auto l1Digits = Level1Digits<length>::value;
+	constexpr auto l2Shift = l1Digits;
+	constexpr auto l2Section = fastPow10<l2Shift>;
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 2)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 2)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 2)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 3)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 3)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 3)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 4)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 4)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 4)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 6)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 6)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 6)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 7)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 7)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 7)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 8)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 8)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 8)>::value, results);
+	innermostLoopBody<length, start, end>(sum + ComputeSum<computeBodyOffset(offset, 9)>::value, multiply<ComputeProduct<computeBodyOffset(offset, 9)>::value>(product), index + ComputeIndexOffset<l2Section, computeBodyOffset(offset, 9)>::value, results);
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+template<u64 length, u64 start, u64 end, u64 offset = 0>
 inline void twoDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
-	oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 2)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 3)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 4)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 5)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 6)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 7)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 8)>(sum, product, index, results);
+	oneDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+template<u64 length, u64 start, u64 end, u64 offset = 0>
 inline void threeDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
-	twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 2)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 3)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 4)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 5)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 6)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 7)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 8)>(sum, product, index, results);
+	twoDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+template<u64 length, u64 start, u64 end, u64 offset = 0>
 inline void fourDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
-	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 2)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 3)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 4)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 5)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 6)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 7)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 8)>(sum, product, index, results);
+	threeDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+template<u64 length, u64 start, u64 end, u64 offset = 0>
 inline void fiveDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
-	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 2)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 3)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 4)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 5)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 6)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 7)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 8)>(sum, product, index, results);
+	fourDigitBodyL2<length, start, end,  computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
-template<u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
+template<u64 length, u64 start, u64 end>
+//u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
 inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-
+	constexpr auto l3Digits = Level3Digits<length>::value;
+	constexpr auto l2Digits = Level2Digits<length>::value;
+	constexpr auto l1Digits = Level1Digits<length>::value;
+	constexpr auto l1Shift = 0u;
+	constexpr auto l2Shift = l1Digits;
+	constexpr auto l3Shift = l2Digits + l1Digits;
+	constexpr auto l3Factor = fastPow10<l3Digits>;
+	constexpr auto l2Factor = fastPow10<l2Digits>;
+	constexpr auto l1Factor = fastPow10<l1Digits>;
+	constexpr auto l3Section = fastPow10<l3Shift>;
+	constexpr auto l2Section = fastPow10<l2Shift>;
+	constexpr auto l1Section = fastPow10<l1Shift>;
+	constexpr auto startL1 = start % l1Factor;
+	constexpr auto startL2 = (start / l1Factor) % l2Factor;
+	constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto attemptEndL1 = end % l1Factor;
+	constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+	constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+	constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+	constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
 	if (l2Digits == 1) {
-		oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
-	} else if (l2Digits == 2) {
-		twoDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
-	} else if (l2Digits == 3) {
-		threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
-	} else if (l2Digits == 4) {
-		fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
-	} else if (l2Digits == 5) {
-		fiveDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
+		oneDigitBodyL2<length, start, end >(sum, product, index, results);
+	} else if (l2Digits == 2) { 
+		twoDigitBodyL2<length, start, end >(sum, product, index, results);
+	} else if (l2Digits == 3) { 
+		threeDigitBodyL2<length, start, end >(sum, product, index, results);
+	} else if (l2Digits == 4) { 
+		fourDigitBodyL2<length, start, end >(sum, product, index, results);
+	} else if (l2Digits == 5) { 
+		fiveDigitBodyL2<length, start, end >(sum, product, index, results);
 	} else {
 		for (auto j = startL2 ; j < endL2; ++j) {
 			if (legalValue<l2Digits>(j)) {
 				auto l2Sum = getSum<l2Digits>(j) + sum;
 				auto l2Product = getProduct<l2Digits>(j) * product;
 				auto l2Index = indexOffset<l2Section>(j) + index;
-				innermostLoopBody<startL1, endL1, l1Digits, l1Section>(l2Sum, l2Product, l2Index, results);
+				innermostLoopBody<length, start, end>(l2Sum, l2Product, l2Index, results);
 			}
 		}
 	}
@@ -698,7 +743,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			auto l3Sum = getSum<l3Digits>(i);
 			auto l3Product = getProduct<l3Digits>(i);
 			auto l3Index = indexOffset<l3Section>(i);
-			l2Body<startL2, endL2, l2Digits, l2Section, startL1, endL1, l1Digits, l1Section>(l3Sum, l3Product, l3Index, results);
+			l2Body<length, start, end>(l3Sum, l3Product, l3Index, results);
 		}
 	}
 	return 0;
