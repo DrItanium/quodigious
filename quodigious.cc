@@ -667,7 +667,6 @@ inline void fiveDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noe
 }
 
 template<u64 length, u64 start, u64 end>
-//u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
 inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 	constexpr auto l3Digits = Level3Digits<length>::value;
 	constexpr auto l2Digits = Level2Digits<length>::value;
