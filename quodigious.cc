@@ -542,27 +542,13 @@ inline void fourDigitBody(u64 sum, u64 product, u64 index, vec64& results) noexc
 
 template<u64 length, u64 start, u64 end>
 inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	constexpr auto l3Digits = Level3Digits<length>::value;
-	constexpr auto l2Digits = Level2Digits<length>::value;
 	constexpr auto l1Digits = Level1Digits<length>::value;
 	constexpr auto l1Shift = 0u;
-	constexpr auto l2Shift = l1Digits;
-	constexpr auto l3Shift = l2Digits + l1Digits;
-	constexpr auto l3Factor = fastPow10<l3Digits>;
-	constexpr auto l2Factor = fastPow10<l2Digits>;
 	constexpr auto l1Factor = fastPow10<l1Digits>;
-	constexpr auto l3Section = fastPow10<l3Shift>;
-	constexpr auto l2Section = fastPow10<l2Shift>;
 	constexpr auto l1Section = fastPow10<l1Shift>;
 	constexpr auto startL1 = start % l1Factor;
-	constexpr auto startL2 = (start / l1Factor) % l2Factor;
-	constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
 	constexpr auto attemptEndL1 = end % l1Factor;
 	constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
-	constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
-	constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
-	constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
-	constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
 	if (l1Digits == 0) {
 		if (componentQuodigious(index, sum) && componentQuodigious(index, product)) {
 			results.emplace_back(index);
