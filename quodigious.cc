@@ -630,8 +630,21 @@ inline void fourDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noe
 	threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
 }
 
+template<u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section, u64 l2Section, u64 offset = 0>
+inline void fiveDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 2)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 3)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 4)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 5)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 6)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 7)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 8)>(sum, product, index, results);
+	fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section, computeBodyOffset(offset, 9)>(sum, product, index, results);
+}
+
 template<u64 startL2, u64 endL2, u64 l2Digits, u64 l2Section, u64 startL1, u64 endL1, u64 l1Digits, u64 l1Section>
 inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
+
 	if (l2Digits == 1) {
 		oneDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
 	} else if (l2Digits == 2) {
@@ -640,8 +653,10 @@ inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
 		threeDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
 	} else if (l2Digits == 4) {
 		fourDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
+	} else if (l2Digits == 5) {
+		fiveDigitBodyL2<startL1, endL1, l1Digits, l1Section, l2Section>(sum, product, index, results);
 	} else {
-		for (auto j = startL2; j < endL2; ++j) {
+		for (auto j = startL2 ; j < endL2; ++j) {
 			if (legalValue<l2Digits>(j)) {
 				auto l2Sum = getSum<l2Digits>(j) + sum;
 				auto l2Product = getProduct<l2Digits>(j) * product;
@@ -657,28 +672,27 @@ template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// precompute the fuck out of all of this!
 	// Compilers hate me, I am the TEMPLATE MASTER
-	static constexpr auto l3Digits = level3Digits<length>;
-	static constexpr auto l2Digits = level2Digits<length>;
-	static constexpr auto l1Digits = level1Digits<length>;
-	static_assert((l3Digits + l2Digits + l1Digits) == length, "Illegal digit layout!");
-	static constexpr auto l1Shift = 0u;
-	static constexpr auto l2Shift = l1Digits;
-	static constexpr auto l3Shift = l2Digits + l1Digits;
-	static constexpr auto l3Factor = fastPow10<l3Digits>;
-	static constexpr auto l2Factor = fastPow10<l2Digits>;
-	static constexpr auto l1Factor = fastPow10<l1Digits>;
-	static constexpr auto l3Section = fastPow10<l3Shift>;
-	static constexpr auto l2Section = fastPow10<l2Shift>;
-	static constexpr auto l1Section = fastPow10<l1Shift>;
-	static constexpr auto startL1 = start % l1Factor;
-	static constexpr auto startL2 = (start / l1Factor) % l2Factor;
-	static constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
-	static constexpr auto attemptEndL1 = end % l1Factor;
-	static constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
-	static constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
-	static constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
-	static constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
-	static constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
+	constexpr auto l3Digits = Level3Digits<length>::value;
+	constexpr auto l2Digits = Level2Digits<length>::value;
+	constexpr auto l1Digits = Level1Digits<length>::value;
+	constexpr auto l1Shift = 0u;
+	constexpr auto l2Shift = l1Digits;
+	constexpr auto l3Shift = l2Digits + l1Digits;
+	constexpr auto l3Factor = fastPow10<l3Digits>;
+	constexpr auto l2Factor = fastPow10<l2Digits>;
+	constexpr auto l1Factor = fastPow10<l1Digits>;
+	constexpr auto l3Section = fastPow10<l3Shift>;
+	constexpr auto l2Section = fastPow10<l2Shift>;
+	constexpr auto l1Section = fastPow10<l1Shift>;
+	constexpr auto startL1 = start % l1Factor;
+	constexpr auto startL2 = (start / l1Factor) % l2Factor;
+	constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto attemptEndL1 = end % l1Factor;
+	constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
+	constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
+	constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
+	constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
+	constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
 	for (auto i = startL3; i < endL3; ++i) {
 		if (legalValue<l3Digits>(i)) {
 			auto l3Sum = getSum<l3Digits>(i);

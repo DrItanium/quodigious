@@ -60,21 +60,15 @@ constexpr auto shaveFactor = 2.0 + (2.0 / 9.0);
 
 using vec64 = std::vector<u64>;
 
-template<u64 width>
-constexpr u64 level3Digits = (width - 1) / 2;
-
-template<u64 width>
-constexpr u64 level2Digits = (width - 1) - level3Digits<width>; // what's left over
-
-template<u64 width>
-constexpr u64 level1Digits = 1;
+template<u64 width> struct Level3Digits : std::integral_constant<u64, (width - 1) / 2> { };
+template<u64 width> struct Level2Digits : std::integral_constant<u64, (width - 1) - Level3Digits<width> { }> { };
+template<u64 width> struct Level1Digits : std::integral_constant<u64, (width - 1) - Level2Digits<width> { }> { };
 
 #define X(width, l3, l2, l1) \
-template<> constexpr u64 level3Digits< width > = l3; \
-template<> constexpr u64 level2Digits< width > = l2; \
-template<> constexpr u64 level1Digits< width > = l1; \
+template<> struct Level3Digits< width > : std::integral_constant<u64, l3 > { }; \
+template<> struct Level2Digits< width > : std::integral_constant<u64, l2 > { }; \
+template<> struct Level1Digits< width > : std::integral_constant<u64, l1 > { }; \
 static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!");
-
 #include "notations.def"
 #undef X
 
