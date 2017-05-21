@@ -576,8 +576,10 @@ inline void innermostLoopBody(u64 sum, u64 product, u64 index, vec64& results) n
 	} else if (l1Digits == 4) {
 		fourDigitBody<l1Section>(sum, product, index, results);
 	} else {
-		for (auto k = start; k < end; ++k) {
-			if (isEven(k) && legalValue<l1Digits>(k)) {
+		for (auto k = startL1; k < endL1; ++k) {
+			auto evenp = isEven(k);
+			auto legalp = legalValue<l1Digits>(k);
+			if (evenp && legalp) {
 				auto l1Sum = sum + getSum<l1Digits>(k);
 				auto l1Value = indexOffset<l1Section>(k) + index;
 				if (componentQuodigious(l1Value, l1Sum)) {
@@ -642,50 +644,6 @@ inline void fourDigitBodyL2(u64 sum, u64 product, u64 index, vec64& results) noe
 }
 
 template<u64 length, u64 start, u64 end>
-inline void l2Body(u64 sum, u64 product, u64 index, vec64& results) noexcept {
-	constexpr auto l3Digits = Level3Digits<length>::value;
-	constexpr auto l2Digits = Level2Digits<length>::value;
-	constexpr auto l1Digits = Level1Digits<length>::value;
-	constexpr auto l1Shift = 0u;
-	constexpr auto l2Shift = l1Digits;
-	constexpr auto l3Shift = l2Digits + l1Digits;
-	constexpr auto l3Factor = fastPow10<l3Digits>;
-	constexpr auto l2Factor = fastPow10<l2Digits>;
-	constexpr auto l1Factor = fastPow10<l1Digits>;
-	constexpr auto l3Section = fastPow10<l3Shift>;
-	constexpr auto l2Section = fastPow10<l2Shift>;
-	constexpr auto l1Section = fastPow10<l1Shift>;
-	constexpr auto startL1 = start % l1Factor;
-	constexpr auto startL2 = (start / l1Factor) % l2Factor;
-	constexpr auto startL3 = ((start / l1Factor) / l2Factor) % l3Factor;
-	constexpr auto attemptEndL1 = end % l1Factor;
-	constexpr auto endL1 = attemptEndL1 == 0 ? l1Factor : attemptEndL1;
-	constexpr auto attemptEndL2 = ((end / l1Factor) % l2Factor);
-	constexpr auto endL2 = attemptEndL2 == 0 ? l2Factor : attemptEndL2;
-	constexpr auto attemptEndL3 = ((end / l1Factor) / l2Factor) % l3Factor;
-	constexpr auto endL3 = attemptEndL3 == 0 ? l3Factor : attemptEndL3;
-	if (l2Digits == 1) {
-		oneDigitBodyL2<length, start, end >(sum, product, index, results);
-	} else if (l2Digits == 2) { 
-		twoDigitBodyL2<length, start, end >(sum, product, index, results);
-	} else if (l2Digits == 3) { 
-		threeDigitBodyL2<length, start, end >(sum, product, index, results);
-	} else if (l2Digits == 4) { 
-		fourDigitBodyL2<length, start, end >(sum, product, index, results);
-	} else {
-		for (auto j = startL2 ; j < endL2; ++j) {
-			if (legalValue<l2Digits>(j)) {
-				auto l2Sum = getSum<l2Digits>(j) + sum;
-				auto l2Product = getProduct<l2Digits>(j) * product;
-				auto l2Index = indexOffset<l2Section>(j) + index;
-				innermostLoopBody<length, start, end>(l2Sum, l2Product, l2Index, results);
-			}
-		}
-	}
-}
-
-
-template<u64 length, u64 start, u64 end>
 inline int performQuodigiousCheck(vec64& results) noexcept {
 	// precompute the fuck out of all of this!
 	// Compilers hate me, I am the TEMPLATE MASTER
@@ -715,7 +673,24 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			auto l3Sum = getSum<l3Digits>(i);
 			auto l3Product = getProduct<l3Digits>(i);
 			auto l3Index = indexOffset<l3Section>(i);
-			l2Body<length, start, end>(l3Sum, l3Product, l3Index, results);
+			if (l2Digits == 1) {
+				oneDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
+			} else if (l2Digits == 2) { 
+				twoDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
+			} else if (l2Digits == 3) { 
+				threeDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
+			} else if (l2Digits == 4) { 
+				fourDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
+			} else {
+				for (auto j = startL2 ; j < endL2; ++j) {
+					if (legalValue<l2Digits>(j)) {
+						auto l2Sum = getSum<l2Digits>(j) + l3Sum;
+						auto l2Product = getProduct<l2Digits>(j) * l3Product;
+						auto l2Index = indexOffset<l2Section>(j) + l3Index;
+						innermostLoopBody<length, start, end>(l2Sum, l2Product, l2Index, results);
+					}
+				}
+			}
 		}
 	}
 	return 0;
@@ -724,7 +699,7 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 #ifdef DEBUG
 template<u64 width>
 inline void printDigitalLayout() noexcept {
-	std::cout << width << ":" << level3Digits<width> << ":" << level2Digits<width> << ":" << level1Digits<width> << std::endl;
+	std::cout << width << ":" << Level3Digits<width>() << ":" << Level2Digits<width>() << ":" << Level1Digits<width>() << std::endl;
 }
 #endif
 
