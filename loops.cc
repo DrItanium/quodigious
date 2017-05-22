@@ -23,18 +23,20 @@
 #include <vector>
 #include "qlib.h"
 
-template<u64 length>
+template<u64 length, bool skipFives = false>
 inline void loopBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-    loopBody<inner>(2 + sum, multiply<2>(product), index + (next * 2), storage);
-    loopBody<inner>(3 + sum, multiply<3>(product), index + (next * 3), storage);
-    loopBody<inner>(4 + sum, multiply<4>(product), index + (next * 4), storage);
-    loopBody<inner>(5 + sum, multiply<5>(product), index + (next * 5), storage);
-    loopBody<inner>(6 + sum, multiply<6>(product), index + (next * 6), storage);
-    loopBody<inner>(7 + sum, multiply<7>(product), index + (next * 7), storage);
-    loopBody<inner>(8 + sum, multiply<8>(product), index + (next * 8), storage);
-    loopBody<inner>(9 + sum, multiply<9>(product), index + (next * 9), storage);
+    loopBody<inner, skipFives>(2 + sum, multiply<2>(product), index + (multiply<2>(next)), storage);
+    loopBody<inner, skipFives>(3 + sum, multiply<3>(product), index + (multiply<3>(next)), storage);
+    loopBody<inner, skipFives>(4 + sum, multiply<4>(product), index + (multiply<4>(next)), storage);
+    if (!skipFives) {
+        loopBody<inner, skipFives>(5 + sum, multiply<5>(product), index + multiply<5>(next), storage);
+    }
+    loopBody<inner, skipFives>(6 + sum, multiply<6>(product), index + multiply<6>(next), storage);
+    loopBody<inner, skipFives>(7 + sum, multiply<7>(product), index + multiply<7>(next), storage);
+    loopBody<inner, skipFives>(8 + sum, multiply<8>(product), index + multiply<8>(next), storage);
+    loopBody<inner, skipFives>(9 + sum, multiply<9>(product), index + multiply<9>(next), storage);
 }
 
 template<u64 k>
@@ -49,7 +51,7 @@ inline void innerMostBody(u64 sum, u64 product, u64 index, vec64& storage) noexc
     }
 }
 template<>
-inline void loopBody<1>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+inline void loopBody<1, false>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
     innerMostBody<2>(sum, product, index, storage);
     innerMostBody<3>(sum, product, index, storage);
     innerMostBody<4>(sum, product, index, storage);
@@ -60,10 +62,21 @@ inline void loopBody<1>(u64 sum, u64 product, u64 index, vec64& storage) noexcep
     innerMostBody<9>(sum, product, index, storage);
 }
 
+template<>
+inline void loopBody<1, true>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+    innerMostBody<2>(sum, product, index, storage);
+    innerMostBody<3>(sum, product, index, storage);
+    innerMostBody<4>(sum, product, index, storage);
+    innerMostBody<6>(sum, product, index, storage);
+    innerMostBody<7>(sum, product, index, storage);
+    innerMostBody<8>(sum, product, index, storage);
+    innerMostBody<9>(sum, product, index, storage);
+}
+
 template<u64 length>
 inline void body(vec64& storage) noexcept {
 	// this is not going to change ever!
-    loopBody<length>(0,1,0,storage);
+    loopBody<length, (length > 4)> (0,1,0,storage);
     for (auto v : storage) {
         std::cout << v << std::endl;
     }
