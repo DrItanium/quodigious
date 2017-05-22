@@ -28,12 +28,13 @@ LXXFLAGS += -O3 -flto -fwhole-program -march=native
 TITLE = quodigious
 FILES = quodigious.o
 
-all: q8 qsinglenumbercheck
+all: q8 qsinglenumbercheck qloops
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the program"
 	@echo "  - q8: compiles the program (8 thread version)"
+	@echo "  - qloops: compiles the nested loop variant"
 	@echo "  - clean : cleans the program artifacts"
 
 q8: quodigious.o
@@ -42,10 +43,14 @@ q8: quodigious.o
 	@echo done.
 
 qsinglenumbercheck: singlenumbercheck.o
-	@echo -n Building ${TITLE} ...
+	@echo -n Building single number checker  ...
 	@${CXX} ${LXXFLAGS} -o qsinglenumbercheck singlenumbercheck.o
 	@echo done.
 
+qloops: loops.o
+	@echo -n Building looped quodigious ...
+	@${CXX} ${LXXFLAGS} -o qloops loops.o
+	@echo done.
 
 
 %.o: %.cc
@@ -55,9 +60,11 @@ qsinglenumbercheck: singlenumbercheck.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck
+	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck qloops loops.o
 	@echo done.
 
 quodigious.o: qlib.h notations.def
 
 singlenumbercheck.o: qlib.h
+
+loops.o: qlib.h
