@@ -27,16 +27,21 @@
 
 template<u64 length>
 void loopBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+    std::cout << "length " << length << std::endl;
     for (int i = 2; i < 10; ++i) {
+        std::cout << "index: " << i << std::endl;
         auto mergedSum = i + sum;
+        std::cout << "  mergedSum: " << mergedSum << std::endl;
         auto mergedProduct = i * product;
+        std::cout << "  mergedProduct: " << mergedProduct << std::endl;
         auto mergedIndex = (fastPow10<length - 1> * i) + index;
+        std::cout << "  mergedIndex: " << mergedIndex << std::endl;
         loopBody<length - 1>(mergedSum, mergedProduct, mergedIndex, storage);
     }
 }
 
 template<>
-void loopBody<0>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+void loopBody<1>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
     for (auto k = 2; k < 10; ++k) {
         auto l1Sum = sum + k;
         auto l1Value = k + index;
