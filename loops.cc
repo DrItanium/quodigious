@@ -26,7 +26,7 @@
 #include <future>
 #include "qlib.h"
 
-template<u64 length, bool skipFives = false>
+template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
@@ -77,18 +77,44 @@ inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     merge(innerMostBody<2>(sum, product, index), storage);
-    //merge(innerMostBody<3>(sum, product, index), storage);
     merge(innerMostBody<4>(sum, product, index), storage);
     merge(innerMostBody<6>(sum, product, index), storage);
-    //merge(innerMostBody<7>(sum, product, index), storage);
     merge(innerMostBody<8>(sum, product, index), storage);
-    //merge(innerMostBody<9>(sum, product, index), storage);
 }
 
-template<u64 length, bool skipFives = false>
-inline void loopBody(std::ostream& storage) noexcept {
-    loopBody<length, skipFives>(storage, 0, 1, 0);
+template<u64 length, bool skipFives, u64 pos>
+inline std::function<std::string()> parallelBody() noexcept {
+    return []() {
+        std::string out;
+        if (pos == 5 && skipFives) {
+            return out;
+        }
+        std::ostringstream storage;
+        loopBody<length - 1, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<length - 1>));
+        out = storage.str();
+        return out;
+    };
 }
+
+template<u64 length, bool skipFives>
+inline void loopBody(std::ostream& storage) noexcept {
+    if (length > 7) {
+        auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>());
+        auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>());
+        auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>());
+        auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>());
+        auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>());
+        auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>());
+        auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>());
+        auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>());
+        storage << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
+        storage << b7.get() << b8.get() << b9.get();
+    } else {
+        loopBody<length, skipFives>(storage, 0, 1, 0);
+    }
+}
+
+template<> inline void loopBody<1, false>(std::ostream& storage) noexcept { loopBody<1, false>(storage, 0, 1, 0); }
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
