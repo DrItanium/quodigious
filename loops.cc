@@ -77,12 +77,12 @@ inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     merge(innerMostBody<2>(sum, product, index), storage);
-    merge(innerMostBody<3>(sum, product, index), storage);
+    //merge(innerMostBody<3>(sum, product, index), storage);
     merge(innerMostBody<4>(sum, product, index), storage);
     merge(innerMostBody<6>(sum, product, index), storage);
-    merge(innerMostBody<7>(sum, product, index), storage);
+    //merge(innerMostBody<7>(sum, product, index), storage);
     merge(innerMostBody<8>(sum, product, index), storage);
-    merge(innerMostBody<9>(sum, product, index), storage);
+    //merge(innerMostBody<9>(sum, product, index), storage);
 }
 
 template<u64 length, bool skipFives = false>
