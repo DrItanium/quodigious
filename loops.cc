@@ -48,8 +48,12 @@ inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
     auto l1Value = k + index;
     if (componentQuodigious(l1Value, l1Sum)) {
         auto l1Product = multiply<k>(product);
-        if (componentQuodigious(l1Value, l1Product)) {
+        if (l1Sum == l1Product) {
             return l1Value;
+        } else {
+            if (componentQuodigious(l1Value, l1Product)) {
+                return l1Value;
+            }
         }
     }
     return 0;
