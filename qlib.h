@@ -92,4 +92,21 @@ std::tuple<u64, u64> digitSumAndProduct(u64 value) noexcept {
 	return std::tuple<u64, u64>(sum, product);
 }
 
+template<u64 times>
+constexpr u64 multiply(u64 product) noexcept {
+	return times * product;
+}
+
+template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
+template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
+template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
+template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
+template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
+template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
+template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
+template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
+template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
+template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
+template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
+
 #endif // end QLIB_H__

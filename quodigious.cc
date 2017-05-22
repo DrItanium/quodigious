@@ -419,22 +419,6 @@ constexpr bool isEven(u64 value) noexcept {
 template<u64 k>
 struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
 
-template<u64 times>
-constexpr u64 multiply(u64 product) noexcept {
-	return times * product;
-}
-
-template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
-template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
-template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
-template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
-template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
-template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
-template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
-template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
-template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
-template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
-template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
 template<u64 value>
 struct ComputeProduct : std::integral_constant<decltype(value), (value % 10) * ComputeProduct<value / 10>()> { };
@@ -661,11 +645,11 @@ inline int performQuodigiousCheck(vec64& results) noexcept {
 			auto l3Index = indexOffset<l3Section>(i);
 			if (l2Digits == 1) {
 				oneDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
-			} else if (l2Digits == 2) { 
+			} else if (l2Digits == 2) {
 				twoDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
-			} else if (l2Digits == 3) { 
+			} else if (l2Digits == 3) {
 				threeDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
-			} else if (l2Digits == 4) { 
+			} else if (l2Digits == 4) {
 				fourDigitBodyL2<length, start, end >(l3Sum, l3Product, l3Index, results);
 			} else {
 				for (auto j = startL2 ; j < endL2; ++j) {
