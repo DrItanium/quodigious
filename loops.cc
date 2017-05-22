@@ -27,23 +27,24 @@
 #include "qlib.h"
 
 template<u64 length, bool skipFives = false>
-inline void loopBody(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
+inline void loopBody(std::ostream& storage, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-    loopBody<inner, skipFives>(2 + sum, multiply<2>(product), index + (multiply<2>(next)), storage);
-    loopBody<inner, skipFives>(3 + sum, multiply<3>(product), index + (multiply<3>(next)), storage);
-    loopBody<inner, skipFives>(4 + sum, multiply<4>(product), index + (multiply<4>(next)), storage);
+    loopBody<inner, skipFives>(storage, 2 + sum, multiply<2>(product), index + (multiply<2>(next)));
+    loopBody<inner, skipFives>(storage, 3 + sum, multiply<3>(product), index + (multiply<3>(next)));
+    loopBody<inner, skipFives>(storage, 4 + sum, multiply<4>(product), index + (multiply<4>(next)));
     if (!skipFives) {
-        loopBody<inner, skipFives>(5 + sum, multiply<5>(product), index + multiply<5>(next), storage);
+        loopBody<inner, skipFives>(storage, 5 + sum, multiply<5>(product), index + multiply<5>(next));
     }
-    loopBody<inner, skipFives>(6 + sum, multiply<6>(product), index + multiply<6>(next), storage);
-    loopBody<inner, skipFives>(7 + sum, multiply<7>(product), index + multiply<7>(next), storage);
-    loopBody<inner, skipFives>(8 + sum, multiply<8>(product), index + multiply<8>(next), storage);
-    loopBody<inner, skipFives>(9 + sum, multiply<9>(product), index + multiply<9>(next), storage);
+    loopBody<inner, skipFives>(storage, 6 + sum, multiply<6>(product), index + multiply<6>(next));
+    loopBody<inner, skipFives>(storage, 7 + sum, multiply<7>(product), index + multiply<7>(next));
+    loopBody<inner, skipFives>(storage, 8 + sum, multiply<8>(product), index + multiply<8>(next));
+    loopBody<inner, skipFives>(storage, 9 + sum, multiply<9>(product), index + multiply<9>(next));
 }
 
 template<u64 k>
 inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
+    static_assert(k < 10, "K can't be wider than 10!");
     auto l1Sum = sum + k;
     auto l1Value = k + index;
     if (componentQuodigious(l1Value, l1Sum)) {
@@ -64,7 +65,7 @@ void merge(u64 value, std::ostream& storage) noexcept {
     }
 }
 template<>
-inline void loopBody<1, false>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
+inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     merge(innerMostBody<2>(sum, product, index), storage);
     merge(innerMostBody<3>(sum, product, index), storage);
     merge(innerMostBody<4>(sum, product, index), storage);
@@ -76,7 +77,7 @@ inline void loopBody<1, false>(u64 sum, u64 product, u64 index, std::ostream& st
 }
 
 template<>
-inline void loopBody<1, true>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
+inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     merge(innerMostBody<2>(sum, product, index), storage);
     merge(innerMostBody<3>(sum, product, index), storage);
     merge(innerMostBody<4>(sum, product, index), storage);
@@ -89,8 +90,7 @@ inline void loopBody<1, true>(u64 sum, u64 product, u64 index, std::ostream& sto
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
 	// this is not going to change ever!
-    static constexpr auto skipFive = length > 4;
-    loopBody<length, skipFive>(0, 1, 0, storage);
+    loopBody<length, (length > 4)>(storage);
 }
 
 int main() {
