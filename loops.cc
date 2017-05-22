@@ -21,10 +21,11 @@
 #include <cmath>
 #include <cstdint>
 #include <vector>
+#include <sstream>
 #include "qlib.h"
 
 template<u64 length, bool skipFives = false>
-inline void loopBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+inline void loopBody(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
     loopBody<inner, skipFives>(2 + sum, multiply<2>(product), index + (multiply<2>(next)), storage);
@@ -40,18 +41,18 @@ inline void loopBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
 }
 
 template<u64 k>
-inline void innerMostBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+inline void innerMostBody(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
     auto l1Sum = sum + k;
     auto l1Value = k + index;
     if (componentQuodigious(l1Value, l1Sum)) {
         auto l1Product = multiply<k>(product);
         if (componentQuodigious(l1Value, l1Product)) {
-            storage.emplace_back(l1Value);
+            storage << l1Value << std::endl;
         }
     }
 }
 template<>
-inline void loopBody<1, false>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+inline void loopBody<1, false>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
     innerMostBody<2>(sum, product, index, storage);
     innerMostBody<3>(sum, product, index, storage);
     innerMostBody<4>(sum, product, index, storage);
@@ -63,7 +64,7 @@ inline void loopBody<1, false>(u64 sum, u64 product, u64 index, vec64& storage) 
 }
 
 template<>
-inline void loopBody<1, true>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
+inline void loopBody<1, true>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
     innerMostBody<2>(sum, product, index, storage);
     innerMostBody<3>(sum, product, index, storage);
     innerMostBody<4>(sum, product, index, storage);
@@ -74,18 +75,13 @@ inline void loopBody<1, true>(u64 sum, u64 product, u64 index, vec64& storage) n
 }
 
 template<u64 length>
-inline void body(vec64& storage) noexcept {
+inline void body(std::ostream& storage) noexcept {
 	// this is not going to change ever!
     loopBody<length, (length > 4)> (0,1,0,storage);
-    for (auto v : storage) {
-        std::cout << v << std::endl;
-    }
-	std::cout << std::endl;
-    storage.clear();
 }
 
 int main() {
-    vec64 storage;
+    std::ostringstream storage;
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
 		std::cin >> currentIndex;
@@ -114,6 +110,8 @@ int main() {
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
 			}
+            std::cout << storage.str() << std::endl;
+            storage.str("");
 		}
 	}
 	return 0;
