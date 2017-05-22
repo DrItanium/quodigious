@@ -19,23 +19,16 @@
 // Perform quodigious checks on numbers using tons of different C++ tricks
 #include <iostream>
 #include <cmath>
-#include <future>
 #include <cstdint>
 #include <vector>
-#include <functional>
 #include "qlib.h"
 
 template<u64 length>
 void loopBody(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
-    std::cout << "length " << length << std::endl;
     for (int i = 2; i < 10; ++i) {
-        std::cout << "index: " << i << std::endl;
         auto mergedSum = i + sum;
-        std::cout << "  mergedSum: " << mergedSum << std::endl;
         auto mergedProduct = i * product;
-        std::cout << "  mergedProduct: " << mergedProduct << std::endl;
         auto mergedIndex = (fastPow10<length - 1> * i) + index;
-        std::cout << "  mergedIndex: " << mergedIndex << std::endl;
         loopBody<length - 1>(mergedSum, mergedProduct, mergedIndex, storage);
     }
 }
@@ -54,45 +47,17 @@ void loopBody<1>(u64 sum, u64 product, u64 index, vec64& storage) noexcept {
     }
 }
 
-void printout(vec64& l) noexcept {
-	for (auto v : l) {
-		std::cout << v << std::endl;
-	}
-	l.clear();
-}
-
 template<u64 length>
 inline void body() noexcept {
     static vec64 storage;
 	// this is not going to change ever!
     loopBody<length>(0,1,0,storage);
-	printout(storage);
+    for (auto v : storage) {
+        std::cout << v << std::endl;
+    }
 	std::cout << std::endl;
+    storage.clear();
 }
-
-template<>
-inline void body<3>() noexcept {
-	// this is the only other qudigious range I know of which has a 5 in it
-	// (besides 1) so just hard code it
-	std::cout << 224 << std::endl;
-	std::cout << 432 << std::endl;
-	std::cout << 624 << std::endl;
-	std::cout << 735 << std::endl;
-	std::cout << std::endl;
-}
-
-	template<>
-	inline void body<1>() noexcept {
-		std::cout << 2 << std::endl;
-		std::cout << 3 << std::endl;
-		std::cout << 4 << std::endl;
-		std::cout << 5 << std::endl;
-		std::cout << 6 << std::endl;
-		std::cout << 7 << std::endl;
-		std::cout << 8 << std::endl;
-		std::cout << 9 << std::endl;
-		std::cout << std::endl;
-	}
 
 int main() {
 	while(std::cin.good()) {
