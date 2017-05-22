@@ -22,6 +22,8 @@
 #include <cstdint>
 #include <vector>
 #include <sstream>
+#include <functional>
+#include <future>
 #include "qlib.h"
 
 template<u64 length, bool skipFives = false>
@@ -41,43 +43,50 @@ inline void loopBody(u64 sum, u64 product, u64 index, std::ostream& storage) noe
 }
 
 template<u64 k>
-inline void innerMostBody(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
+inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
     auto l1Sum = sum + k;
     auto l1Value = k + index;
     if (componentQuodigious(l1Value, l1Sum)) {
         auto l1Product = multiply<k>(product);
         if (componentQuodigious(l1Value, l1Product)) {
-            storage << l1Value << std::endl;
+            return l1Value;
         }
+    }
+    return 0;
+}
+void merge(u64 value, std::ostream& storage) noexcept {
+    if (value != 0) {
+        storage << value << std::endl;
     }
 }
 template<>
 inline void loopBody<1, false>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
-    innerMostBody<2>(sum, product, index, storage);
-    innerMostBody<3>(sum, product, index, storage);
-    innerMostBody<4>(sum, product, index, storage);
-    innerMostBody<5>(sum, product, index, storage);
-    innerMostBody<6>(sum, product, index, storage);
-    innerMostBody<7>(sum, product, index, storage);
-    innerMostBody<8>(sum, product, index, storage);
-    innerMostBody<9>(sum, product, index, storage);
+    merge(innerMostBody<2>(sum, product, index), storage);
+    merge(innerMostBody<3>(sum, product, index), storage);
+    merge(innerMostBody<4>(sum, product, index), storage);
+    merge(innerMostBody<5>(sum, product, index), storage);
+    merge(innerMostBody<6>(sum, product, index), storage);
+    merge(innerMostBody<7>(sum, product, index), storage);
+    merge(innerMostBody<8>(sum, product, index), storage);
+    merge(innerMostBody<9>(sum, product, index), storage);
 }
 
 template<>
 inline void loopBody<1, true>(u64 sum, u64 product, u64 index, std::ostream& storage) noexcept {
-    innerMostBody<2>(sum, product, index, storage);
-    innerMostBody<3>(sum, product, index, storage);
-    innerMostBody<4>(sum, product, index, storage);
-    innerMostBody<6>(sum, product, index, storage);
-    innerMostBody<7>(sum, product, index, storage);
-    innerMostBody<8>(sum, product, index, storage);
-    innerMostBody<9>(sum, product, index, storage);
+    merge(innerMostBody<2>(sum, product, index), storage);
+    merge(innerMostBody<3>(sum, product, index), storage);
+    merge(innerMostBody<4>(sum, product, index), storage);
+    merge(innerMostBody<6>(sum, product, index), storage);
+    merge(innerMostBody<7>(sum, product, index), storage);
+    merge(innerMostBody<8>(sum, product, index), storage);
+    merge(innerMostBody<9>(sum, product, index), storage);
 }
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
 	// this is not going to change ever!
-    loopBody<length, (length > 4)> (0,1,0,storage);
+    static constexpr auto skipFive = length > 4;
+    loopBody<length, skipFive>(0, 1, 0, storage);
 }
 
 int main() {
