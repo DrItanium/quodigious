@@ -27,7 +27,7 @@
 #include "qlib.h"
 
 template<u64 length, bool skipFives = false>
-inline void loopBody(std::ostream& storage, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
     loopBody<inner, skipFives>(storage, 2 + sum, multiply<2>(product), index + (multiply<2>(next)));
@@ -51,15 +51,13 @@ inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
         auto l1Product = multiply<k>(product);
         if (l1Sum == l1Product) {
             return l1Value;
-        } else {
-            if (componentQuodigious(l1Value, l1Product)) {
-                return l1Value;
-            }
+        } else if (componentQuodigious(l1Value, l1Product)) {
+            return l1Value;
         }
     }
     return 0;
 }
-void merge(u64 value, std::ostream& storage) noexcept {
+inline void merge(u64 value, std::ostream& storage) noexcept {
     if (value != 0) {
         storage << value << std::endl;
     }
@@ -85,6 +83,11 @@ inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 i
     merge(innerMostBody<7>(sum, product, index), storage);
     merge(innerMostBody<8>(sum, product, index), storage);
     merge(innerMostBody<9>(sum, product, index), storage);
+}
+
+template<u64 length, bool skipFives = false>
+inline void loopBody(std::ostream& storage) noexcept {
+    loopBody<length, skipFives>(storage, 0, 1, 0);
 }
 
 template<u64 length>
