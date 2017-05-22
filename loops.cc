@@ -83,32 +83,29 @@ inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 i
 }
 
 template<u64 length, bool skipFives, u64 pos>
-inline std::function<std::string()> parallelBody() noexcept {
-    return []() {
-        std::string out;
-        if (pos == 5 && skipFives) {
-            return out;
-        }
-        std::ostringstream storage;
-        loopBody<length - 1, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<length - 1>));
-        out = storage.str();
-        return out;
-    };
+inline std::string parallelBody() noexcept {
+    std::ostringstream storage;
+    loopBody<length - 1, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<length - 1>));
+    std::string out(storage.str());
+    return out;
 }
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
     if (length > 7) {
-        auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>());
-        auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>());
-        auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>());
-        auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>());
-        auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>());
-        auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>());
-        auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>());
-        auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>());
-        storage << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
-        storage << b7.get() << b8.get() << b9.get();
+        auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
+        auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
+        auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
+        storage << b2.get() << b3.get() << b4.get();
+        if (!skipFives) {
+            auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
+            storage << b5.get();
+        }
+        auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>);
+        auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>);
+        auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>);
+        auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>);
+        storage << b6.get() << b7.get() << b8.get() << b9.get();
     } else {
         loopBody<length, skipFives>(storage, 0, 1, 0);
     }
