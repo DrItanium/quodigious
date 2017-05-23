@@ -412,12 +412,6 @@ template<> constexpr u64 startIndex<17u> = 22222222222222222u;
 template<> constexpr u64 startIndex<16u> = 2222222222222222u;
 template<> constexpr u64 startIndex<15u> = 222222222222222u;
 
-constexpr bool isEven(u64 value) noexcept {
-	return (value == ((value >> 1) << 1));
-}
-
-template<u64 k>
-struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
 
 
 template<u64 value>

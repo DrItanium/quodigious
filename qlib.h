@@ -109,4 +109,11 @@ template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 
 template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
 template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
+constexpr bool isEven(u64 value) noexcept {
+	return (value == ((value >> 1) << 1));
+}
+
+template<u64 k>
+struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
+
 #endif // end QLIB_H__

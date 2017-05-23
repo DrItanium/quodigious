@@ -53,7 +53,7 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
 template<bool experimentalCheck = false>
 inline bool checkValue(u64 sum) noexcept {
     if (experimentalCheck) {
-        return (sum % 2 == 0) || (sum % 3 == 0);
+        return isEven(sum) || (sum % 3 == 0);
     } else {
         return true;
     }
@@ -74,6 +74,7 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
         storage << value << std::endl;
     }
 }
+
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     sum += 2;
