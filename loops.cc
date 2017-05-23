@@ -51,72 +51,65 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
+    auto advance = [&sum]() noexcept { ++sum; };
+    auto doubleAdvance = [&sum]() noexcept { sum += 2; };
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-    sum += 2;
+    doubleAdvance();
     loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
-    ++sum;
+    advance();
     loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
-    ++sum;
+    advance();
     loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
     if (!skipFives) {
-        ++sum;
+        advance();
         loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
-        ++sum;
+        advance();
     } else {
-        sum += 2;
+        doubleAdvance();
     }
     loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
-    ++sum;
+    advance();
     loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
-    ++sum;
+    advance();
     loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
-    ++sum;
+    advance();
     loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
 }
 
 
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
+    auto advance = [&sum, &index]() noexcept { ++sum; ++index; };
     sum += 2;
     index += 2;
     merge(innerMostBody(sum, multiply<2>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<3>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<4>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<5>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<6>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<7>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<8>(product), index), storage);
-    ++sum;
-    ++index;
+    advance();
     merge(innerMostBody(sum, multiply<9>(product), index), storage);
 }
 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    sum += 2;
-    index += 2;
+    auto advance = [&sum, &index]() noexcept { sum += 2; index += 2; };
+    advance();
     merge(innerMostBody<true>(sum, multiply<2>(product), index), storage);
-    sum += 2;
-    index += 2;
+    advance();
     merge(innerMostBody<true>(sum, multiply<4>(product), index), storage);
-    sum += 2;
-    index += 2;
+    advance();
     merge(innerMostBody<true>(sum, multiply<6>(product), index), storage);
-    sum += 2;
-    index += 2;
+    advance();
     merge(innerMostBody<true>(sum, multiply<8>(product), index), storage);
 }
 
