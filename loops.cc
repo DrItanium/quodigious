@@ -27,11 +27,10 @@
 
 template<bool experimentalCheck = false>
 inline bool checkValue(u64 sum) noexcept {
-    if (experimentalCheck) {
-        return isEven(sum) || (sum % 3 == 0);
-    } else {
+    if (!experimentalCheck) {
         return true;
     }
+    return isEven(sum) || (sum % 3 == 0);
 }
 template<bool experimentalCheck = false>
 inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
