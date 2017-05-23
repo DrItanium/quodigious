@@ -59,21 +59,14 @@ inline bool checkValue(u64 sum) noexcept {
 	}
 }
 template<u64 k, bool experimentalCheck = false>
-inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
-    static_assert(k < 10, "K can't be wider than 10!");
-	auto l1Sum = sum + k;
-	if (checkValue<experimentalCheck>(l1Sum)) {
-		auto l1Value = k + index;
-		if (componentQuodigious(l1Value, l1Sum)) {
-			auto l1Product = multiply<k>(product);
-			if (l1Sum == l1Product) {
-				return l1Value;
-			} else if (componentQuodigious(l1Value, l1Product)) {
-				return l1Value;
+inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+	if (checkValue<experimentalCheck>(sum)) {
+		if (componentQuodigious(value, sum)) {
+			if (componentQuodigious(value, product)) {
+				return value;
 			}
 		}
 	}
-
     return 0;
 }
 inline void merge(u64 value, std::ostream& storage) noexcept {
@@ -83,22 +76,46 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 }
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    merge(innerMostBody<2>(sum, product, index), storage);
-    merge(innerMostBody<3>(sum, product, index), storage);
-    merge(innerMostBody<4>(sum, product, index), storage);
-    merge(innerMostBody<5>(sum, product, index), storage);
-    merge(innerMostBody<6>(sum, product, index), storage);
-    merge(innerMostBody<7>(sum, product, index), storage);
-    merge(innerMostBody<8>(sum, product, index), storage);
-    merge(innerMostBody<9>(sum, product, index), storage);
+	sum += 2;
+	index += 2;
+	merge(innerMostBody<2>(sum, multiply<2>(product), index), storage); 
+	++sum;
+	++index;
+	merge(innerMostBody<3>(sum, multiply<3>(product), index), storage); 
+	++sum;
+	++index;
+	merge(innerMostBody<4>(sum, multiply<4>(product), index), storage); 
+	++sum;
+	++index;
+	merge(innerMostBody<5>(sum, multiply<5>(product), index), storage);
+	++sum;
+	++index;
+	merge(innerMostBody<6>(sum, multiply<6>(product), index), storage);
+	++sum;
+	++index;
+	merge(innerMostBody<7>(sum, multiply<7>(product), index), storage);
+	++sum;
+	++index;
+	merge(innerMostBody<8>(sum, multiply<8>(product), index), storage);
+	++sum;
+	++index;
+	merge(innerMostBody<9>(sum, multiply<9>(product), index), storage); 
 }
 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    merge(innerMostBody<2, true>(sum, product, index), storage);
-    merge(innerMostBody<4, true>(sum, product, index), storage);
-    merge(innerMostBody<6, true>(sum, product, index), storage);
-    merge(innerMostBody<8, true>(sum, product, index), storage);
+	sum += 2;
+	index += 2;
+    merge(innerMostBody<2, true>(sum, multiply<2>(product), index), storage); 
+	sum += 2;
+	index += 2;
+    merge(innerMostBody<4, true>(sum, multiply<4>(product), index), storage); 
+	sum += 2;
+	index += 2;
+    merge(innerMostBody<6, true>(sum, multiply<6>(product), index), storage); 
+	sum += 2;
+	index += 2;
+    merge(innerMostBody<8, true>(sum, multiply<8>(product), index), storage); 
 }
 
 template<u64 length, bool skipFives, u64 pos>
