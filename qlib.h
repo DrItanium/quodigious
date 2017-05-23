@@ -51,47 +51,6 @@ constexpr bool isQuodigious(T value, T sum, T product) noexcept {
 }
 
 
-
-/**
- * Represents the starting offset of any base number for any width!
- */
-constexpr auto shaveFactor = 2.0 + (2.0 / 9.0);
-
-
-using vec64 = std::vector<u64>;
-
-template<u64 width> struct Level3Digits : std::integral_constant<u64, (width - 1) / 2> { };
-template<u64 width> struct Level2Digits : std::integral_constant<u64, (width - 1) - Level3Digits<width> { }> { };
-template<u64 width> struct Level1Digits : std::integral_constant<u64, (width - 1) - Level2Digits<width> { }> { };
-
-#define X(width, l3, l2, l1) \
-template<> struct Level3Digits< width > : std::integral_constant<u64, l3 > { }; \
-template<> struct Level2Digits< width > : std::integral_constant<u64, l2 > { }; \
-template<> struct Level1Digits< width > : std::integral_constant<u64, l1 > { }; \
-static_assert(width == (l3 + l2 + l1) , "Number of digits allocated != width of number!");
-#include "notations.def"
-#undef X
-
-/**
- * Useful for getting information about a given number, not used during
- * quodigious computation because it gets really slow with larger numbers!
- */
-template<u64 length>
-std::tuple<u64, u64> digitSumAndProduct(u64 value) noexcept {
-	static_assert(length != 0, "Can't have a length of zero!");
-	static_assert(length < 20, "Maximum of 19 digits!");
-	u64 current = value;
-	u64 sum = 0u;
-	u64 product = 1u;
-	for(auto count = 0; count < length; ++count) {
-		auto back = current % 10u;
-		sum += back;
-		product *= back;
-		current /= 10u;
-	}
-	return std::tuple<u64, u64>(sum, product);
-}
-
 template<u64 times>
 constexpr u64 multiply(u64 product) noexcept {
 	return times * product;

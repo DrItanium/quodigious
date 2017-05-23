@@ -26,6 +26,25 @@
 #include <string>
 #include "qlib.h"
 
+/**
+ * Useful for getting information about a given number, not used during
+ * quodigious computation because it gets really slow with larger numbers!
+ */
+template<u64 length>
+std::tuple<u64, u64> digitSumAndProduct(u64 value) noexcept {
+	static_assert(length != 0, "Can't have a length of zero!");
+	static_assert(length < 20, "Maximum of 19 digits!");
+	u64 current = value;
+	u64 sum = 0u;
+	u64 product = 1u;
+	for(auto count = 0; count < length; ++count) {
+		auto back = current % 10u;
+		sum += back;
+		product *= back;
+		current /= 10u;
+	}
+	return std::tuple<u64, u64>(sum, product);
+}
 template<typename T>
 void field(std::ostream& out, const std::string& title, T value, bool newline = true) {
 	out << "(" << title << " " << value << ")";
