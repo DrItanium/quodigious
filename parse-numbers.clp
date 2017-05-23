@@ -19,12 +19,12 @@
              (if (< ?value 0) then
                (return FALSE))
              (if (= ?value 0) then
-                          (create$)
-                          else
-                          (create$ (mod ?value
-                                        10)
-                                   (decompose-number (/ ?value
-                                                        10)))))
+               (create$)
+               else
+               (create$ (integer (mod ?value
+                                      10))
+                        (decompose-number (integer (/ ?value
+                                                      10))))))
 
 (deftemplate quodigious-number
              (slot value
