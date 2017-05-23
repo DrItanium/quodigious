@@ -135,7 +135,7 @@ inline std::string parallelBody() noexcept {
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
     if (length > 7) {
-        //auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
+        auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
         auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
         auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
         auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
@@ -143,9 +143,7 @@ inline void loopBody(std::ostream& storage) noexcept {
         auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>);
         auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>);
         auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>);
-        //storage << b2.get();
-        storage << parallelBody<length, skipFives, 2>();
-        storage << b3.get() << b4.get() << b5.get() << b6.get();
+        storage << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
         storage << b7.get() << b8.get() << b9.get();
     } else {
         loopBody<length, skipFives>(storage, 0, 1, 0);
