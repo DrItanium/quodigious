@@ -30,16 +30,24 @@ template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-    loopBody<inner, skipFives>(storage, 2 + sum, multiply<2>(product), index + (multiply<2>(next)));
-    loopBody<inner, skipFives>(storage, 3 + sum, multiply<3>(product), index + (multiply<3>(next)));
-    loopBody<inner, skipFives>(storage, 4 + sum, multiply<4>(product), index + (multiply<4>(next)));
+	sum += 2;
+    loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
+	++sum;
     if (!skipFives) {
-        loopBody<inner, skipFives>(storage, 5 + sum, multiply<5>(product), index + multiply<5>(next));
+        loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
     }
-    loopBody<inner, skipFives>(storage, 6 + sum, multiply<6>(product), index + multiply<6>(next));
-    loopBody<inner, skipFives>(storage, 7 + sum, multiply<7>(product), index + multiply<7>(next));
-    loopBody<inner, skipFives>(storage, 8 + sum, multiply<8>(product), index + multiply<8>(next));
-    loopBody<inner, skipFives>(storage, 9 + sum, multiply<9>(product), index + multiply<9>(next));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
+	++sum;
+    loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
 }
 
 template<bool experimentalCheck = false>
