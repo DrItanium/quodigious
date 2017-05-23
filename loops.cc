@@ -79,6 +79,26 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
     loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
 }
 
+template<u64 inner, u64 next, u64 pos>
+inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
+    std::ostringstream storage;
+    loopBody<inner, true>(storage, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
+    std::string out(storage.str());
+    return out;
+}
+template<>
+inline void loopBody<8, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    auto b2 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 2>, sum, product, index);
+    auto b3 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 3>, sum, product, index);
+    auto b4 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 4>, sum, product, index);
+    auto b6 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 6>, sum, product, index);
+    auto b7 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 7>, sum, product, index);
+    auto b8 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 8>, sum, product, index);
+    auto b9 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 9>, sum, product, index);
+    stream << b2.get() << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
+}
+
+
 
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
@@ -129,7 +149,7 @@ inline std::string parallelBody() noexcept {
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
-    if (length > 7) {
+    if (length > 8) {
         auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
         auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
         auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
