@@ -30,43 +30,43 @@ template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-	sum += 2;
+    sum += 2;
     loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
-	++sum;
+    ++sum;
     if (!skipFives) {
         loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
     }
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
-	++sum;
+    ++sum;
     loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
 }
 
 template<bool experimentalCheck = false>
 inline bool checkValue(u64 sum) noexcept {
-	if (experimentalCheck) {
-		return (sum % 2 == 0) || (sum % 3 == 0);
-	} else {
-		return true;
-	}
+    if (experimentalCheck) {
+        return (sum % 2 == 0) || (sum % 3 == 0);
+    } else {
+        return true;
+    }
 }
 template<bool experimentalCheck = false>
 inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-	if (checkValue<experimentalCheck>(sum)) {
-		if (componentQuodigious(value, sum)) {
-			if (componentQuodigious(value, product)) {
-				return value;
-			}
-		}
-	}
+    if (checkValue<experimentalCheck>(sum)) {
+        if (componentQuodigious(value, sum)) {
+            if (componentQuodigious(value, product)) {
+                return value;
+            }
+        }
+    }
     return 0;
 }
 inline void merge(u64 value, std::ostream& storage) noexcept {
@@ -76,46 +76,46 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 }
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	sum += 2;
-	index += 2;
-	merge(innerMostBody(sum, multiply<2>(product), index), storage); 
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<3>(product), index), storage); 
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<4>(product), index), storage); 
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<5>(product), index), storage);
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<6>(product), index), storage);
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<7>(product), index), storage);
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<8>(product), index), storage);
-	++sum;
-	++index;
-	merge(innerMostBody(sum, multiply<9>(product), index), storage); 
+    sum += 2;
+    index += 2;
+    merge(innerMostBody(sum, multiply<2>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<3>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<4>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<5>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<6>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<7>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<8>(product), index), storage);
+    ++sum;
+    ++index;
+    merge(innerMostBody(sum, multiply<9>(product), index), storage);
 }
 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	sum += 2;
-	index += 2;
-    merge(innerMostBody<true>(sum, multiply<2>(product), index), storage); 
-	sum += 2;
-	index += 2;
-    merge(innerMostBody<true>(sum, multiply<4>(product), index), storage); 
-	sum += 2;
-	index += 2;
-    merge(innerMostBody<true>(sum, multiply<6>(product), index), storage); 
-	sum += 2;
-	index += 2;
-    merge(innerMostBody<true>(sum, multiply<8>(product), index), storage); 
+    sum += 2;
+    index += 2;
+    merge(innerMostBody<true>(sum, multiply<2>(product), index), storage);
+    sum += 2;
+    index += 2;
+    merge(innerMostBody<true>(sum, multiply<4>(product), index), storage);
+    sum += 2;
+    index += 2;
+    merge(innerMostBody<true>(sum, multiply<6>(product), index), storage);
+    sum += 2;
+    index += 2;
+    merge(innerMostBody<true>(sum, multiply<8>(product), index), storage);
 }
 
 template<u64 length, bool skipFives, u64 pos>
@@ -152,43 +152,43 @@ template<> inline void loopBody<1, false>(std::ostream& storage) noexcept { loop
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
-	// this is not going to change ever!
+    // this is not going to change ever!
     loopBody<length, (length > 4)>(storage);
 }
 
 int main() {
     std::ostringstream storage;
-	while(std::cin.good()) {
-		u64 currentIndex = 0;
-		std::cin >> currentIndex;
-		if (std::cin.good()) {
-			switch(currentIndex) {
-				case 1: body<1>(storage); break;
-				case 2: body<2>(storage); break;
-				case 3: body<3>(storage); break;
-				case 4: body<4>(storage); break;
-				case 5: body<5>(storage); break;
-				case 6: body<6>(storage); break;
-				case 7: body<7>(storage); break;
-				case 8: body<8>(storage); break;
-				case 9: body<9>(storage); break;
-				case 10: body<10>(storage); break;
-				case 11: body<11>(storage); break;
-				case 12: body<12>(storage); break;
-				case 13: body<13>(storage); break;
-				case 14: body<14>(storage); break;
-				case 15: body<15>(storage); break;
-				case 16: body<16>(storage); break;
-				case 17: body<17>(storage); break;
-				case 18: body<18>(storage); break;
-				case 19: body<19>(storage); break;
-				default:
-						 std::cerr << "Illegal index " << currentIndex << std::endl;
-						 return 1;
-			}
+    while(std::cin.good()) {
+        u64 currentIndex = 0;
+        std::cin >> currentIndex;
+        if (std::cin.good()) {
+            switch(currentIndex) {
+                case 1: body<1>(storage); break;
+                case 2: body<2>(storage); break;
+                case 3: body<3>(storage); break;
+                case 4: body<4>(storage); break;
+                case 5: body<5>(storage); break;
+                case 6: body<6>(storage); break;
+                case 7: body<7>(storage); break;
+                case 8: body<8>(storage); break;
+                case 9: body<9>(storage); break;
+                case 10: body<10>(storage); break;
+                case 11: body<11>(storage); break;
+                case 12: body<12>(storage); break;
+                case 13: body<13>(storage); break;
+                case 14: body<14>(storage); break;
+                case 15: body<15>(storage); break;
+                case 16: body<16>(storage); break;
+                case 17: body<17>(storage); break;
+                case 18: body<18>(storage); break;
+                case 19: body<19>(storage); break;
+                default:
+                         std::cerr << "Illegal index " << currentIndex << std::endl;
+                         return 1;
+            }
             std::cout << storage.str() << std::endl;
             storage.str("");
-		}
-	}
-	return 0;
+        }
+    }
+    return 0;
 }
