@@ -51,10 +51,12 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    auto advance = [&sum]() noexcept { ++sum; };
-    auto doubleAdvance = [&sum]() noexcept { sum += 2; };
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
+
+    auto advance = [&sum]() noexcept { ++sum; };
+    auto doubleAdvance = [&sum]() noexcept { sum += 2; };
+
     doubleAdvance();
     loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
     advance();
