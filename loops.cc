@@ -149,6 +149,7 @@ template<> inline void loopBody<1, false>(std::ostream& storage) noexcept { loop
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
+    static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // this is not going to change ever!
     loopBody<length, (length > 4)>(storage);
 }
