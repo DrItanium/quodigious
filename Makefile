@@ -28,11 +28,11 @@ LXXFLAGS += -O3 -flto -fwhole-program -march=native
 TITLE = quodigious
 FILES = quodigious.o
 
-all: q8 qsinglenumbercheck qloops
+all: qloops
 
 help:
 	@echo "available options: "
-	@echo "  - all : builds the program"
+	@echo "  - all : builds the program qloops "
 	@echo "  - q8: compiles the program (8 thread version)"
 	@echo "  - qloops: compiles the nested loop variant"
 	@echo "  - clean : cleans the program artifacts"

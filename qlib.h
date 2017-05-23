@@ -110,7 +110,7 @@ template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 
 template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
 constexpr bool isEven(u64 value) noexcept {
-	return (value == ((value >> 1) << 1));
+    return (value & 1) == 0;
 }
 
 template<u64 k>
