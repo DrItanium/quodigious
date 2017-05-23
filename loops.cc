@@ -49,9 +49,41 @@ inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
     auto l1Value = k + index;
     if (componentQuodigious(l1Value, l1Sum)) {
         auto l1Product = multiply<k>(product);
+        // research code
+        auto tmp = [&l1Product, &l1Sum, &l1Value]() {
+            auto divisibleBy = [](auto value, auto against) { return (value % against) == 0; };
+            //auto divisibleByThree = [divisibleBy](auto value) { return divisibleBy(value, 3); };
+            auto divisibleByTwo = [divisibleBy](auto value) { return divisibleBy(value, 2); };
+            //auto divisibleBySeven = [divisibleBy](auto value) { return divisibleBy(value, 7); };
+            auto divisibleByNine = [divisibleBy](auto value) { return divisibleBy(value, 9); };
+            std::cout << "value: " << l1Value << " sum: " << l1Sum << " product: " << l1Product;
+            if (!divisibleByTwo(l1Sum)) {
+                std::cout << "\n\tSum is odd!";
+            }
+            if (!divisibleByTwo(l1Product)) {
+                std::cout << "\n\tProduct is odd!";
+            }
+            //std::cout << "\n\tSum divisible by three: " << divisibleByThree(l1Sum);
+            //std::cout << "\n\tproduct divisible by three: " << divisibleByThree(l1Product);
+            //std::cout << "\n\tvalue divisible by three: " << divisibleByThree(l1Value);
+            //std::cout << "\n\tSum divisible by two: " << divisibleByTwo(l1Sum);
+            //std::cout << "\n\tproduct divisible by two: " << divisibleByTwo(l1Product);
+            //std::cout << "\n\tvalue divisible by two: " << divisibleByTwo(l1Value);
+            //std::cout << "\n\tSum divisible by seven: " << divisibleBySeven(l1Sum);
+            //std::cout << "\n\tproduct divisible by seven: " << divisibleBySeven(l1Product);
+            //std::cout << "\n\tvalue divisible by seven: " << divisibleBySeven(l1Value);
+            //std::cout << "\n\tSum divisible by nine: " << divisibleByNine(l1Sum);
+            //std::cout << "\n\tProduct divisible by nine: " << divisibleByNine(l1Product);
+            //std::cout << "\n\tProduct / sum: " << l1Product / l1Sum << std::endl;
+            //std::cout << "\n\tsum divisor: " << (l1Value / l1Sum);
+            //std::cout << "\n\tproduct divisor: " << (l1Value / l1Product);
+            std::cout << std::endl;
+        };
         if (l1Sum == l1Product) {
+            tmp();
             return l1Value;
         } else if (componentQuodigious(l1Value, l1Product)) {
+            tmp();
             return l1Value;
         }
     }
