@@ -19,8 +19,6 @@
 #ifndef QLIB_H__
 #define QLIB_H__
 #include <cstdint>
-#include <vector>
-#include <tuple>
 using u64 = uint64_t;
 
 template<u64 length>

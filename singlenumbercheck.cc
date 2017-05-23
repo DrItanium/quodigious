@@ -19,11 +19,10 @@
 // Perform quodigious checks on numbers using tons of different C++ tricks
 #include <iostream>
 #include <cmath>
-#include <future>
 #include <cstdint>
-#include <vector>
 #include <functional>
 #include <string>
+#include <tuple>
 #include "qlib.h"
 
 /**

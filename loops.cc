@@ -20,7 +20,6 @@
 #include <iostream>
 #include <cmath>
 #include <cstdint>
-#include <vector>
 #include <sstream>
 #include <functional>
 #include <future>
