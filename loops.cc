@@ -86,17 +86,53 @@ inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
     std::string out(storage.str());
     return out;
 }
+template<u64 length>
+inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    // cut the computation in half...mostly
+    auto b2 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 2>, sum, product, index);
+    auto b3 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
+            std::ostringstream storage;
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 3>(sum, product, index);
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 4>(sum, product, index);
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 6>(sum, product, index);
+            std::string out(storage.str());
+            return out;
+            }, sum, product, index);
+    auto b4 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
+            std::ostringstream storage;
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 7>(sum, product, index);
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 8>(sum, product, index);
+            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 9>(sum, product, index);
+            std::string out(storage.str());
+            return out;
+            }, sum, product, index);
+
+    stream << b2.get() << b3.get() << b4.get();
+}
 template<>
 inline void loopBody<12, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    auto b2 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 2>, sum, product, index);
-    auto b3 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 3>, sum, product, index);
-    auto b4 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 4>, sum, product, index);
-    auto b6 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 6>, sum, product, index);
-    auto b7 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 7>, sum, product, index);
-    auto b8 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 8>, sum, product, index);
-    auto b9 = std::async(std::launch::async, innerParallelBody<11, fastPow10<11>, 9>, sum, product, index);
+    tripleSplit<12>(stream, sum, product, index);
+}
+
+template<>
+inline void loopBody<14, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    tripleSplit<14>(stream, sum, product, index);
+}
+
+/*
+template<>
+inline void loopBody<8, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    // cut the computation in half...mostly
+    auto b2 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 2>, sum, product, index);
+    auto b3 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 3>, sum, product, index);
+    auto b7 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 7>, sum, product, index);
+    auto b4 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 4>, sum, product, index);
+    auto b6 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 6>, sum, product, index);
+    auto b8 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 8>, sum, product, index);
+    auto b9 = std::async(std::launch::async, innerParallelBody<7, fastPow10<7>, 9>, sum, product, index);
     stream << b2.get() << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
 }
+*/
 
 
 
@@ -149,7 +185,7 @@ inline std::string parallelBody() noexcept {
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
-    if (length > 7 && length != 12) {
+    if (length > 7) {
         auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
         auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
         auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
