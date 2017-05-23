@@ -42,19 +42,30 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
     loopBody<inner, skipFives>(storage, 9 + sum, multiply<9>(product), index + multiply<9>(next));
 }
 
-template<u64 k>
+template<bool experimentalCheck = false>
+inline bool checkValue(u64 sum) noexcept {
+	if (experimentalCheck) {
+		return (sum % 2 == 0) || (sum % 3 == 0);
+	} else {
+		return true;
+	}
+}
+template<u64 k, bool experimentalCheck = false>
 inline u64 innerMostBody(u64 sum, u64 product, u64 index) noexcept {
     static_assert(k < 10, "K can't be wider than 10!");
-    auto l1Sum = sum + k;
-    auto l1Value = k + index;
-    if (componentQuodigious(l1Value, l1Sum)) {
-        auto l1Product = multiply<k>(product);
-        if (l1Sum == l1Product) {
-            return l1Value;
-        } else if (componentQuodigious(l1Value, l1Product)) {
-            return l1Value;
-        }
-    }
+	auto l1Sum = sum + k;
+	if (checkValue<experimentalCheck>(l1Sum)) {
+		auto l1Value = k + index;
+		if (componentQuodigious(l1Value, l1Sum)) {
+			auto l1Product = multiply<k>(product);
+			if (l1Sum == l1Product) {
+				return l1Value;
+			} else if (componentQuodigious(l1Value, l1Product)) {
+				return l1Value;
+			}
+		}
+	}
+
     return 0;
 }
 inline void merge(u64 value, std::ostream& storage) noexcept {
@@ -76,10 +87,10 @@ inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 
 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    merge(innerMostBody<2>(sum, product, index), storage);
-    merge(innerMostBody<4>(sum, product, index), storage);
-    merge(innerMostBody<6>(sum, product, index), storage);
-    merge(innerMostBody<8>(sum, product, index), storage);
+    merge(innerMostBody<2, true>(sum, product, index), storage);
+    merge(innerMostBody<4, true>(sum, product, index), storage);
+    merge(innerMostBody<6, true>(sum, product, index), storage);
+    merge(innerMostBody<8, true>(sum, product, index), storage);
 }
 
 template<u64 length, bool skipFives, u64 pos>
