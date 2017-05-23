@@ -58,7 +58,7 @@ inline bool checkValue(u64 sum) noexcept {
 		return true;
 	}
 }
-template<u64 k, bool experimentalCheck = false>
+template<bool experimentalCheck = false>
 inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	if (checkValue<experimentalCheck>(sum)) {
 		if (componentQuodigious(value, sum)) {
@@ -78,44 +78,44 @@ template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 	sum += 2;
 	index += 2;
-	merge(innerMostBody<2>(sum, multiply<2>(product), index), storage); 
+	merge(innerMostBody(sum, multiply<2>(product), index), storage); 
 	++sum;
 	++index;
-	merge(innerMostBody<3>(sum, multiply<3>(product), index), storage); 
+	merge(innerMostBody(sum, multiply<3>(product), index), storage); 
 	++sum;
 	++index;
-	merge(innerMostBody<4>(sum, multiply<4>(product), index), storage); 
+	merge(innerMostBody(sum, multiply<4>(product), index), storage); 
 	++sum;
 	++index;
-	merge(innerMostBody<5>(sum, multiply<5>(product), index), storage);
+	merge(innerMostBody(sum, multiply<5>(product), index), storage);
 	++sum;
 	++index;
-	merge(innerMostBody<6>(sum, multiply<6>(product), index), storage);
+	merge(innerMostBody(sum, multiply<6>(product), index), storage);
 	++sum;
 	++index;
-	merge(innerMostBody<7>(sum, multiply<7>(product), index), storage);
+	merge(innerMostBody(sum, multiply<7>(product), index), storage);
 	++sum;
 	++index;
-	merge(innerMostBody<8>(sum, multiply<8>(product), index), storage);
+	merge(innerMostBody(sum, multiply<8>(product), index), storage);
 	++sum;
 	++index;
-	merge(innerMostBody<9>(sum, multiply<9>(product), index), storage); 
+	merge(innerMostBody(sum, multiply<9>(product), index), storage); 
 }
 
 template<>
 inline void loopBody<1, true>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 	sum += 2;
 	index += 2;
-    merge(innerMostBody<2, true>(sum, multiply<2>(product), index), storage); 
+    merge(innerMostBody<true>(sum, multiply<2>(product), index), storage); 
 	sum += 2;
 	index += 2;
-    merge(innerMostBody<4, true>(sum, multiply<4>(product), index), storage); 
+    merge(innerMostBody<true>(sum, multiply<4>(product), index), storage); 
 	sum += 2;
 	index += 2;
-    merge(innerMostBody<6, true>(sum, multiply<6>(product), index), storage); 
+    merge(innerMostBody<true>(sum, multiply<6>(product), index), storage); 
 	sum += 2;
 	index += 2;
-    merge(innerMostBody<8, true>(sum, multiply<8>(product), index), storage); 
+    merge(innerMostBody<true>(sum, multiply<8>(product), index), storage); 
 }
 
 template<u64 length, bool skipFives, u64 pos>
