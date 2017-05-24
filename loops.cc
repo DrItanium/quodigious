@@ -120,6 +120,7 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
     }
 performThreadSplitAtLevel(12);
 performThreadSplitAtLevel(14);
+performThreadSplitAtLevel(16);
 #undef performThreadSplitAtLevel
 
 template<>
