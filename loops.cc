@@ -113,15 +113,14 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 
     stream << innerParallelBody<(length -1), fastPow10<(length - 1)>, 2>(sum, product, index) << b3.get() << b4.get() << b5.get();
 }
-template<>
-inline void loopBody<12, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    tripleSplit<12>(stream, sum, product, index);
-}
-
-template<>
-inline void loopBody<14, true>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    tripleSplit<14>(stream, sum, product, index);
-}
+#define performThreadSplitAtLevel(q) \
+    template <> \
+    inline void loopBody < q , true > (std::ostream& stream, u64 sum, u64 product, u64 index) noexcept { \
+        tripleSplit< q > (stream, sum, product, index); \
+    }
+performThreadSplitAtLevel(12);
+performThreadSplitAtLevel(14);
+#undef performThreadSplitAtLevel
 
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
