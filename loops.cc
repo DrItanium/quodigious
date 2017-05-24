@@ -89,6 +89,7 @@ inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
 template<u64 length>
 inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
     // cut the computation in half...mostly
+    auto b2 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 2>, sum, product, index);
     auto b3 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
             std::ostringstream storage;
             storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 3>(sum, product, index);
@@ -111,14 +112,17 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
             return out;
             }, sum, product, index);
 
-    stream << innerParallelBody<(length -1), fastPow10<(length - 1)>, 2>(sum, product, index) << b3.get() << b4.get() << b5.get();
+    stream << b2.get() << b3.get() << b4.get() << b5.get();
 }
 #define performThreadSplitAtLevel(q) \
     template <> \
     inline void loopBody < q , true > (std::ostream& stream, u64 sum, u64 product, u64 index) noexcept { \
         tripleSplit< q > (stream, sum, product, index); \
     }
+performThreadSplitAtLevel(10);
+performThreadSplitAtLevel(11);
 performThreadSplitAtLevel(12);
+performThreadSplitAtLevel(13);
 performThreadSplitAtLevel(14);
 performThreadSplitAtLevel(16);
 #undef performThreadSplitAtLevel
