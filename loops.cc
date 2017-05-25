@@ -50,34 +50,7 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 }
 
 template<u64 length, bool skipFives>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    constexpr auto inner = length - 1;
-    constexpr auto next = fastPow10<inner>;
-
-    auto advance = [&sum]() noexcept { ++sum; };
-    auto doubleAdvance = [&sum]() noexcept { sum += 2; };
-
-    doubleAdvance();
-    loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
-    if (!skipFives) {
-        advance();
-        loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
-        advance();
-    } else {
-        doubleAdvance();
-    }
-    loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
-}
+void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
 template<u64 length, u64 pos>
@@ -124,19 +97,55 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
         stream << b3.get() << b4.get() << b5.get();
     }
 }
-#define performThreadSplitAtLevel(q) \
-    template <> \
-    inline void loopBody < q , true > (std::ostream& stream, u64 sum, u64 product, u64 index) noexcept { \
-        tripleSplit< q > (stream, sum, product, index); \
+
+template<u64 length>
+struct EnableParallelism : std::integral_constant<bool, false> { };
+#define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
+EnableParallelismAtLevel(10);
+EnableParallelismAtLevel(11);
+EnableParallelismAtLevel(12);
+EnableParallelismAtLevel(13);
+EnableParallelismAtLevel(14);
+EnableParallelismAtLevel(15);
+EnableParallelismAtLevel(16);
+#undef EnableParallelismAtLevel
+
+template<u64 length, bool skipFives>
+inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
+    if (EnableParallelism<length>::value) {
+        tripleSplit<length>(storage, sum, product, index);
+    } else {
+        constexpr auto inner = length - 1;
+        constexpr auto next = fastPow10<inner>;
+
+        auto advance = [&sum]() noexcept { ++sum; };
+        auto doubleAdvance = [&sum]() noexcept { sum += 2; };
+
+        doubleAdvance();
+        loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
+        if (!skipFives) {
+            advance();
+            loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
+            advance();
+        } else {
+            doubleAdvance();
+        }
+        loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
     }
-performThreadSplitAtLevel(10);
-performThreadSplitAtLevel(11);
-performThreadSplitAtLevel(12);
-performThreadSplitAtLevel(13);
-performThreadSplitAtLevel(14);
-performThreadSplitAtLevel(15);
-performThreadSplitAtLevel(16);
-#undef performThreadSplitAtLevel
+}
+
+
+
 
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
