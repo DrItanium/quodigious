@@ -37,6 +37,8 @@ help:
 	@echo "  - quodigious32: program to compute 32-bit quodigious values"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
+	@echo "  - timed_tests: runs short regression tests"
+	@echo "  - timed_longer_tests: runs longer regression tests (more digits)"
 	@echo "  - clean : cleans the program artifacts"
 
 ${QLOOPS_PROG}: loops.o
@@ -50,17 +52,29 @@ ${QLOOPS_PROG32}: loops32.o
 	@echo done.
 
 
-tests: ${QLOOPS_PROG}
+timed_tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
 	@echo "12 digits"
 	@time echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
 	@echo "11 digits"
 	@time echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
 
-longer_tests: ${QLOOPS_PROG}
+timed_longer_tests: ${QLOOPS_PROG}
 	@echo Running longer tests with time analysis
 	@echo "13 digits"
 	@time echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
+
+tests: ${QLOOPS_PROG}
+	@echo Running simple testing suite
+	@echo "12 digits"
+	@echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
+	@echo "11 digits"
+	@echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
+
+longer_tests: ${QLOOPS_PROG}
+	@echo Running longer tests
+	@echo "13 digits"
+	@echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
