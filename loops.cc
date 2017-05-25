@@ -81,20 +81,20 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
 
 
 template<u64 length, u64 pos>
-void innerParallelBodyExternalStream(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerParallelBodyExternalStream(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
     constexpr auto inner = (length - 1);
     constexpr auto next = fastPow10<inner>;
     loopBody<inner, true>(stream, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
 }
 template<u64 length, u64 pos>
-std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
+inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
     std::ostringstream storage;
     innerParallelBodyExternalStream<length, pos>(storage, sum, product, index);
     std::string out(storage.str());
     return out;
 }
 
-template<u64 length, u64 digitA, u64 digitB>
+template<u64 length, u64 digitA, u64 digitB = (digitA + 1)>
 std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
     static_assert(digitA != digitB, "the first digit and the second should not be equal!");
     std::ostringstream storage;
