@@ -79,50 +79,49 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
     loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
 }
 
-template<u64 inner, u64 next, u64 pos>
-inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
+
+template<u64 length, u64 pos>
+void innerParallelBodyExternalStream(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    constexpr auto inner = (length - 1);
+    constexpr auto next = fastPow10<inner>;
+    loopBody<inner, true>(stream, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
+}
+template<u64 length, u64 pos>
+std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
     std::ostringstream storage;
-    loopBody<inner, true>(storage, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
+    innerParallelBodyExternalStream<length, pos>(storage, sum, product, index);
     std::string out(storage.str());
     return out;
 }
+
+template<u64 length, u64 digitA, u64 digitB>
+std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
+    static_assert(digitA != digitB, "the first digit and the second should not be equal!");
+    std::ostringstream storage;
+    innerParallelBodyExternalStream<length, digitA>(storage, sum, product, index);
+    innerParallelBodyExternalStream<length, digitB>(storage, sum, product, index);
+    std::string out(storage.str());
+    return out;
+}
+
 template<u64 length>
 inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
     if (length > 12) {
-        auto b2 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 2>, sum, product, index);
-        auto b3 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 3>, sum, product, index);
-        auto b4 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 4>, sum, product, index);
-        auto b6 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 6>, sum, product, index);
-        auto b7 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 7>, sum, product, index);
-        auto b8 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 8>, sum, product, index);
-        auto b9 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 9>, sum, product, index);
-        stream << b2.get() << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
+        auto b3 = std::async(std::launch::async, innerParallelBody<length, 3>, sum, product, index);
+        auto b4 = std::async(std::launch::async, innerParallelBody<length, 4>, sum, product, index);
+        auto b6 = std::async(std::launch::async, innerParallelBody<length, 6>, sum, product, index);
+        auto b7 = std::async(std::launch::async, innerParallelBody<length, 7>, sum, product, index);
+        auto b8 = std::async(std::launch::async, innerParallelBody<length, 8>, sum, product, index);
+        auto b9 = std::async(std::launch::async, innerParallelBody<length, 9>, sum, product, index);
+        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
+        stream << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
     } else {
-        // cut the computation in half...mostly
-        auto b2 = std::async(std::launch::async, innerParallelBody<(length - 1), fastPow10<(length - 1)>, 2>, sum, product, index);
-        auto b3 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-                std::ostringstream storage;
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 3>(sum, product, index);
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 4>(sum, product, index);
-                std::string out(storage.str());
-                return out;
-                }, sum, product, index);
-        auto b4 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-                std::ostringstream storage;
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 6>(sum, product, index);
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 7>(sum, product, index);
-                std::string out(storage.str());
-                return out;
-                }, sum, product, index);
-        auto b5 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-                std::ostringstream storage;
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 8>(sum, product, index);
-                storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 9>(sum, product, index);
-                std::string out(storage.str());
-                return out;
-                }, sum, product, index);
-
-        stream << b2.get() << b3.get() << b4.get() << b5.get();
+        // cut the computation in thirds...mostly
+        auto b3 = std::async(std::launch::async, dualParallelBody<length, 3, 4>, sum, product, index);
+        auto b4 = std::async(std::launch::async, dualParallelBody<length, 6, 7>, sum, product, index);
+        auto b5 = std::async(std::launch::async, dualParallelBody<length, 8, 9>, sum, product, index);
+        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
+        stream << b3.get() << b4.get() << b5.get();
     }
 }
 #define performThreadSplitAtLevel(q) \
@@ -135,6 +134,7 @@ performThreadSplitAtLevel(11);
 performThreadSplitAtLevel(12);
 performThreadSplitAtLevel(13);
 performThreadSplitAtLevel(14);
+performThreadSplitAtLevel(15);
 performThreadSplitAtLevel(16);
 #undef performThreadSplitAtLevel
 
