@@ -106,7 +106,7 @@ std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
 
 template<u64 length>
 inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    if (length > 12) {
+    if (length >= 12) {
         auto b3 = std::async(std::launch::async, innerParallelBody<length, 3>, sum, product, index);
         auto b4 = std::async(std::launch::async, innerParallelBody<length, 4>, sum, product, index);
         auto b6 = std::async(std::launch::async, innerParallelBody<length, 6>, sum, product, index);
