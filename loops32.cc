@@ -16,10 +16,7 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 
-// Perform quodigious checks on numbers using tons of different C++ tricks
-#include <iostream>
-#include <cmath>
-#include <cstdint>
+// Perform 32-bit numeric quodigious checks
 #include "qlib.h"
 
 
@@ -28,49 +25,32 @@ inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
-    auto advance = [&sum]() noexcept { ++sum; };
+    auto baseProduct = product;
     sum += 2;
-    body<inner>(sum, multiply<2>(product), index + (multiply<2>(next)));
-    advance();
-    body<inner>(sum, multiply<3>(product), index + (multiply<3>(next)));
-    advance();
-    body<inner>(sum, multiply<4>(product), index + (multiply<4>(next)));
-    advance();
-    body<inner>(sum, multiply<5>(product), index + multiply<5>(next));
-    advance();
-    body<inner>(sum, multiply<6>(product), index + multiply<6>(next));
-    advance();
-    body<inner>(sum, multiply<7>(product), index + multiply<7>(next));
-    advance();
-    body<inner>(sum, multiply<8>(product), index + multiply<8>(next));
-    advance();
-    body<inner>(sum, multiply<9>(product), index + multiply<9>(next));
+    product <<= 1;
+    index += multiply<2>(next);
+    for (int i = 2; i < 10; ++i) {
+        body<inner>(sum, product, index);
+        ++sum;
+        product += baseProduct;
+        index += next;
+    }
 }
-
-
-
 
 template<>
 inline void body<1>(u32 sum, u32 product, u32 index) noexcept {
-    auto advance = [&sum, &index]() noexcept { ++sum; ++index; };
-    auto innerMostBody = [](auto sum, auto product, auto value) noexcept { return isQuodigious(value, sum, product) ? value : 0; };
+    auto originalProduct = product;
     sum += 2;
     index += 2;
-    merge(innerMostBody(sum, multiply<2>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<3>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<4>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<5>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<6>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<7>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<8>(product), index), std::cout);
-    advance();
-    merge(innerMostBody(sum, multiply<9>(product), index), std::cout);
+    product <<= 1;
+    for (int i = 2; i < 10; ++i) {
+        if (isQuodigious(index, sum, product)) {
+            std::cout << index << std::endl;
+        }
+        ++sum;
+        ++index;
+        product += originalProduct;
+    }
 }
 
 int main() {
