@@ -99,6 +99,12 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 }
 
 template<u64 length>
+struct EnableTopLevelParallelism : std::integral_constant<bool, (length > 7)> { };
+
+template<u64 length>
+struct SkipFives : std::integral_constant<bool, (length > 4)> { };
+
+template<u64 length>
 struct EnableParallelism : std::integral_constant<bool, false> { };
 #define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
 EnableParallelismAtLevel(10);
@@ -188,25 +194,28 @@ inline std::string parallelBody() noexcept {
     if (pos == 5 && skipFives) {
         return out;
     }
+    constexpr auto next = (length - 1);
     std::ostringstream storage;
-    loopBody<length - 1, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<length - 1>));
+    loopBody<next, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<next>));
     out = storage.str();
     return out;
 }
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
-    if (length > 7) {
+    if (EnableTopLevelParallelism<length>::value) {
         constexpr auto next = (length - 1);
         auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
         auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
-        auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
+        //auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
         auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>);
         auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>);
         auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>);
         auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>);
         loopBody<next, skipFives>(storage, 2,  2, multiply<2>(fastPow10<next>));
-        storage << b3.get() << b4.get() << b5.get() << b6.get();
+        storage << b3.get() << b4.get();
+        //storage << b5.get();
+        storage << b6.get();
         storage << b7.get() << b8.get() << b9.get();
     } else {
         loopBody<length, skipFives>(storage, 0, 1, 0);
@@ -219,7 +228,7 @@ template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // this is not going to change ever!
-    loopBody<length, (length > 4)>(storage);
+    loopBody<length, SkipFives<length>::value>(storage);
 }
 
 int main() {
