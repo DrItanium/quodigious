@@ -23,7 +23,7 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -lpthread
+LXXFLAGS = -pthread
 LXXFLAGS += -O3 -flto -fwhole-program -march=native
 TITLE = quodigious
 FILES = quodigious.o
@@ -52,6 +52,11 @@ qloops: loops.o
 	@${CXX} ${LXXFLAGS} -o qloops loops.o
 	@echo done.
 
+qloops32: loops32.o
+	@echo -n Building looped quodigious ...
+	@${CXX} ${LXXFLAGS} -o qloops32 loops32.o
+	@echo done.
+
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -60,7 +65,7 @@ qloops: loops.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck qloops loops.o
+	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck qloops loops.o loops32.o qloops32
 	@echo done.
 
 quodigious.o: qlib.h notations.def
@@ -68,3 +73,5 @@ quodigious.o: qlib.h notations.def
 singlenumbercheck.o: qlib.h
 
 loops.o: qlib.h
+
+loops32.o: qlib.h

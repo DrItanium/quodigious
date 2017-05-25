@@ -95,27 +95,24 @@ inline void body(std::ostream& storage) noexcept {
 }
 
 int main() {
-    std::ostringstream storage;
     while(std::cin.good()) {
         u32 currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 1: body<1>(storage); break;
-                case 2: body<2>(storage); break;
-                case 3: body<3>(storage); break;
-                case 4: body<4>(storage); break;
-                case 5: body<5>(storage); break;
-                case 6: body<6>(storage); break;
-                case 7: body<7>(storage); break;
-                case 8: body<8>(storage); break;
-                case 9: body<9>(storage); break;
+                case 1: body<1>(std::cout); break;
+                case 2: body<2>(std::cout); break;
+                case 3: body<3>(std::cout); break;
+                case 4: body<4>(std::cout); break;
+                case 5: body<5>(std::cout); break;
+                case 6: body<6>(std::cout); break;
+                case 7: body<7>(std::cout); break;
+                case 8: body<8>(std::cout); break;
+                case 9: body<9>(std::cout); break;
                 default:
-                         std::cerr << "Illegal index " << currentIndex << std::endl;
-                         return 1;
+                        std::cerr << "Illegal index " << currentIndex << std::endl;
+                        return 1;
             }
-            std::cout << storage.str() << std::endl;
-            storage.str("");
         }
     }
     return 0;
