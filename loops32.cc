@@ -19,10 +19,13 @@
 // Perform 32-bit numeric quodigious checks
 #include "qlib.h"
 
+template<u32 length>
+inline void innerBody(u32 sum, u32 product, u32 index) noexcept;
 
 template<u32 length>
 inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+    static_assert(length != 0, "Can't have length of zero!");
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
     auto baseProduct = product;
@@ -30,26 +33,22 @@ inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     product <<= 1;
     index += multiply<2>(next);
     for (int i = 2; i < 10; ++i) {
-        body<inner>(sum, product, index);
+        innerBody<inner>(sum, product, index);
         ++sum;
         product += baseProduct;
         index += next;
     }
 }
 
+template<u32 length>
+inline void innerBody(u32 sum, u32 product, u32 index) noexcept {
+    body<length>(sum, product, index);
+}
+
 template<>
-inline void body<1>(u32 sum, u32 product, u32 index) noexcept {
-    auto originalProduct = product;
-    sum += 2;
-    index += 2;
-    product <<= 1;
-    for (int i = 2; i < 10; ++i) {
-        if (isQuodigious(index, sum, product)) {
-            std::cout << index << std::endl;
-        }
-        ++sum;
-        ++index;
-        product += originalProduct;
+inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
+    if (isQuodigious(index, sum, product)) {
+        std::cout << index << std::endl;
     }
 }
 
