@@ -50,17 +50,17 @@ ${QLOOPS_PROG32}: loops32.o
 	@echo done.
 
 
-tests: qloops
+tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
 	@echo "12 digits"
-	@time echo 12 | ./qloops | diff -B -- - outputs/qnums12
+	@time echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
 	@echo "11 digits"
-	@time echo 11 | ./qloops | diff -B -- - outputs/qnums11
+	@time echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
 
-longer_tests: qloops
+longer_tests: ${QLOOPS_PROG}
 	@echo Running longer tests with time analysis
 	@echo "13 digits"
-	@time echo 13 | ./qloops | diff -B -- - outputs/qnums13
+	@time echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
