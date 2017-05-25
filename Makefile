@@ -33,6 +33,7 @@ help:
 	@echo "  - all : builds the program qloops "
 	@echo "  - qloops: compiles the nested loop variant"
 	@echo "  - qloops32: compiles the nested loop variant for 32-bit only targets"
+	@echo "  - tests: runs regression tests"
 	@echo "  - clean : cleans the program artifacts"
 
 qloops: loops.o
@@ -45,6 +46,18 @@ qloops32: loops32.o
 	@${CXX} ${LXXFLAGS} -o qloops32 loops32.o
 	@echo done.
 
+
+tests: qloops
+	@echo Running simple testing suite with time analysis
+	@echo "12 digits"
+	@time echo 12 | ./qloops | diff -B -- - outputs/qnums12
+	@echo "11 digits"
+	@time echo 11 | ./qloops | diff -B -- - outputs/qnums11
+
+longer_tests: qloops
+	@echo Running longer tests with time analysis
+	@echo "13 digits"
+	@time echo 13 | ./qloops | diff -B -- - outputs/qnums13
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -59,3 +72,5 @@ clean:
 loops.o: qlib.h
 
 loops32.o: qlib.h
+
+.PHONY: tests longer_tests
