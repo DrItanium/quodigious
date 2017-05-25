@@ -19,7 +19,9 @@
 #ifndef QLIB_H__
 #define QLIB_H__
 #include <cstdint>
+#include <iostream>
 using u64 = uint64_t;
+using u32 = uint32_t;
 
 template<u64 length>
 constexpr u64 quickPow10() noexcept {
@@ -54,6 +56,11 @@ constexpr u64 multiply(u64 product) noexcept {
 	return times * product;
 }
 
+template<u32 times>
+constexpr u32 multiply(u32 product) noexcept {
+    return times * product;
+}
+
 template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
 template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
 template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
@@ -66,11 +73,30 @@ template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 
 template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
 template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
 
+template<> constexpr u32 multiply<0>(u32 product) noexcept { return 0; }
+template<> constexpr u32 multiply<1>(u32 product) noexcept { return product; }
+template<> constexpr u32 multiply<2>(u32 product) noexcept { return product << 1; }
+template<> constexpr u32 multiply<3>(u32 product) noexcept { return (product << 1) + product; }
+template<> constexpr u32 multiply<4>(u32 product) noexcept { return (product << 2); }
+template<> constexpr u32 multiply<5>(u32 product) noexcept { return (product << 2) + product; }
+template<> constexpr u32 multiply<6>(u32 product) noexcept { return (product << 2) + (product << 1); }
+template<> constexpr u32 multiply<7>(u32 product) noexcept { return (product << 2) + (product << 1) + product; }
+template<> constexpr u32 multiply<8>(u32 product) noexcept { return (product << 3); }
+template<> constexpr u32 multiply<9>(u32 product) noexcept { return (product << 3) + product; }
+template<> constexpr u32 multiply<10>(u32 product) noexcept { return (product << 3) + (product << 1); }
+
 constexpr bool isEven(u64 value) noexcept {
     return (value & 1) == 0;
 }
 
 template<u64 k>
 struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
+
+template<typename T>
+void merge(T value , std::ostream& input) noexcept {
+    if (value != 0) {
+        input << value << std::endl;
+    }
+}
 
 #endif // end QLIB_H__

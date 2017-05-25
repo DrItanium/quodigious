@@ -22,76 +22,55 @@
 #include <cstdint>
 #include "qlib.h"
 
-using u32 = uint32_t;
-inline u32 innerMostBody(u32 sum, u32 product, u32 value) noexcept {
-    if (componentQuodigious(value, sum)) {
-        if (componentQuodigious(value, product)) {
-            return value;
-        }
-    }
-    return 0;
-}
-
-inline void merge(u32 value, std::ostream& storage) noexcept {
-    if (value != 0) {
-        storage << value << std::endl;
-    }
-}
-
 
 template<u32 length>
-inline void loopBody(std::ostream& storage, u32 sum, u32 product, u32 index) noexcept {
-        constexpr auto inner = length - 1;
-        constexpr auto next = fastPow10<inner>;
-        auto advance = [&sum]() noexcept { ++sum; };
-        sum += 2;
-        loopBody<inner>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
-        advance();
-        loopBody<inner>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
-        advance();
-        loopBody<inner>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
-        advance();
-        loopBody<inner>(storage, sum, multiply<5>(product), index + multiply<5>(next));
-        advance();
-        loopBody<inner>(storage, sum, multiply<6>(product), index + multiply<6>(next));
-        advance();
-        loopBody<inner>(storage, sum, multiply<7>(product), index + multiply<7>(next));
-        advance();
-        loopBody<inner>(storage, sum, multiply<8>(product), index + multiply<8>(next));
-        advance();
-        loopBody<inner>(storage, sum, multiply<9>(product), index + multiply<9>(next));
+inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
+    static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+    constexpr auto inner = length - 1;
+    constexpr auto next = fastPow10<inner>;
+    auto advance = [&sum]() noexcept { ++sum; };
+    sum += 2;
+    body<inner>(sum, multiply<2>(product), index + (multiply<2>(next)));
+    advance();
+    body<inner>(sum, multiply<3>(product), index + (multiply<3>(next)));
+    advance();
+    body<inner>(sum, multiply<4>(product), index + (multiply<4>(next)));
+    advance();
+    body<inner>(sum, multiply<5>(product), index + multiply<5>(next));
+    advance();
+    body<inner>(sum, multiply<6>(product), index + multiply<6>(next));
+    advance();
+    body<inner>(sum, multiply<7>(product), index + multiply<7>(next));
+    advance();
+    body<inner>(sum, multiply<8>(product), index + multiply<8>(next));
+    advance();
+    body<inner>(sum, multiply<9>(product), index + multiply<9>(next));
 }
 
 
 
 
 template<>
-inline void loopBody<1>(std::ostream& storage, u32 sum, u32 product, u32 index) noexcept {
+inline void body<1>(u32 sum, u32 product, u32 index) noexcept {
     auto advance = [&sum, &index]() noexcept { ++sum; ++index; };
+    auto innerMostBody = [](auto sum, auto product, auto value) noexcept { return isQuodigious(value, sum, product) ? value : 0; };
     sum += 2;
     index += 2;
-    merge(innerMostBody(sum, multiply<2>(product), index), storage);
+    merge(innerMostBody(sum, multiply<2>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<3>(product), index), storage);
+    merge(innerMostBody(sum, multiply<3>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<4>(product), index), storage);
+    merge(innerMostBody(sum, multiply<4>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<5>(product), index), storage);
+    merge(innerMostBody(sum, multiply<5>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<6>(product), index), storage);
+    merge(innerMostBody(sum, multiply<6>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<7>(product), index), storage);
+    merge(innerMostBody(sum, multiply<7>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<8>(product), index), storage);
+    merge(innerMostBody(sum, multiply<8>(product), index), std::cout);
     advance();
-    merge(innerMostBody(sum, multiply<9>(product), index), storage);
-}
-
-template<u32 length>
-inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
-    // this is not going to change ever!
-    loopBody<length>(storage, 0, 1, 0);
+    merge(innerMostBody(sum, multiply<9>(product), index), std::cout);
 }
 
 int main() {
@@ -100,19 +79,20 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 1: body<1>(std::cout); break;
-                case 2: body<2>(std::cout); break;
-                case 3: body<3>(std::cout); break;
-                case 4: body<4>(std::cout); break;
-                case 5: body<5>(std::cout); break;
-                case 6: body<6>(std::cout); break;
-                case 7: body<7>(std::cout); break;
-                case 8: body<8>(std::cout); break;
-                case 9: body<9>(std::cout); break;
+                case 1: body<1>(); break;
+                case 2: body<2>(); break;
+                case 3: body<3>(); break;
+                case 4: body<4>(); break;
+                case 5: body<5>(); break;
+                case 6: body<6>(); break;
+                case 7: body<7>(); break;
+                case 8: body<8>(); break;
+                case 9: body<9>(); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
             }
+            std::cout << std::endl;
         }
     }
     return 0;

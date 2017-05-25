@@ -23,8 +23,7 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -pthread
-LXXFLAGS += -O3 -flto -fwhole-program -march=native
+LXXFLAGS = -O3 -flto -fwhole-program -march=native
 TITLE = quodigious
 FILES = quodigious.o
 
@@ -39,7 +38,7 @@ help:
 
 q8: quodigious.o
 	@echo -n Building ${TITLE} ...
-	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
+	@${CXX} -pthread ${LXXFLAGS} -o ${TITLE} ${FILES}
 	@echo done.
 
 qsinglenumbercheck: singlenumbercheck.o
@@ -49,7 +48,7 @@ qsinglenumbercheck: singlenumbercheck.o
 
 qloops: loops.o
 	@echo -n Building looped quodigious ...
-	@${CXX} ${LXXFLAGS} -o qloops loops.o
+	@${CXX} -pthread ${LXXFLAGS} -o qloops loops.o
 	@echo done.
 
 qloops32: loops32.o
