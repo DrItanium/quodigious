@@ -6,4 +6,6 @@ addons:
             - gcc-5
             - g++-5
 
-script: CC=gcc-5 CXX=g++-5 make
+compiler:
+    - gcc
+script: CC=gcc-5 CXX=g++-5 make tests
