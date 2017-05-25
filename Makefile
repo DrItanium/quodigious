@@ -25,25 +25,28 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
-PROGS = qloops qloops32
+QLOOPS_PROG = quodigious
+QLOOPS_PROG32 = quodigious32
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32}
 all: ${PROGS}
 
 help:
 	@echo "available options: "
-	@echo "  - all : builds the program qloops "
-	@echo "  - qloops: compiles the nested loop variant"
-	@echo "  - qloops32: compiles the nested loop variant for 32-bit only targets"
-	@echo "  - tests: runs regression tests"
+	@echo "  - all : builds the quodigious programs "
+	@echo "  - quodigious: program to compute 64-bit quodigious values"
+	@echo "  - quodigious32: program to compute 32-bit quodigious values"
+	@echo "  - tests: runs short regression tests"
+	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - clean : cleans the program artifacts"
 
-qloops: loops.o
-	@echo -n Building looped quodigious ...
-	@${CXX} -pthread ${LXXFLAGS} -o qloops loops.o
+${QLOOPS_PROG}: loops.o
+	@echo -n Building 64-bit number quodigious ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} loops.o
 	@echo done.
 
-qloops32: loops32.o
-	@echo -n Building looped quodigious ...
-	@${CXX} ${LXXFLAGS} -o qloops32 loops32.o
+${QLOOPS_PROG32}: loops32.o
+	@echo -n Building 32-bit number quodigious quodigious ...
+	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
 
