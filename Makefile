@@ -24,27 +24,16 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 #CXXFLAGS += -DDEBUG -g3
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
-TITLE = quodigious
-FILES = quodigious.o
 
-all: qloops
+PROGS = qloops qloops32
+all: ${PROGS}
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the program qloops "
-	@echo "  - q8: compiles the program (8 thread version)"
 	@echo "  - qloops: compiles the nested loop variant"
+	@echo "  - qloops32: compiles the nested loop variant for 32-bit only targets"
 	@echo "  - clean : cleans the program artifacts"
-
-q8: quodigious.o
-	@echo -n Building ${TITLE} ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${TITLE} ${FILES}
-	@echo done.
-
-qsinglenumbercheck: singlenumbercheck.o
-	@echo -n Building single number checker  ...
-	@${CXX} ${LXXFLAGS} -o qsinglenumbercheck singlenumbercheck.o
-	@echo done.
 
 qloops: loops.o
 	@echo -n Building looped quodigious ...
@@ -64,12 +53,8 @@ qloops32: loops32.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck qloops loops.o loops32.o qloops32
+	@rm -rf *.o ${PROGS}
 	@echo done.
-
-quodigious.o: qlib.h notations.def
-
-singlenumbercheck.o: qlib.h
 
 loops.o: qlib.h
 
