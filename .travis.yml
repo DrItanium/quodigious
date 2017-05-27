@@ -1,0 +1,11 @@
+addons:
+    apt:
+        sources:
+            - ubuntu-toolchain-r-test
+        packages:
+            - gcc-5
+            - g++-5
+
+compiler:
+    - gcc
+script: CC=gcc-5 CXX=g++-5 make tests

@@ -23,35 +23,58 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -lpthread
-LXXFLAGS += -O3 -flto -fwhole-program -march=native
-TITLE = quodigious
-FILES = quodigious.o
+LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
-all: qloops
+QLOOPS_PROG = quodigious
+QLOOPS_PROG32 = quodigious32
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32}
+all: ${PROGS}
 
 help:
 	@echo "available options: "
-	@echo "  - all : builds the program qloops "
-	@echo "  - q8: compiles the program (8 thread version)"
-	@echo "  - qloops: compiles the nested loop variant"
+	@echo "  - all : builds the quodigious programs "
+	@echo "  - quodigious: program to compute 64-bit quodigious values"
+	@echo "  - quodigious32: program to compute 32-bit quodigious values"
+	@echo "  - tests: runs short regression tests"
+	@echo "  - longer_tests: runs longer regression tests (more digits)"
+	@echo "  - timed_tests: runs short regression tests"
+	@echo "  - timed_longer_tests: runs longer regression tests (more digits)"
 	@echo "  - clean : cleans the program artifacts"
 
-q8: quodigious.o
-	@echo -n Building ${TITLE} ...
-	@${CXX} ${LXXFLAGS} -o ${TITLE} ${FILES}
+${QLOOPS_PROG}: loops.o
+	@echo -n Building 64-bit number quodigious ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} loops.o
 	@echo done.
 
-qsinglenumbercheck: singlenumbercheck.o
-	@echo -n Building single number checker  ...
-	@${CXX} ${LXXFLAGS} -o qsinglenumbercheck singlenumbercheck.o
+${QLOOPS_PROG32}: loops32.o
+	@echo -n Building 32-bit number quodigious quodigious ...
+	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
-qloops: loops.o
-	@echo -n Building looped quodigious ...
-	@${CXX} ${LXXFLAGS} -o qloops loops.o
-	@echo done.
 
+timed_tests: ${QLOOPS_PROG}
+	@echo Running simple testing suite with time analysis
+	@echo "12 digits"
+	@time echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
+	@echo "11 digits"
+	@time echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
+
+timed_longer_tests: ${QLOOPS_PROG}
+	@echo Running longer tests with time analysis
+	@echo "13 digits"
+	@time echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
+
+tests: ${QLOOPS_PROG}
+	@echo Running simple testing suite
+	@echo "12 digits"
+	@echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
+	@echo "11 digits"
+	@echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
+
+longer_tests: ${QLOOPS_PROG}
+	@echo Running longer tests
+	@echo "13 digits"
+	@echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -60,11 +83,11 @@ qloops: loops.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf ${FILES} ${TITLE} singlenumbercheck.o qsinglenumbercheck qloops loops.o
+	@rm -rf *.o ${PROGS}
 	@echo done.
 
-quodigious.o: qlib.h notations.def
-
-singlenumbercheck.o: qlib.h
-
 loops.o: qlib.h
+
+loops32.o: qlib.h
+
+.PHONY: tests longer_tests

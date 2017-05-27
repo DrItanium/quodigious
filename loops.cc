@@ -50,78 +50,108 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 }
 
 template<u64 length, bool skipFives>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-    constexpr auto inner = length - 1;
+void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
+
+
+template<u64 length, u64 pos>
+inline void innerParallelBodyExternalStream(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    constexpr auto inner = (length - 1);
     constexpr auto next = fastPow10<inner>;
-
-    auto advance = [&sum]() noexcept { ++sum; };
-    auto doubleAdvance = [&sum]() noexcept { sum += 2; };
-
-    doubleAdvance();
-    loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
-    if (!skipFives) {
-        advance();
-        loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
-        advance();
-    } else {
-        doubleAdvance();
-    }
-    loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
-    advance();
-    loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
+    loopBody<inner, true>(stream, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
 }
-
-template<u64 inner, u64 next, u64 pos>
+template<u64 length, u64 pos>
 inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
     std::ostringstream storage;
-    loopBody<inner, true>(storage, sum + pos, multiply<pos>(product), index + (multiply<pos>(next)));
+    innerParallelBodyExternalStream<length, pos>(storage, sum, product, index);
     std::string out(storage.str());
     return out;
 }
+
+template<u64 length, u64 digitA, u64 digitB = (digitA + 1)>
+std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
+    static_assert(digitA != digitB, "the first digit and the second should not be equal!");
+    std::ostringstream storage;
+    innerParallelBodyExternalStream<length, digitA>(storage, sum, product, index);
+    innerParallelBodyExternalStream<length, digitB>(storage, sum, product, index);
+    std::string out(storage.str());
+    return out;
+}
+
 template<u64 length>
 inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    // cut the computation in half...mostly
-    auto b3 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-            std::ostringstream storage;
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 3>(sum, product, index);
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 4>(sum, product, index);
-            std::string out(storage.str());
-            return out;
-            }, sum, product, index);
-    auto b4 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-            std::ostringstream storage;
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 6>(sum, product, index);
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 7>(sum, product, index);
-            std::string out(storage.str());
-            return out;
-            }, sum, product, index);
-    auto b5 = std::async(std::launch::async, [](auto sum, auto product, auto index) {
-            std::ostringstream storage;
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 8>(sum, product, index);
-            storage << innerParallelBody<(length - 1), fastPow10<(length - 1)>, 9>(sum, product, index);
-            std::string out(storage.str());
-            return out;
-            }, sum, product, index);
-
-    stream << innerParallelBody<(length -1), fastPow10<(length - 1)>, 2>(sum, product, index) << b3.get() << b4.get() << b5.get();
-}
-#define performThreadSplitAtLevel(q) \
-    template <> \
-    inline void loopBody < q , true > (std::ostream& stream, u64 sum, u64 product, u64 index) noexcept { \
-        tripleSplit< q > (stream, sum, product, index); \
+    if (length >= 12) {
+        auto b3 = std::async(std::launch::async, innerParallelBody<length, 3>, sum, product, index);
+        auto b4 = std::async(std::launch::async, innerParallelBody<length, 4>, sum, product, index);
+        auto b6 = std::async(std::launch::async, innerParallelBody<length, 6>, sum, product, index);
+        auto b7 = std::async(std::launch::async, innerParallelBody<length, 7>, sum, product, index);
+        auto b8 = std::async(std::launch::async, innerParallelBody<length, 8>, sum, product, index);
+        auto b9 = std::async(std::launch::async, innerParallelBody<length, 9>, sum, product, index);
+        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
+        stream << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
+    } else {
+        // cut the computation in thirds...mostly
+        auto b3 = std::async(std::launch::async, dualParallelBody<length, 3, 4>, sum, product, index);
+        auto b4 = std::async(std::launch::async, dualParallelBody<length, 6, 7>, sum, product, index);
+        auto b5 = std::async(std::launch::async, dualParallelBody<length, 8, 9>, sum, product, index);
+        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
+        stream << b3.get() << b4.get() << b5.get();
     }
-performThreadSplitAtLevel(12);
-performThreadSplitAtLevel(14);
-performThreadSplitAtLevel(16);
-#undef performThreadSplitAtLevel
+}
+
+template<u64 length>
+struct EnableTopLevelParallelism : std::integral_constant<bool, (length > 7)> { };
+
+template<u64 length>
+struct SkipFives : std::integral_constant<bool, (length > 4)> { };
+
+template<u64 length>
+struct EnableParallelism : std::integral_constant<bool, false> { };
+#define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
+EnableParallelismAtLevel(10);
+EnableParallelismAtLevel(11);
+EnableParallelismAtLevel(12);
+EnableParallelismAtLevel(13);
+EnableParallelismAtLevel(14);
+EnableParallelismAtLevel(15);
+EnableParallelismAtLevel(16);
+#undef EnableParallelismAtLevel
+
+template<u64 length, bool skipFives>
+inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
+    if (EnableParallelism<length>::value) {
+        tripleSplit<length>(storage, sum, product, index);
+    } else {
+        constexpr auto inner = length - 1;
+        constexpr auto next = fastPow10<inner>;
+
+        auto advance = [&sum]() noexcept { ++sum; };
+        auto doubleAdvance = [&sum]() noexcept { sum += 2; };
+
+        doubleAdvance();
+        loopBody<inner, skipFives>(storage, sum, multiply<2>(product), index + (multiply<2>(next)));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<3>(product), index + (multiply<3>(next)));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<4>(product), index + (multiply<4>(next)));
+        if (!skipFives) {
+            advance();
+            loopBody<inner, skipFives>(storage, sum, multiply<5>(product), index + multiply<5>(next));
+            advance();
+        } else {
+            doubleAdvance();
+        }
+        loopBody<inner, skipFives>(storage, sum, multiply<6>(product), index + multiply<6>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<7>(product), index + multiply<7>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<8>(product), index + multiply<8>(next));
+        advance();
+        loopBody<inner, skipFives>(storage, sum, multiply<9>(product), index + multiply<9>(next));
+    }
+}
+
+
+
 
 template<>
 inline void loopBody<1, false>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
@@ -164,26 +194,28 @@ inline std::string parallelBody() noexcept {
     if (pos == 5 && skipFives) {
         return out;
     }
+    constexpr auto next = (length - 1);
     std::ostringstream storage;
-    loopBody<length - 1, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<length - 1>));
+    loopBody<next, skipFives>(storage, pos, pos, multiply<pos>(fastPow10<next>));
     out = storage.str();
     return out;
 }
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
-    if (length > 7) {
-        //auto b2 = std::async(std::launch::async, parallelBody<length, skipFives, 2>);
+    if (EnableTopLevelParallelism<length>::value) {
+        constexpr auto next = (length - 1);
         auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
         auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
-        auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
+        //auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
         auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>);
         auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>);
         auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>);
         auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>);
-        //storage << b2.get();
-        storage << parallelBody<length, skipFives, 2>();
-        storage << b3.get() << b4.get() << b5.get() << b6.get();
+        loopBody<next, skipFives>(storage, 2,  2, multiply<2>(fastPow10<next>));
+        storage << b3.get() << b4.get();
+        //storage << b5.get();
+        storage << b6.get();
         storage << b7.get() << b8.get() << b9.get();
     } else {
         loopBody<length, skipFives>(storage, 0, 1, 0);
@@ -196,7 +228,7 @@ template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // this is not going to change ever!
-    loopBody<length, (length > 4)>(storage);
+    loopBody<length, SkipFives<length>::value>(storage);
 }
 
 int main() {
