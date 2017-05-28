@@ -70,7 +70,7 @@ struct ActualLoopBody {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		constexpr auto next = fastPow10<pos - 1>;
 		constexpr auto follow = pos + 1;
-		if (pos == 10) {
+		if (pos == 2 || pos == 3 || pos == 4) {
 			auto b0 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 2, multiply<2>(product), index + multiply<2>(next));
 			auto b1 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 3, multiply<3>(product), index + multiply<3>(next));
 			auto b2 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 4, multiply<4>(product), index + multiply<4>(next));
