@@ -30,7 +30,7 @@ inline bool checkValue(u64 sum) noexcept {
     if (!experimentalCheck) {
         return true;
     }
-    return isEven(sum) || (sum % 3 == 0);
+	return (sum % 2 == 0) || (sum % 3 == 0);
 }
 template<bool experimentalCheck = false>
 inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
@@ -67,7 +67,7 @@ inline std::string innerParallelBody(u64 sum, u64 product, u64 index) noexcept {
     return out;
 }
 
-template<u64 length, u64 digitA, u64 digitB = (digitA + 1)>
+template<u64 length, u64 digitA, u64 digitB>
 std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
     static_assert(digitA != digitB, "the first digit and the second should not be equal!");
     std::ostringstream storage;
@@ -77,7 +77,7 @@ std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
     return out;
 }
 
-template<u64 length, u64 digitA, u64 digitB = (digitA + 1), u64 digitC = (digitA + 2)>
+template<u64 length, u64 digitA, u64 digitB, u64 digitC>
 std::string tripleParallelBody(u64 sum, u64 product, u64 index) noexcept {
     static_assert(digitA != digitB, "the first digit and the second should not be equal!");
 	static_assert(digitB != digitC, "the second digit and the third digit should not be equal!");
@@ -96,26 +96,26 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 		return std::async(std::launch::async, fn, sum, product, index);
 	};
     if (length >= 12 && length <= 14) {
+        auto b2 = doAsync(innerParallelBody<length, 2>);
         auto b3 = doAsync(innerParallelBody<length, 3>);
         auto b4 = doAsync(innerParallelBody<length, 4>);
         auto b6 = doAsync(innerParallelBody<length, 6>);
         auto b7 = doAsync(innerParallelBody<length, 7>);
         auto b8 = doAsync(innerParallelBody<length, 8>);
         auto b9 = doAsync(innerParallelBody<length, 9>);
-        auto b2 = doAsync(innerParallelBody<length, 2>);
 		stream << b2.get();
         stream << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
-	} else if (length > 14) {
-		auto b1 = doAsync(tripleParallelBody<length, 3, 4, 6>);
-		auto b2 = doAsync(tripleParallelBody<length, 7, 8, 9>);
-		auto b3 = doAsync(innerParallelBody<length, 2>);
-		stream << b3.get() << b1.get() << b2.get();
+	//} else if (length > 14) {
+	//	auto b1 = doAsync(tripleParallelBody<length, 3, 4, 6>);
+	//	auto b2 = doAsync(tripleParallelBody<length, 7, 8, 9>);
+	//	auto b3 = doAsync(innerParallelBody<length, 2>);
+	//	stream << b3.get() << b1.get() << b2.get();
     } else {
         // cut the computation in thirds...mostly
+		auto b2 = doAsync(innerParallelBody<length, 2>);
         auto b3 = doAsync(dualParallelBody<length, 3, 4>);
         auto b4 = doAsync(dualParallelBody<length, 6, 7>);
         auto b5 = doAsync(dualParallelBody<length, 8, 9>);
-		auto b2 = doAsync(dualParallelBody<length, 2>);
         stream << b2.get() << b3.get() << b4.get() << b5.get();
     }
 }
@@ -130,7 +130,6 @@ template<u64 length>
 struct EnableParallelism : std::integral_constant<bool, false> { };
 #define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
 EnableParallelismAtLevel(10);
-EnableParallelismAtLevel(11);
 EnableParallelismAtLevel(12);
 EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
