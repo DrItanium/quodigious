@@ -121,7 +121,8 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 }
 
 template<u64 length>
-struct EnableTopLevelParallelism : std::integral_constant<bool, (length > 7)> { };
+//struct EnableTopLevelParallelism : std::integral_constant<bool, (length > 7)> { };
+struct EnableTopLevelParallelism : std::integral_constant<bool, false> { };
 
 template<u64 length>
 struct SkipFives : std::integral_constant<bool, (length > 4)> { };
@@ -133,10 +134,6 @@ EnableParallelismAtLevel(10);
 EnableParallelismAtLevel(12);
 EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
-EnableParallelismAtLevel(15);
-EnableParallelismAtLevel(16);
-EnableParallelismAtLevel(17);
-EnableParallelismAtLevel(18);
 #undef EnableParallelismAtLevel
 
 template<u64 length, bool skipFives>
