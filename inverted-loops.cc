@@ -91,7 +91,7 @@ struct ActualLoopBody {
 			product <<= 1;
 			sum += 2;
 			index += multiply<2>(next);
-			auto advance = [&originalProduct, &product, &sum, &index]() { product += originalProduct; ++sum; index += next; };
+			auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 			loopBody<follow, max>(storage, sum, product, index); // 2 
 			advance();
 			loopBody<follow, max>(storage, sum, product, index); // 3
