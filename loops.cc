@@ -132,9 +132,9 @@ struct EnableParallelism : std::integral_constant<bool, false> { };
 #define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
 EnableParallelismAtLevel(10);
 EnableParallelismAtLevel(12);
-EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
-EnableParallelismAtLevel(15);
+EnableParallelismAtLevel(16);
+EnableParallelismAtLevel(18);
 #undef EnableParallelismAtLevel
 
 template<u64 length, bool skipFives>
