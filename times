@@ -4,18 +4,19 @@ user    98m58.960s
 sys     0m0.410s
 
 15 Digits
-real    29m2.010s
-user    695m52.710s
-sys     0m1.600s
+real    28m57.992s
+user    692m19.420s
+sys     0m2.080s
 
 16 Digits
-real    1175m1.368s
-user    8179m26.240s
-sys     0m38.480s
+real    203m7.725s
+user    4857m50.070s
+sys     0m12.670s
 
 17 Digits
 real    1443m38.117s
 user    34372m7.790s
 sys     0m44.840s
+
 
 
