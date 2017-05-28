@@ -77,24 +77,46 @@ std::string dualParallelBody(u64 sum, u64 product, u64 index) noexcept {
     return out;
 }
 
+template<u64 length, u64 digitA, u64 digitB = (digitA + 1), u64 digitC = (digitA + 2)>
+std::string tripleParallelBody(u64 sum, u64 product, u64 index) noexcept {
+    static_assert(digitA != digitB, "the first digit and the second should not be equal!");
+	static_assert(digitB != digitC, "the second digit and the third digit should not be equal!");
+	static_assert(digitC != digitA, "the third digit and first digit should not be equal!");
+    std::ostringstream storage;
+    innerParallelBodyExternalStream<length, digitA>(storage, sum, product, index);
+    innerParallelBodyExternalStream<length, digitB>(storage, sum, product, index);
+	innerParallelBodyExternalStream<length, digitC>(storage, sum, product, index);
+    std::string out(storage.str());
+    return out;
+}
+
 template<u64 length>
 inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    if (length >= 12) {
-        auto b3 = std::async(std::launch::async, innerParallelBody<length, 3>, sum, product, index);
-        auto b4 = std::async(std::launch::async, innerParallelBody<length, 4>, sum, product, index);
-        auto b6 = std::async(std::launch::async, innerParallelBody<length, 6>, sum, product, index);
-        auto b7 = std::async(std::launch::async, innerParallelBody<length, 7>, sum, product, index);
-        auto b8 = std::async(std::launch::async, innerParallelBody<length, 8>, sum, product, index);
-        auto b9 = std::async(std::launch::async, innerParallelBody<length, 9>, sum, product, index);
-        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
+	auto doAsync = [&sum, &product, &index](auto fn) {
+		return std::async(std::launch::async, fn, sum, product, index);
+	};
+    if (length >= 12 && length <= 14) {
+        auto b3 = doAsync(innerParallelBody<length, 3>);
+        auto b4 = doAsync(innerParallelBody<length, 4>);
+        auto b6 = doAsync(innerParallelBody<length, 6>);
+        auto b7 = doAsync(innerParallelBody<length, 7>);
+        auto b8 = doAsync(innerParallelBody<length, 8>);
+        auto b9 = doAsync(innerParallelBody<length, 9>);
+        auto b2 = doAsync(innerParallelBody<length, 2>);
+		stream << b2.get();
         stream << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
+	} else if (length > 14) {
+		auto b1 = doAsync(tripleParallelBody<length, 3, 4, 6>);
+		auto b2 = doAsync(tripleParallelBody<length, 7, 8, 9>);
+		auto b3 = doAsync(innerParallelBody<length, 2>);
+		stream << b3.get() << b1.get() << b2.get();
     } else {
         // cut the computation in thirds...mostly
-        auto b3 = std::async(std::launch::async, dualParallelBody<length, 3, 4>, sum, product, index);
-        auto b4 = std::async(std::launch::async, dualParallelBody<length, 6, 7>, sum, product, index);
-        auto b5 = std::async(std::launch::async, dualParallelBody<length, 8, 9>, sum, product, index);
-        innerParallelBodyExternalStream<length, 2>(stream, sum, product, index);
-        stream << b3.get() << b4.get() << b5.get();
+        auto b3 = doAsync(dualParallelBody<length, 3, 4>);
+        auto b4 = doAsync(dualParallelBody<length, 6, 7>);
+        auto b5 = doAsync(dualParallelBody<length, 8, 9>);
+		auto b2 = doAsync(dualParallelBody<length, 2>);
+        stream << b2.get() << b3.get() << b4.get() << b5.get();
     }
 }
 
