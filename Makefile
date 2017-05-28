@@ -27,7 +27,8 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32}
+QLOOPS_SINGLE_DIGIT_TOP = quodigious_single_top
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_SINGLE_DIGIT_TOP}
 all: ${PROGS}
 
 help:
@@ -35,6 +36,7 @@ help:
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - quodigious: program to compute 64-bit quodigious values"
 	@echo "  - quodigious32: program to compute 32-bit quodigious values"
+	@echo "  - quodigious_single_top: Compute a quodigious number with a single top digit"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
@@ -46,9 +48,15 @@ ${QLOOPS_PROG}: loops.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} loops.o
 	@echo done.
 
+
 ${QLOOPS_PROG32}: loops32.o
 	@echo -n Building 32-bit number quodigious quodigious ...
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
+	@echo done.
+
+${QLOOPS_SINGLE_DIGIT_TOP}: single_digit_top_level_loops.o
+	@echo -n Building 64-bit number quodigious with single digit top number ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_SINGLE_DIGIT_TOP} single_digit_top_level_loops.o
 	@echo done.
 
 
