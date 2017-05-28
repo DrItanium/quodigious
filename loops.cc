@@ -134,6 +134,7 @@ EnableParallelismAtLevel(10);
 EnableParallelismAtLevel(12);
 EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
+EnableParallelismAtLevel(15);
 #undef EnableParallelismAtLevel
 
 template<u64 length, bool skipFives>
