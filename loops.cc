@@ -121,10 +121,6 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 }
 
 template<u64 length>
-//struct EnableTopLevelParallelism : std::integral_constant<bool, (length > 7)> { };
-struct EnableTopLevelParallelism : std::integral_constant<bool, false> { };
-
-template<u64 length>
 struct SkipFives : std::integral_constant<bool, (length > 4)> { };
 
 template<u64 length>
@@ -224,26 +220,8 @@ inline std::string parallelBody() noexcept {
 
 template<u64 length, bool skipFives>
 inline void loopBody(std::ostream& storage) noexcept {
-    if (EnableTopLevelParallelism<length>::value) {
-        constexpr auto next = (length - 1);
-        auto b3 = std::async(std::launch::async, parallelBody<length, skipFives, 3>);
-        auto b4 = std::async(std::launch::async, parallelBody<length, skipFives, 4>);
-        //auto b5 = std::async(std::launch::async, parallelBody<length, skipFives, 5>);
-        auto b6 = std::async(std::launch::async, parallelBody<length, skipFives, 6>);
-        auto b7 = std::async(std::launch::async, parallelBody<length, skipFives, 7>);
-        auto b8 = std::async(std::launch::async, parallelBody<length, skipFives, 8>);
-        auto b9 = std::async(std::launch::async, parallelBody<length, skipFives, 9>);
-        loopBody<next, skipFives>(storage, 2,  2, multiply<2>(fastPow10<next>));
-        storage << b3.get() << b4.get();
-        //storage << b5.get();
-        storage << b6.get();
-        storage << b7.get() << b8.get() << b9.get();
-    } else {
-        loopBody<length, skipFives>(storage, 0, 1, 0);
-    }
+	loopBody<length, skipFives>(storage, 0, 1, 0);
 }
-
-template<> inline void loopBody<1, false>(std::ostream& storage) noexcept { loopBody<1, false>(storage, 0, 1, 0); }
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
