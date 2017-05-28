@@ -105,11 +105,11 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
         auto b9 = doAsync(innerParallelBody<length, 9>);
 		stream << b2.get();
         stream << b3.get() << b4.get() << b6.get() << b7.get() << b8.get() << b9.get();
-	//} else if (length > 14) {
-	//	auto b1 = doAsync(tripleParallelBody<length, 3, 4, 6>);
-	//	auto b2 = doAsync(tripleParallelBody<length, 7, 8, 9>);
-	//	auto b3 = doAsync(innerParallelBody<length, 2>);
-	//	stream << b3.get() << b1.get() << b2.get();
+	} else if (length > 14) {
+		auto b1 = doAsync(tripleParallelBody<length, 3, 4, 6>);
+		auto b2 = doAsync(tripleParallelBody<length, 7, 8, 9>);
+		auto b3 = doAsync(innerParallelBody<length, 2>);
+		stream << b3.get() << b1.get() << b2.get();
     } else {
         // cut the computation in thirds...mostly
 		auto b2 = doAsync(innerParallelBody<length, 2>);
