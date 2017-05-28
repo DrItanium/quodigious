@@ -134,7 +134,9 @@ EnableParallelismAtLevel(11);
 EnableParallelismAtLevel(12);
 EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
+EnableParallelismAtLevel(15);
 EnableParallelismAtLevel(16);
+EnableParallelismAtLevel(17);
 EnableParallelismAtLevel(18);
 #undef EnableParallelismAtLevel
 
