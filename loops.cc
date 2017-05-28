@@ -112,7 +112,7 @@ inline void tripleSplit(std::ostream& stream, u64 sum, u64 product, u64 index) n
 	//	stream << b1.get() << b2.get() << b3.get();
     } else {
         // cut the computation in thirds...mostly
-		auto b2 = doAsync(innerParallelBody<length, 2>);
+	auto b2 = doAsync(innerParallelBody<length, 2>);
         auto b3 = doAsync(dualParallelBody<length, 3, 4>);
         auto b4 = doAsync(dualParallelBody<length, 6, 7>);
         auto b5 = doAsync(dualParallelBody<length, 8, 9>);
@@ -127,11 +127,8 @@ template<u64 length>
 struct EnableParallelism : std::integral_constant<bool, false> { };
 #define EnableParallelismAtLevel(q) template <> struct EnableParallelism< q > : std::integral_constant<bool, true> { }
 EnableParallelismAtLevel(10);
-//EnableParallelismAtLevel(11);
 EnableParallelismAtLevel(12);
-EnableParallelismAtLevel(13);
 EnableParallelismAtLevel(14);
-EnableParallelismAtLevel(15);
 EnableParallelismAtLevel(16);
 EnableParallelismAtLevel(18);
 #undef EnableParallelismAtLevel
