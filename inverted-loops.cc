@@ -29,14 +29,10 @@ inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
 inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-    if (checkValue(sum)) {
-        if (componentQuodigious(value, sum)) {
-            if (componentQuodigious(value, product)) {
-                return value;
-            }
-        }
-    }
-    return 0;
+	if (checkValue(sum) && isQuodigious(value, sum, product)) {
+		return value;
+	}
+	return 0;
 }
 inline void merge(u64 value, std::ostream& storage) noexcept {
     if (value != 0) {
