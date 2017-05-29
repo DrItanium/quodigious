@@ -41,25 +41,27 @@ using PrecomputedData = std::vector<PackagedData>;
 
 PrecomputedData* precomputesPos6= nullptr;
 PrecomputedData* precomputesPos8= nullptr;
+PrecomputedData* precomputesPos10= nullptr;
 void setup() noexcept {
 	precomputesPos6 = new PrecomputedData;
 	precomputesPos8 = new PrecomputedData;
+	precomputesPos10 = new PrecomputedData;
 	for (int i = 2; i < 10; ++i) {
 		if (i != 5) {
 			auto iIndex = (i * fastPow10<5>);
 			auto iIndex8 = (i * fastPow10<7>);
+			auto iIndex10 = (i * fastPow10<9>);
 			auto iMul = i;
 			auto iSum = i;
 			for (int j = 2; j < 10; ++j) {
 				if (j != 5) {
 					precomputesPos6->emplace_back(PackagedData(iSum + j, iMul * j, iIndex + (j * fastPow10<6>)));
 					precomputesPos8->emplace_back(PackagedData(iSum + j, iMul * j, iIndex8 + (j * fastPow10<8>)));
+					precomputesPos10->emplace_back(PackagedData(iSum + j, iMul * j, iIndex10 + (j * fastPow10<10>)));
 				}
 			}
 		}
 	}
-	std::cerr << "Number of precomputed cells: " << precomputesPos6->size() << std::endl;
-	std::cerr << "Number of precomputed cells pos 8: " << precomputesPos8->size() << std::endl;
 }
 
 
@@ -103,16 +105,18 @@ struct ActualLoopBody {
 			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else if (pos == 6) {
-			static bool init = true;
 			// skip ahead to 8
 			for (const auto& a : *precomputesPos6) {
 				loopBody<8, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
 			}
 		} else if (pos == 8) {
-			static bool init = true;
-			// skip ahead to 8
+			// skip ahead to 10
 			for (const auto& a : *precomputesPos8) {
 				loopBody<10, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			}
+		} else if (pos == 10) {
+			for (const auto& a : *precomputesPos10) {
+				loopBody<12, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
 			}
 		} else {
 			initialIncrement();
