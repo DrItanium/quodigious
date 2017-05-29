@@ -42,16 +42,33 @@ using PrecomputedData = std::vector<PackagedData>;
 PrecomputedData* precomputes = nullptr;
 void setup() noexcept {
 	precomputes = new PrecomputedData;
-	for (int i = 2; i < 10; ++i) {
-		if (i != 5) {
-			auto iIndex = i * fastPow10<5>;
-			for (int j = 2; j < 10; ++j) {
-				if (j != 5) {
-					precomputes->emplace_back(PackagedData(i + j, i * j, iIndex + (j * fastPow10<6>)));
+	for (int h = 2; h < 10; ++h) {
+		if (h != 5) {
+			auto hIndex = h * fastPow10<5>;
+			auto hMul = h;
+			auto hSum = h;
+			for (int k = 2; k < 10; ++k) {
+				if (k != 5) {
+					auto kIndex = (k * fastPow10<6>) + hIndex;
+					auto kMul = k * hMul;
+					auto kSum = k + hSum;
+					for (int i = 2; i < 10; ++i) {
+						if (i != 5) {
+							auto iIndex = (i * fastPow10<7>) + kIndex;
+							auto iMul = i * kMul;
+							auto iSum = i + kSum;
+							for (int j = 2; j < 10; ++j) {
+								if (j != 5) {
+									precomputes->emplace_back(PackagedData(iSum + j, iMul * j, iIndex + (j * fastPow10<8>)));
+								}
+							}
+						}
+					}
 				}
 			}
 		}
 	}
+	std::cerr << "Number of precomputed cells: " << precomputes->size() << std::endl;
 }
 
 
@@ -96,9 +113,9 @@ struct ActualLoopBody {
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else if (pos == 6) {
 			static bool init = true;
-			// this really, 5 and 6 only really runs well on massive numbers of cores
-			for (auto& a : *precomputes) {
-				loopBody<8, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			// skip ahead to 8
+			for (const auto& a : *precomputes) {
+				loopBody<10, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
 			}
 		} else {
 			initialIncrement();
