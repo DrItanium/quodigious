@@ -34,11 +34,6 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	}
 	return 0;
 }
-inline void merge(u64 value, std::ostream& storage) noexcept {
-    if (value != 0) {
-        storage << value << std::endl;
-    }
-}
 
 template<u64 pos, u64 max>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -105,20 +100,21 @@ struct ActualLoopBody<true> {
 		sum += 2;
 		index += multiply<2>(next);
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-		merge(innerMostBody(sum, product, index), storage); // 2
+		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
+		merge(innerMostBody(sum, product, index)); // 2
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 3
+		merge(innerMostBody(sum, product, index)); // 3
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 4
+		merge(innerMostBody(sum, product, index)); // 4
 		advance();
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 6
+		merge(innerMostBody(sum, product, index)); // 6
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 7
+		merge(innerMostBody(sum, product, index)); // 7
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 8
+		merge(innerMostBody(sum, product, index)); // 8
 		advance();
-		merge(innerMostBody(sum, product, index), storage); // 9
+		merge(innerMostBody(sum, product, index)); // 9
 	}
 };
 
