@@ -23,6 +23,7 @@
 #include <sstream>
 #include <functional>
 #include <future>
+#include <vector>
 #include "qlib.h"
 
 inline constexpr bool checkValue(u64 sum) noexcept {
@@ -34,6 +35,25 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	}
 	return 0;
 }
+
+using PackagedData = std::tuple<u64, u64, u64>;
+using PrecomputedData = std::vector<PackagedData>;
+
+PrecomputedData* precomputes = nullptr;
+void setup() noexcept {
+	precomputes = new PrecomputedData;
+	for (int i = 2; i < 10; ++i) {
+		if (i != 5) {
+			auto iIndex = i * fastPow10<5>;
+			for (int j = 2; j < 10; ++j) {
+				if (j != 5) {
+					precomputes->emplace_back(PackagedData(i + j, i * j, iIndex + (j * fastPow10<6>)));
+				}
+			}
+		}
+	}
+}
+
 
 template<u64 pos, u64 max>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -53,13 +73,12 @@ struct ActualLoopBody {
 		constexpr auto next = fastPow10<pos - 1>;
 		constexpr auto follow = pos + 1;
 		auto originalProduct = product;
-		product <<= 1;
-		sum += 2;
-		index += multiply<2>(next);
+		auto initialIncrement = [&product, &sum, &index]() { product <<= 1; sum += 2; index += multiply<2>(next); };
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		// this really, 5 and 6 only really runs well on massive numbers of cores
 		if (pos == 2 || pos == 3 || pos == 4 || pos == 5) {
 			auto mkComputation = [&sum, &product, &index]() noexcept { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
+			initialIncrement();
 			auto b0 = mkComputation();
 			advance();
 			auto b1 = mkComputation();
@@ -75,7 +94,14 @@ struct ActualLoopBody {
 			advance();
 			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
+		} else if (pos == 6) {
+			static bool init = true;
+			// this really, 5 and 6 only really runs well on massive numbers of cores
+			for (auto& a : *precomputes) {
+				loopBody<8, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			}
 		} else {
+			initialIncrement();
 			for (int i = 2; i < 10; ++i) {
 				if (i != 5) {
 					loopBody<follow, max>(storage, sum, product, index);
@@ -145,6 +171,7 @@ inline void body(std::ostream& storage) noexcept {
 
 int main() {
     std::ostringstream storage;
+	setup();
     while(std::cin.good()) {
         u64 currentIndex = 0;
         std::cin >> currentIndex;
