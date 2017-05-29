@@ -57,7 +57,8 @@ struct ActualLoopBody {
 		sum += 2;
 		index += multiply<2>(next);
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-		if (pos == 2 || pos == 3 || pos == 4) {
+		// this really, 5 and 6 only really runs well on massive numbers of cores
+		if (pos == 2 || pos == 3 || pos == 4 || pos == 5) {
 			auto mkComputation = [&sum, &product, &index]() noexcept { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
 			auto b0 = mkComputation();
 			advance();
