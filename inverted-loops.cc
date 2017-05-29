@@ -142,10 +142,11 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-	loopBody<2, length>(storage, 2, 2, 2);
-	loopBody<2, length>(storage, 4, 4, 4);
-	loopBody<2, length>(storage, 6, 6, 6);
-	loopBody<2, length>(storage, 8, 8, 8);
+	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
+	auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
+	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
+	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
+	storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
 int main() {
