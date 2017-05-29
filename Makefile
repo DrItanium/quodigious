@@ -28,7 +28,8 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
 QLOOPS_SINGLE_DIGIT_TOP = quodigious_single_top
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_SINGLE_DIGIT_TOP}
+QLOOPS_INVERTED = quodigious_inverted
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_SINGLE_DIGIT_TOP} ${QLOOPS_INVERTED}
 all: ${PROGS}
 
 help:
@@ -57,6 +58,11 @@ ${QLOOPS_PROG32}: loops32.o
 ${QLOOPS_SINGLE_DIGIT_TOP}: single_digit_top_level_loops.o
 	@echo -n Building 64-bit number quodigious with single digit top number ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_SINGLE_DIGIT_TOP} single_digit_top_level_loops.o
+	@echo done.
+
+${QLOOPS_INVERTED}: inverted-loops.o
+	@echo -n Building 64-bit number quodigious inverted loop bodies ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_INVERTED} inverted-loops.o
 	@echo done.
 
 
