@@ -25,7 +25,6 @@
 #include <future>
 #include "qlib.h"
 
-using byte = uint8_t;
 inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
@@ -116,7 +115,7 @@ struct ActualLoopBody<true> {
 		product <<= 1;
 		sum += 2;
 		index += multiply<2>(next);
-		auto advance = [&originalProduct, &product, &sum, &index]() { product += originalProduct; ++sum; index += next; };
+		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		merge(innerMostBody(sum, product, index), storage); // 2
 		advance();
 		merge(innerMostBody(sum, product, index), storage); // 3
@@ -148,21 +147,13 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	return storage.str();
 }
 
-template<u64 pos, u64 length>
-inline std::string startBody() noexcept {
-	return loopBodyString<2, length>(pos, pos, pos);
-}
-
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-    // this is not going to change ever!
-	//auto b0 = std::async(std::launch::async, startBody<2, length>);
-	//auto b1 = std::async(std::launch::async, startBody<4, length>);
-	//auto b2 = std::async(std::launch::async, startBody<6, length>);
-	//auto b3 = std::async(std::launch::async, startBody<8, length>);
-	//storage << b0.get() << b1.get() << b2.get() << b3.get();
-	storage << startBody<2, length>() << startBody<4, length>() << startBody<6, length>() << startBody<8, length>();
+	loopBody<2, length>(storage, 2, 2, 2);
+	loopBody<2, length>(storage, 4, 4, 4);
+	loopBody<2, length>(storage, 6, 6, 6);
+	loopBody<2, length>(storage, 8, 8, 8);
 }
 
 int main() {
