@@ -67,7 +67,7 @@ struct ActualLoopBody {
 		sum += 2;
 		index += multiply<2>(next);
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-		if (pos == 2 || pos == 3 || pos == 4 || pos == 5) {
+		if (pos == 2 || pos == 3 || pos == 4) {
 			auto b0 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
 			advance();
 			auto b1 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
@@ -157,11 +157,12 @@ template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // this is not going to change ever!
-	auto b0 = std::async(std::launch::async, startBody<2, length>);
-	auto b1 = std::async(std::launch::async, startBody<4, length>);
-	auto b2 = std::async(std::launch::async, startBody<6, length>);
-	auto b3 = std::async(std::launch::async, startBody<8, length>);
-	storage << b0.get() << b1.get() << b2.get() << b3.get();
+	//auto b0 = std::async(std::launch::async, startBody<2, length>);
+	//auto b1 = std::async(std::launch::async, startBody<4, length>);
+	//auto b2 = std::async(std::launch::async, startBody<6, length>);
+	//auto b3 = std::async(std::launch::async, startBody<8, length>);
+	//storage << b0.get() << b1.get() << b2.get() << b3.get();
+	storage << startBody<2, length>() << startBody<4, length>() << startBody<6, length>() << startBody<8, length>();
 }
 
 int main() {
