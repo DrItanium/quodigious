@@ -63,20 +63,21 @@ struct ActualLoopBody {
 		index += multiply<2>(next);
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		if (pos == 2 || pos == 3 || pos == 4) {
-			auto b0 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto mkComputation = [&sum, &product, &index]() noexcept { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
+			auto b0 = mkComputation();
 			advance();
-			auto b1 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b1 = mkComputation();
 			advance();
-			auto b2 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b2 = mkComputation();
 			advance();
 			advance();
-			auto b3 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b3 = mkComputation();
 			advance();
-			auto b4 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b4 = mkComputation();
 			advance();
-			auto b5 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b5 = mkComputation();
 			advance();
-			auto b6 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else {
 			for (int i = 2; i < 10; ++i) {
