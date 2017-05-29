@@ -26,16 +26,11 @@
 #include "qlib.h"
 
 using byte = uint8_t;
-template<bool experimentalCheck = false>
-inline bool checkValue(u64 sum) noexcept {
-    if (!experimentalCheck) {
-        return true;
-    }
+inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
-template<bool experimentalCheck = false>
-inline u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-    if (checkValue<experimentalCheck>(sum)) {
+inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+    if (checkValue(sum)) {
         if (componentQuodigious(value, sum)) {
             if (componentQuodigious(value, product)) {
                 return value;
@@ -51,21 +46,11 @@ inline void merge(u64 value, std::ostream& storage) noexcept {
 }
 
 template<u64 pos, u64 max>
-struct IsTopMostLevel : std::integral_constant<bool, (pos == max)> { };
-
-template<u64 pos, u64 max>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
-template<u64 pos, u64 max, u64 a, u64 b, u64 next>
-std::string loopBodyDual(u64 sum, u64 product, u64 index) noexcept {
-	std::ostringstream storage;
-	loopBody<pos, max>(storage, sum + a, multiply<a>(product), index + multiply<a>(next));
-	loopBody<pos, max>(storage, sum + b, multiply<b>(product), index + multiply<b>(next));
-	return storage.str();
-}
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -77,21 +62,28 @@ struct ActualLoopBody {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		constexpr auto next = fastPow10<pos - 1>;
 		constexpr auto follow = pos + 1;
+		auto originalProduct = product;
+		product <<= 1;
+		sum += 2;
+		index += multiply<2>(next);
+		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		if (pos == 2 || pos == 3 || pos == 4 || pos == 5) {
-			auto b0 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 2, multiply<2>(product), index + multiply<2>(next));
-			auto b1 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 3, multiply<3>(product), index + multiply<3>(next));
-			auto b2 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 4, multiply<4>(product), index + multiply<4>(next));
-			auto b3 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 6, multiply<6>(product), index + multiply<6>(next));
-			auto b4 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 7, multiply<7>(product), index + multiply<7>(next));
-			auto b5 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 8, multiply<8>(product), index + multiply<8>(next));
-			auto b6 = std::async(std::launch::async, loopBodyString<follow, max>, sum + 9, multiply<9>(product), index + multiply<9>(next));
+			auto b0 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			auto b1 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			auto b2 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			advance();
+			auto b3 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			auto b4 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			auto b5 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
+			advance();
+			auto b6 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else {
-			auto originalProduct = product;
-			product <<= 1;
-			sum += 2;
-			index += multiply<2>(next);
-			auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 			loopBody<follow, max>(storage, sum, product, index); // 2 
 			advance();
 			loopBody<follow, max>(storage, sum, product, index); // 3
@@ -125,20 +117,20 @@ struct ActualLoopBody<true> {
 		sum += 2;
 		index += multiply<2>(next);
 		auto advance = [&originalProduct, &product, &sum, &index]() { product += originalProduct; ++sum; index += next; };
-		merge(innerMostBody<true>(sum, product, index), storage); // 2
+		merge(innerMostBody(sum, product, index), storage); // 2
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 3
+		merge(innerMostBody(sum, product, index), storage); // 3
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 4
+		merge(innerMostBody(sum, product, index), storage); // 4
 		advance();
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 6
+		merge(innerMostBody(sum, product, index), storage); // 6
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 7
+		merge(innerMostBody(sum, product, index), storage); // 7
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 8
+		merge(innerMostBody(sum, product, index), storage); // 8
 		advance();
-		merge(innerMostBody<true>(sum, product, index), storage); // 9
+		merge(innerMostBody(sum, product, index), storage); // 9
 	}
 };
 
@@ -146,7 +138,7 @@ template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 	static_assert (pos <= max, "Position can't be larger than maximum!");
 	// walk through two separate set of actions
-	ActualLoopBody<IsTopMostLevel<pos, max>::value>::template body< pos, max > (storage, sum, product, index);
+	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
 }
 
 template<u64 pos, u64 max>
@@ -158,10 +150,7 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 template<u64 pos, u64 length>
 inline std::string startBody() noexcept {
-	std::ostringstream output;
-	loopBody<2, length>(output, pos, pos, pos);
-	std::string out(output.str());
-	return out;
+	return loopBodyString<2, length>(pos, pos, pos);
 }
 
 template<u64 length>
@@ -182,8 +171,6 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 10: body<10>(storage); break;
-                case 11: body<11>(storage); break;
                 case 12: body<12>(storage); break;
                 case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
