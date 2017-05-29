@@ -39,36 +39,27 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 using PackagedData = std::tuple<u64, u64, u64>;
 using PrecomputedData = std::vector<PackagedData>;
 
-PrecomputedData* precomputes = nullptr;
+PrecomputedData* precomputesPos6= nullptr;
+PrecomputedData* precomputesPos8= nullptr;
 void setup() noexcept {
-	precomputes = new PrecomputedData;
-	for (int h = 2; h < 10; ++h) {
-		if (h != 5) {
-			auto hIndex = h * fastPow10<5>;
-			auto hMul = h;
-			auto hSum = h;
-			for (int k = 2; k < 10; ++k) {
-				if (k != 5) {
-					auto kIndex = (k * fastPow10<6>) + hIndex;
-					auto kMul = k * hMul;
-					auto kSum = k + hSum;
-					for (int i = 2; i < 10; ++i) {
-						if (i != 5) {
-							auto iIndex = (i * fastPow10<7>) + kIndex;
-							auto iMul = i * kMul;
-							auto iSum = i + kSum;
-							for (int j = 2; j < 10; ++j) {
-								if (j != 5) {
-									precomputes->emplace_back(PackagedData(iSum + j, iMul * j, iIndex + (j * fastPow10<8>)));
-								}
-							}
-						}
-					}
+	precomputesPos6 = new PrecomputedData;
+	precomputesPos8 = new PrecomputedData;
+	for (int i = 2; i < 10; ++i) {
+		if (i != 5) {
+			auto iIndex = (i * fastPow10<5>);
+			auto iIndex8 = (i * fastPow10<7>);
+			auto iMul = i;
+			auto iSum = i;
+			for (int j = 2; j < 10; ++j) {
+				if (j != 5) {
+					precomputesPos6->emplace_back(PackagedData(iSum + j, iMul * j, iIndex + (j * fastPow10<6>)));
+					precomputesPos8->emplace_back(PackagedData(iSum + j, iMul * j, iIndex8 + (j * fastPow10<8>)));
 				}
 			}
 		}
 	}
-	std::cerr << "Number of precomputed cells: " << precomputes->size() << std::endl;
+	std::cerr << "Number of precomputed cells: " << precomputesPos6->size() << std::endl;
+	std::cerr << "Number of precomputed cells pos 8: " << precomputesPos8->size() << std::endl;
 }
 
 
@@ -114,7 +105,13 @@ struct ActualLoopBody {
 		} else if (pos == 6) {
 			static bool init = true;
 			// skip ahead to 8
-			for (const auto& a : *precomputes) {
+			for (const auto& a : *precomputesPos6) {
+				loopBody<8, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			}
+		} else if (pos == 8) {
+			static bool init = true;
+			// skip ahead to 8
+			for (const auto& a : *precomputesPos8) {
 				loopBody<10, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
 			}
 		} else {
