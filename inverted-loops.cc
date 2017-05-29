@@ -83,20 +83,12 @@ struct ActualLoopBody {
 			auto b6 = std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index);
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else {
-			loopBody<follow, max>(storage, sum, product, index); // 2 
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 3
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 4
-			advance();
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 6
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 7
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 8
-			advance();
-			loopBody<follow, max>(storage, sum, product, index); // 9
+			for (int i = 2; i < 10; ++i) {
+				if (i != 5) {
+					loopBody<follow, max>(storage, sum, product, index);
+				}
+				advance();
+			}
 		}
 	}
 };
