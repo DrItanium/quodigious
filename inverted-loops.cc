@@ -36,15 +36,19 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 }
 
 u64 sums[49] = { 0 };
+u64 sums4[2401] = { 0 };
 u64 products[49] = { 0 };
+u64 products4[2401] = { 0 };
 u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
-u64 values10[49] = { 0 };
-u64 values8[49] = { 0 };
-u64 values6[49] = { 0 };
-u64 values4[49] = { 0 };
+u64 values4To8[2401] = { 0 };
+u64 values8To12[2401] = { 0 };
 void setup() noexcept {
+	u64 values10[49] = { 0 };
+	u64 values6[49] = { 0 };
+	u64 values4[49] = { 0 };
+	u64 values8[49] = { 0 };
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
 	auto* ptrVal16 = values16;
@@ -94,6 +98,46 @@ void setup() noexcept {
 	if (count != 49) {
 		throw "Expected exactly 49 entries!";
 	}
+	count = 0;
+	auto* s4ptr = sums4;
+	auto* p4ptr = products4;
+	auto* v4to8 = values4To8;
+	auto* v8to12 = values8To12;
+	auto* v4 = values4;
+	auto* v8 = values8;
+	auto* oProd = products;
+	auto* oSum = sums;
+	for (int i = 0; i < 49; ++i) {
+		auto s0 = *oSum;
+		auto p0 = *oProd;
+		auto v0_4 = *v4;
+		auto v0_8 = *v8;
+		auto* iProd = products;
+		auto* iSum = sums;
+		auto* v6 = values6;
+		auto* v10 = values10;
+		for (int j = 0; j < 49; ++j) {
+			*s4ptr = s0 + (*iSum);
+			*p4ptr = p0 * (*iProd);
+			*v4to8 = (*v6) + (v0_4);
+			*v8to12 = (*v10) + (v0_8);
+			++count;
+			++s4ptr;
+			++p4ptr;
+			++iSum;
+			++iProd;
+			++v6;
+			++v4to8;
+			++v8to12;
+		}
+		++oSum;
+		++oProd;
+		++v4;
+		++v8;
+	}
+	if (count != 2401) {
+		throw "Expected exactly 2401 entries!";
+	}
 }
 
 
@@ -109,6 +153,18 @@ void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u
 	auto* ptrProd = products;
 	auto* ptrVals = precomputedValues;
 	for (int i = 0; i < 49; ++i) {
+		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
+		++ptrSum;
+		++ptrProd;
+		++ptrVals;
+	}
+}
+template<u64 nextPosition, u64 max>
+void iterativePrecomputedLoopBody4(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
+	auto* ptrSum = sums4;
+	auto* ptrProd = products4;
+	auto* ptrVals = precomputedValues;
+	for (int i =0 ; i < 2401; ++i) {
 		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
 		++ptrSum;
 		++ptrProd;
@@ -162,13 +218,9 @@ struct ActualLoopBody {
 			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else if (pos == 4) {
-			iterativePrecomputedLoopBody<6, max>(storage, sum, product, index, values4);
-		} else if (pos == 6) {
-			iterativePrecomputedLoopBody<8, max>(storage, sum, product, index, values6);
+			iterativePrecomputedLoopBody4<8, max>(storage, sum, product, index, values4To8);
 		} else if (pos == 8) {
-			iterativePrecomputedLoopBody<10, max>(storage, sum, product, index, values8);
-		} else if (pos == 10) {
-			iterativePrecomputedLoopBody<12, max>(storage, sum, product, index, values10);
+			iterativePrecomputedLoopBody4<12, max>(storage, sum, product, index, values8To12);
 		} else if (pos == 12 && max >= 14) {
 			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
 		} else if (pos == 14 && max >= 16) {
