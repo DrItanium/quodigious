@@ -44,6 +44,7 @@ u64 products8[2401 * 2401] = { 0 };
 u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
+u64 values2[49] = { 0 };
 u64 values4To12[2401 * 2401] = { 0 };
 u64 values12To16[2401] = { 0 };
 void setup() noexcept {
@@ -62,6 +63,7 @@ void setup() noexcept {
 	auto* ptrVal8 = values8;
 	auto* ptrVal6 = values6;
 	auto* ptrVal4 = values4;
+	auto* ptrVal2 = values2;
 	int count = 0;
 	for (int i = 2; i < 10; ++i) {
 		if (i != 5) {
@@ -86,6 +88,7 @@ void setup() noexcept {
 					*ptrVal12 = iIndex12 + (j * fastPow10<12>);
 					*ptrVal14 = iIndex14 + (j * fastPow10<14>);
 					*ptrVal16 = iIndex16 + (j * fastPow10<16>);
+					*ptrVal2 = iIndex2 + (j * fastPow10<2>);
 					++count;
 					++ptrSum;
 					++ptrProd;
@@ -93,6 +96,7 @@ void setup() noexcept {
 					++ptrVal8;
 					++ptrVal6;
 					++ptrVal4;
+					++ptrVal2;
 					++ptrVal12;
 					++ptrVal14;
 					++ptrVal16;
@@ -253,25 +257,30 @@ struct ActualLoopBody {
 		auto initialIncrement = [&product, &sum, &index]() { product <<= 1; sum += 2; index += multiply<2>(next); };
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		// this really, 5 and 6 only really runs well on massive numbers of cores
-		if (pos == 2 || pos == 3) {
-			auto mkComputation = [&sum, &product, &index]() noexcept { return std::async(std::launch::async, loopBodyString<follow,  max>, sum, product, index); };
-			initialIncrement();
-			auto t0 = mkComputation(); // 2
-			advance();
-			auto t1 = mkComputation(); // 3
-			advance();
-			auto t2 = mkComputation(); // 4
-			advance();
-			advance();
-			auto t3 = mkComputation(); // 6
-			advance();
-			auto t4 = mkComputation(); // 7
-			advance();
-			auto t5 = mkComputation(); // 8
-			advance();
-			auto t6 = mkComputation(); // 9
-			storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-
+		if (pos == 2) {
+			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
+			auto* ptrSum = sums;
+			auto* ptrProd = products;
+			auto* ptrVals = values2;
+			auto first = mkComputation(*ptrSum, *ptrProd, *ptrVals);
+			decltype(first) watcher[48];
+			auto* w = watcher;
+			++ptrSum;
+			++ptrProd;
+			++ptrVals;
+			for (int i = 1; i < 49; ++i) {
+				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
+				++w;
+				++ptrSum;
+				++ptrProd;
+				++ptrVals;
+			}
+			w = watcher;
+			storage << first.get();
+			for (int i = 0; i < 48; ++i) {
+				storage << w->get();
+				++w;
+			}
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody8<12, max>(storage, sum, product, index, values4To12);
 		} else if (pos == 12 && max >= 14 && max < 16) {
