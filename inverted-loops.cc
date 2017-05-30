@@ -37,6 +37,7 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 
 u64 sums[49] = { 0 };
 u64 products[49] = { 0 };
+u64 values12[49] = { 0 };
 u64 values10[49] = { 0 };
 u64 values8[49] = { 0 };
 u64 values6[49] = { 0 };
@@ -44,6 +45,7 @@ u64 values4[49] = { 0 };
 void setup() noexcept {
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
+	auto* ptrVal12 = values12;
 	auto* ptrVal10 = values10;
 	auto* ptrVal8 = values8;
 	auto* ptrVal6 = values6;
@@ -55,6 +57,7 @@ void setup() noexcept {
 			auto iIndex8 = ( i * fastPow10<7>);
 			auto iIndex6 = (i * fastPow10<5>);
 			auto iIndex4 = (i * fastPow10<3>);
+			auto iIndex12 = (i * fastPow10<11>);
 			auto iMul = i;
 			auto iSum = i;
 			for (int j = 2; j < 10; ++j) {
@@ -65,6 +68,7 @@ void setup() noexcept {
 					*ptrVal8 = iIndex8 + (j * fastPow10<8>);
 					*ptrVal6 = iIndex6 + (j * fastPow10<6>);
 					*ptrVal4 = iIndex4 + (j * fastPow10<4>);
+					*ptrVal12 = iIndex12 + (j * fastPow10<12>);
 					++count;
 					++ptrSum;
 					++ptrProd;
@@ -72,6 +76,7 @@ void setup() noexcept {
 					++ptrVal8;
 					++ptrVal6;
 					++ptrVal4;
+					++ptrVal12;
 				}
 			}
 		}
@@ -100,6 +105,10 @@ void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u
 		++ptrVals;
 	}
 }
+// disable some of these runs in the cases where it exceeds the max
+template<> void iterativePrecomputedLoopBody<14,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<14,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+//template<> void iterativePrecomputedLoopBody<
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -141,6 +150,8 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody<10, max>(storage, sum, product, index, values8);
 		} else if (pos == 10) {
 			iterativePrecomputedLoopBody<12, max>(storage, sum, product, index, values10);
+		} else if (pos == 12 && max >= 14) {
+			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
 		} else {
 			initialIncrement();
 			for (int i = 2; i < 10; ++i) {
