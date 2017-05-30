@@ -40,18 +40,21 @@ u64 products[49] = { 0 };
 u64 values10[49] = { 0 };
 u64 values8[49] = { 0 };
 u64 values6[49] = { 0 };
+u64 values4[49] = { 0 };
 void setup() noexcept {
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
 	auto* ptrVal10 = values10;
 	auto* ptrVal8 = values8;
 	auto* ptrVal6 = values6;
+	auto* ptrVal4 = values4;
 	int count = 0;
 	for (int i = 2; i < 10; ++i) {
 		if (i != 5) {
 			auto iIndex10 = (i * fastPow10<9>);
 			auto iIndex8 = ( i * fastPow10<7>);
 			auto iIndex6 = (i * fastPow10<5>);
+			auto iIndex4 = (i * fastPow10<3>);
 			auto iMul = i;
 			auto iSum = i;
 			for (int j = 2; j < 10; ++j) {
@@ -61,12 +64,14 @@ void setup() noexcept {
 					*ptrVal10 = iIndex10 + (j * fastPow10<10>);
 					*ptrVal8 = iIndex8 + (j * fastPow10<8>);
 					*ptrVal6 = iIndex6 + (j * fastPow10<6>);
+					*ptrVal4 = iIndex4 + (j * fastPow10<4>);
 					++count;
 					++ptrSum;
 					++ptrProd;
 					++ptrVal10;
 					++ptrVal8;
 					++ptrVal6;
+					++ptrVal4;
 				}
 			}
 		}
@@ -83,6 +88,18 @@ void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
+template<u64 nextPosition, u64 max>
+void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
+	auto* ptrSum = sums;
+	auto* ptrProd = products;
+	auto* ptrVals = precomputedValues;
+	for (int i = 0; i < 49; ++i) {
+		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
+		++ptrSum;
+		++ptrProd;
+		++ptrVals;
+	}
+}
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -98,7 +115,7 @@ struct ActualLoopBody {
 		auto initialIncrement = [&product, &sum, &index]() { product <<= 1; sum += 2; index += multiply<2>(next); };
 		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		// this really, 5 and 6 only really runs well on massive numbers of cores
-		if (pos == 2 || pos == 3 || pos == 4 || pos == 5) {
+		if (pos == 2 || pos == 3) {
 			auto mkComputation = [&sum, &product, &index]() noexcept { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
 			initialIncrement();
 			auto b0 = mkComputation();
@@ -116,36 +133,14 @@ struct ActualLoopBody {
 			advance();
 			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
+		} else if (pos == 4) {
+			iterativePrecomputedLoopBody<6, max>(storage, sum, product, index, values4);
 		} else if (pos == 6) {
-			auto* ptrSum = sums;
-			auto* ptrProd = products;
-			auto* ptrVal6 = values6;
-			for (int i = 0; i < 49; ++i) {
-				loopBody<8, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal6));
-				++ptrSum;
-				++ptrProd;
-				++ptrVal6;
-			}
+			iterativePrecomputedLoopBody<8, max>(storage, sum, product, index, values6);
 		} else if (pos == 8) {
-			auto* ptrSum = sums;
-			auto* ptrProd = products;
-			auto* ptrVal8 = values8;
-			for (int i = 0; i < 49; ++i) {
-				loopBody<10, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal8));
-				++ptrSum;
-				++ptrProd;
-				++ptrVal8;
-			}
+			iterativePrecomputedLoopBody<10, max>(storage, sum, product, index, values8);
 		} else if (pos == 10) {
-			auto* ptrSum = sums;
-			auto* ptrProd = products;
-			auto* ptrVal10 = values10;
-			for (int i = 0; i < 49; ++i) {
-				loopBody<12, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal10));
-				++ptrSum;
-				++ptrProd;
-				++ptrVal10;
-			}
+			iterativePrecomputedLoopBody<12, max>(storage, sum, product, index, values10);
 		} else {
 			initialIncrement();
 			for (int i = 2; i < 10; ++i) {
