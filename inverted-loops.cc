@@ -37,6 +37,7 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 
 u64 sums[49] = { 0 };
 u64 products[49] = { 0 };
+u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
 u64 values10[49] = { 0 };
@@ -46,6 +47,7 @@ u64 values4[49] = { 0 };
 void setup() noexcept {
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
+	auto* ptrVal16 = values16;
 	auto* ptrVal14 = values14;
 	auto* ptrVal12 = values12;
 	auto* ptrVal10 = values10;
@@ -61,6 +63,7 @@ void setup() noexcept {
 			auto iIndex4 = (i * fastPow10<3>);
 			auto iIndex12 = (i * fastPow10<11>);
 			auto iIndex14 = (i * fastPow10<13>);
+			auto iIndex16 = (i * fastPow10<15>);
 			auto iMul = i;
 			auto iSum = i;
 			for (int j = 2; j < 10; ++j) {
@@ -73,6 +76,7 @@ void setup() noexcept {
 					*ptrVal4 = iIndex4 + (j * fastPow10<4>);
 					*ptrVal12 = iIndex12 + (j * fastPow10<12>);
 					*ptrVal14 = iIndex14 + (j * fastPow10<14>);
+					*ptrVal16 = iIndex16 + (j * fastPow10<16>);
 					++count;
 					++ptrSum;
 					++ptrProd;
@@ -82,6 +86,7 @@ void setup() noexcept {
 					++ptrVal4;
 					++ptrVal12;
 					++ptrVal14;
+					++ptrVal16;
 				}
 			}
 		}
@@ -117,6 +122,12 @@ template<> void iterativePrecomputedLoopBody<16,12>(std::ostream& storage, u64 s
 template<> void iterativePrecomputedLoopBody<16,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody<16,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody<16,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,16>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody<18,17>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -162,6 +173,8 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
 		} else if (pos == 14 && max >= 16) {
 			iterativePrecomputedLoopBody<16, max>(storage, sum, product, index, values14);
+		} else if (pos == 16 && max >= 18) {
+			iterativePrecomputedLoopBody<18, max>(storage, sum, product, index, values16);
 		} else {
 			initialIncrement();
 			for (int i = 2; i < 10; ++i) {
