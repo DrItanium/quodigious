@@ -44,6 +44,7 @@ u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
 u64 values4To8[2401] = { 0 };
 u64 values8To12[2401] = { 0 };
+u64 values12To16[2401] = { 0 };
 void setup() noexcept {
 	u64 values10[49] = { 0 };
 	u64 values6[49] = { 0 };
@@ -103,8 +104,10 @@ void setup() noexcept {
 	auto* p4ptr = products4;
 	auto* v4to8 = values4To8;
 	auto* v8to12 = values8To12;
+	auto* v12to16 = values12To16;
 	auto* v4 = values4;
 	auto* v8 = values8;
+	auto* v12 = values12;
 	auto* oProd = products;
 	auto* oSum = sums;
 	for (int i = 0; i < 49; ++i) {
@@ -112,28 +115,35 @@ void setup() noexcept {
 		auto p0 = *oProd;
 		auto v0_4 = *v4;
 		auto v0_8 = *v8;
+		auto v0_12 = *v12;
 		auto* iProd = products;
 		auto* iSum = sums;
 		auto* v6 = values6;
 		auto* v10 = values10;
+		auto* v14 = values14;
 		for (int j = 0; j < 49; ++j) {
 			*s4ptr = s0 + (*iSum);
 			*p4ptr = p0 * (*iProd);
 			*v4to8 = (*v6) + (v0_4);
 			*v8to12 = (*v10) + (v0_8);
+			*v12to16 = (*v14) + (v0_12);
 			++count;
 			++s4ptr;
 			++p4ptr;
 			++iSum;
 			++iProd;
 			++v6;
+			++v10;
+			++v14;
 			++v4to8;
 			++v8to12;
+			++v12to16;
 		}
 		++oSum;
 		++oProd;
 		++v4;
 		++v8;
+		++v12;
 	}
 	if (count != 2401) {
 		throw "Expected exactly 2401 entries!";
@@ -184,6 +194,11 @@ template<> void iterativePrecomputedLoopBody<18,14>(std::ostream& storage, u64 s
 template<> void iterativePrecomputedLoopBody<18,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody<18,16>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody<18,17>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+
+template<> void iterativePrecomputedLoopBody4<16,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody4<16,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody4<16,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody4<16,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -221,10 +236,10 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody4<8, max>(storage, sum, product, index, values4To8);
 		} else if (pos == 8) {
 			iterativePrecomputedLoopBody4<12, max>(storage, sum, product, index, values8To12);
-		} else if (pos == 12 && max >= 14) {
+		} else if (pos == 12 && max >= 14 && max < 16) {
 			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
-		} else if (pos == 14 && max >= 16) {
-			iterativePrecomputedLoopBody<16, max>(storage, sum, product, index, values14);
+		} else if (pos == 12 && max >= 16) {
+			iterativePrecomputedLoopBody4<16, max>(storage, sum, product, index, values12To16);
 		} else if (pos == 16 && max >= 18) {
 			iterativePrecomputedLoopBody<18, max>(storage, sum, product, index, values16);
 		} else {
