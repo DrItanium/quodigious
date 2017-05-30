@@ -23,7 +23,6 @@
 #include <sstream>
 #include <functional>
 #include <future>
-#include <vector>
 #include "qlib.h"
 
 inline constexpr bool checkValue(u64 sum) noexcept {
@@ -36,31 +35,44 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	return 0;
 }
 
-using PackagedData = std::tuple<u64, u64, u64>;
-using PrecomputedData = std::vector<PackagedData>;
-
-PrecomputedData* precomputesPos6= nullptr;
-PrecomputedData* precomputesPos8= nullptr;
-PrecomputedData* precomputesPos10= nullptr;
+u64 sums[49] = { 0 };
+u64 products[49] = { 0 };
+u64 values10[49] = { 0 };
+u64 values8[49] = { 0 };
+u64 values6[49] = { 0 };
 void setup() noexcept {
-	precomputesPos6 = new PrecomputedData;
-	precomputesPos8 = new PrecomputedData;
-	precomputesPos10 = new PrecomputedData;
+	auto* ptrSum = sums;
+	auto* ptrProd = products;
+	auto* ptrVal10 = values10;
+	auto* ptrVal8 = values8;
+	auto* ptrVal6 = values6;
+	int count = 0;
 	for (int i = 2; i < 10; ++i) {
 		if (i != 5) {
-			auto iIndex = (i * fastPow10<5>);
-			auto iIndex8 = (i * fastPow10<7>);
 			auto iIndex10 = (i * fastPow10<9>);
+			auto iIndex8 = ( i * fastPow10<7>);
+			auto iIndex6 = (i * fastPow10<5>);
 			auto iMul = i;
 			auto iSum = i;
 			for (int j = 2; j < 10; ++j) {
 				if (j != 5) {
-					precomputesPos6->emplace_back(PackagedData(iSum + j, iMul * j, iIndex + (j * fastPow10<6>)));
-					precomputesPos8->emplace_back(PackagedData(iSum + j, iMul * j, iIndex8 + (j * fastPow10<8>)));
-					precomputesPos10->emplace_back(PackagedData(iSum + j, iMul * j, iIndex10 + (j * fastPow10<10>)));
+					*ptrSum = iSum + j;
+					*ptrProd = iMul * j;
+					*ptrVal10 = iIndex10 + (j * fastPow10<10>);
+					*ptrVal8 = iIndex8 + (j * fastPow10<8>);
+					*ptrVal6 = iIndex6 + (j * fastPow10<6>);
+					++count;
+					++ptrSum;
+					++ptrProd;
+					++ptrVal10;
+					++ptrVal8;
+					++ptrVal6;
 				}
 			}
 		}
+	}
+	if (count != 49) {
+		throw "Expected exactly 49 entries!";
 	}
 }
 
@@ -105,18 +117,34 @@ struct ActualLoopBody {
 			auto b6 = mkComputation();
 			storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
 		} else if (pos == 6) {
-			// skip ahead to 8
-			for (const auto& a : *precomputesPos6) {
-				loopBody<8, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			auto* ptrSum = sums;
+			auto* ptrProd = products;
+			auto* ptrVal6 = values6;
+			for (int i = 0; i < 49; ++i) {
+				loopBody<8, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal6));
+				++ptrSum;
+				++ptrProd;
+				++ptrVal6;
 			}
 		} else if (pos == 8) {
-			// skip ahead to 10
-			for (const auto& a : *precomputesPos8) {
-				loopBody<10, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			auto* ptrSum = sums;
+			auto* ptrProd = products;
+			auto* ptrVal8 = values8;
+			for (int i = 0; i < 49; ++i) {
+				loopBody<10, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal8));
+				++ptrSum;
+				++ptrProd;
+				++ptrVal8;
 			}
 		} else if (pos == 10) {
-			for (const auto& a : *precomputesPos10) {
-				loopBody<12, max>(storage, sum + std::get<0>(a), product * std::get<1>(a), index + std::get<2>(a));
+			auto* ptrSum = sums;
+			auto* ptrProd = products;
+			auto* ptrVal10 = values10;
+			for (int i = 0; i < 49; ++i) {
+				loopBody<12, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVal10));
+				++ptrSum;
+				++ptrProd;
+				++ptrVal10;
 			}
 		} else {
 			initialIncrement();
