@@ -287,6 +287,7 @@ struct ActualLoopBody {
 				++ptrProd;
 				++ptrVals;
 			}
+			w = watcher;
 			storage << first.get();
 			for (int i = 0; i < 48; ++i) {
 				storage << w->get();
