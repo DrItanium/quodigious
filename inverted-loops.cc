@@ -96,6 +96,7 @@ void setup() noexcept {
 					++ptrVal8;
 					++ptrVal6;
 					++ptrVal4;
+					++ptrVal2;
 					++ptrVal12;
 					++ptrVal14;
 					++ptrVal16;
