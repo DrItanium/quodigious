@@ -47,7 +47,10 @@ constexpr bool componentQuodigious(T value, T compare) noexcept {
  */
 template<typename T>
 constexpr bool isQuodigious(T value, T sum, T product) noexcept {
-	return componentQuodigious<T>(value, sum) && componentQuodigious(value, product);
+	// more often than not, the sum is divisible by the original value, so
+	// really that sort of check is useless. If we find that the product is
+	// divisible first then we should eliminate numbers faster :D
+	return componentQuodigious<T>(value, product) && componentQuodigious<T>(value, sum);
 }
 
 
