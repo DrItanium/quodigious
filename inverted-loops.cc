@@ -199,12 +199,12 @@ void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
-template<u64 nextPosition, u64 max>
-void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
+template<u64 nextPosition, u64 max, u64 count>
+void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values, u64* sums, u64* products) noexcept {
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
-	auto* ptrVals = precomputedValues;
-	for (int i = 0; i < 49; ++i) {
+	auto* ptrVals = values;
+	for (int i = 0; i < count; ++i) {
 		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
 		++ptrSum;
 		++ptrProd;
@@ -212,29 +212,17 @@ void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u
 	}
 }
 template<u64 nextPosition, u64 max>
+void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 49>(storage, sum, product, index, precomputedValues, sums, products);
+}
+template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody4(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	auto* ptrSum = sums4;
-	auto* ptrProd = products4;
-	auto* ptrVals = precomputedValues;
-	for (int i =0 ; i < 2401; ++i) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
-		++ptrSum;
-		++ptrProd;
-		++ptrVals;
-	}
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 2401>(storage, sum, product, index, precomputedValues, sums4, products4);
 }
 
 template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody8(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	auto* ptrSum = sums8;
-	auto* ptrProd = products8;
-	auto* ptrVals = precomputedValues;
-	for (int i =0 ; i < (2401*2401); ++i) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
-		++ptrSum;
-		++ptrProd;
-		++ptrVals;
-	}
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, (2401 * 2401)>(storage, sum, product, index, precomputedValues, sums8, products8);
 }
 // disable some of these runs in the cases where it exceeds the max
 template<> void iterativePrecomputedLoopBody<14,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
