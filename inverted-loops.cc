@@ -254,8 +254,6 @@ struct ActualLoopBody {
 		constexpr auto next = fastPow10<pos - 1>;
 		constexpr auto follow = pos + 1;
 		auto originalProduct = product;
-		auto initialIncrement = [&product, &sum, &index]() { product <<= 1; sum += 2; index += multiply<2>(next); };
-		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		// this really, 5 and 6 only really runs well on massive numbers of cores
 		if (pos == 2) {
 			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
@@ -268,18 +266,13 @@ struct ActualLoopBody {
 			++ptrSum;
 			++ptrProd;
 			++ptrVals;
-			for (int i = 1; i < 49; ++i) {
+			for (int i = 1; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
-				++w;
-				++ptrSum;
-				++ptrProd;
-				++ptrVals;
 			}
 			w = watcher;
 			storage << first.get();
-			for (int i = 0; i < 48; ++i) {
+			for (int i = 0; i < 48; ++i, ++w) {
 				storage << w->get();
-				++w;
 			}
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody8<12, max>(storage, sum, product, index, values4To12);
@@ -290,12 +283,13 @@ struct ActualLoopBody {
 		} else if (pos == 16 && max >= 18) {
 			iterativePrecomputedLoopBody<18, max>(storage, sum, product, index, values16);
 		} else {
-			initialIncrement();
-			for (int i = 2; i < 10; ++i) {
+			product <<= 1;
+			sum += 2;
+			index += multiply<2>(next);
+			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
 				if (i != 5) {
 					loopBody<follow, max>(storage, sum, product, index);
 				}
-				advance();
 			}
 		}
 	}
