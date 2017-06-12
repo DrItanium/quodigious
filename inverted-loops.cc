@@ -36,15 +36,18 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 }
 
 u64 sums[49] = { 0 };
+u64 sums3[343] = { 0 };
 u64 sums4[2401] = { 0 };
 u64 sums8[2401 * 2401] = { 0 };
 u64 products[49] = { 0 };
+u64 products3[343] = { 0 };
 u64 products4[2401] = { 0 };
 u64 products8[2401 * 2401] = { 0 };
 u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
 u64 values2[49] = { 0 };
+u64 values12to15[343] = { 0 };
 u64 values4To12[2401 * 2401] = { 0 };
 u64 values12To16[2401] = { 0 };
 void setup() noexcept {
@@ -190,6 +193,36 @@ void setup() noexcept {
 	if (count != (2401 * 2401)) {
 		throw "Expected exactly 7^8 entries!";
 	}
+
+	count = 0;
+	auto* s2 = sums;
+	auto* p2 = products;
+	auto* s3 = sums3;
+	auto* p3 = products3;
+	auto* v14 = values14;
+	auto* v12to15 = values12to15;
+	for (int i = 0; i < 49; ++i) {
+		auto s0 = *s2;
+		auto p0 = *p2;
+		auto v0 = *v14;
+		for (int j = 2; j < 10; ++j) {
+			if (j != 5) {
+				*s3 = s0 + j;
+				*p3 = s0 * j;
+				*v12to15 = *v14 + (j * fastPow10<14>);
+				++count;
+				++s3;
+				++p3;
+				++v12to15;
+			}
+		}
+		++s2;
+		++p2;
+		++v14;
+	}
+	if (count != 343) {
+		throw "Expected exactly 343 entries";
+	}
 }
 
 
@@ -275,8 +308,10 @@ struct ActualLoopBody {
 			}
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody8<12, max>(storage, sum, product, index, values4To12);
-		} else if (pos == 12 && max >= 14 && max < 16) {
+		} else if (pos == 12 && max == 14) {
 			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
+		} else if (pos == 12 && max == 15) {
+			iterativePrecomputedLoopBody<16, max>(storage, sum, product, index, values12to15);
 		} else if (pos == 12 && max >= 16) {
 			iterativePrecomputedLoopBody4<16, max>(storage, sum, product, index, values12To16);
 		} else if (pos == 16 && max >= 18) {
