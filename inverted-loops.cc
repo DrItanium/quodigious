@@ -155,6 +155,7 @@ u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
 u64 values2[49] = { 0 };
+u64 values12to15[343] = { 0 };
 u64 values4To12[2401 * 2401] = { 0 };
 u64 values12To16[2401] = { 0 };
 u64 values12To15[343] = { 0 };
@@ -206,6 +207,10 @@ void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u
 	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 49>(storage, sum, product, index, precomputedValues, sums, products);
 }
 template<u64 nextPosition, u64 max>
+void iterativePrecomputedLoopBody3(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 343>(storage, sum, product, index, precomputedValues, sums3, products3);
+}
+template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody4(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
 	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 2401>(storage, sum, product, index, precomputedValues, sums4, products4);
 }
@@ -228,6 +233,10 @@ template<> void iterativePrecomputedLoopBody<18,15>(std::ostream& storage, u64 s
 template<> void iterativePrecomputedLoopBody<18,16>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody<18,17>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 
+template<> void iterativePrecomputedLoopBody3<15,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody3<15,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> void iterativePrecomputedLoopBody3<15,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+
 template<> void iterativePrecomputedLoopBody4<16,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody4<16,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 template<> void iterativePrecomputedLoopBody4<16,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
@@ -244,9 +253,6 @@ struct ActualLoopBody {
 		constexpr auto next = fastPow10<pos - 1>;
 		constexpr auto follow = pos + 1;
 		auto originalProduct = product;
-		auto initialIncrement = [&product, &sum, &index]() { product <<= 1; sum += 2; index += multiply<2>(next); };
-		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-		// this really, 5 and 6 only really runs well on massive numbers of cores
 		if (pos == 2) {
 			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
 			auto* ptrSum = sums;
@@ -258,34 +264,32 @@ struct ActualLoopBody {
 			++ptrSum;
 			++ptrProd;
 			++ptrVals;
-			for (int i = 1; i < 49; ++i) {
+			for (int i = 1; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
-				++w;
-				++ptrSum;
-				++ptrProd;
-				++ptrVals;
 			}
 			w = watcher;
 			storage << first.get();
-			for (int i = 0; i < 48; ++i) {
+			for (int i = 0; i < 48; ++i, ++w) {
 				storage << w->get();
-				++w;
 			}
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody8<12, max>(storage, sum, product, index, values4To12);
-		} else if (pos == 12 && max >= 14 && max < 16) {
+		} else if (pos == 12 && max == 14) {
 			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
+		} else if (pos == 12 && max == 15) {
+			iterativePrecomputedLoopBody3<15, max>(storage, sum, product, index, values12to15);
 		} else if (pos == 12 && max >= 16) {
 			iterativePrecomputedLoopBody4<16, max>(storage, sum, product, index, values12To16);
 		} else if (pos == 16 && max >= 18) {
 			iterativePrecomputedLoopBody<18, max>(storage, sum, product, index, values16);
 		} else {
-			initialIncrement();
-			for (int i = 2; i < 10; ++i) {
+			product <<= 1;
+			sum += 2;
+			index += multiply<2>(next);
+			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
 				if (i != 5) {
 					loopBody<follow, max>(storage, sum, product, index);
 				}
-				advance();
 			}
 		}
 	}
@@ -300,27 +304,31 @@ struct ActualLoopBody<true> {
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-		constexpr auto next = fastPow10<pos - 1>;
-		auto originalProduct = product;
-		product <<= 1;
-		sum += 2;
-		index += multiply<2>(next);
-		auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-		merge(innerMostBody(sum, product, index)); // 2
-		advance();
-		merge(innerMostBody(sum, product, index)); // 3
-		advance();
-		merge(innerMostBody(sum, product, index)); // 4
-		advance();
-		advance();
-		merge(innerMostBody(sum, product, index)); // 6
-		advance();
-		merge(innerMostBody(sum, product, index)); // 7
-		advance();
-		merge(innerMostBody(sum, product, index)); // 8
-		advance();
-		merge(innerMostBody(sum, product, index)); // 9
+		if (max == 15) {
+			merge(innerMostBody(sum, product, index));
+		} else {
+			constexpr auto next = fastPow10<pos - 1>;
+			auto originalProduct = product;
+			product <<= 1;
+			sum += 2;
+			index += multiply<2>(next);
+			auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
+			merge(innerMostBody(sum, product, index)); // 2
+			advance();
+			merge(innerMostBody(sum, product, index)); // 3
+			advance();
+			merge(innerMostBody(sum, product, index)); // 4
+			advance();
+			advance();
+			merge(innerMostBody(sum, product, index)); // 6
+			advance();
+			merge(innerMostBody(sum, product, index)); // 7
+			advance();
+			merge(innerMostBody(sum, product, index)); // 8
+			advance();
+			merge(innerMostBody(sum, product, index)); // 9
+		}
 	}
 };
 
