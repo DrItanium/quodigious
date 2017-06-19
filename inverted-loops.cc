@@ -157,6 +157,7 @@ u64 values12[49] = { 0 };
 u64 values2[49] = { 0 };
 u64 values4To12[2401 * 2401] = { 0 };
 u64 values12To16[2401] = { 0 };
+u64 values12To15[343] = { 0 };
 
 void setup() noexcept {
     populateWidth2(sums, products, numbers2);
@@ -169,6 +170,9 @@ void setup() noexcept {
         values16[i] = num * fastPow10<14>;
         values14[i] = num * fastPow10<12>;
         values12[i] = num * fastPow10<10>;
+    }
+    for (auto i = 0; i < 343; ++i) {
+        values12To15[i] = numbers3[i] * fastPow10<11>;
     }
     for (auto i = 0; i < 2401 * 2401; ++i) {
         values4To12[i] = numbers8[i] * fastPow10<3>;
