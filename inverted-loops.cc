@@ -36,24 +36,149 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 }
 
 u64 sums[49] = { 0 };
+u64 sums3[343] = { 0 };
 u64 sums4[2401] = { 0 };
 u64 sums8[2401 * 2401] = { 0 };
 u64 products[49] = { 0 };
+u64 products3[343] = { 0 };
 u64 products4[2401] = { 0 };
 u64 products8[2401 * 2401] = { 0 };
+u64 numbers2[49] = { 0 };
+u64 numbers3[343] = { 0 };
+u64 numbers4[2401] = { 0 };
+u64 numbers8[2401 * 2401] = { 0 };
+void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
+    auto* sumPtr = sums;
+    auto* prodPtr = products;
+    auto* numPtr = numbers;
+    for (int i = 2; i < 10; ++i) {
+        if (i != 5) {
+            auto numberOuter = i * 10;
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *sumPtr = i + j;
+                    *prodPtr = i * j;
+                    *numPtr = numberOuter + j;
+                    ++sumPtr;
+                    ++prodPtr;
+                    ++numPtr;
+                }
+            }
+        }
+    }
+}
+
+void populateWidth3(u64* sums, u64* products, u64* numbers) noexcept {
+    auto* sumPtr = sums;
+    auto* prodPtr = products;
+    auto* numPtr = numbers;
+    for (int i = 2; i < 10; ++i) {
+        if (i != 5) {
+            auto iNum = i * 100;
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    auto jSum = i + j;
+                    auto jProd = i * j;
+                    auto jNum = iNum + (j * 10);
+                    for (int k = 2; k < 10; ++k) {
+                        if (k != 5) {
+                            *sumPtr = jSum + k;
+                            *prodPtr = jProd * k;
+                            *numPtr = jNum + k;
+                            ++sumPtr;
+                            ++prodPtr;
+                            ++numPtr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void populateWidth4(u64* sums, u64* products, u64* numbers) noexcept {
+    auto* numPtr = numbers;
+    auto* sumPtr = sums;
+    auto* prodPtr = products;
+    for (int i = 2; i < 10; ++i) {
+        if (i != 5) {
+            auto iNum = i * 1000;
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    auto jSum = i + j;
+                    auto jProd = i * j;
+                    auto jNum = (j * 100) + iNum;
+                    for (int k = 2; k < 10; ++k) {
+                        if (k != 5) {
+                            auto kSum = k + jSum;
+                            auto kProd = k * jProd;
+                            auto kNum = (k * 10) + jNum;
+                            for (int m = 2; m < 10; ++m) {
+                                if (m != 5) {
+                                    *sumPtr = kSum + m;
+                                    *prodPtr = kProd * m;
+                                    *numPtr = kNum + m;
+                                    ++sumPtr;
+                                    ++prodPtr;
+                                    ++numPtr;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void populateWidth8(u64* sums4, u64* products4, u64* numbers4, u64* sums8, u64* products8, u64* numbers8) noexcept {
+    auto* s8 = sums8;
+    auto* p8 = products8;
+    auto* n8 = numbers8;
+    for (auto i = 0; i < 2401; ++i) {
+        auto os = sums4[i];
+        auto op = products4[i];
+        auto on = numbers4[i] * 10000;
+        for (auto j = 0; j < 2401; ++j) {
+            *s8 = os + sums4[j];
+            *p8 = op * products4[j];
+            *n8 = on + numbers4[j];
+            ++s8;
+            ++p8;
+            ++n8;
+        }
+    }
+}
+
+
 u64 values16[49] = { 0 };
 u64 values14[49] = { 0 };
 u64 values12[49] = { 0 };
 u64 values2[49] = { 0 };
 u64 values4To12[2401 * 2401] = { 0 };
 u64 values12To16[2401] = { 0 };
+
 void setup() noexcept {
-	u64 values10[49] = { 0 };
-	u64 values6[49] = { 0 };
-	u64 values4[49] = { 0 };
-	u64 values8[49] = { 0 };
-	u64 values4To8[2401] = { 0 };
-	u64 values8To12[2401] = { 0 };
+    populateWidth2(sums, products, numbers2);
+    populateWidth3(sums3, products3, numbers3);
+    populateWidth4(sums4, products4, numbers4);
+    populateWidth8(sums4, products4, numbers4, sums8, products8, numbers8);
+    for (auto i = 0; i < 49; ++i) {
+        auto num = numbers2[i];
+        values2[i] = num * fastPow10<1>;
+        values16[i] = num * fastPow10<14>;
+        values14[i] = num * fastPow10<12>;
+        values12[i] = num * fastPow10<10>;
+    }
+    for (auto i = 0; i < 2401 * 2401; ++i) {
+        // shift over by four digits
+        values4To12[i] = numbers8[i] * fastPow10<4>;
+        std::cout << "i: " << i << "\tvalues4To12[i]: " << values4To12[i] << std::endl;
+    }
+    for (auto i = 0; i < 2401; ++i) {
+        values12To16[i] = numbers4[i] * fastPow10<12>;
+    }
+    /*
 	auto* ptrSum = sums;
 	auto* ptrProd = products;
 	auto* ptrVal16 = values16;
@@ -61,7 +186,6 @@ void setup() noexcept {
 	auto* ptrVal12 = values12;
 	auto* ptrVal10 = values10;
 	auto* ptrVal8 = values8;
-	auto* ptrVal6 = values6;
 	auto* ptrVal4 = values4;
 	auto* ptrVal2 = values2;
 	int count = 0;
@@ -126,7 +250,6 @@ void setup() noexcept {
 		auto v0_12 = *v12;
 		auto* iProd = products;
 		auto* iSum = sums;
-		auto* v6 = values6;
 		auto* v10 = values10;
 		auto* v14 = values14;
 		for (int j = 0; j < 49; ++j) {
@@ -190,6 +313,7 @@ void setup() noexcept {
 	if (count != (2401 * 2401)) {
 		throw "Expected exactly 7^8 entries!";
 	}
+    */
 }
 
 
