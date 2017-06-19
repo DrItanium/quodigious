@@ -209,7 +209,7 @@ void setup() noexcept {
 			if (j != 5) {
 				*s3 = s0 + j;
 				*p3 = s0 * j;
-				*v12to15 = *v14 + (j * fastPow10<14>);
+				*v12to15 = *v14 + (j * fastPow10<13>);
 				++count;
 				++s3;
 				++p3;
