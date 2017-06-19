@@ -34,19 +34,26 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	}
 	return 0;
 }
-
-u64 sums[49] = { 0 };
-u64 sums3[343] = { 0 };
-u64 sums4[2401] = { 0 };
-u64 sums8[2401 * 2401] = { 0 };
-u64 products[49] = { 0 };
-u64 products3[343] = { 0 };
-u64 products4[2401] = { 0 };
-u64 products8[2401 * 2401] = { 0 };
-u64 numbers2[49] = { 0 };
-u64 numbers3[343] = { 0 };
-u64 numbers4[2401] = { 0 };
-u64 numbers8[2401 * 2401] = { 0 };
+template<int width>
+constexpr int numberOfDigitsForGivenWidth() noexcept {
+    static_assert(width >= 0, "Negative width doesn't make sense");
+    return 7 * numberOfDigitsForGivenWidth<width - 1>();
+}
+template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
+template<int width>
+constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
+u64 sums[numElements<2>] = { 0 };
+u64 sums3[numElements<3>] = { 0 };
+u64 sums4[numElements<4>] = { 0 };
+u64 sums8[numElements<8>] = { 0 };
+u64 products[numElements<2>] = { 0 };
+u64 products3[numElements<3>] = { 0 };
+u64 products4[numElements<4>] = { 0 };
+u64 products8[numElements<8>] = { 0 };
+u64 numbers2[numElements<2>] = { 0 };
+u64 numbers3[numElements<3>] = { 0 };
+u64 numbers4[numElements<4>] = { 0 };
+u64 numbers8[numElements<8>] = { 0 };
 void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
     auto* sumPtr = sums;
     auto* prodPtr = products;
@@ -74,12 +81,12 @@ void populateWidth3(u64* sums, u64* products, u64* numbers) noexcept {
     auto* numPtr = numbers;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto iNum = i * 100;
+            auto iNum = i * fastPow10<2>;
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     auto jSum = i + j;
                     auto jProd = i * j;
-                    auto jNum = iNum + (j * 10);
+                    auto jNum = iNum + (j * fastPow10<1>);
                     for (int k = 2; k < 10; ++k) {
                         if (k != 5) {
                             *sumPtr = jSum + k;
@@ -102,17 +109,17 @@ void populateWidth4(u64* sums, u64* products, u64* numbers) noexcept {
     auto* prodPtr = products;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto iNum = i * 1000;
+            auto iNum = i * fastPow10<3>;
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     auto jSum = i + j;
                     auto jProd = i * j;
-                    auto jNum = (j * 100) + iNum;
+                    auto jNum = (j * fastPow10<2>) + iNum;
                     for (int k = 2; k < 10; ++k) {
                         if (k != 5) {
                             auto kSum = k + jSum;
                             auto kProd = k * jProd;
-                            auto kNum = (k * 10) + jNum;
+                            auto kNum = (k * fastPow10<1>) + jNum;
                             for (int m = 2; m < 10; ++m) {
                                 if (m != 5) {
                                     *sumPtr = kSum + m;
@@ -135,11 +142,11 @@ void populateWidth8(u64* sums4, u64* products4, u64* numbers4, u64* sums8, u64* 
     auto* s8 = sums8;
     auto* p8 = products8;
     auto* n8 = numbers8;
-    for (auto i = 0; i < 2401; ++i) {
+    for (auto i = 0; i < numElements<4>; ++i) {
         auto os = sums4[i];
         auto op = products4[i];
-        auto on = numbers4[i] * 10000;
-        for (auto j = 0; j < 2401; ++j) {
+        auto on = numbers4[i] * fastPow10<4>;
+        for (auto j = 0; j < numElements<4>; ++j) {
             *s8 = os + sums4[j];
             *p8 = op * products4[j];
             *n8 = on + numbers4[j];
@@ -151,35 +158,49 @@ void populateWidth8(u64* sums4, u64* products4, u64* numbers4, u64* sums8, u64* 
 }
 
 
-u64 values16[49] = { 0 };
-u64 values14[49] = { 0 };
-u64 values12[49] = { 0 };
-u64 values2[49] = { 0 };
-u64 values12to15[343] = { 0 };
-u64 values4To12[2401 * 2401] = { 0 };
-u64 values12To16[2401] = { 0 };
-u64 values12To15[343] = { 0 };
+u64 values16[numElements<2>] = { 0 };
+u64 values14[numElements<2>] = { 0 };
+u64 values12[numElements<2>] = { 0 };
+u64 values2[numElements<2>] = { 0 };
+u64 values12to15[numElements<3>] = { 0 };
+u64 values12To15[numElements<3>] = { 0 };
+u64 values4To12[numElements<8>] = { 0 };
+u64 values12To16[numElements<4>] = { 0 };
 
 void setup() noexcept {
     populateWidth2(sums, products, numbers2);
     populateWidth3(sums3, products3, numbers3);
     populateWidth4(sums4, products4, numbers4);
     populateWidth8(sums4, products4, numbers4, sums8, products8, numbers8);
-    for (auto i = 0; i < 49; ++i) {
-        auto num = numbers2[i];
-        values2[i] = num * fastPow10<1>;
-        values16[i] = num * fastPow10<14>;
-        values14[i] = num * fastPow10<12>;
-        values12[i] = num * fastPow10<10>;
+    auto* n2ptr = numbers2;
+    auto* v2 = values2;
+    auto* v16 = values16;
+    auto* v14 = values14;
+    auto* v12 = values12;
+    for (auto num : numbers2) {
+        *v2 = num * fastPow10<1>;
+        *v16 = num * fastPow10<14>;
+        *v14 = num * fastPow10<12>;
+        *v12 = num * fastPow10<10>;
+        ++v2;
+        ++v16;
+        ++v14;
+        ++v12;
     }
-    for (auto i = 0; i < 343; ++i) {
-        values12To15[i] = numbers3[i] * fastPow10<11>;
+    auto* v12To15 = values12To15;
+    for (auto num : numbers3) {
+        *v12To15 = num * fastPow10<11>;
+        ++v12To15;
     }
-    for (auto i = 0; i < 2401 * 2401; ++i) {
-        values4To12[i] = numbers8[i] * fastPow10<3>;
+    auto* v12To16 = values12To16;
+    for (auto num : numbers4) {
+        *v12To16 = num * fastPow10<11>;
+        ++v12To16;
     }
-    for (auto i = 0; i < 2401; ++i) {
-        values12To16[i] = numbers4[i] * fastPow10<11>;
+    auto* v4To12 = values4To12;
+    for (auto num : numbers8) {
+        *v4To12 = num * fastPow10<3>;
+        ++v4To12;
     }
 }
 
@@ -204,20 +225,20 @@ void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 pro
 }
 template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 49>(storage, sum, product, index, precomputedValues, sums, products);
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<2>>(storage, sum, product, index, precomputedValues, sums, products);
 }
 template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody3(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 343>(storage, sum, product, index, precomputedValues, sums3, products3);
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<3>>(storage, sum, product, index, precomputedValues, sums3, products3);
 }
 template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody4(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, 2401>(storage, sum, product, index, precomputedValues, sums4, products4);
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<4>>(storage, sum, product, index, precomputedValues, sums4, products4);
 }
 
 template<u64 nextPosition, u64 max>
 void iterativePrecomputedLoopBody8(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, (2401 * 2401)>(storage, sum, product, index, precomputedValues, sums8, products8);
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<8>>(storage, sum, product, index, precomputedValues, sums8, products8);
 }
 // disable some of these runs in the cases where it exceeds the max
 template<> void iterativePrecomputedLoopBody<14,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
