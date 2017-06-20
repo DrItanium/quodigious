@@ -65,41 +65,38 @@ u64 numbers6[numElements<6>] = { 0 };
 u64 numbers7[numElements<7>] = { 0 };
 u64 numbers8[numElements<8>] = { 0 };
 
-u64* getSums(u64 width) noexcept {
-    static std::map<u64, u64*> ptrs = {
-        { 2, sums2 },
-        { 3, sums3 },
-        { 4, sums4 },
-        { 5, sums5 },
-        { 6, sums6 },
-        { 7, sums7 },
-        { 8, sums8 },
-    };
-    auto point = ptrs.find(width);
-    if (point == ptrs.end()) {
-        return nullptr;
-    } else {
-        return point->second;
-    }
+template<u64 width>
+inline u64* getSums() noexcept {
+    static_assert(width >= 2 && width < 9, "Illegal width!");
+    return nullptr;
+}
+#define defSum(width) \
+    template<> inline u64* getSums< width > () noexcept { return sums ## width ; }
+defSum(2);
+defSum(3);
+defSum(4);
+defSum(5);
+defSum(6);
+defSum(7);
+defSum(8);
+#undef defSum
+
+template<u64 width>
+inline u64* getProducts() noexcept {
+    static_assert(width >= 2 && width < 9, "Illegal width!");
+    return nullptr;
 }
 
-u64* getProducts(u64 width) noexcept {
-    static std::map<u64, u64*> ptrs = {
-        { 2, products2 },
-        { 3, products3 },
-        { 4, products4 },
-        { 5, products5 },
-        { 6, products6 },
-        { 7, products7 },
-        { 8, products8 },
-    };
-    auto point = ptrs.find(width);
-    if (point == ptrs.end()) {
-        return nullptr;
-    } else {
-        return point->second;
-    }
-}
+#define defProduct(width) \
+    template<> inline u64* getProducts< width > () noexcept { return products ## width ; }
+defProduct(2);
+defProduct(3);
+defProduct(4);
+defProduct(5);
+defProduct(6);
+defProduct(7);
+defProduct(8);
+#undef defProduct
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
@@ -351,8 +348,8 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
 template<u64 nextPosition, u64 max, u64 count, u64 width>
 void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
-	auto* ptrSum = getSums(width);
-	auto* ptrProd = getProducts(width);
+	auto* ptrSum = getSums<width>();
+	auto* ptrProd = getProducts<width>();
 	auto* ptrVals = values;
 	for (int i = 0; i < count; ++i) {
 		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
@@ -428,8 +425,12 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
 		} else if (pos == 12 && max == 16) {
 			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
-		} else if (pos == 16 && max >= 18) {
-			iterativePrecomputedLoopBody<18, max, 2>(storage, sum, product, index, values16);
+        } else if (pos == 12 && max == 17) {
+            iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
+        } else if (pos == 12 && max == 18) {
+            iterativePrecomputedLoopBody<max, max, 6>(storage, sum, product, index, values12To18);
+        } else if (pos == 12 && max == 19) {
+            iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
 		} else {
 			product <<= 1;
 			sum += 2;
