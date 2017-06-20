@@ -60,7 +60,7 @@ void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
     auto* numPtr = numbers;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto numberOuter = i * 10;
+            auto numberOuter = i * fastPow<1>;
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     *sumPtr = i + j;
