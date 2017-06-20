@@ -343,8 +343,6 @@ void setup() noexcept {
 template<u64 pos, u64 max>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
 template<u64 nextPosition, u64 max, u64 count, u64 width>
 void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
@@ -362,6 +360,9 @@ template<u64 nextPosition, u64 max, u64 width>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
     iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
+
+template<u64 pos, u64 max>
+inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
 template<bool topLevel>
 struct ActualLoopBody {
@@ -475,11 +476,22 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
+#ifndef SEQUENTIAL
+    // spawn each section at the same time, 196 threads will be spawned for
+    // simultaneous processing
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
 	auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
 	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
 	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
-	storage << p0.get() << p1.get() << p2.get() << p3.get();
+    storage << p0.get() << p1.get() << p2.get() << p3.get();
+#else /* defined SEQUENTIAL */
+    // Execute each section sequentially, seems to give the same performance
+    // times as doing it all at once. We'll have to see as we go along
+	loopBody<2, length>(storage, 2, 2, 2);
+    loopBody<2, length>(storage, 4, 4, 4);
+    loopBody<2, length>(storage, 6, 6, 6);
+    loopBody<2, length>(storage, 8, 8, 8);
+#endif
 }
 
 int main() {
