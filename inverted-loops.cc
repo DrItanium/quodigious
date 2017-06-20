@@ -316,10 +316,10 @@ u64 values12To17[numElements<5>] = { 0 };
 u64 values12To18[numElements<6>] = { 0 };
 u64 values12To19[numElements<7>] = { 0 };
 
-template<int width>
-void populateArray(u64* nums, u64* storage) noexcept {
+template<u64 width, u64 factor = 11>
+inline void populateArray(u64* nums, u64* storage) noexcept {
     for (int i = 0; i < numElements<width>; ++i) {
-        *storage = nums[i] * fastPow10<11>;
+        *storage = nums[i] * fastPow10<factor>;
         ++storage;
     }
 }
@@ -331,28 +331,15 @@ void setup() noexcept {
     populateWidth6();
     populateWidth7();
     populateWidth8();
-    auto* n2ptr = numbers2;
-    auto* v2 = values2To4;
-    auto* v16 = values16;
-    auto* v12 = values12To14;
-    for (auto num : numbers2) {
-        *v2 = num * fastPow10<1>;
-        *v16 = num * fastPow10<14>;
-        *v12 = num * fastPow10<10>;
-        ++v2;
-        ++v16;
-        ++v12;
-    }
-    auto* v4To12 = values4To12;
-    for (auto num : numbers8) {
-        *v4To12 = num * fastPow10<3>;
-        ++v4To12;
-    }
-    populateArray<3>(numbers3, values12To15);
-    populateArray<4>(numbers4, values12To16);
-    populateArray<5>(numbers5, values12To17);
-    populateArray<6>(numbers6, values12To18);
-    populateArray<7>(numbers7, values12To19);
+    populateArray<2, 1>(numbers2, values2To4);
+    populateArray<2, 14>(numbers2, values16);
+    populateArray<2, 10>(numbers2, values12To14);
+    populateArray<8, 3>(numbers8, values4To12);
+    populateArray<3, 11>(numbers3, values12To15);
+    populateArray<4, 11>(numbers4, values12To16);
+    populateArray<5, 11>(numbers5, values12To17);
+    populateArray<6, 11>(numbers6, values12To18);
+    populateArray<7, 11>(numbers7, values12To19);
 }
 
 
