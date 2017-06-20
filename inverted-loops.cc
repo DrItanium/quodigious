@@ -180,7 +180,6 @@ void populateWidth<2>() noexcept {
 }
 
 
-u64 values16[numElements<2>] = { 0 };
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
 u64 values12To14[numElements<2>] = { 0 };
@@ -198,6 +197,11 @@ inline void populateArray(u64* nums, u64* storage) noexcept {
     }
 }
 
+template<u64 width, u64 factor>
+inline void populateArray(u64* storage) noexcept {
+    populateArray<width, factor>(getNumbers<width>(), storage);
+}
+
 void setup() noexcept {
     populateWidth<2>();
     populateWidth<3>();
@@ -206,15 +210,14 @@ void setup() noexcept {
     populateWidth<6>();
     populateWidth<7>();
     populateWidth<8>();
-    populateArray<2, 1>(numbers2, values2To4);
-    populateArray<2, 14>(numbers2, values16);
-    populateArray<2, 10>(numbers2, values12To14);
-    populateArray<8, 3>(numbers8, values4To12);
-    populateArray<3, 11>(numbers3, values12To15);
-    populateArray<4, 11>(numbers4, values12To16);
-    populateArray<5, 11>(numbers5, values12To17);
-    populateArray<6, 11>(numbers6, values12To18);
-    populateArray<7, 11>(numbers7, values12To19);
+    populateArray<2, 1>(values2To4);
+    populateArray<8, 3>(values4To12);
+    populateArray<2, 11>(values12To14);
+    populateArray<3, 11>(values12To15);
+    populateArray<4, 11>(values12To16);
+    populateArray<5, 11>(values12To17);
+    populateArray<6, 11>(values12To18);
+    populateArray<7, 11>(values12To19);
 }
 
 
