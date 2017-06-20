@@ -99,6 +99,23 @@ defProduct(8);
 #undef defProduct
 
 template<u64 width>
+inline u64* getNumbers() noexcept {
+    static_assert(width >= 2 && width < 9, "Illegal width!");
+    return nullptr;
+}
+
+#define defNumber(width) \
+    template<> inline u64* getNumbers< width > () noexcept { return numbers ## width ; }
+defNumber(2);
+defNumber(3);
+defNumber(4);
+defNumber(5);
+defNumber(6);
+defNumber(7);
+defNumber(8);
+#undef defNumber
+
+template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
     static_assert(width >= 0, "Can't have negative width!");
     return input * fastPow10<width>;
