@@ -377,28 +377,29 @@ template<u64 nextPosition, u64 max, u64 width>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
     iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
+
 // disable some of these runs in the cases where it exceeds the max
-template<> inline void iterativePrecomputedLoopBody<14,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<14,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,14, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,15, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,14, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,15, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,16, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,17, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-
-template<> inline void iterativePrecomputedLoopBody<15,14, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<15,13, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<15,12, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-
-template<> inline void iterativePrecomputedLoopBody<16,15, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,14, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,13, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,12, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+#define stubLoopBody(a, b, c) \
+    template<> inline void iterativePrecomputedLoopBody< a, b, c >(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+stubLoopBody(14,12,2);
+stubLoopBody(14,13,2);
+stubLoopBody(15,14,3);
+stubLoopBody(15,13,3);
+stubLoopBody(15,12,3);
+stubLoopBody(16,13,2);
+stubLoopBody(16,14,2);
+stubLoopBody(16,15,2);
+stubLoopBody(18,12,2);
+stubLoopBody(18,13,2);
+stubLoopBody(18,14,2);
+stubLoopBody(18,15,2);
+stubLoopBody(18,16,2);
+stubLoopBody(18,17,2);
+stubLoopBody(16,15,4);
+stubLoopBody(16,14,4);
+stubLoopBody(16,13,4);
+stubLoopBody(16,12,4);
+#undef stubLoopBody
 
 template<bool topLevel>
 struct ActualLoopBody {
