@@ -435,11 +435,11 @@ struct ActualLoopBody {
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
 		} else if (pos == 12 && max == 14) {
-			iterativePrecomputedLoopBody<14, max, 2>(storage, sum, product, index, values12);
+			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12);
 		} else if (pos == 12 && max == 15) {
-			iterativePrecomputedLoopBody<15, max, 3>(storage, sum, product, index, values12To15);
+			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
 		} else if (pos == 12 && max == 16) {
-			iterativePrecomputedLoopBody<16, max, 4>(storage, sum, product, index, values12To16);
+			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
 		} else if (pos == 16 && max >= 18) {
 			iterativePrecomputedLoopBody<18, max, 2>(storage, sum, product, index, values16);
 		} else {
