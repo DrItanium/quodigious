@@ -307,13 +307,22 @@ void populateWidth8() noexcept {
 
 
 u64 values16[numElements<2>] = { 0 };
-u64 values14[numElements<2>] = { 0 };
-u64 values12[numElements<2>] = { 0 };
-u64 values2[numElements<2>] = { 0 };
-u64 values12To15[numElements<3>] = { 0 };
+u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
+u64 values12To14[numElements<2>] = { 0 };
+u64 values12To15[numElements<3>] = { 0 };
 u64 values12To16[numElements<4>] = { 0 };
+u64 values12To17[numElements<5>] = { 0 };
+u64 values12To18[numElements<6>] = { 0 };
+u64 values12To19[numElements<7>] = { 0 };
 
+template<int width>
+void populateArray(u64* nums, u64* storage) noexcept {
+    for (int i = 0; i < numElements<width>; ++i) {
+        *storage = nums[i] * fastPow10<11>;
+        ++storage;
+    }
+}
 void setup() noexcept {
     populateWidth2();
     populateWidth3();
@@ -323,35 +332,27 @@ void setup() noexcept {
     populateWidth7();
     populateWidth8();
     auto* n2ptr = numbers2;
-    auto* v2 = values2;
+    auto* v2 = values2To4;
     auto* v16 = values16;
-    auto* v14 = values14;
-    auto* v12 = values12;
+    auto* v12 = values12To14;
     for (auto num : numbers2) {
         *v2 = num * fastPow10<1>;
         *v16 = num * fastPow10<14>;
-        *v14 = num * fastPow10<12>;
         *v12 = num * fastPow10<10>;
         ++v2;
         ++v16;
-        ++v14;
         ++v12;
-    }
-    auto* v12To15 = values12To15;
-    for (auto num : numbers3) {
-        *v12To15 = num * fastPow10<11>;
-        ++v12To15;
-    }
-    auto* v12To16 = values12To16;
-    for (auto num : numbers4) {
-        *v12To16 = num * fastPow10<11>;
-        ++v12To16;
     }
     auto* v4To12 = values4To12;
     for (auto num : numbers8) {
         *v4To12 = num * fastPow10<3>;
         ++v4To12;
     }
+    populateArray<3>(numbers3, values12To15);
+    populateArray<4>(numbers4, values12To16);
+    populateArray<5>(numbers5, values12To17);
+    populateArray<6>(numbers6, values12To18);
+    populateArray<7>(numbers7, values12To19);
 }
 
 
@@ -417,7 +418,7 @@ struct ActualLoopBody {
 			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
 			auto* ptrSum = sums2;
 			auto* ptrProd = products2;
-			auto* ptrVals = values2;
+			auto* ptrVals = values2To4;
 			auto first = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			decltype(first) watcher[48];
 			auto* w = watcher;
@@ -435,7 +436,7 @@ struct ActualLoopBody {
 		} else if (pos == 4) {
 			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
 		} else if (pos == 12 && max == 14) {
-			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12);
+			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12To14);
 		} else if (pos == 12 && max == 15) {
 			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
 		} else if (pos == 12 && max == 16) {
