@@ -23,6 +23,7 @@
 #include <sstream>
 #include <functional>
 #include <future>
+#include <map>
 #include "qlib.h"
 
 inline constexpr bool checkValue(u64 sum) noexcept {
@@ -63,6 +64,43 @@ u64 numbers5[numElements<5>] = { 0 };
 u64 numbers6[numElements<6>] = { 0 };
 u64 numbers7[numElements<7>] = { 0 };
 u64 numbers8[numElements<8>] = { 0 };
+
+u64* getSums(u64 width) noexcept {
+    static std::map<u64, u64*> ptrs = {
+        { 2, sums2 },
+        { 3, sums3 },
+        { 4, sums4 },
+        { 5, sums5 },
+        { 6, sums6 },
+        { 7, sums7 },
+        { 8, sums8 },
+    };
+    auto point = ptrs.find(width);
+    if (point == ptrs.end()) {
+        return nullptr;
+    } else {
+        return point->second;
+    }
+}
+
+u64* getProducts(u64 width) noexcept {
+    static std::map<u64, u64*> ptrs = {
+        { 2, products2 },
+        { 3, products3 },
+        { 4, products4 },
+        { 5, products5 },
+        { 6, products6 },
+        { 7, products7 },
+        { 8, products8 },
+    };
+    auto point = ptrs.find(width);
+    if (point == ptrs.end()) {
+        return nullptr;
+    } else {
+        return point->second;
+    }
+}
+
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
     static_assert(width >= 0, "Can't have negative width!");
@@ -272,7 +310,6 @@ u64 values16[numElements<2>] = { 0 };
 u64 values14[numElements<2>] = { 0 };
 u64 values12[numElements<2>] = { 0 };
 u64 values2[numElements<2>] = { 0 };
-u64 values12to15[numElements<3>] = { 0 };
 u64 values12To15[numElements<3>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
 u64 values12To16[numElements<4>] = { 0 };
@@ -281,6 +318,9 @@ void setup() noexcept {
     populateWidth2();
     populateWidth3();
     populateWidth4();
+    populateWidth5();
+    populateWidth6();
+    populateWidth7();
     populateWidth8();
     auto* n2ptr = numbers2;
     auto* v2 = values2;
@@ -321,10 +361,10 @@ void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
-template<u64 nextPosition, u64 max, u64 count>
-void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values, u64* sums, u64* products) noexcept {
-	auto* ptrSum = sums;
-	auto* ptrProd = products;
+template<u64 nextPosition, u64 max, u64 count, u64 width>
+void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
+	auto* ptrSum = getSums(width);
+	auto* ptrProd = getProducts(width);
 	auto* ptrVals = values;
 	for (int i = 0; i < count; ++i) {
 		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
@@ -333,45 +373,32 @@ void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 pro
 		++ptrVals;
 	}
 }
-template<u64 nextPosition, u64 max>
+template<u64 nextPosition, u64 max, u64 width>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<2>>(storage, sum, product, index, precomputedValues, sums2, products2);
-}
-template<u64 nextPosition, u64 max>
-inline void iterativePrecomputedLoopBody3(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<3>>(storage, sum, product, index, precomputedValues, sums3, products3);
-}
-template<u64 nextPosition, u64 max>
-inline void iterativePrecomputedLoopBody4(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<4>>(storage, sum, product, index, precomputedValues, sums4, products4);
-}
-
-template<u64 nextPosition, u64 max>
-inline void iterativePrecomputedLoopBody8(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<8>>(storage, sum, product, index, precomputedValues, sums8, products8);
+    iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
 // disable some of these runs in the cases where it exceeds the max
-template<> inline void iterativePrecomputedLoopBody<14,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<14,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<16,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,16>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody<18,17>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<14,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<14,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,14, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,15, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,12, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,13, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,14, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,15, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,16, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<18,17, 2>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 
-template<> inline void iterativePrecomputedLoopBody3<15,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody3<15,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody3<15,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<15,14, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<15,13, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<15,12, 3>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 
-template<> inline void iterativePrecomputedLoopBody4<16,15>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody4<16,14>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody4<16,13>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
-template<> inline void iterativePrecomputedLoopBody4<16,12>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,15, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,14, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,13, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
+template<> inline void iterativePrecomputedLoopBody<16,12, 4>(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept { }
 
 template<bool topLevel>
 struct ActualLoopBody {
@@ -405,15 +432,15 @@ struct ActualLoopBody {
 				storage << w->get();
 			}
 		} else if (pos == 4) {
-			iterativePrecomputedLoopBody8<12, max>(storage, sum, product, index, values4To12);
+			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
 		} else if (pos == 12 && max == 14) {
-			iterativePrecomputedLoopBody<14, max>(storage, sum, product, index, values12);
+			iterativePrecomputedLoopBody<14, max, 2>(storage, sum, product, index, values12);
 		} else if (pos == 12 && max == 15) {
-			iterativePrecomputedLoopBody3<15, max>(storage, sum, product, index, values12to15);
-		} else if (pos == 12 && max >= 16) {
-			iterativePrecomputedLoopBody4<16, max>(storage, sum, product, index, values12To16);
+			iterativePrecomputedLoopBody<15, max, 3>(storage, sum, product, index, values12To15);
+		} else if (pos == 12 && max == 16) {
+			iterativePrecomputedLoopBody<16, max, 4>(storage, sum, product, index, values12To16);
 		} else if (pos == 16 && max >= 18) {
-			iterativePrecomputedLoopBody<18, max>(storage, sum, product, index, values16);
+			iterativePrecomputedLoopBody<18, max, 2>(storage, sum, product, index, values16);
 		} else {
 			product <<= 1;
 			sum += 2;
