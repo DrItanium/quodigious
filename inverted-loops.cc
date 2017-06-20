@@ -42,27 +42,36 @@ constexpr int numberOfDigitsForGivenWidth() noexcept {
 template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
 template<u64 width>
 constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
-u64 sums[numElements<2>] = { 0 };
+u64 sums2[numElements<2>] = { 0 };
 u64 sums3[numElements<3>] = { 0 };
 u64 sums4[numElements<4>] = { 0 };
+u64 sums5[numElements<5>] = { 0 };
+u64 sums6[numElements<6>] = { 0 };
+u64 sums7[numElements<7>] = { 0 };
 u64 sums8[numElements<8>] = { 0 };
-u64 products[numElements<2>] = { 0 };
+u64 products2[numElements<2>] = { 0 };
 u64 products3[numElements<3>] = { 0 };
 u64 products4[numElements<4>] = { 0 };
+u64 products5[numElements<5>] = { 0 };
+u64 products6[numElements<6>] = { 0 };
+u64 products7[numElements<7>] = { 0 };
 u64 products8[numElements<8>] = { 0 };
 u64 numbers2[numElements<2>] = { 0 };
 u64 numbers3[numElements<3>] = { 0 };
 u64 numbers4[numElements<4>] = { 0 };
+u64 numbers5[numElements<5>] = { 0 };
+u64 numbers6[numElements<6>] = { 0 };
+u64 numbers7[numElements<7>] = { 0 };
 u64 numbers8[numElements<8>] = { 0 };
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
     static_assert(width >= 0, "Can't have negative width!");
     return input * fastPow10<width>;
 }
-void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
-    auto* sumPtr = sums;
-    auto* prodPtr = products;
-    auto* numPtr = numbers;
+void populateWidth2() noexcept {
+    auto* sumPtr = sums2;
+    auto* prodPtr = products2;
+    auto* numPtr = numbers2;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
             auto numberOuter = makeDigitAt<1>(i);
@@ -80,10 +89,10 @@ void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
     }
 }
 
-void populateWidth3(u64* sums, u64* products, u64* numbers) noexcept {
-    auto* sumPtr = sums;
-    auto* prodPtr = products;
-    auto* numPtr = numbers;
+void populateWidth3() noexcept {
+    auto* sumPtr = sums3;
+    auto* prodPtr = products3;
+    auto* numPtr = numbers3;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
             auto iNum = makeDigitAt<2>(i);
@@ -108,10 +117,10 @@ void populateWidth3(u64* sums, u64* products, u64* numbers) noexcept {
     }
 }
 
-void populateWidth4(u64* sums, u64* products, u64* numbers) noexcept {
-    auto* numPtr = numbers;
-    auto* sumPtr = sums;
-    auto* prodPtr = products;
+void populateWidth4() noexcept {
+    auto* numPtr = numbers4;
+    auto* sumPtr = sums4;
+    auto* prodPtr = products4;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
             auto iNum = makeDigitAt<3>(i);
@@ -143,7 +152,7 @@ void populateWidth4(u64* sums, u64* products, u64* numbers) noexcept {
     }
 }
 
-void populateWidth8(u64* sums4, u64* products4, u64* numbers4, u64* sums8, u64* products8, u64* numbers8) noexcept {
+void populateWidth8() noexcept {
     auto* s8 = sums8;
     auto* p8 = products8;
     auto* n8 = numbers8;
@@ -173,10 +182,10 @@ u64 values4To12[numElements<8>] = { 0 };
 u64 values12To16[numElements<4>] = { 0 };
 
 void setup() noexcept {
-    populateWidth2(sums, products, numbers2);
-    populateWidth3(sums3, products3, numbers3);
-    populateWidth4(sums4, products4, numbers4);
-    populateWidth8(sums4, products4, numbers4, sums8, products8, numbers8);
+    populateWidth2();
+    populateWidth3();
+    populateWidth4();
+    populateWidth8();
     auto* n2ptr = numbers2;
     auto* v2 = values2;
     auto* v16 = values16;
@@ -230,7 +239,7 @@ void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 pro
 }
 template<u64 nextPosition, u64 max>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<2>>(storage, sum, product, index, precomputedValues, sums, products);
+	iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<2>>(storage, sum, product, index, precomputedValues, sums2, products2);
 }
 template<u64 nextPosition, u64 max>
 inline void iterativePrecomputedLoopBody3(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
@@ -282,8 +291,8 @@ struct ActualLoopBody {
 		auto originalProduct = product;
 		if (pos == 2) {
 			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
-			auto* ptrSum = sums;
-			auto* ptrProd = products;
+			auto* ptrSum = sums2;
+			auto* ptrProd = products2;
 			auto* ptrVals = values2;
 			auto first = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			decltype(first) watcher[48];
