@@ -69,20 +69,24 @@ constexpr u64 makeDigitAt(u64 input) noexcept {
     return input * fastPow10<width>;
 }
 void populateWidth2() noexcept {
-    auto* sumPtr = sums2;
-    auto* prodPtr = products2;
-    auto* numPtr = numbers2;
-    for (int i = 2; i < 10; ++i) {
-        if (i != 5) {
-            auto numberOuter = makeDigitAt<1>(i);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    *sumPtr = i + j;
-                    *prodPtr = i * j;
-                    *numPtr = numberOuter + j;
-                    ++sumPtr;
-                    ++prodPtr;
-                    ++numPtr;
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        auto* sumPtr = sums2;
+        auto* prodPtr = products2;
+        auto* numPtr = numbers2;
+        for (int i = 2; i < 10; ++i) {
+            if (i != 5) {
+                auto numberOuter = makeDigitAt<1>(i);
+                for (int j = 2; j < 10; ++j) {
+                    if (j != 5) {
+                        *sumPtr = i + j;
+                        *prodPtr = i * j;
+                        *numPtr = numberOuter + j;
+                        ++sumPtr;
+                        ++prodPtr;
+                        ++numPtr;
+                    }
                 }
             }
         }
@@ -90,25 +94,29 @@ void populateWidth2() noexcept {
 }
 
 void populateWidth3() noexcept {
-    auto* sumPtr = sums3;
-    auto* prodPtr = products3;
-    auto* numPtr = numbers3;
-    for (int i = 2; i < 10; ++i) {
-        if (i != 5) {
-            auto iNum = makeDigitAt<2>(i);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    auto jSum = i + j;
-                    auto jProd = i * j;
-                    auto jNum = makeDigitAt<1>(j) + iNum;
-                    for (int k = 2; k < 10; ++k) {
-                        if (k != 5) {
-                            *sumPtr = jSum + k;
-                            *prodPtr = jProd * k;
-                            *numPtr = jNum + k;
-                            ++sumPtr;
-                            ++prodPtr;
-                            ++numPtr;
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        auto* sumPtr = sums3;
+        auto* prodPtr = products3;
+        auto* numPtr = numbers3;
+        for (int i = 2; i < 10; ++i) {
+            if (i != 5) {
+                auto iNum = makeDigitAt<2>(i);
+                for (int j = 2; j < 10; ++j) {
+                    if (j != 5) {
+                        auto jSum = i + j;
+                        auto jProd = i * j;
+                        auto jNum = makeDigitAt<1>(j) + iNum;
+                        for (int k = 2; k < 10; ++k) {
+                            if (k != 5) {
+                                *sumPtr = jSum + k;
+                                *prodPtr = jProd * k;
+                                *numPtr = jNum + k;
+                                ++sumPtr;
+                                ++prodPtr;
+                                ++numPtr;
+                            }
                         }
                     }
                 }
@@ -118,30 +126,34 @@ void populateWidth3() noexcept {
 }
 
 void populateWidth4() noexcept {
-    auto* numPtr = numbers4;
-    auto* sumPtr = sums4;
-    auto* prodPtr = products4;
-    for (int i = 2; i < 10; ++i) {
-        if (i != 5) {
-            auto iNum = makeDigitAt<3>(i);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    auto jSum = i + j;
-                    auto jProd = i * j;
-                    auto jNum = iNum + makeDigitAt<2>(j);
-                    for (int k = 2; k < 10; ++k) {
-                        if (k != 5) {
-                            auto kSum = k + jSum;
-                            auto kProd = k * jProd;
-                            auto kNum = jNum + makeDigitAt<1>(k);
-                            for (int m = 2; m < 10; ++m) {
-                                if (m != 5) {
-                                    *sumPtr = kSum + m;
-                                    *prodPtr = kProd * m;
-                                    *numPtr = kNum + m;
-                                    ++sumPtr;
-                                    ++prodPtr;
-                                    ++numPtr;
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        auto* numPtr = numbers4;
+        auto* sumPtr = sums4;
+        auto* prodPtr = products4;
+        for (int i = 2; i < 10; ++i) {
+            if (i != 5) {
+                auto iNum = makeDigitAt<3>(i);
+                for (int j = 2; j < 10; ++j) {
+                    if (j != 5) {
+                        auto jSum = i + j;
+                        auto jProd = i * j;
+                        auto jNum = iNum + makeDigitAt<2>(j);
+                        for (int k = 2; k < 10; ++k) {
+                            if (k != 5) {
+                                auto kSum = k + jSum;
+                                auto kProd = k * jProd;
+                                auto kNum = jNum + makeDigitAt<1>(k);
+                                for (int m = 2; m < 10; ++m) {
+                                    if (m != 5) {
+                                        *sumPtr = kSum + m;
+                                        *prodPtr = kProd * m;
+                                        *numPtr = kNum + m;
+                                        ++sumPtr;
+                                        ++prodPtr;
+                                        ++numPtr;
+                                    }
                                 }
                             }
                         }
@@ -152,21 +164,105 @@ void populateWidth4() noexcept {
     }
 }
 
+void populateWidth5() noexcept {
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        populateWidth4();
+        auto* numPtr = numbers5;
+        auto* sumPtr = sums5;
+        auto* prodPtr = products5;
+        for (int i = 0; i < numElements<4>; ++i) {
+            auto s4 = sums4[i];
+            auto p4 = products4[i];
+            auto n4 = makeDigitAt<1>(numbers4[i]);
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *numPtr = n4 + j;
+                    *sumPtr = s4 + j;
+                    *prodPtr = p4 + j;
+                    ++numPtr;
+                    ++sumPtr;
+                    ++prodPtr;
+                }
+            }
+        }
+    }
+}
+
+void populateWidth6() noexcept {
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        populateWidth5();
+        auto* numPtr = numbers6;
+        auto* sumPtr = sums6;
+        auto* prodPtr = products6;
+        for (int i = 0; i < numElements<5>; ++i) {
+            auto s5 = sums5[i];
+            auto p5 = products5[i];
+            auto n5 = makeDigitAt<1>(numbers5[i]);
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *numPtr = n5 + j;
+                    *sumPtr = s5 + j;
+                    *prodPtr = p5 + j;
+                    ++numPtr;
+                    ++sumPtr;
+                    ++prodPtr;
+                }
+            }
+        }
+    }
+}
+
+void populateWidth7() noexcept {
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        populateWidth6();
+        auto* numPtr = numbers7;
+        auto* sumPtr = sums7;
+        auto* prodPtr = products7;
+        for (int i = 0; i < numElements<6>; ++i) {
+            auto s6 = sums6[i];
+            auto p6 = products6[i];
+            auto n6 = makeDigitAt<1>(numbers6[i]);
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *numPtr = n6 + j;
+                    *sumPtr = s6 + j;
+                    *prodPtr = p6 + j;
+                    ++numPtr;
+                    ++sumPtr;
+                    ++prodPtr;
+                }
+            }
+        }
+    }
+}
+
+
 void populateWidth8() noexcept {
-    auto* s8 = sums8;
-    auto* p8 = products8;
-    auto* n8 = numbers8;
-    for (auto i = 0; i < numElements<4>; ++i) {
-        auto os = sums4[i];
-        auto op = products4[i];
-        auto on = numbers4[i] * fastPow10<4>;
-        for (auto j = 0; j < numElements<4>; ++j) {
-            *s8 = os + sums4[j];
-            *p8 = op * products4[j];
-            *n8 = on + numbers4[j];
-            ++s8;
-            ++p8;
-            ++n8;
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        populateWidth4();
+        auto* s8 = sums8;
+        auto* p8 = products8;
+        auto* n8 = numbers8;
+        for (auto i = 0; i < numElements<4>; ++i) {
+            auto os = sums4[i];
+            auto op = products4[i];
+            auto on = numbers4[i] * fastPow10<4>;
+            for (auto j = 0; j < numElements<4>; ++j) {
+                *s8 = os + sums4[j];
+                *p8 = op * products4[j];
+                *n8 = on + numbers4[j];
+                ++s8;
+                ++p8;
+                ++n8;
+            }
         }
     }
 }
