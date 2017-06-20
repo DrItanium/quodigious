@@ -43,77 +43,37 @@ constexpr int numberOfDigitsForGivenWidth() noexcept {
 template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
 template<u64 width>
 constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
-u64 sums2[numElements<2>] = { 0 };
-u64 sums3[numElements<3>] = { 0 };
-u64 sums4[numElements<4>] = { 0 };
-u64 sums5[numElements<5>] = { 0 };
-u64 sums6[numElements<6>] = { 0 };
-u64 sums7[numElements<7>] = { 0 };
-u64 sums8[numElements<8>] = { 0 };
-u64 products2[numElements<2>] = { 0 };
-u64 products3[numElements<3>] = { 0 };
-u64 products4[numElements<4>] = { 0 };
-u64 products5[numElements<5>] = { 0 };
-u64 products6[numElements<6>] = { 0 };
-u64 products7[numElements<7>] = { 0 };
-u64 products8[numElements<8>] = { 0 };
-u64 numbers2[numElements<2>] = { 0 };
-u64 numbers3[numElements<3>] = { 0 };
-u64 numbers4[numElements<4>] = { 0 };
-u64 numbers5[numElements<5>] = { 0 };
-u64 numbers6[numElements<6>] = { 0 };
-u64 numbers7[numElements<7>] = { 0 };
-u64 numbers8[numElements<8>] = { 0 };
 
 template<u64 width>
 inline u64* getSums() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
     return nullptr;
 }
-#define defSum(width) \
-    template<> inline u64* getSums< width > () noexcept { return sums ## width ; }
-defSum(2);
-defSum(3);
-defSum(4);
-defSum(5);
-defSum(6);
-defSum(7);
-defSum(8);
-#undef defSum
-
 template<u64 width>
 inline u64* getProducts() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
     return nullptr;
 }
-
-#define defProduct(width) \
-    template<> inline u64* getProducts< width > () noexcept { return products ## width ; }
-defProduct(2);
-defProduct(3);
-defProduct(4);
-defProduct(5);
-defProduct(6);
-defProduct(7);
-defProduct(8);
-#undef defProduct
-
 template<u64 width>
 inline u64* getNumbers() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
     return nullptr;
 }
-
-#define defNumber(width) \
+#define defTripleStorage(width) \
+    u64 sums ## width [ numElements< width > ] = { 0 }; \
+    u64 products ## width [ numElements < width > ] = { 0 }; \
+    u64 numbers ## width [ numElements < width > ] = { 0 }; \
+    template<> inline u64* getSums< width > () noexcept { return sums ## width ; } \
+    template<> inline u64* getProducts< width > () noexcept { return products ## width ; } \
     template<> inline u64* getNumbers< width > () noexcept { return numbers ## width ; }
-defNumber(2);
-defNumber(3);
-defNumber(4);
-defNumber(5);
-defNumber(6);
-defNumber(7);
-defNumber(8);
-#undef defNumber
+defTripleStorage(2);
+defTripleStorage(3);
+defTripleStorage(4);
+defTripleStorage(5);
+defTripleStorage(6);
+defTripleStorage(7);
+defTripleStorage(8);
+#undef defTripleStorage
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
@@ -178,7 +138,6 @@ void populateWidth<2>() noexcept {
         }
     }
 }
-
 
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
