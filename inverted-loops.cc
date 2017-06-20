@@ -302,7 +302,6 @@ void populateWidth8() noexcept {
     }
 }
 
-
 u64 values16[numElements<2>] = { 0 };
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
@@ -313,13 +312,14 @@ u64 values12To17[numElements<5>] = { 0 };
 u64 values12To18[numElements<6>] = { 0 };
 u64 values12To19[numElements<7>] = { 0 };
 
-template<u64 width, u64 factor = 11>
+template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
     for (int i = 0; i < numElements<width>; ++i) {
         *storage = nums[i] * fastPow10<factor>;
         ++storage;
     }
 }
+
 void setup() noexcept {
     populateWidth2();
     populateWidth3();
@@ -373,9 +373,6 @@ struct ActualLoopBody {
 
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		constexpr auto next = fastPow10<pos - 1>;
-		constexpr auto follow = pos + 1;
-		auto originalProduct = product;
 		if (pos == 2) {
 			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
 			auto* ptrSum = sums2;
@@ -410,6 +407,9 @@ struct ActualLoopBody {
         } else if (pos == 12 && max == 19) {
             iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
 		} else {
+            constexpr auto next = fastPow10<pos - 1>;
+            constexpr auto follow = pos + 1;
+            auto originalProduct = product;
 			product <<= 1;
 			sum += 2;
 			index += multiply<2>(next);
@@ -476,7 +476,6 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-#ifndef SEQUENTIAL
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
@@ -484,14 +483,6 @@ inline void body(std::ostream& storage) noexcept {
 	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
 	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
-#else /* defined SEQUENTIAL */
-    // Execute each section sequentially, seems to give the same performance
-    // times as doing it all at once. We'll have to see as we go along
-	loopBody<2, length>(storage, 2, 2, 2);
-    loopBody<2, length>(storage, 4, 4, 4);
-    loopBody<2, length>(storage, 6, 6, 6);
-    loopBody<2, length>(storage, 8, 8, 8);
-#endif
 }
 
 int main() {
