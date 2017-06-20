@@ -34,13 +34,13 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	}
 	return 0;
 }
-template<int width>
+template<u64 width>
 constexpr int numberOfDigitsForGivenWidth() noexcept {
     static_assert(width >= 0, "Negative width doesn't make sense");
     return 7 * numberOfDigitsForGivenWidth<width - 1>();
 }
 template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
-template<int width>
+template<u64 width>
 constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
 u64 sums[numElements<2>] = { 0 };
 u64 sums3[numElements<3>] = { 0 };
@@ -54,13 +54,18 @@ u64 numbers2[numElements<2>] = { 0 };
 u64 numbers3[numElements<3>] = { 0 };
 u64 numbers4[numElements<4>] = { 0 };
 u64 numbers8[numElements<8>] = { 0 };
+template<u64 width>
+constexpr u64 makeDigitAt(u64 input) noexcept {
+    static_assert(width >= 0, "Can't have negative width!");
+    return input * fastPow10<width>;
+}
 void populateWidth2(u64* sums, u64* products, u64* numbers) noexcept {
     auto* sumPtr = sums;
     auto* prodPtr = products;
     auto* numPtr = numbers;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto numberOuter = i * fastPow<1>;
+            auto numberOuter = makeDigitAt<1>(i);
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     *sumPtr = i + j;
@@ -81,12 +86,12 @@ void populateWidth3(u64* sums, u64* products, u64* numbers) noexcept {
     auto* numPtr = numbers;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto iNum = i * fastPow10<2>;
+            auto iNum = makeDigitAt<2>(i);
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     auto jSum = i + j;
                     auto jProd = i * j;
-                    auto jNum = iNum + (j * fastPow10<1>);
+                    auto jNum = makeDigitAt<1>(j) + iNum;
                     for (int k = 2; k < 10; ++k) {
                         if (k != 5) {
                             *sumPtr = jSum + k;
@@ -109,17 +114,17 @@ void populateWidth4(u64* sums, u64* products, u64* numbers) noexcept {
     auto* prodPtr = products;
     for (int i = 2; i < 10; ++i) {
         if (i != 5) {
-            auto iNum = i * fastPow10<3>;
+            auto iNum = makeDigitAt<3>(i);
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     auto jSum = i + j;
                     auto jProd = i * j;
-                    auto jNum = (j * fastPow10<2>) + iNum;
+                    auto jNum = iNum + makeDigitAt<2>(j);
                     for (int k = 2; k < 10; ++k) {
                         if (k != 5) {
                             auto kSum = k + jSum;
                             auto kProd = k * jProd;
-                            auto kNum = (k * fastPow10<1>) + jNum;
+                            auto kNum = jNum + makeDigitAt<1>(k);
                             for (int m = 2; m < 10; ++m) {
                                 if (m != 5) {
                                     *sumPtr = kSum + m;
