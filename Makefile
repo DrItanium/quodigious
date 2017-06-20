@@ -27,9 +27,7 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
-QLOOPS_SINGLE_DIGIT_TOP = quodigious_single_top
-QLOOPS_INVERTED = quodigious_inverted
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_SINGLE_DIGIT_TOP} ${QLOOPS_INVERTED}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32}
 all: ${PROGS}
 
 help:
@@ -37,17 +35,11 @@ help:
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - quodigious: program to compute 64-bit quodigious values"
 	@echo "  - quodigious32: program to compute 32-bit quodigious values"
-	@echo "  - quodigious_single_top: Compute a quodigious number with a single top digit"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
 	@echo "  - timed_longer_tests: runs longer regression tests (more digits)"
 	@echo "  - clean : cleans the program artifacts"
-
-${QLOOPS_PROG}: loops.o
-	@echo -n Building 64-bit number quodigious ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} loops.o
-	@echo done.
 
 
 ${QLOOPS_PROG32}: loops32.o
@@ -55,16 +47,10 @@ ${QLOOPS_PROG32}: loops32.o
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
-${QLOOPS_SINGLE_DIGIT_TOP}: single_digit_top_level_loops.o
-	@echo -n Building 64-bit number quodigious with single digit top number ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_SINGLE_DIGIT_TOP} single_digit_top_level_loops.o
-	@echo done.
-
-${QLOOPS_INVERTED}: inverted-loops.o
+${QLOOPS_PROG}: inverted-loops.o
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_INVERTED} inverted-loops.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
 	@echo done.
-
 
 timed_tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
@@ -100,7 +86,7 @@ clean:
 	@rm -rf *.o ${PROGS}
 	@echo done.
 
-loops.o: qlib.h
+inverted-loops.o: qlib.h
 
 loops32.o: qlib.h
 
