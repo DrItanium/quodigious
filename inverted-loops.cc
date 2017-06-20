@@ -188,12 +188,8 @@ template<u64 nextPosition, u64 max, u64 count, u64 width>
 void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
 	auto* ptrSum = getSums<width>();
 	auto* ptrProd = getProducts<width>();
-	auto* ptrVals = values;
-	for (int i = 0; i < count; ++i) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*ptrVals));
-		++ptrSum;
-		++ptrProd;
-		++ptrVals;
+	for (int i = 0; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
+		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
 	}
 }
 template<u64 nextPosition, u64 max, u64 width>
@@ -224,7 +220,7 @@ struct ActualLoopBody {
 			++ptrSum;
 			++ptrProd;
 			++ptrVals;
-			for (int i = 1; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
+			for (int i = 0; i < 48; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			}
 			w = watcher;
@@ -232,7 +228,7 @@ struct ActualLoopBody {
 			for (int i = 0; i < 48; ++i, ++w) {
 				storage << w->get();
 			}
-		} else if (pos == 4) {
+		} else if (pos == 4 && max >= 12) {
 			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
 		} else if (pos == 12 && max == 14) {
 			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12To14);
@@ -272,30 +268,26 @@ struct ActualLoopBody<true> {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
 		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-		if (max == 15) {
-			merge(innerMostBody(sum, product, index));
-		} else {
-			constexpr auto next = fastPow10<pos - 1>;
-			auto originalProduct = product;
-			product <<= 1;
-			sum += 2;
-			index += multiply<2>(next);
-			auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-			merge(innerMostBody(sum, product, index)); // 2
-			advance();
-			merge(innerMostBody(sum, product, index)); // 3
-			advance();
-			merge(innerMostBody(sum, product, index)); // 4
-			advance();
-			advance();
-			merge(innerMostBody(sum, product, index)); // 6
-			advance();
-			merge(innerMostBody(sum, product, index)); // 7
-			advance();
-			merge(innerMostBody(sum, product, index)); // 8
-			advance();
-			merge(innerMostBody(sum, product, index)); // 9
-		}
+        constexpr auto next = fastPow10<pos - 1>;
+        auto originalProduct = product;
+        product <<= 1;
+        sum += 2;
+        index += multiply<2>(next);
+        auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
+        merge(innerMostBody(sum, product, index)); // 2
+        advance();
+        merge(innerMostBody(sum, product, index)); // 3
+        advance();
+        merge(innerMostBody(sum, product, index)); // 4
+        advance();
+        advance();
+        merge(innerMostBody(sum, product, index)); // 6
+        advance();
+        merge(innerMostBody(sum, product, index)); // 7
+        advance();
+        merge(innerMostBody(sum, product, index)); // 8
+        advance();
+        merge(innerMostBody(sum, product, index)); // 9
 	}
 };
 
