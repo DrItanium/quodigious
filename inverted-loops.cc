@@ -181,7 +181,7 @@ void setup() noexcept {
 
 
 template<u64 pos, u64 max>
-void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
+inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
 template<u64 nextPosition, u64 max, u64 count, u64 width>
@@ -196,6 +196,9 @@ template<u64 nextPosition, u64 max, u64 width>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
     iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
+
+template<> inline void loopBody<12, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<12, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
 
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
@@ -325,6 +328,8 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
+                case 10: body<10>(storage); break;
+                case 11: body<11>(storage); break;
                 case 12: body<12>(storage); break;
                 case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
