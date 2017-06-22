@@ -256,7 +256,7 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 }
 template<u64 length>
 inline void body(std::ostream& storage, std::istream& input) noexcept {
-    static_assert(length >= 16 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
+    static_assert(length >= 18 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
     int innerThreadId = 0;
     input >> innerThreadId;
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
