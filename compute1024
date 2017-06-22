@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {0..1023}
+do
+    ./compute_work_unit.sh $1 $i
+done
