@@ -323,6 +323,20 @@ template<u64 length>
 inline std::string smallBody(int threadId, u64 sum, u64 product, u64 number) noexcept {
     return loopBodyString<12, length>(sum + sums2[threadId], product * products2[threadId], number + values2To4[threadId]);
 }
+template<u64 length, u64 pos>
+std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
+    std::ostringstream str;
+    auto s2 = sums2;
+    auto p2 = products2;
+    auto n2 = values2To4;
+    auto sum = pos + s;
+    auto product = p * pos;
+    auto num = n + pos;
+    for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
+        loopBody<12, length>(str, *s2 + sum, *p2 * product, *n2 + num);
+    }
+    return str.str();
+}
 template<u64 length>
 inline void body(std::ostream& storage, std::istream& input) noexcept {
     static_assert(length >= 16 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
@@ -345,35 +359,29 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
         std::cerr << "Hit end of input prematurely!" << std::endl;
         return;
     }
-    auto outerSum = sums8[innerThreadId];
-    auto outerProd = sums8[innerThreadId];
-    auto outerNumber = values4To12[innerThreadId];
-    auto os2 = outerSum + 2;
-    auto op2 = outerProd * 2;
-    auto on2 = outerNumber + 2;
-    auto os4 = outerSum + 4;
-    auto op4 = outerProd * 4;
-    auto on4 = outerNumber + 4;
-    auto os6 = outerSum + 6;
-    auto op6 = outerProd * 6;
-    auto on6 = outerNumber + 6;
-    auto os8 = outerSum + 8;
-    auto op8 = outerProd * 8;
-    auto on8 = outerNumber + 8;
-    auto s2 = sums2;
-    auto p2 = products2;
-    auto v2 = values2To4;
-    for ( int i =0; i < numElements<2>; ++i, ++s2, ++p2, ++v2) {
-        auto ss = *s2;
-        auto pp = *p2;
-        auto vv = *v2;
-        auto p0 = std::async(std::launch::async, loopBodyString<12, length>, os2 + ss, op2 * pp, on2 + vv);
-        auto p1 = std::async(std::launch::async, loopBodyString<12, length>, os4 + ss, op4 * pp, on4 + vv);
-        auto p2 = std::async(std::launch::async, loopBodyString<12, length>, os6 + ss, op6 * pp, on6 + vv);
-        auto p3 = std::async(std::launch::async, loopBodyString<12, length>, os8 + ss, op8 * pp, on8 + vv);
-        storage << p0.get() << p1.get() << p2.get() << p3.get();
-        //storage << smallBody<length>(i, os2, op2, on2) << smallBody<length>(i, os4, op4, on4) << smallBody<length>(i, os6, op6, on6) << smallBody<length>(i, os8, op8, on8);
-    }
+    auto p0 = std::async(std::launch::async, fourthBody<length, 2>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
+    auto p1 = std::async(std::launch::async, fourthBody<length, 4>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
+    auto p2 = std::async(std::launch::async, fourthBody<length, 6>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
+    auto p3 = std::async(std::launch::async, fourthBody<length, 8>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
+    storage << p0.get() << p1.get() << p2.get() << p3.get();
+    //auto outerSum = sums8[innerThreadId];
+    //auto outerProd = sums8[innerThreadId];
+    //auto outerNumber = values4To12[innerThreadId];
+    //auto os2 = outerSum + 2;
+    //auto op2 = outerProd * 2;
+    //auto on2 = outerNumber + 2;
+    //auto os4 = outerSum + 4;
+    //auto op4 = outerProd * 4;
+    //auto on4 = outerNumber + 4;
+    //auto os6 = outerSum + 6;
+    //auto op6 = outerProd * 6;
+    //auto on6 = outerNumber + 6;
+    //auto os8 = outerSum + 8;
+    //auto op8 = outerProd * 8;
+    //auto on8 = outerNumber + 8;
+    //for ( int i =0; i < numElements<2>; ++i) {
+    //    storage << smallBody<length>(i, os2, op2, on2) << smallBody<length>(i, os4, op4, on4) << smallBody<length>(i, os6, op6, on6) << smallBody<length>(i, os8, op8, on8);
+    //}
 }
 
 int main() {
