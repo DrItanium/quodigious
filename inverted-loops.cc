@@ -310,7 +310,7 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
+    static_assert(length <= 17, "Can't have numbers over 19 digits at this time!");
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
@@ -318,6 +318,38 @@ inline void body(std::ostream& storage) noexcept {
 	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
 	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
+}
+
+template<u64 length>
+inline void body(std::ostream& storage, std::istream& input) noexcept {
+    static_assert(length >= 18 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
+    int index = 0;
+    int threadId = 0;
+    input >> index;
+    switch(index) {
+        case 2:
+        case 4:
+        case 6:
+        case 8:
+            break;
+        default:
+            std::cerr << "Last digit index must be 2,4,6, or 8" << std::endl;
+            return;
+    }
+    if (!input.good()) {
+        std::cerr << "Hit end of input prematurely!" << std::endl;
+        return;
+    }
+    input >> threadId;
+    if (threadId < 0 || threadId > 48) {
+        std::cerr << "Illegal thread id, must be in the range [0,48]" << std::endl;
+        return;
+    }
+    if (!input.good()) {
+        std::cerr << "Hit end of input prematurely!" << std::endl;
+        return;
+    }
+
 }
 
 int main() {
@@ -336,8 +368,8 @@ int main() {
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
                 case 17: body<17>(storage); break;
-                case 18: body<18>(storage); break;
-                case 19: body<19>(storage); break;
+                case 18: body<18>(storage, std::cin); break;
+                case 19: body<19>(storage, std::cin); break;
                 default:
                          std::cerr << "Illegal index " << currentIndex << std::endl;
                          return 1;
