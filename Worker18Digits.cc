@@ -130,7 +130,6 @@ void populateWidth<2>() noexcept {
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
 u64 values12To18[numElements<6>] = { 0 };
-u64 values12To19[numElements<7>] = { 0 };
 
 template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
@@ -148,12 +147,10 @@ inline void populateArray(u64* storage) noexcept {
 void setup() noexcept {
     populateWidth<2>();
     populateWidth<6>();
-    populateWidth<7>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
     populateArray<6, 11>(values12To18);
-    populateArray<7, 11>(values12To19);
 }
 
 
@@ -185,8 +182,6 @@ struct ActualLoopBody {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
         if (pos == 12 && max == 18) {
             iterativePrecomputedLoopBody<max, max, 6>(storage, sum, product, index, values12To18);
-        } else if (pos == 12 && max == 19) {
-            iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
 		} else {
             constexpr auto next = fastPow10<pos - 1>;
             constexpr auto follow = pos + 1;
@@ -243,20 +238,17 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
 	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
 }
 
-template<u64 length>
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
     auto s2 = getSums<2>();
     auto p2 = getProducts<2>();
     auto n2 = values2To4;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        loopBody<12, length>(str, *s2 + s, *p2 * p, *n2 + n);
+        loopBody<12, 18>(str, *s2 + s, *p2 * p, *n2 + n);
     }
     return str.str();
 }
-template<u64 length>
 inline void body(std::ostream& storage, std::istream& input) noexcept {
-    static_assert(length >= 18 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
     int innerThreadId = 0;
     input >> innerThreadId;
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
@@ -269,10 +261,10 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
     auto sum = getSums<8>()[innerThreadId];
     auto prod = getProducts<8>()[innerThreadId];
     auto num = values4To12[innerThreadId];
-    auto p0 = std::async(std::launch::async, fourthBody<length>, 2 + sum, 2 * prod, 2 + num);
-    auto p1 = std::async(std::launch::async, fourthBody<length>, 4 + sum, 4 * prod, 4 + num);
-    auto p2 = std::async(std::launch::async, fourthBody<length>, 6 + sum, 6 * prod, 6 + num);
-    auto p3 = std::async(std::launch::async, fourthBody<length>, 8 + sum, 8 * prod, 8 + num);
+    auto p0 = std::async(std::launch::async, fourthBody, 2 + sum, 2 * prod, 2 + num);
+    auto p1 = std::async(std::launch::async, fourthBody, 4 + sum, 4 * prod, 4 + num);
+    auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
+    auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
@@ -280,19 +272,9 @@ int main() {
     std::ostringstream storage;
 	setup();
     while(std::cin.good()) {
-        u64 currentIndex = 0;
-        std::cin >> currentIndex;
-        if (std::cin.good()) {
-            switch(currentIndex) {
-                case 18: body<18>(storage, std::cin); break;
-                case 19: body<19>(storage, std::cin); break;
-                default:
-                         std::cerr << "Illegal index " << currentIndex << std::endl;
-                         return 1;
-            }
-            std::cout << storage.str() << std::endl;
-            storage.str("");
-        }
+        body(storage, std::cin);
+        std::cout << storage.str() << std::endl;
+        storage.str("");
     }
     return 0;
 }
