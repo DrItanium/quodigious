@@ -319,9 +319,9 @@ inline void body(std::ostream& storage) noexcept {
 	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
-template<u64 length, u64 pos>
-inline std::string smallBody(int threadId, int innerThreadId) noexcept {
-    return loopBodyString<12, length>(pos + sums2[threadId] + sums8[innerThreadId], pos * products2[threadId] * products8[innerThreadId], pos + values2To4[threadId] + values4To12[innerThreadId]);
+template<u64 length>
+inline std::string smallBody(int threadId, u64 sum, u64 product, u64 number) noexcept {
+    return loopBodyString<12, length>(sum + sums2[threadId], product * products2[threadId], number + values2To4[threadId]);
 }
 template<u64 length>
 inline void body(std::ostream& storage, std::istream& input) noexcept {
@@ -350,8 +350,23 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
 	//auto p2 = std::async(std::launch::async, loopBodyString<12, 16>, 6 + sums2[threadId] + sums8[innerThreadId], 6 * products2[threadId] * products8[innerThreadId], 6 + values2To4[threadId] + values4To12[innerThreadId]);
 	//auto p3 = std::async(std::launch::async, loopBodyString<12, 16>, 8 + sums2[threadId] + sums8[innerThreadId], 8 * products2[threadId] * products8[innerThreadId], 8 + values2To4[threadId] + values4To12[innerThreadId]);
     //storage << p0.get() << p1.get() << p2.get() << p3.get();
+    auto outerSum = sums8[innerThreadId];
+    auto outerProd = sums8[innerThreadId];
+    auto outerNumber = values4To12[innerThreadId];
+    auto os2 = outerSum + 2;
+    auto op2 = outerProd * 2;
+    auto on2 = outerNumber + 2;
+    auto os4 = outerSum + 4;
+    auto op4 = outerProd * 4;
+    auto on4 = outerNumber + 4;
+    auto os6 = outerSum + 6;
+    auto op6 = outerProd * 6;
+    auto on6 = outerNumber + 6;
+    auto os8 = outerSum + 8;
+    auto op8 = outerProd * 8;
+    auto on8 = outerNumber + 8;
     for ( int i =0; i < numElements<2>; ++i) {
-        storage << smallBody<length, 2>(i, innerThreadId) << smallBody<length, 4>(i, innerThreadId) << smallBody<length, 6>(i, innerThreadId) << smallBody<length, 8>(i, innerThreadId);
+        storage << smallBody<length>(i, os2, op2, on2) << smallBody<length>(i, os4, op4, on4) << smallBody<length>(i, os6, op6, on6) << smallBody<length>(i, os8, op8, on8);
     }
 }
 
