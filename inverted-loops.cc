@@ -320,17 +320,14 @@ inline void body(std::ostream& storage) noexcept {
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
-template<u64 length, u64 pos>
+template<u64 length>
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
     auto s2 = sums2;
     auto p2 = products2;
     auto n2 = values2To4;
-    auto sum = pos + s;
-    auto product = p * pos;
-    auto num = n + pos;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        loopBody<12, length>(str, *s2 + sum, *p2 * product, *n2 + num);
+        loopBody<12, length>(str, *s2 + s, *p2 * p, *n2 + n);
     }
     return str.str();
 }
@@ -346,10 +343,13 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
         std::cerr << "Hit end of input prematurely!" << std::endl;
         return;
     }
-    auto p0 = std::async(std::launch::async, fourthBody<length, 2>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
-    auto p1 = std::async(std::launch::async, fourthBody<length, 4>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
-    auto p2 = std::async(std::launch::async, fourthBody<length, 6>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
-    auto p3 = std::async(std::launch::async, fourthBody<length, 8>, sums8[innerThreadId], products8[innerThreadId], values4To12[innerThreadId]);
+    auto sum = sums8[innerThreadId];
+    auto prod = products8[innerThreadId];
+    auto num = values4To12[innerThreadId];
+    auto p0 = std::async(std::launch::async, fourthBody<length>, 2 + sum, 2 * prod, 2 + num);
+    auto p1 = std::async(std::launch::async, fourthBody<length>, 4 + sum, 4 * prod, 4 + num);
+    auto p2 = std::async(std::launch::async, fourthBody<length>, 6 + sum, 6 * prod, 6 + num);
+    auto p3 = std::async(std::launch::async, fourthBody<length>, 8 + sum, 8 * prod, 8 + num);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
