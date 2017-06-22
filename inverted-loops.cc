@@ -310,7 +310,7 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 15, "Can't have numbers over 19 digits at this time!");
+    static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
@@ -320,38 +320,6 @@ inline void body(std::ostream& storage) noexcept {
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
-template<u64 length>
-std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
-    std::ostringstream str;
-    auto s2 = sums2;
-    auto p2 = products2;
-    auto n2 = values2To4;
-    for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        loopBody<12, length>(str, *s2 + s, *p2 * p, *n2 + n);
-    }
-    return str.str();
-}
-template<u64 length>
-inline void body(std::ostream& storage, std::istream& input) noexcept {
-    static_assert(length >= 16 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
-    int innerThreadId = 0;
-    input >> innerThreadId;
-    if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
-        std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
-    }
-    if (!input.good()) {
-        std::cerr << "Hit end of input prematurely!" << std::endl;
-        return;
-    }
-    auto sum = sums8[innerThreadId];
-    auto prod = products8[innerThreadId];
-    auto num = values4To12[innerThreadId];
-    auto p0 = std::async(std::launch::async, fourthBody<length>, 2 + sum, 2 * prod, 2 + num);
-    auto p1 = std::async(std::launch::async, fourthBody<length>, 4 + sum, 4 * prod, 4 + num);
-    auto p2 = std::async(std::launch::async, fourthBody<length>, 6 + sum, 6 * prod, 6 + num);
-    auto p3 = std::async(std::launch::async, fourthBody<length>, 8 + sum, 8 * prod, 8 + num);
-    storage << p0.get() << p1.get() << p2.get() << p3.get();
-}
 
 int main() {
     std::ostringstream storage;
@@ -367,10 +335,10 @@ int main() {
                 case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
                 case 15: body<15>(storage); break;
-                case 16: body<16>(storage, std::cin); break;
-                case 17: body<17>(storage, std::cin); break;
-                case 18: body<18>(storage, std::cin); break;
-                case 19: body<19>(storage, std::cin); break;
+                case 16: body<16>(storage); break;
+                case 17: body<17>(storage); break;
+                case 18: body<18>(storage); break;
+                case 19: body<19>(storage); break;
                 default:
                          std::cerr << "Illegal index " << currentIndex << std::endl;
                          return 1;
