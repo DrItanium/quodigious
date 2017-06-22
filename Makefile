@@ -27,14 +27,16 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32}
+WORKER_PROG = qworker
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER_PROG}
 all: ${PROGS}
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the quodigious programs "
-	@echo "  - quodigious: program to compute 64-bit quodigious values"
-	@echo "  - quodigious32: program to compute 32-bit quodigious values"
+	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
+	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
+	@echo "  - ${WORKER_PROG}: a worker program to compute part of a large number's space"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
@@ -50,6 +52,11 @@ ${QLOOPS_PROG32}: loops32.o
 ${QLOOPS_PROG}: inverted-loops.o
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
+	@echo done.
+
+${WORKER_PROG}: large-number-compute.o
+	@echo -n Building worker program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER_PROG} large-number-compute.o
 	@echo done.
 
 timed_tests: ${QLOOPS_PROG}
@@ -89,5 +96,7 @@ clean:
 inverted-loops.o: qlib.h
 
 loops32.o: qlib.h
+
+large-number-compute.o: qlib.h
 
 .PHONY: tests longer_tests
