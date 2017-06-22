@@ -349,7 +349,7 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
         std::cerr << "Hit end of input prematurely!" << std::endl;
         return;
     }
-
+    loopBody<4, length>(storage, index + sums2[threadId], index * products2[threadId], index + values2To4[threadId]);
 }
 
 int main() {
