@@ -254,10 +254,6 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
         std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
     }
-    if (!input.good()) {
-        std::cerr << "Hit end of input prematurely!" << std::endl;
-        return;
-    }
     auto sum = getSums<8>()[innerThreadId];
     auto prod = getProducts<8>()[innerThreadId];
     auto num = values4To12[innerThreadId];
