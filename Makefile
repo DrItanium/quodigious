@@ -27,8 +27,9 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
-WORKER_PROG = qworker
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER_PROG}
+WORKER18_PROG = qworker18
+WORKER19_PROG = qworker19
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG}
 all: ${PROGS}
 
 help:
@@ -36,7 +37,8 @@ help:
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
-	@echo "  - ${WORKER_PROG}: a worker program to compute part of a large number's space"
+	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
+	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
@@ -54,9 +56,14 @@ ${QLOOPS_PROG}: inverted-loops.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
 	@echo done.
 
-${WORKER_PROG}: large-number-compute.o
+${WORKER18_PROG}: Worker18Digits.o
 	@echo -n Building worker program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER_PROG} large-number-compute.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER18_PROG} Worker18Digits.o
+	@echo done.
+
+${WORKER19_PROG}: Worker19Digits.o
+	@echo -n Building worker program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
 timed_tests: ${QLOOPS_PROG}
@@ -97,6 +104,7 @@ inverted-loops.o: qlib.h
 
 loops32.o: qlib.h
 
-large-number-compute.o: qlib.h
+Worker18Digits.o: qlib.h
+Worker19Digits.o: qlib.h
 
 .PHONY: tests longer_tests
