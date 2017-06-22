@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo $1 $2 | ./quodigious
+echo $1 $2 | ./qworker

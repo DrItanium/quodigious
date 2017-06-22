@@ -141,8 +141,6 @@ void populateWidth<2>() noexcept {
 
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
-u64 values12To14[numElements<2>] = { 0 };
-u64 values12To15[numElements<3>] = { 0 };
 u64 values12To16[numElements<4>] = { 0 };
 u64 values12To17[numElements<5>] = { 0 };
 u64 values12To18[numElements<6>] = { 0 };
@@ -171,8 +169,6 @@ void setup() noexcept {
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
-    populateArray<2, 11>(values12To14);
-    populateArray<3, 11>(values12To15);
     populateArray<4, 11>(values12To16);
     populateArray<5, 11>(values12To17);
     populateArray<6, 11>(values12To18);
@@ -197,12 +193,6 @@ inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 pro
     iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
 
-template<> inline void loopBody<12, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
-template<> inline void loopBody<12, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
-
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
-
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
@@ -212,32 +202,7 @@ struct ActualLoopBody {
 
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		if (pos == 2) {
-			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
-			auto* ptrSum = sums2;
-			auto* ptrProd = products2;
-			auto* ptrVals = values2To4;
-			auto first = mkComputation(*ptrSum, *ptrProd, *ptrVals);
-			decltype(first) watcher[48];
-			auto* w = watcher;
-			++ptrSum;
-			++ptrProd;
-			++ptrVals;
-			for (int i = 0; i < 48; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
-				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
-			}
-			w = watcher;
-			storage << first.get();
-			for (int i = 0; i < 48; ++i, ++w) {
-				storage << w->get();
-			}
-		} else if (pos == 4 && max >= 12) {
-			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
-		} else if (pos == 12 && max == 14) {
-			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12To14);
-		} else if (pos == 12 && max == 15) {
-			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
-		} else if (pos == 12 && max == 16) {
+		if (pos == 12 && max == 16) {
 			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
         } else if (pos == 12 && max == 17) {
             iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
@@ -301,13 +266,6 @@ inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noe
 	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
 }
 
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
-	std::ostringstream storage;
-	loopBody<pos, max> (storage, sum, product, index);
-	return storage.str();
-}
-
 template<u64 length>
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
@@ -349,8 +307,6 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 16: body<16>(storage, std::cin); break;
-                case 17: body<17>(storage, std::cin); break;
                 case 18: body<18>(storage, std::cin); break;
                 case 19: body<19>(storage, std::cin); break;
                 default:

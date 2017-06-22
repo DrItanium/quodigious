@@ -337,8 +337,6 @@ int main() {
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
                 case 17: body<17>(storage); break;
-                case 18: body<18>(storage); break;
-                case 19: body<19>(storage); break;
                 default:
                          std::cerr << "Illegal index " << currentIndex << std::endl;
                          return 1;
