@@ -159,9 +159,6 @@ inline void populateArray(u64* storage) noexcept {
 
 void setup() noexcept {
     populateWidth<2>();
-    populateWidth<3>();
-    populateWidth<4>();
-    populateWidth<5>();
     populateWidth<6>();
     populateWidth<7>();
     populateWidth<8>();

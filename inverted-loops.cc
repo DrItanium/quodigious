@@ -164,8 +164,6 @@ void setup() noexcept {
     populateWidth<3>();
     populateWidth<4>();
     populateWidth<5>();
-    populateWidth<6>();
-    populateWidth<7>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
