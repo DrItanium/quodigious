@@ -345,19 +345,28 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
 template<>
 inline void body<16>(std::ostream& storage, std::istream& input) noexcept {
     int threadId = 0;
+    int innerThreadId = 0;
     input >> threadId;
-    if (threadId < 0 || threadId > 48) {
-        std::cerr << "Illegal thread id, must be in the range [0,48]" << std::endl;
+    if (threadId < 0 || threadId >= numElements<2>) {
+        std::cerr << "Illegal thread id, must be in the range [0," << numElements<2> - 1 << "]" << std::endl;
         return;
     }
     if (!input.good()) {
         std::cerr << "Hit end of input prematurely!" << std::endl;
         return;
     }
-	auto p0 = std::async(std::launch::async, loopBodyString<4, 16>, 2 + sums2[threadId], 2 * products2[threadId], 2 + values2To4[threadId]);
-	auto p1 = std::async(std::launch::async, loopBodyString<4, 16>, 4 + sums2[threadId], 4 * products2[threadId], 4 + values2To4[threadId]);
-	auto p2 = std::async(std::launch::async, loopBodyString<4, 16>, 6 + sums2[threadId], 6 * products2[threadId], 6 + values2To4[threadId]);
-	auto p3 = std::async(std::launch::async, loopBodyString<4, 16>, 8 + sums2[threadId], 8 * products2[threadId], 8 + values2To4[threadId]);
+    input >> innerThreadId;
+    if (innerThreadId < 0 || threadId >= numElements<8>) {
+        std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
+    }
+    if (!input.good()) {
+        std::cerr << "Hit end of input prematurely!" << std::endl;
+        return;
+    }
+	auto p0 = std::async(std::launch::async, loopBodyString<12, 16>, 2 + sums2[threadId] + sums8[innerThreadId], 2 * products2[threadId] * products8[innerThreadId], 2 + values2To4[threadId] + values4To12[innerThreadId]);
+	auto p1 = std::async(std::launch::async, loopBodyString<12, 16>, 4 + sums2[threadId] + sums8[innerThreadId], 4 * products2[threadId] * products8[innerThreadId], 4 + values2To4[threadId] + values4To12[innerThreadId]);
+	auto p2 = std::async(std::launch::async, loopBodyString<12, 16>, 6 + sums2[threadId] + sums8[innerThreadId], 6 * products2[threadId] * products8[innerThreadId], 6 + values2To4[threadId] + values4To12[innerThreadId]);
+	auto p3 = std::async(std::launch::async, loopBodyString<12, 16>, 8 + sums2[threadId] + sums8[innerThreadId], 8 * products2[threadId] * products8[innerThreadId], 8 + values2To4[threadId] + values4To12[innerThreadId]);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
