@@ -310,7 +310,7 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 17, "Can't have numbers over 19 digits at this time!");
+    static_assert(length <= 16, "Can't have numbers over 19 digits at this time!");
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
@@ -322,7 +322,7 @@ inline void body(std::ostream& storage) noexcept {
 
 template<u64 length>
 inline void body(std::ostream& storage, std::istream& input) noexcept {
-    static_assert(length >= 18 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
+    static_assert(length >= 17 && length < 20, "At this point in time only 18 and 19 digits are supported in this fashion");
     int index = 0;
     int threadId = 0;
     input >> index;
@@ -367,7 +367,7 @@ int main() {
                 case 14: body<14>(storage); break;
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
-                case 17: body<17>(storage); break;
+                case 17: body<17>(storage, std::cin); break;
                 case 18: body<18>(storage, std::cin); break;
                 case 19: body<19>(storage, std::cin); break;
                 default:
