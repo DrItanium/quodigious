@@ -145,8 +145,6 @@ u64 values12To14[numElements<2>] = { 0 };
 u64 values12To15[numElements<3>] = { 0 };
 u64 values12To16[numElements<4>] = { 0 };
 u64 values12To17[numElements<5>] = { 0 };
-u64 values12To18[numElements<6>] = { 0 };
-u64 values12To19[numElements<7>] = { 0 };
 
 template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
@@ -175,8 +173,6 @@ void setup() noexcept {
     populateArray<3, 11>(values12To15);
     populateArray<4, 11>(values12To16);
     populateArray<5, 11>(values12To17);
-    populateArray<6, 11>(values12To18);
-    populateArray<7, 11>(values12To19);
 }
 
 
@@ -241,10 +237,6 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
         } else if (pos == 12 && max == 17) {
             iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
-        } else if (pos == 12 && max == 18) {
-            iterativePrecomputedLoopBody<max, max, 6>(storage, sum, product, index, values12To18);
-        } else if (pos == 12 && max == 19) {
-            iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
 		} else {
             constexpr auto next = fastPow10<pos - 1>;
             constexpr auto follow = pos + 1;

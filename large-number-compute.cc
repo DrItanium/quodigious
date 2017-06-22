@@ -141,8 +141,6 @@ void populateWidth<2>() noexcept {
 
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
-u64 values12To16[numElements<4>] = { 0 };
-u64 values12To17[numElements<5>] = { 0 };
 u64 values12To18[numElements<6>] = { 0 };
 u64 values12To19[numElements<7>] = { 0 };
 
@@ -169,8 +167,6 @@ void setup() noexcept {
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
-    populateArray<4, 11>(values12To16);
-    populateArray<5, 11>(values12To17);
     populateArray<6, 11>(values12To18);
     populateArray<7, 11>(values12To19);
 }
@@ -202,11 +198,7 @@ struct ActualLoopBody {
 
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		if (pos == 12 && max == 16) {
-			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
-        } else if (pos == 12 && max == 17) {
-            iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
-        } else if (pos == 12 && max == 18) {
+        if (pos == 12 && max == 18) {
             iterativePrecomputedLoopBody<max, max, 6>(storage, sum, product, index, values12To18);
         } else if (pos == 12 && max == 19) {
             iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
