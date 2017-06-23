@@ -1,5 +1,5 @@
 #!/bin/bash
 
-for ((i=$1; i<=$2; i++)); do
-    ./compute18_work_unit.sh $1 > /srv/repo/data/quodigious/n18_wu$i
+for ((i=$1; j<=$2; j++)); do
+    ./compute18_work_unit.sh $j > /srv/repo/data/quodigious/n18_wu$j
 done
