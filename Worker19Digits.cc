@@ -154,97 +154,25 @@ void setup() noexcept {
 }
 
 
-template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
-
-
-template<u64 nextPosition, u64 max, u64 count, u64 width>
-void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
-	auto* ptrSum = getSums<width>();
-	auto* ptrProd = getProducts<width>();
-	for (int i = 0; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
-	}
-}
-template<u64 nextPosition, u64 max, u64 width>
-inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-    iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
-}
-
-template<bool topLevel>
-struct ActualLoopBody {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-        if (pos == 12 && max == 19) {
-            iterativePrecomputedLoopBody<max, max, 7>(storage, sum, product, index, values12To19);
-		} else {
-            constexpr auto next = fastPow10<pos - 1>;
-            constexpr auto follow = pos + 1;
-            auto originalProduct = product;
-			product <<= 1;
-			sum += 2;
-			index += multiply<2>(next);
-			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
-				if (i != 5) {
-					loopBody<follow, max>(storage, sum, product, index);
-				}
-			}
-		}
-	}
-};
-
-template<>
-struct ActualLoopBody<true> {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-        constexpr auto next = fastPow10<pos - 1>;
-        auto originalProduct = product;
-        product <<= 1;
-        sum += 2;
-        index += multiply<2>(next);
-        auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index)); // 2
-        advance();
-        merge(innerMostBody(sum, product, index)); // 3
-        advance();
-        merge(innerMostBody(sum, product, index)); // 4
-        advance();
-        advance();
-        merge(innerMostBody(sum, product, index)); // 6
-        advance();
-        merge(innerMostBody(sum, product, index)); // 7
-        advance();
-        merge(innerMostBody(sum, product, index)); // 8
-        advance();
-        merge(innerMostBody(sum, product, index)); // 9
-	}
-};
-
-template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos <= max, "Position can't be larger than maximum!");
-	// walk through two separate set of actions
-	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
-}
-
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
     auto s2 = getSums<2>();
     auto p2 = getProducts<2>();
     auto n2 = values2To4;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        loopBody<12, 19>(str, *s2 + s, *p2 * p, *n2 + n);
+        //loopBody<12, 19>(str, *s2 + s, *p2 * p, *n2 + n);
+		auto* pSum = getSums<8>();
+		auto* pProd = getProducts<8>();
+		auto* transition = values12To19;
+		auto sum = *s2 + s;
+		auto product = *p2 * p;
+		auto index = *n2 + n;
+		for (int i = 0; i < numElements<8>; ++i, ++pSum, ++pProd, ++transition) {
+			auto result = innerMostBody(sum + *pSum, product * *pProd, index + *transition);
+			if (result != 0) {
+				str << result << std::endl;
+			}
+		}
     }
     return str.str();
 }
@@ -253,6 +181,7 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
     input >> innerThreadId;
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
         std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
+		return;
     }
     auto sum = getSums<8>()[innerThreadId];
     auto prod = getProducts<8>()[innerThreadId];
