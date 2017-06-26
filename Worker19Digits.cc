@@ -125,7 +125,6 @@ void populateWidth<2>() noexcept {
 }
 
 u64 values2To4[numElements<2>] = { 0 };
-u64 values4To12[numElements<8>] = { 0 };
 u64 values12To19[numElements<8>] = { 0 };
 
 template<u64 width, u64 factor>
@@ -140,7 +139,6 @@ void setup() noexcept {
     populateWidth<2>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
-    populateArray<8, 3>(values4To12);
     populateArray<8, 11>(values12To19);
 }
 
@@ -185,9 +183,9 @@ int main() {
 	setup();
     auto sums = getSums<8>();
     auto products = getProducts<8>();
-    auto nums = values4To12;
+    auto nums = getNumbers<8>();
     auto mkBody = [sums, products, nums](auto index, auto offset) {
-        return std::async(std::launch::async, fourthBody, sums[index] + offset, products[index] * offset, nums[index] + offset);
+        return std::async(std::launch::async, fourthBody, sums[index] + offset, products[index] * offset, (nums[index] * fastPow10<3>) + offset);
     };
     while(std::cin.good()) {
         int innerThreadId = 0;
