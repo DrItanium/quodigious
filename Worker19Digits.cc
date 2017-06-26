@@ -160,7 +160,7 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 		auto sum = *s2 + s;
 		auto product = *p2 * p;
 		auto index = *n2 + n;
-		for (int i = 0; i < numElements<8>; ++i, ++pSum, ++pProd, ++transition) {
+		for (int j = 0; j < numElements<8>; ++j, ++pSum, ++pProd, ++transition) {
             auto result = index + *transition;
 			if (innerMostBody(sum + *pSum, product * *pProd, result)) {
 				str << result << std::endl;
