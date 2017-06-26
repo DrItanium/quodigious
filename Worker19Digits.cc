@@ -113,27 +113,15 @@ void populateWidth<2>() noexcept {
 template<u64 width>
 using Range = std::array<Triple, numElements<width>>;
 
+Triple range12To19[numElements<8>];
+Range<2> range2To4;
+
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
-    static bool init = true;
-    static Range<8> range12To19;
-    static Range<2> range2To4;
-    if (init) {
-        init = false;
-        auto t8 = getTriples<8>();
-        for (int i = 0; i < numElements<8>; ++i) {
-            auto tmp = t8[i];
-            range12To19[i] = Triple(getSum(tmp), getProduct(tmp), getNumber(tmp) * fastPow10<11>);
-        }
-        auto t2 = getTriples<2>();
-        for (int i = 0; i < numElements<2>; ++i) {
-            auto tmp = t2[i];
-            range2To4[i] = Triple(getSum(tmp), getProduct(tmp), getNumber(tmp) * fastPow10<1>);
-        }
-    }
     std::ostringstream str;
     auto out = range12To19;
     auto in = range2To4;
-    for (const auto& tmp : range12To19) {
+    for (int i =0; i < numElements<8>; ++i) {
+        auto tmp = out[i];
         auto sum = s + getSum(tmp);
         auto prod = p * getProduct(tmp);
         auto index = n + getNumber(tmp);
@@ -152,6 +140,14 @@ int main() {
     // setup the triples
     populateWidth<2>();
     populateWidth<8>();
+    auto t8 = getTriples<8>();
+    for (int i = 0; i < numElements<8>; ++i) {
+        range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
+    }
+    auto t2 = getTriples<2>();
+    for (int i = 0; i < numElements<2>; ++i) {
+        range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
+    }
     auto triples = getTriples<8>();
     auto mkBody = [triples](auto index, auto offset) {
         auto t = triples[index];
