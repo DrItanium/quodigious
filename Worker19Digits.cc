@@ -29,11 +29,8 @@
 inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
-inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-	if (checkValue(sum) && isQuodigious(value, sum, product)) {
-		return value;
-	}
-	return 0;
+inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+    return checkValue(sum) && isQuodigious(value, sum, product);
 }
 template<u64 width>
 constexpr int numberOfDigitsForGivenWidth() noexcept {
@@ -134,9 +131,8 @@ u64 values12To19[numElements<8>] = { 0 };
 template<u64 width, u64 factor>
 inline void populateArray(u64* storage) noexcept {
 	auto nums = getNumbers<width>();
-    for (int i = 0; i < numElements<width>; ++i) {
-        *storage = nums[i] * fastPow10<factor>;
-        ++storage;
+    for (int i = 0; i < numElements<width>; ++i, ++storage, ++nums) {
+        *storage = *nums * fastPow10<factor>;
     }
 }
 
@@ -155,7 +151,6 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     auto p2 = getProducts<2>();
     auto n2 = values2To4;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        //loopBody<12, 19>(str, *s2 + s, *p2 * p, *n2 + n);
 		auto* pSum = getSums<8>();
 		auto* pProd = getProducts<8>();
 		auto* transition = values12To19;
@@ -163,42 +158,34 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 		auto product = *p2 * p;
 		auto index = *n2 + n;
 		for (int i = 0; i < numElements<8>; ++i, ++pSum, ++pProd, ++transition) {
-			auto result = innerMostBody(sum + *pSum, product * *pProd, index + *transition);
-			if (result != 0) {
+            auto result = index + *transition;
+			if (innerMostBody(sum + *pSum, product * *pProd, result)) {
 				str << result << std::endl;
 			}
 		}
     }
     return str.str();
 }
-inline bool body(std::ostream& storage, std::istream& input) noexcept {
-    int innerThreadId = 0;
-	input >> innerThreadId;
-    if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
-        std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
-		return false;
-    }
-    auto sum = getSums<8>()[innerThreadId];
-    auto prod = getProducts<8>()[innerThreadId];
-    auto num = values4To12[innerThreadId];
-    auto p0 = std::async(std::launch::async, fourthBody, 2 + sum, 2 * prod, 2 + num);
-    auto p1 = std::async(std::launch::async, fourthBody, 4 + sum, 4 * prod, 4 + num);
-    auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
-    auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
-    storage << p0.get() << p1.get() << p2.get() << p3.get();
-	return true;
-}
 
 int main() {
-	int errorCode = 0;
 	std::stringstream collection;
 	setup();
     while(std::cin.good()) {
-		if (!body(collection, std::cin)) {
-			errorCode = 1;
-			break;
-		}
+        int innerThreadId = 0;
+        std::cin >> innerThreadId;
+        if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
+            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
+            return 1;
+        }
+        auto sum = getSums<8>()[innerThreadId];
+        auto prod = getProducts<8>()[innerThreadId];
+        auto num = values4To12[innerThreadId];
+        auto p0 = std::async(std::launch::async, fourthBody, 2 + sum, 2 * prod, 2 + num);
+        auto p1 = std::async(std::launch::async, fourthBody, 4 + sum, 4 * prod, 4 + num);
+        auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
+        auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
+        collection << p0.get() << p1.get() << p2.get() << p3.get();
     }
 	std::cout << collection.str() << std::endl;
-    return errorCode;
+    return 0;
 }
