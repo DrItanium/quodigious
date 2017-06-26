@@ -150,10 +150,13 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     auto s2 = getSums<2>();
     auto p2 = getProducts<2>();
     auto n2 = values2To4;
+    auto s8 = getSums<8>();
+    auto p8 = getProducts<8>();
+    auto n8 = values12To19;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-		auto* pSum = getSums<8>();
-		auto* pProd = getProducts<8>();
-		auto* transition = values12To19;
+		auto* pSum = s8;
+		auto* pProd = p8;
+		auto* transition = n8;
 		auto sum = *s2 + s;
 		auto product = *p2 * p;
 		auto index = *n2 + n;
