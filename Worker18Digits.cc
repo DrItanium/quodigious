@@ -129,114 +129,26 @@ void populateWidth<2>() noexcept {
 
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
-u64 values12To18[numElements<6>] = { 0 };
+u64 values12To18[numElements<7>] = { 0 };
 
 template<u64 width, u64 factor>
-inline void populateArray(u64* nums, u64* storage) noexcept {
+inline void populateArray(u64* storage) noexcept {
+	auto nums = getNumbers<width>();
     for (int i = 0; i < numElements<width>; ++i) {
         *storage = nums[i] * fastPow10<factor>;
         ++storage;
     }
 }
 
-template<u64 width, u64 factor>
-inline void populateArray(u64* storage) noexcept {
-    populateArray<width, factor>(getNumbers<width>(), storage);
-}
-
 void setup() noexcept {
     populateWidth<2>();
-    populateWidth<6>();
+    populateWidth<7>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
-    populateArray<6, 11>(values12To18);
+    populateArray<7, 11>(values12To18);
 }
 
-
-template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
-
-
-template<u64 nextPosition, u64 max, u64 count, u64 width>
-void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
-	auto* ptrSum = getSums<width>();
-	auto* ptrProd = getProducts<width>();
-	for (int i = 0; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
-	}
-}
-template<u64 nextPosition, u64 max, u64 width>
-inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-    iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
-}
-
-template<bool topLevel>
-struct ActualLoopBody {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-        if (pos == 12 && max == 18) {
-            iterativePrecomputedLoopBody<max, max, 6>(storage, sum, product, index, values12To18);
-		} else {
-            constexpr auto next = fastPow10<pos - 1>;
-            constexpr auto follow = pos + 1;
-            auto originalProduct = product;
-			product <<= 1;
-			sum += 2;
-			index += multiply<2>(next);
-			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
-				if (i != 5) {
-					loopBody<follow, max>(storage, sum, product, index);
-				}
-			}
-		}
-	}
-};
-
-template<>
-struct ActualLoopBody<true> {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-        constexpr auto next = fastPow10<pos - 1>;
-        auto originalProduct = product;
-        product <<= 1;
-        sum += 2;
-        index += multiply<2>(next);
-        auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index)); // 2
-        advance();
-        merge(innerMostBody(sum, product, index)); // 3
-        advance();
-        merge(innerMostBody(sum, product, index)); // 4
-        advance();
-        advance();
-        merge(innerMostBody(sum, product, index)); // 6
-        advance();
-        merge(innerMostBody(sum, product, index)); // 7
-        advance();
-        merge(innerMostBody(sum, product, index)); // 8
-        advance();
-        merge(innerMostBody(sum, product, index)); // 9
-	}
-};
-
-template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos <= max, "Position can't be larger than maximum!");
-	// walk through two separate set of actions
-	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
-}
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
@@ -244,15 +156,28 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     auto p2 = getProducts<2>();
     auto n2 = values2To4;
     for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-        loopBody<12, 18>(str, *s2 + s, *p2 * p, *n2 + n);
+		auto s7 = getSums<7>();
+		auto p7 = getProducts<7>();
+		auto n7 = values12To18;
+		auto sum = *s2 + s;
+		auto product = *p2 * p;
+		auto index = *n2 + n;
+		for (int j = 0; j < numElements<7>; ++j, ++s7, ++p7, ++n7) {
+			auto result = innerMostBody(sum + *s7, product * *p7, index + *n7);
+			if (result != 0) {
+				str << result << std::endl;
+			}
+		}
+        //loopBody<12, 18>(str, *s2 + s, *p2 * p, *n2 + n);
     }
     return str.str();
 }
-inline void body(std::ostream& storage, std::istream& input) noexcept {
+inline bool body(std::ostream& storage, std::istream& input) noexcept {
     int innerThreadId = 0;
     input >> innerThreadId;
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
         std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
+		return false;
     }
     auto sum = getSums<8>()[innerThreadId];
     auto prod = getProducts<8>()[innerThreadId];
@@ -262,15 +187,19 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
     auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
     auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
+	return true;
 }
 
 int main() {
+	int errorCode = 0;
     std::ostringstream storage;
 	setup();
     while(std::cin.good()) {
-        body(storage, std::cin);
-        std::cout << storage.str() << std::endl;
-        storage.str("");
+        if (!body(storage, std::cin)) {
+			errorCode = 1;
+			break;
+		}
     }
-    return 0;
+	std::cout << storage.str() << std::endl;
+    return errorCode;
 }
