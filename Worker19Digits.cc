@@ -152,8 +152,11 @@ template<> inline u64* getTransitionValues<8>() noexcept { return values12To19; 
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
-    constexpr auto outerElementWidth = 2;
-    constexpr auto innerElementWidth = 8;
+    constexpr auto outerElementWidth = 8;
+    constexpr auto innerElementWidth = 2;
+    static_assert((outerElementWidth + innerElementWidth) == 10, "The outer element width and inner element widths are not correct!");
+    static_assert(outerElementWidth == 8 || outerElementWidth == 2, "The outer element width is not 8 or 2!");
+    static_assert(innerElementWidth == 8 || innerElementWidth == 2, "The inner element width is not 8 or 2!");
     auto sO = getSums<outerElementWidth>();
     auto pO = getProducts<outerElementWidth>();
     auto nO = getTransitionValues<outerElementWidth>();
