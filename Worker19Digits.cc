@@ -132,21 +132,16 @@ u64 values4To12[numElements<8>] = { 0 };
 u64 values12To19[numElements<8>] = { 0 };
 
 template<u64 width, u64 factor>
-inline void populateArray(u64* nums, u64* storage) noexcept {
+inline void populateArray(u64* storage) noexcept {
+	auto nums = getNumbers<width>();
     for (int i = 0; i < numElements<width>; ++i) {
         *storage = nums[i] * fastPow10<factor>;
         ++storage;
     }
 }
 
-template<u64 width, u64 factor>
-inline void populateArray(u64* storage) noexcept {
-    populateArray<width, factor>(getNumbers<width>(), storage);
-}
-
 void setup() noexcept {
     populateWidth<2>();
-    populateWidth<7>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
@@ -176,12 +171,12 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     }
     return str.str();
 }
-inline void body(std::ostream& storage, std::istream& input) noexcept {
+inline bool body(std::ostream& storage, std::istream& input) noexcept {
     int innerThreadId = 0;
-    input >> innerThreadId;
+	input >> innerThreadId;
     if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
         std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
-		return;
+		return false;
     }
     auto sum = getSums<8>()[innerThreadId];
     auto prod = getProducts<8>()[innerThreadId];
@@ -191,15 +186,19 @@ inline void body(std::ostream& storage, std::istream& input) noexcept {
     auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
     auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
     storage << p0.get() << p1.get() << p2.get() << p3.get();
+	return true;
 }
 
 int main() {
-    std::ostringstream storage;
+	int errorCode = 0;
+	std::stringstream collection;
 	setup();
     while(std::cin.good()) {
-        body(storage, std::cin);
-        std::cout << storage.str() << std::endl;
-        storage.str("");
+		if (!body(collection, std::cin)) {
+			errorCode = 1;
+			break;
+		}
     }
-    return 0;
+	std::cout << collection.str() << std::endl;
+    return errorCode;
 }
