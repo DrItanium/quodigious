@@ -2,8 +2,7 @@
 //
 //  This software is provided 'as-is', without any express or implied
 //  warranty. In no event will the authors be held liable for any damages
-//  arising from the use of this software.
-//
+//  arising from the use of this software.  //
 //  Permission is granted to anyone to use this software for any purpose,
 //  including commercial applications, and to alter it and redistribute it
 //  freely, subject to the following restrictions:
@@ -26,6 +25,7 @@
 #include <map>
 #include "qlib.h"
 
+using Triple = std::tuple<u64, u64, u64>;
 inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
@@ -41,6 +41,7 @@ template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
 template<u64 width>
 constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
 
+/*
 template<u64 width>
 inline u64* getSums() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
@@ -59,6 +60,7 @@ inline u64* getNumbers() noexcept {
     static u64 numbers[numElements<width>] = { 0 };
     return numbers;
 }
+*/
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
@@ -67,30 +69,31 @@ constexpr u64 makeDigitAt(u64 input) noexcept {
 }
 
 template<u64 width>
+inline Triple* getTriples() noexcept {
+    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static Triple elements[numElements<width>];
+    return elements;
+}
+
+
+template<u64 width>
 void populateWidth() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
     static bool populated = false;
     if (!populated) {
         populated = true;
         populateWidth<width - 1>();
-        auto* numPtr = getNumbers<width>();
-        auto* sumPtr = getSums<width>();
-        auto* prodPtr = getProducts<width>();
-        auto* prevNum = getNumbers<width - 1>();
-        auto* prevSum = getSums<width - 1>();
-        auto* prevProd = getProducts<width - 1>();
+        auto* triple = getTriples<width>();
+        auto* prev = getTriples<width - 1>();
         for (int i = 0; i < numElements<width - 1>; ++i) {
-            auto s = prevSum[i];
-            auto p = prevProd[i];
-            auto n = makeDigitAt<1>(prevNum[i]);
+            auto tmp = prev[i];
+            auto s = std::get<0>(tmp);
+            auto p = std::get<1>(tmp);
+            auto n = makeDigitAt<1>(std::get<2>(tmp));
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
-                    *numPtr = n + j;
-                    *sumPtr = s + j;
-                    *prodPtr = p * j;
-                    ++numPtr;
-                    ++sumPtr;
-                    ++prodPtr;
+                    *triple = Triple(s + j, p * j, n + j);
+                    ++triple;
 
                 }
             }
@@ -103,20 +106,14 @@ void populateWidth<2>() noexcept {
     static bool populated = false;
     if (!populated) {
         populated = true;
-        auto* sumPtr = getSums<2>();
-        auto* prodPtr = getProducts<2>();
-        auto* numPtr = getNumbers<2>();
+        auto* triple = getTriples<2>();
         for (int i = 2; i < 10; ++i) {
             if (i != 5) {
                 auto numberOuter = makeDigitAt<1>(i);
                 for (int j = 2; j < 10; ++j) {
                     if (j != 5) {
-                        *sumPtr = i + j;
-                        *prodPtr = i * j;
-                        *numPtr = numberOuter + j;
-                        ++sumPtr;
-                        ++prodPtr;
-                        ++numPtr;
+                        *triple = Triple(i + j, i * j, numberOuter + j);
+                        ++triple;
                     }
                 }
             }
@@ -124,30 +121,39 @@ void populateWidth<2>() noexcept {
     }
 }
 
-u64 values2To4[numElements<2>] = { 0 };
-u64 values12To19[numElements<8>] = { 0 };
-
-template<u64 width, u64 factor>
-inline void populateArray(u64* storage) noexcept {
-	auto nums = getNumbers<width>();
-    for (int i = 0; i < numElements<width>; ++i, ++storage, ++nums) {
-        *storage = *nums * fastPow10<factor>;
-    }
-}
+//u64 values2To4[numElements<2>] = { 0 };
+//u64 values12To19[numElements<8>] = { 0 };
+Triple range12To19[numElements<8>];
+Triple range2To4[numElements<2>];
+//template<u64 width, u64 factor>
+//inline void populateArray(u64* storage) noexcept {
+//	auto nums = getNumbers<width>();
+//    for (int i = 0; i < numElements<width>; ++i, ++storage, ++nums) {
+//        *storage = *nums * fastPow10<factor>;
+//    }
+//}
 
 void setup() noexcept {
     populateWidth<2>();
     populateWidth<8>();
-    populateArray<2, 1>(values2To4);
-    populateArray<8, 11>(values12To19);
+    auto t8 = getTriples<8>();
+    for (int i = 0; i < numElements<8>; ++i) {
+        auto tmp = t8[i];
+        range12To19[i] = Triple(std::get<0>(tmp), std::get<1>(tmp), std::get<2>(tmp) * fastPow10<11>);
+    }
+    auto t2 = getTriples<2>();
+    for (int i = 0; i < numElements<2>; ++i) {
+        auto tmp = t2[i];
+        range2To4[i] = Triple(std::get<0>(tmp), std::get<1>(tmp), std::get<2>(tmp) * fastPow10<1>);
+    }
 }
 
-template<u64 width> inline u64* getTransitionValues() noexcept { return nullptr; }
+//template<u64 width> inline u64* getTransitionValues() noexcept { return nullptr; }
+//
+//template<> inline u64* getTransitionValues<2>() noexcept { return values2To4; }
+//template<> inline u64* getTransitionValues<8>() noexcept { return values12To19; }
 
-template<> inline u64* getTransitionValues<2>() noexcept { return values2To4; }
-template<> inline u64* getTransitionValues<8>() noexcept { return values12To19; }
-
-
+/*
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
     constexpr auto outerElementWidth = 8;
@@ -177,15 +183,36 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     }
     return str.str();
 }
+*/
+
+std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
+    std::ostringstream str;
+    auto out = range12To19;
+    auto in = range2To4;
+    for (int i = 0; i < numElements<8>; ++i, ++out) {
+        auto tmp = *out;
+        auto sum = s + std::get<0>(tmp);
+        auto prod = p * std::get<1>(tmp);
+        auto index = n + std::get<2>(tmp);
+        auto inner = in;
+        for (int j = 0; j < numElements<2>; ++j, ++inner) {
+            auto tmp2 = *inner;
+            auto result = index + std::get<2>(tmp2);
+            if (innerMostBody(sum + std::get<0>(tmp2), prod * std::get<1>(tmp2), result)) {
+                str << result << std::endl;
+            }
+        }
+    }
+    return str.str();
+}
 
 int main() {
 	std::stringstream collection;
 	setup();
-    auto sums = getSums<8>();
-    auto products = getProducts<8>();
-    auto nums = getNumbers<8>();
-    auto mkBody = [sums, products, nums](auto index, auto offset) {
-        return std::async(std::launch::async, fourthBody, sums[index] + offset, products[index] * offset, (nums[index] * fastPow10<3>) + offset);
+    auto triples = getTriples<8>();
+    auto mkBody = [triples](auto index, auto offset) {
+        auto t = triples[index];
+        return std::async(std::launch::async, fourthBody, std::get<0>(t) + offset, std::get<1>(t) * offset, (std::get<2>(t) * fastPow10<3>) + offset);
     };
     while(std::cin.good()) {
         int innerThreadId = 0;
