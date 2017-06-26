@@ -170,6 +170,12 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 int main() {
 	std::stringstream collection;
 	setup();
+    auto sums = getSums<8>();
+    auto products = getProducts<8>();
+    auto nums = values4To12;
+    auto mkBody = [sums, products, nums](auto index, auto offset) {
+        return std::async(std::launch::async, fourthBody, sums[index] + offset, products[index] * offset, nums[index] + offset);
+    };
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
@@ -177,13 +183,10 @@ int main() {
             std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
             return 1;
         }
-        auto sum = getSums<8>()[innerThreadId];
-        auto prod = getProducts<8>()[innerThreadId];
-        auto num = values4To12[innerThreadId];
-        auto p0 = std::async(std::launch::async, fourthBody, 2 + sum, 2 * prod, 2 + num);
-        auto p1 = std::async(std::launch::async, fourthBody, 4 + sum, 4 * prod, 4 + num);
-        auto p2 = std::async(std::launch::async, fourthBody, 6 + sum, 6 * prod, 6 + num);
-        auto p3 = std::async(std::launch::async, fourthBody, 8 + sum, 8 * prod, 8 + num);
+        auto p0 = mkBody(innerThreadId, 2);
+        auto p1 = mkBody(innerThreadId, 4);
+        auto p2 = mkBody(innerThreadId, 6);
+        auto p3 = mkBody(innerThreadId, 8);
         collection << p0.get() << p1.get() << p2.get() << p3.get();
     }
 	std::cout << collection.str() << std::endl;
