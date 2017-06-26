@@ -129,7 +129,7 @@ void populateWidth<2>() noexcept {
 
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To12[numElements<8>] = { 0 };
-u64 values12To19[numElements<7>] = { 0 };
+u64 values12To19[numElements<8>] = { 0 };
 
 template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
@@ -150,7 +150,7 @@ void setup() noexcept {
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
     populateArray<8, 3>(values4To12);
-    populateArray<7, 11>(values12To19);
+    populateArray<8, 11>(values12To19);
 }
 
 
