@@ -144,25 +144,32 @@ void setup() noexcept {
     populateArray<8, 11>(values12To19);
 }
 
+template<u64 width> inline u64* getTransitionValues() noexcept { return nullptr; }
+
+template<> inline u64* getTransitionValues<2>() noexcept { return values2To4; }
+template<> inline u64* getTransitionValues<8>() noexcept { return values12To19; }
+
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     std::ostringstream str;
-    auto s2 = getSums<2>();
-    auto p2 = getProducts<2>();
-    auto n2 = values2To4;
-    auto s8 = getSums<8>();
-    auto p8 = getProducts<8>();
-    auto n8 = values12To19;
-    for (int i = 0; i < numElements<2>; ++i, ++s2, ++p2, ++n2) {
-		auto* pSum = s8;
-		auto* pProd = p8;
-		auto* transition = n8;
-		auto sum = *s2 + s;
-		auto product = *p2 * p;
-		auto index = *n2 + n;
-		for (int j = 0; j < numElements<8>; ++j, ++pSum, ++pProd, ++transition) {
-            auto result = index + *transition;
-			if (innerMostBody(sum + *pSum, product * *pProd, result)) {
+    constexpr auto outerElementWidth = 2;
+    constexpr auto innerElementWidth = 8;
+    auto sO = getSums<outerElementWidth>();
+    auto pO = getProducts<outerElementWidth>();
+    auto nO = getTransitionValues<outerElementWidth>();
+    auto sI = getSums<innerElementWidth>();
+    auto pI = getProducts<innerElementWidth>();
+    auto nI = getTransitionValues<innerElementWidth>();
+    for (int i = 0; i < numElements<outerElementWidth>; ++i, ++sO, ++pO, ++nO) {
+		auto* sumInner = sI;
+		auto* productInner = pI;
+		auto* numberInner = nI;
+		auto sum = *sO + s;
+		auto product = *pO * p;
+		auto index = *nO + n;
+		for (int j = 0; j < numElements<innerElementWidth>; ++j, ++sumInner, ++productInner, ++numberInner) {
+            auto result = index + *numberInner;
+			if (innerMostBody(sum + *sumInner, product * *productInner, result)) {
 				str << result << std::endl;
 			}
 		}
