@@ -26,6 +26,16 @@
 #include "qlib.h"
 
 using Triple = std::tuple<u64, u64, u64>;
+
+inline u64 getSum(const Triple& in) noexcept {
+    return std::get<0>(in);
+}
+inline u64 getProduct(const Triple& in) noexcept {
+    return std::get<1>(in);
+}
+inline u64 getNumber(const Triple& in) noexcept {
+    return std::get<2>(in);
+}
 inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
@@ -40,27 +50,6 @@ constexpr int numberOfDigitsForGivenWidth() noexcept {
 template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
 template<u64 width>
 constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
-
-/*
-template<u64 width>
-inline u64* getSums() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    static u64 sums[numElements<width>] = { 0 };
-    return sums;
-}
-template<u64 width>
-inline u64* getProducts() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    static u64 products[numElements<width>] = { 0 };
-    return products;
-}
-template<u64 width>
-inline u64* getNumbers() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    static u64 numbers[numElements<width>] = { 0 };
-    return numbers;
-}
-*/
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
@@ -87,9 +76,9 @@ void populateWidth() noexcept {
         auto* prev = getTriples<width - 1>();
         for (int i = 0; i < numElements<width - 1>; ++i) {
             auto tmp = prev[i];
-            auto s = std::get<0>(tmp);
-            auto p = std::get<1>(tmp);
-            auto n = makeDigitAt<1>(std::get<2>(tmp));
+            auto s = getSum(tmp);
+            auto p = getProduct(tmp);
+            auto n = makeDigitAt<1>(getNumber(tmp));
             for (int j = 2; j < 10; ++j) {
                 if (j != 5) {
                     *triple = Triple(s + j, p * j, n + j);
@@ -121,84 +110,36 @@ void populateWidth<2>() noexcept {
     }
 }
 
-//u64 values2To4[numElements<2>] = { 0 };
-//u64 values12To19[numElements<8>] = { 0 };
-Triple range12To19[numElements<8>];
-Triple range2To4[numElements<2>];
-//template<u64 width, u64 factor>
-//inline void populateArray(u64* storage) noexcept {
-//	auto nums = getNumbers<width>();
-//    for (int i = 0; i < numElements<width>; ++i, ++storage, ++nums) {
-//        *storage = *nums * fastPow10<factor>;
-//    }
-//}
-
-void setup() noexcept {
-    populateWidth<2>();
-    populateWidth<8>();
-    auto t8 = getTriples<8>();
-    for (int i = 0; i < numElements<8>; ++i) {
-        auto tmp = t8[i];
-        range12To19[i] = Triple(std::get<0>(tmp), std::get<1>(tmp), std::get<2>(tmp) * fastPow10<11>);
-    }
-    auto t2 = getTriples<2>();
-    for (int i = 0; i < numElements<2>; ++i) {
-        auto tmp = t2[i];
-        range2To4[i] = Triple(std::get<0>(tmp), std::get<1>(tmp), std::get<2>(tmp) * fastPow10<1>);
-    }
-}
-
-//template<u64 width> inline u64* getTransitionValues() noexcept { return nullptr; }
-//
-//template<> inline u64* getTransitionValues<2>() noexcept { return values2To4; }
-//template<> inline u64* getTransitionValues<8>() noexcept { return values12To19; }
-
-/*
-std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
-    std::ostringstream str;
-    constexpr auto outerElementWidth = 8;
-    constexpr auto innerElementWidth = 2;
-    static_assert((outerElementWidth + innerElementWidth) == 10, "The outer element width and inner element widths are not correct!");
-    static_assert(outerElementWidth == 8 || outerElementWidth == 2, "The outer element width is not 8 or 2!");
-    static_assert(innerElementWidth == 8 || innerElementWidth == 2, "The inner element width is not 8 or 2!");
-    auto sO = getSums<outerElementWidth>();
-    auto pO = getProducts<outerElementWidth>();
-    auto nO = getTransitionValues<outerElementWidth>();
-    auto sI = getSums<innerElementWidth>();
-    auto pI = getProducts<innerElementWidth>();
-    auto nI = getTransitionValues<innerElementWidth>();
-    for (int i = 0; i < numElements<outerElementWidth>; ++i, ++sO, ++pO, ++nO) {
-		auto* sumInner = sI;
-		auto* productInner = pI;
-		auto* numberInner = nI;
-		auto sum = *sO + s;
-		auto product = *pO * p;
-		auto index = *nO + n;
-		for (int j = 0; j < numElements<innerElementWidth>; ++j, ++sumInner, ++productInner, ++numberInner) {
-            auto result = index + *numberInner;
-			if (innerMostBody(sum + *sumInner, product * *productInner, result)) {
-				str << result << std::endl;
-			}
-		}
-    }
-    return str.str();
-}
-*/
+template<u64 width>
+using Range = std::array<Triple, numElements<width>>;
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
+    static bool init = true;
+    static Range<8> range12To19;
+    static Range<2> range2To4;
+    if (init) {
+        init = false;
+        auto t8 = getTriples<8>();
+        for (int i = 0; i < numElements<8>; ++i) {
+            auto tmp = t8[i];
+            range12To19[i] = Triple(getSum(tmp), getProduct(tmp), getNumber(tmp) * fastPow10<11>);
+        }
+        auto t2 = getTriples<2>();
+        for (int i = 0; i < numElements<2>; ++i) {
+            auto tmp = t2[i];
+            range2To4[i] = Triple(getSum(tmp), getProduct(tmp), getNumber(tmp) * fastPow10<1>);
+        }
+    }
     std::ostringstream str;
     auto out = range12To19;
     auto in = range2To4;
-    for (int i = 0; i < numElements<8>; ++i, ++out) {
-        auto tmp = *out;
-        auto sum = s + std::get<0>(tmp);
-        auto prod = p * std::get<1>(tmp);
-        auto index = n + std::get<2>(tmp);
-        auto inner = in;
-        for (int j = 0; j < numElements<2>; ++j, ++inner) {
-            auto tmp2 = *inner;
-            auto result = index + std::get<2>(tmp2);
-            if (innerMostBody(sum + std::get<0>(tmp2), prod * std::get<1>(tmp2), result)) {
+    for (const auto& tmp : range12To19) {
+        auto sum = s + getSum(tmp);
+        auto prod = p * getProduct(tmp);
+        auto index = n + getNumber(tmp);
+        for (const auto& tmp2 : range2To4) {
+            auto result = index + getNumber(tmp2);
+            if (innerMostBody(sum + getSum(tmp2), prod * getProduct(tmp2), result)) {
                 str << result << std::endl;
             }
         }
@@ -208,11 +149,13 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 
 int main() {
 	std::stringstream collection;
-	setup();
+    // setup the triples
+    populateWidth<2>();
+    populateWidth<8>();
     auto triples = getTriples<8>();
     auto mkBody = [triples](auto index, auto offset) {
         auto t = triples[index];
-        return std::async(std::launch::async, fourthBody, std::get<0>(t) + offset, std::get<1>(t) * offset, (std::get<2>(t) * fastPow10<3>) + offset);
+        return std::async(std::launch::async, fourthBody, getSum(t) + offset, getProduct(t) * offset, (getNumber(t) * fastPow10<3>) + offset);
     };
     while(std::cin.good()) {
         int innerThreadId = 0;
