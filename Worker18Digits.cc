@@ -168,7 +168,6 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 				str << result << std::endl;
 			}
 		}
-        //loopBody<12, 18>(str, *s2 + s, *p2 * p, *n2 + n);
     }
     return str.str();
 }
