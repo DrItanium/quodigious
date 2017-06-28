@@ -150,7 +150,6 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 }
 
 int main() {
-	std::stringstream collection;
     // setup the triples
     populateWidth<2>();
     populateWidth<8>();
@@ -181,9 +180,8 @@ int main() {
 			auto p1 = mkBody(i, 4);
 			auto p2 = mkBody(i, 6);
 			auto p3 = mkBody(i, 8);
-			collection << p0.get() << p1.get() << p2.get() << p3.get();
+			std::cout << p0.get() << p1.get() << p2.get() << p3.get() << std::endl;
 		}
     }
-	std::cout << collection.str() << std::endl;
     return 0;
 }
