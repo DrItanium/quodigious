@@ -130,6 +130,7 @@ template<u64 width>
 using Range = std::array<Triple, numElements<width>>;
 
 Triple range12To19[numElements<8>];
+Triple range4To12[numElements<8>];
 Range<2> range2To4;
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
@@ -152,23 +153,19 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 
 std::string doIt(int start, int stop) noexcept {
 	std::stringstream storage;
-    static auto t8 = getTriples<8>();
+    static auto t8 = range4To12;
 	for (int i = start; i < stop; ++i) {
-        std::cout << "i: " << i << std::endl;
+        //std::cout << "i: " << i << std::endl;
 		auto t = t8[i];
-		auto p0 = std::async(std::launch::async, fourthBody, getSum(t) + 2, getProduct(t) * 2, (getNumber(t) * fastPow10<3>) + 2);
-		auto p1 = std::async(std::launch::async, fourthBody, getSum(t) + 4, getProduct(t) * 4, (getNumber(t) * fastPow10<3>) + 4);
-		auto p2 = std::async(std::launch::async, fourthBody, getSum(t) + 6, getProduct(t) * 6, (getNumber(t) * fastPow10<3>) + 6);
-		auto p3 = std::async(std::launch::async, fourthBody, getSum(t) + 8, getProduct(t) * 8, (getNumber(t) * fastPow10<3>) + 8);
+        auto prod = getProduct(t);
+        auto sum = getSum(t);
+        auto num = getNumber(t);
+		auto p0 = std::async(std::launch::async, fourthBody, sum + 2, prod * 2, num + 2);
+		auto p1 = std::async(std::launch::async, fourthBody, sum + 4, prod * 4, num + 4);
+		auto p2 = std::async(std::launch::async, fourthBody, sum + 6, prod * 6, num + 6);
+		auto p3 = std::async(std::launch::async, fourthBody, sum + 8, prod * 8, num + 8);
 		storage << p0.get() << p1.get();
 		storage << p2.get() << p3.get();
-        //auto prod = getProduct(t);
-        //auto sum = getSum(t);
-        //auto num = getNumber(t) * fastPow10<3>;
-        //storage << fourthBody(sum + 2, prod * 2, num + 2);
-        //storage << fourthBody(sum + 4, prod * 4, num + 4);
-        //storage << fourthBody(sum + 6, prod * 6, num + 6);
-        //storage << fourthBody(sum + 8, prod * 8, num + 8);
 	}
 	return storage.str();
 }
@@ -181,33 +178,36 @@ int main() {
     auto t8 = getTriples<8>();
     for (int i = 0; i < numElements<8>; ++i) {
         range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
+        range4To12[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<3>);
     }
     auto t2 = getTriples<2>();
     for (int i = 0; i < numElements<2>; ++i) {
         range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
     }
-    //auto triples = getTriples<8>();
-    //auto mkBody = [triples](auto index, auto offset) {
-    //    auto t = triples[index];
-    //    return std::async(std::launch::async, fourthBody, getSum(t) + offset, getProduct(t) * offset, (getNumber(t) * fastPow10<3>) + offset);
-    //};
+    constexpr auto workUnitWidth = 2;
+    constexpr auto fallOver = 8 - workUnitWidth;
+    constexpr auto workUnitCount = numElements<workUnitWidth>;
+    constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
-        if (innerThreadId < 0 || innerThreadId >= numElements<4>) {
+        if (innerThreadId < 0 || innerThreadId >= numElements<fallOver>) {
             std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<4> - 1 << "]" << std::endl;
             return 1;
         }
+        if (!std::cin.good()) {
+            break;
+        }
         // divide the code up into seven parts
-		auto start = 2401 * innerThreadId;
-        auto stop0 = 343 + start;
-        auto stop1 = 343 + stop0;
-        auto stop2 = 343 + stop1;
-        auto stop3 = 343 + stop2;
-        auto stop4 = 343 + stop3;
-        auto stop5 = 343 + stop4;
-        auto stop6 = 343 + stop5;
-		auto stop = 2401 * (innerThreadId + 1);
+		auto start = workUnitCount * innerThreadId;
+        auto stop0 = oneSeventhWorkUnit + start;
+        auto stop1 = oneSeventhWorkUnit + stop0;
+        auto stop2 = oneSeventhWorkUnit + stop1;
+        auto stop3 = oneSeventhWorkUnit + stop2;
+        auto stop4 = oneSeventhWorkUnit + stop3;
+        auto stop5 = oneSeventhWorkUnit + stop4;
+        auto stop6 = oneSeventhWorkUnit + stop5;
+		auto stop = workUnitCount * (innerThreadId + 1);
         if (stop != stop6) {
             std::cerr << "size mismatch!" << std::endl;
             return 1;
