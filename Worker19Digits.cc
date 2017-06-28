@@ -152,15 +152,23 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 
 std::string doIt(int start, int stop) noexcept {
 	std::stringstream storage;
-	static auto t8 = getTriples<8>();
+    static auto t8 = getTriples<8>();
 	for (int i = start; i < stop; ++i) {
+        std::cout << "i: " << i << std::endl;
 		auto t = t8[i];
 		auto p0 = std::async(std::launch::async, fourthBody, getSum(t) + 2, getProduct(t) * 2, (getNumber(t) * fastPow10<3>) + 2);
 		auto p1 = std::async(std::launch::async, fourthBody, getSum(t) + 4, getProduct(t) * 4, (getNumber(t) * fastPow10<3>) + 4);
-		storage << p0.get() << p1.get();
 		auto p2 = std::async(std::launch::async, fourthBody, getSum(t) + 6, getProduct(t) * 6, (getNumber(t) * fastPow10<3>) + 6);
 		auto p3 = std::async(std::launch::async, fourthBody, getSum(t) + 8, getProduct(t) * 8, (getNumber(t) * fastPow10<3>) + 8);
+		storage << p0.get() << p1.get();
 		storage << p2.get() << p3.get();
+        //auto prod = getProduct(t);
+        //auto sum = getSum(t);
+        //auto num = getNumber(t) * fastPow10<3>;
+        //storage << fourthBody(sum + 2, prod * 2, num + 2);
+        //storage << fourthBody(sum + 4, prod * 4, num + 4);
+        //storage << fourthBody(sum + 6, prod * 6, num + 6);
+        //storage << fourthBody(sum + 8, prod * 8, num + 8);
 	}
 	return storage.str();
 }
@@ -190,13 +198,28 @@ int main() {
             std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<4> - 1 << "]" << std::endl;
             return 1;
         }
+        // divide the code up into seven parts
 		auto start = 2401 * innerThreadId;
-		auto midStop = 1201 + start;
-		auto midStart = 1201 + start;
+        auto stop0 = 343 + start;
+        auto stop1 = 343 + stop0;
+        auto stop2 = 343 + stop1;
+        auto stop3 = 343 + stop2;
+        auto stop4 = 343 + stop3;
+        auto stop5 = 343 + stop4;
+        auto stop6 = 343 + stop5;
 		auto stop = 2401 * (innerThreadId + 1);
-		auto b0 = std::async(std::launch::async, doIt, start, midStop);
-		auto b1 = std::async(std::launch::async, doIt, midStart, stop);
-		collection0 << b0.get() << b1.get();
+        if (stop != stop6) {
+            std::cerr << "size mismatch!" << std::endl;
+            return 1;
+        }
+		auto b0 = std::async(std::launch::async, doIt, start, stop0);
+        auto b1 = std::async(std::launch::async, doIt, stop0, stop1);
+        auto b2 = std::async(std::launch::async, doIt, stop1, stop2);
+		auto b3 = std::async(std::launch::async, doIt, stop2, stop3);
+		auto b4 = std::async(std::launch::async, doIt, stop3, stop4);
+		auto b5 = std::async(std::launch::async, doIt, stop4, stop5);
+		auto b6 = std::async(std::launch::async, doIt, stop5, stop6);
+		collection0 << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
     }
 	std::cout << collection0.str() << std::endl;
     return 0;
