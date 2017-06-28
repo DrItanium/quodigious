@@ -130,7 +130,7 @@ template<u64 width>
 using Range = std::array<Triple, numElements<width>>;
 
 Triple range12To19[numElements<8>];
-Triple range4To12[numElements<8>];
+//Triple range4To12[numElements<8>];
 Range<2> range2To4;
 
 std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
@@ -153,13 +153,11 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 
 std::string doIt(int start, int stop) noexcept {
 	std::stringstream storage;
-    static auto t8 = range4To12;
-	for (int i = start; i < stop; ++i) {
-        //std::cout << "i: " << i << std::endl;
-		auto t = t8[i];
-        auto prod = getProduct(t);
-        auto sum = getSum(t);
-        auto num = getNumber(t);
+    auto t8 = &getTriples<8>()[start];
+	for (int i = start; i < stop; ++i, ++t8) {
+        auto prod = t8->product;
+        auto sum = t8->sum;
+        auto num = t8->number * fastPow10<3>;
 		auto p0 = std::async(std::launch::async, fourthBody, sum + 2, prod * 2, num + 2);
 		auto p1 = std::async(std::launch::async, fourthBody, sum + 4, prod * 4, num + 4);
 		auto p2 = std::async(std::launch::async, fourthBody, sum + 6, prod * 6, num + 6);
@@ -178,7 +176,7 @@ int main() {
     auto t8 = getTriples<8>();
     for (int i = 0; i < numElements<8>; ++i) {
         range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
-        range4To12[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<3>);
+        //range4To12[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<3>);
     }
     auto t2 = getTriples<2>();
     for (int i = 0; i < numElements<2>; ++i) {
