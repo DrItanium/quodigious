@@ -181,7 +181,7 @@ int main() {
     for (int i = 0; i < numElements<2>; ++i) {
         range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
     }
-    constexpr auto workUnitWidth = 2;
+    constexpr auto workUnitWidth = 4;
     constexpr auto fallOver = 8 - workUnitWidth;
     constexpr auto workUnitCount = numElements<workUnitWidth>;
     constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
