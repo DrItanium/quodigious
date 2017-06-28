@@ -78,30 +78,52 @@ inline Triple* getTriples() noexcept {
     return elements;
 }
 
-template<> inline Triple* getTriples<2>() noexcept;
-template<> inline Triple* getTriples<4>() noexcept;
-template<> 
-inline Triple* getTriples<8>() noexcept {
-	static bool init = true;
-	static Triple elements [numElements<8>];
-	if (init) {
-		init = false;
-		auto pThis = elements;
-		auto gs4 = getTriples<4>();
-		auto p4 = gs4;
-		for (int i = 0; i < numElements<4>; ++i, ++p4) {
-			auto ip4 = gs4;
-			auto sum = p4->sum;
-			auto product = p4->product;
-			auto number = (p4->number) * fastPow10<4>;
-			for (int j = 0; j < numElements<4>; ++j, ++ip4) {
-				*pThis = Triple(ip4->sum + sum, ip4->product * product, ip4->number + number);
-				++pThis;
-			}
-		}
-	}
-	return elements;
+
+template<u64 width>
+void populateWidth() noexcept {
+    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        populateWidth<width - 1>();
+        auto* triple = getTriples<width>();
+        auto* prev = getTriples<width - 1>();
+        for (int i = 0; i < numElements<width - 1>; ++i) {
+            auto tmp = prev[i];
+            auto s = getSum(tmp);
+            auto p = getProduct(tmp);
+            auto n = makeDigitAt<1>(getNumber(tmp));
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *triple = Triple(s + j, p * j, n + j);
+                    ++triple;
+
+                }
+            }
+        }
+    }
 }
+//TODO: reduce memory footprint by specializing on 6
+template<>
+void populateWidth<2>() noexcept {
+    static bool populated = false;
+    if (!populated) {
+        populated = true;
+        auto* triple = getTriples<2>();
+        for (int i = 2; i < 10; ++i) {
+            if (i != 5) {
+                auto numberOuter = makeDigitAt<1>(i);
+                for (int j = 2; j < 10; ++j) {
+                    if (j != 5) {
+                        *triple = Triple(i + j, i * j, numberOuter + j);
+                        ++triple;
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 template<u64 width>
 using Range = std::array<Triple, numElements<width>>;
@@ -130,6 +152,8 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
 int main() {
 	std::stringstream collection;
     // setup the triples
+    populateWidth<2>();
+    populateWidth<8>();
     auto t8 = getTriples<8>();
     for (int i = 0; i < numElements<8>; ++i) {
         range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
@@ -159,5 +183,3 @@ int main() {
 	std::cout << collection.str() << std::endl;
     return 0;
 }
-
-#include "triples2And4.h"
