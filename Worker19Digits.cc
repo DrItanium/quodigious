@@ -76,44 +76,36 @@ inline Triple* getTriples() noexcept {
 }
 
 template<u64 width>
-void populateWidth() noexcept {
+inline void populateWidth() noexcept {
     static_assert(width >= 2 && width < 9, "Illegal width!");
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        populateWidth<width - 1>();
-        auto* triple = getTriples<width>();
-        auto* prev = getTriples<width - 1>();
-        for (int i = 0; i < numElements<width - 1>; ++i) {
-            auto tmp = prev[i];
-            auto s = getSum(tmp);
-            auto p = getProduct(tmp);
-            auto n = makeDigitAt<1>(getNumber(tmp));
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    *triple = Triple(s + j, p * j, n + j);
-                    ++triple;
+    populateWidth<width - 1>();
+    auto* triple = getTriples<width>();
+    auto* prev = getTriples<width - 1>();
+    for (int i = 0; i < numElements<width - 1>; ++i) {
+        auto tmp = prev[i];
+        auto s = getSum(tmp);
+        auto p = getProduct(tmp);
+        auto n = makeDigitAt<1>(getNumber(tmp));
+        for (int j = 2; j < 10; ++j) {
+            if (j != 5) {
+                *triple = Triple(s + j, p * j, n + j);
+                ++triple;
 
-                }
             }
         }
     }
 }
 //TODO: reduce memory footprint by specializing on 6
 template<>
-void populateWidth<2>() noexcept {
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        auto* triple = getTriples<2>();
-        for (int i = 2; i < 10; ++i) {
-            if (i != 5) {
-                auto numberOuter = makeDigitAt<1>(i);
-                for (int j = 2; j < 10; ++j) {
-                    if (j != 5) {
-                        *triple = Triple(i + j, i * j, numberOuter + j);
-                        ++triple;
-                    }
+inline void populateWidth<2>() noexcept {
+    auto* triple = getTriples<2>();
+    for (int i = 2; i < 10; ++i) {
+        if (i != 5) {
+            auto numberOuter = makeDigitAt<1>(i);
+            for (int j = 2; j < 10; ++j) {
+                if (j != 5) {
+                    *triple = Triple(i + j, i * j, numberOuter + j);
+                    ++triple;
                 }
             }
         }
@@ -141,29 +133,27 @@ void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
         }
     }
 }
-std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
-    std::ostringstream str;
-    fourthBody(str, s, p, n);
-    return str.str();
-}
 
 std::string doIt(int start, int stop) noexcept {
     std::stringstream storage;
-    auto fn = [](auto start, auto stop, auto offset) noexcept {
-	    std::stringstream storage;
-        auto t8 = &getTriples<8>()[start];
-	    for (int i = start; i < stop; ++i, ++t8) {
-            auto product = getProduct(*t8);
-            auto sum = getSum(*t8);
-            auto num = getNumber(*t8) * fastPow10<3>;
-            fourthBody(storage, sum + offset, product * offset, num + offset);
-	    }
-	    return storage.str();
+    auto mkBody = [start, stop](auto offset) noexcept {
+        auto fn = [start, stop](auto offset) noexcept {
+	        std::stringstream storage;
+            auto t8 = &getTriples<8>()[start];
+	        for (int i = start; i < stop; ++i, ++t8) {
+                auto product = getProduct(*t8);
+                auto sum = getSum(*t8);
+                auto num = getNumber(*t8) * fastPow10<3>;
+                fourthBody(storage, sum + offset, product * offset, num + offset);
+	        }
+	        return storage.str();
+        };
+        return std::async(std::launch::async, fn, offset);
     };
-	auto p0 = std::async(std::launch::async, fn, start, stop, 2);
-	auto p1 = std::async(std::launch::async, fn, start, stop, 4);
-	auto p2 = std::async(std::launch::async, fn, start, stop, 6);
-	auto p3 = std::async(std::launch::async, fn, start, stop, 8);
+    auto p0 = mkBody(2);
+    auto p1 = mkBody(4);
+    auto p2 = mkBody(6);
+    auto p3 = mkBody(8);
 	storage << p0.get() << p1.get() << p2.get() << p3.get();
     return storage.str();
 }
@@ -172,19 +162,22 @@ int main() {
 	std::stringstream collection0;
     // setup the triples
     populateWidth<2>();
+    auto t2 = getTriples<2>();
+    for (int i = 0; i < numElements<2>; ++i) {
+        range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
+    }
     populateWidth<8>();
     auto t8 = getTriples<8>();
     for (int i = 0; i < numElements<8>; ++i) {
         range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
     }
-    auto t2 = getTriples<2>();
-    for (int i = 0; i < numElements<2>; ++i) {
-        range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
-    }
     constexpr auto workUnitWidth = 2;
     constexpr auto fallOver = 8 - workUnitWidth;
     constexpr auto workUnitCount = numElements<workUnitWidth>;
     constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
+    auto fn = [](auto start, auto stop) noexcept {
+        return std::async(std::launch::async, doIt, start, stop);
+    };
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
@@ -209,13 +202,13 @@ int main() {
             std::cerr << "size mismatch!" << std::endl;
             return 1;
         }
-		auto b0 = std::async(std::launch::async, doIt, start, stop0);
-        auto b1 = std::async(std::launch::async, doIt, stop0, stop1);
-        auto b2 = std::async(std::launch::async, doIt, stop1, stop2);
-		auto b3 = std::async(std::launch::async, doIt, stop2, stop3);
-		auto b4 = std::async(std::launch::async, doIt, stop3, stop4);
-		auto b5 = std::async(std::launch::async, doIt, stop4, stop5);
-		auto b6 = std::async(std::launch::async, doIt, stop5, stop6);
+		auto b0 = fn(start, stop0);
+        auto b1 = fn(stop0, stop1);
+        auto b2 = fn(stop1, stop2);
+		auto b3 = fn(stop2, stop3);
+		auto b4 = fn(stop3, stop4);
+		auto b5 = fn(stop4, stop5);
+		auto b6 = fn(stop5, stop6);
 		collection0 << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
     }
 	std::cout << collection0.str() << std::endl;
