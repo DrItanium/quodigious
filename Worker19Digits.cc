@@ -24,6 +24,7 @@
 #include <future>
 #include <map>
 #include "qlib.h"
+#include <tuple>
 
 struct Triple {
 	Triple(u64 _s, u64 _p, u64 _n) : sum(_s), product(_p), number(_n) { }
@@ -149,7 +150,23 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
     return str.str();
 }
 
+std::string doIt(int start, int stop) noexcept {
+	std::stringstream storage;
+	static auto t8 = getTriples<8>();
+	for (int i = start; i < stop; ++i) {
+		auto t = t8[i];
+		auto p0 = std::async(std::launch::async, fourthBody, getSum(t) + 2, getProduct(t) * 2, (getNumber(t) * fastPow10<3>) + 2);
+		auto p1 = std::async(std::launch::async, fourthBody, getSum(t) + 4, getProduct(t) * 4, (getNumber(t) * fastPow10<3>) + 4);
+		storage << p0.get() << p1.get();
+		auto p2 = std::async(std::launch::async, fourthBody, getSum(t) + 6, getProduct(t) * 6, (getNumber(t) * fastPow10<3>) + 6);
+		auto p3 = std::async(std::launch::async, fourthBody, getSum(t) + 8, getProduct(t) * 8, (getNumber(t) * fastPow10<3>) + 8);
+		storage << p2.get() << p3.get();
+	}
+	return storage.str();
+}
+
 int main() {
+	std::stringstream collection0;
     // setup the triples
     populateWidth<2>();
     populateWidth<8>();
@@ -161,11 +178,11 @@ int main() {
     for (int i = 0; i < numElements<2>; ++i) {
         range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
     }
-    auto triples = getTriples<8>();
-    auto mkBody = [triples](auto index, auto offset) {
-        auto t = triples[index];
-        return std::async(std::launch::async, fourthBody, getSum(t) + offset, getProduct(t) * offset, (getNumber(t) * fastPow10<3>) + offset);
-    };
+    //auto triples = getTriples<8>();
+    //auto mkBody = [triples](auto index, auto offset) {
+    //    auto t = triples[index];
+    //    return std::async(std::launch::async, fourthBody, getSum(t) + offset, getProduct(t) * offset, (getNumber(t) * fastPow10<3>) + offset);
+    //};
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
@@ -174,14 +191,13 @@ int main() {
             return 1;
         }
 		auto start = 2401 * innerThreadId;
+		auto midStop = 1201 + start;
+		auto midStart = 1201 + start;
 		auto stop = 2401 * (innerThreadId + 1);
-		for (int i = start; i < stop; ++i) {
-			auto p0 = mkBody(i, 2);
-			auto p1 = mkBody(i, 4);
-			auto p2 = mkBody(i, 6);
-			auto p3 = mkBody(i, 8);
-			std::cout << p0.get() << p1.get() << p2.get() << p3.get() << std::endl;
-		}
+		auto b0 = std::async(std::launch::async, doIt, start, midStop);
+		auto b1 = std::async(std::launch::async, doIt, midStart, stop);
+		collection0 << b0.get() << b1.get();
     }
+	std::cout << collection0.str() << std::endl;
     return 0;
 }
