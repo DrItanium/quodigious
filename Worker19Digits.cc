@@ -177,10 +177,10 @@ int main() {
 		auto start = 2401 * innerThreadId;
 		auto stop = 2401 * (innerThreadId + 1);
 		for (int i = start; i < stop; ++i) {
-			auto p0 = mkBody(innerThreadId, 2);
-			auto p1 = mkBody(innerThreadId, 4);
-			auto p2 = mkBody(innerThreadId, 6);
-			auto p3 = mkBody(innerThreadId, 8);
+			auto p0 = mkBody(i, 2);
+			auto p1 = mkBody(i, 4);
+			auto p2 = mkBody(i, 6);
+			auto p3 = mkBody(i, 8);
 			collection << p0.get() << p1.get() << p2.get() << p3.get();
 		}
     }
