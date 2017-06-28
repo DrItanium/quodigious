@@ -170,15 +170,19 @@ int main() {
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
-        if (innerThreadId < 0 || innerThreadId >= numElements<8>) {
-            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<8> - 1 << "]" << std::endl;
+        if (innerThreadId < 0 || innerThreadId >= numElements<4>) {
+            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<4> - 1 << "]" << std::endl;
             return 1;
         }
-        auto p0 = mkBody(innerThreadId, 2);
-        auto p1 = mkBody(innerThreadId, 4);
-        auto p2 = mkBody(innerThreadId, 6);
-        auto p3 = mkBody(innerThreadId, 8);
-        collection << p0.get() << p1.get() << p2.get() << p3.get();
+		auto start = 2401 * innerThreadId;
+		auto stop = 2401 * (innerThreadId + 1);
+		for (int i = start; i < stop; ++i) {
+			auto p0 = mkBody(innerThreadId, 2);
+			auto p1 = mkBody(innerThreadId, 4);
+			auto p2 = mkBody(innerThreadId, 6);
+			auto p3 = mkBody(innerThreadId, 8);
+			collection << p0.get() << p1.get() << p2.get() << p3.get();
+		}
     }
 	std::cout << collection.str() << std::endl;
     return 0;
