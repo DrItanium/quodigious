@@ -36,19 +36,15 @@ struct Triple {
 
 	}
 };
-//using Triple = std::tuple<u64, u64, u64>;
 
 inline u64 getSum(const Triple& in) noexcept {
 	return in.sum;
-    //return std::get<0>(in);
 }
 inline u64 getProduct(const Triple& in) noexcept {
 	return in.product;
-    //return std::get<1>(in);
 }
 inline u64 getNumber(const Triple& in) noexcept {
 	return in.number;
-    //return std::get<2>(in);
 }
 
 inline constexpr bool checkValue(u64 sum) noexcept {
@@ -78,7 +74,6 @@ inline Triple* getTriples() noexcept {
     static Triple elements[numElements<width>];
     return elements;
 }
-
 
 template<u64 width>
 void populateWidth() noexcept {
@@ -130,17 +125,14 @@ template<u64 width>
 using Range = std::array<Triple, numElements<width>>;
 
 Triple range12To19[numElements<8>];
-//Triple range4To12[numElements<8>];
 Range<2> range2To4;
 
-std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
-    std::ostringstream str;
+void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
     auto out = range12To19;
-    for (int i =0; i < numElements<8>; ++i, ++out) {
-		auto tmp = *out;
-        auto sum = s + getSum(tmp);
-        auto prod = p * getProduct(tmp);
-        auto index = n + getNumber(tmp);
+    for (auto i = std::begin(range12To19); i != std::end(range12To19) ; ++i) {
+        auto sum = s + getSum(*i);
+        auto prod = p * getProduct(*i);
+        auto index = n + getNumber(*i);
         for (const auto& tmp2 : range2To4) {
             auto result = index + getNumber(tmp2);
             if (innerMostBody(sum + getSum(tmp2), prod * getProduct(tmp2), result)) {
@@ -148,24 +140,32 @@ std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
             }
         }
     }
+}
+std::string fourthBody(u64 s, u64 p, u64 n) noexcept {
+    std::ostringstream str;
+    fourthBody(str, s, p, n);
     return str.str();
 }
 
 std::string doIt(int start, int stop) noexcept {
-	std::stringstream storage;
-    auto t8 = &getTriples<8>()[start];
-	for (int i = start; i < stop; ++i, ++t8) {
-        auto prod = t8->product;
-        auto sum = t8->sum;
-        auto num = t8->number * fastPow10<3>;
-		auto p0 = std::async(std::launch::async, fourthBody, sum + 2, prod * 2, num + 2);
-		auto p1 = std::async(std::launch::async, fourthBody, sum + 4, prod * 4, num + 4);
-		auto p2 = std::async(std::launch::async, fourthBody, sum + 6, prod * 6, num + 6);
-		auto p3 = std::async(std::launch::async, fourthBody, sum + 8, prod * 8, num + 8);
-		storage << p0.get() << p1.get();
-		storage << p2.get() << p3.get();
-	}
-	return storage.str();
+    std::stringstream storage;
+    auto fn = [](auto start, auto stop, auto offset) noexcept {
+	    std::stringstream storage;
+        auto t8 = &getTriples<8>()[start];
+	    for (int i = start; i < stop; ++i, ++t8) {
+            auto product = getProduct(*t8);
+            auto sum = getSum(*t8);
+            auto num = getNumber(*t8) * fastPow10<3>;
+            fourthBody(storage, sum + offset, product * offset, num + offset);
+	    }
+	    return storage.str();
+    };
+	auto p0 = std::async(std::launch::async, fn, start, stop, 2);
+	auto p1 = std::async(std::launch::async, fn, start, stop, 4);
+	auto p2 = std::async(std::launch::async, fn, start, stop, 6);
+	auto p3 = std::async(std::launch::async, fn, start, stop, 8);
+	storage << p0.get() << p1.get() << p2.get() << p3.get();
+    return storage.str();
 }
 
 int main() {
@@ -176,7 +176,6 @@ int main() {
     auto t8 = getTriples<8>();
     for (int i = 0; i < numElements<8>; ++i) {
         range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
-        //range4To12[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<3>);
     }
     auto t2 = getTriples<2>();
     for (int i = 0; i < numElements<2>; ++i) {
@@ -190,7 +189,7 @@ int main() {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
         if (innerThreadId < 0 || innerThreadId >= numElements<fallOver>) {
-            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<4> - 1 << "]" << std::endl;
+            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<fallOver> - 1 << "]" << std::endl;
             return 1;
         }
         if (!std::cin.good()) {
