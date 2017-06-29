@@ -26,44 +26,37 @@
 #include "qlib.h"
 #include <tuple>
 
-inline constexpr bool checkValue(u64 sum) noexcept {
-	return (sum % 2 == 0) || (sum % 3 == 0);
-}
-inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-    return checkValue(sum) && (value % product == 0) && (value % sum == 0);
-}
-struct Triple {
-	Triple(u64 _s, u64 _p, u64 _n) : sum(_s), product(_p), number(_n) { }
-	Triple() : Triple(0, 0, 0) { }
-	u64 sum;
-	u64 product;
-	u64 number;
-    inline bool assume(u64 _sum, u64 _product, u64 _number) noexcept {
-        sum = _sum;
-        product = _product;
-        number = _number;
-    }
-    inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
-        return innerMostBody(sCombine + sum, pCombine * product, nCombine + number);
-    }
-    inline u64 buildNumber(u64 offset) const noexcept {
-        return number + offset;
-    }
+class Triple {
+    private:
+        static inline constexpr bool checkValue(u64 sum) noexcept {
+            return (sum % 2 == 0) || (sum % 3 == 0);
+        }
+        static inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+            return checkValue(sum) && (value % product == 0) && (value % sum == 0);
+        }
+    public:
+        Triple(u64 s, u64 p, u64 n) : _sum(s), _product(p), _number(n) { }
+        Triple() : Triple(0, 0, 0) { }
+        inline bool assume(u64 sum, u64 product, u64 number) noexcept {
+            _sum = sum;
+            _product = product;
+            _number = number;
+        }
+        inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
+            return innerMostBody(sCombine + _sum, pCombine * _product, nCombine + _number);
+        }
+        inline u64 buildNumber(u64 offset) const noexcept {
+            return _number + offset;
+        }
+        inline u64 getSum() const noexcept { return _sum; }
+        inline u64 getProduct() const noexcept { return _product; }
+        inline u64 getNumber() const noexcept { return _number; }
+    private:
+        u64 _sum;
+        u64 _product;
+        u64 _number;
 };
 
-inline u64 getSum(const Triple& in) noexcept {
-	return in.sum;
-}
-inline u64 getProduct(const Triple& in) noexcept {
-	return in.product;
-}
-inline u64 getNumber(const Triple& in) noexcept {
-	return in.number;
-}
-
-inline constexpr bool innerMostBody(const Triple& t) noexcept {
-    return innerMostBody(t.sum, t.product, t.number);
-}
 template<u64 width>
 constexpr int numberOfDigitsForGivenWidth() noexcept {
     static_assert(width >= 0, "Negative width doesn't make sense");
@@ -94,9 +87,9 @@ inline void populateWidth() noexcept {
     auto* prev = getTriples<width - 1>();
     for (int i = 0; i < numElements<width - 1>; ++i) {
         auto tmp = prev[i];
-        auto s = getSum(tmp);
-        auto p = getProduct(tmp);
-        auto n = makeDigitAt<1>(getNumber(tmp));
+        auto s = tmp.getSum();
+        auto p = tmp.getProduct();
+        auto n = makeDigitAt<1>(tmp.getNumber());
         for (int j = 2; j < 10; ++j) {
             if (j != 5) {
                 *triple = Triple(s + j, p * j, n + j);
@@ -132,9 +125,9 @@ Range<2> range2To4;
 
 void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
     for (auto i = std::begin(range12To19); i != std::end(range12To19) ; ++i) {
-        auto sum = s + getSum(*i);
-        auto prod = p * getProduct(*i);
-        auto index = n + getNumber(*i);
+        auto sum = s + i->getSum();
+        auto prod = p * i->getProduct();
+        auto index = n + i->getNumber();
         for (const auto& tmp2 : range2To4) {
             if (tmp2.isQuodigious(sum, prod, index)) {
                 str << tmp2.buildNumber(index) << std::endl;
@@ -149,9 +142,9 @@ std::string doIt(int start, int stop) noexcept {
 	        std::stringstream storage;
             auto t8 = &getTriples<8>()[start];
 	        for (int i = start; i < stop; ++i, ++t8) {
-                auto product = getProduct(*t8);
-                auto sum = getSum(*t8);
-                auto num = getNumber(*t8) * fastPow10<3>;
+                auto product = t8->getProduct();
+                auto sum = t8->getSum();
+                auto num = t8->getNumber() * fastPow10<3>;
                 fourthBody(storage, sum + offset, product * offset, num + offset);
 	        }
 	        return storage.str();
@@ -178,14 +171,14 @@ int main() {
     populateWidth<2>();
     auto t2 = getTriples<2>();
     for (auto& r24 : range2To4) {
-        r24.assume(getSum(*t2), getProduct(*t2), getNumber(*t2) * fastPow10<1>);
+        r24.assume(t2->getSum(), t2->getProduct(), t2->getNumber() * fastPow10<1>);
         ++t2;
     }
     populateWidth<8>();
     auto t8 = getTriples<8>();
     auto r1219 = range12To19;
     for (int i = 0; i < numElements<8>; ++i, ++t8, ++r1219) {
-        r1219->assume(getSum(*t8), getProduct(*t8), getNumber(*t8) * fastPow10<11>);
+        r1219->assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
     }
     auto fn = [](auto start, auto stop) noexcept {
         return std::async(std::launch::async, doIt, start, stop);
