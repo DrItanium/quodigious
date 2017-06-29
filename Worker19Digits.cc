@@ -26,15 +26,29 @@
 #include "qlib.h"
 #include <tuple>
 
+inline constexpr bool checkValue(u64 sum) noexcept {
+	return (sum % 2 == 0) || (sum % 3 == 0);
+}
+inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+    return checkValue(sum) && (value % product == 0) && (value % sum == 0);
+}
 struct Triple {
 	Triple(u64 _s, u64 _p, u64 _n) : sum(_s), product(_p), number(_n) { }
 	Triple() : Triple(0, 0, 0) { }
 	u64 sum;
 	u64 product;
 	u64 number;
-	bool isQuodigious() const noexcept {
-
-	}
+    inline bool assume(u64 _sum, u64 _product, u64 _number) noexcept {
+        sum = _sum;
+        product = _product;
+        number = _number;
+    }
+    inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
+        return innerMostBody(sCombine + sum, pCombine * product, nCombine + number);
+    }
+    inline u64 buildNumber(u64 offset) const noexcept {
+        return number + offset;
+    }
 };
 
 inline u64 getSum(const Triple& in) noexcept {
@@ -47,11 +61,8 @@ inline u64 getNumber(const Triple& in) noexcept {
 	return in.number;
 }
 
-inline constexpr bool checkValue(u64 sum) noexcept {
-	return (sum % 2 == 0) || (sum % 3 == 0);
-}
-inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-    return checkValue(sum) && isQuodigious(value, sum, product);
+inline constexpr bool innerMostBody(const Triple& t) noexcept {
+    return innerMostBody(t.sum, t.product, t.number);
 }
 template<u64 width>
 constexpr int numberOfDigitsForGivenWidth() noexcept {
@@ -120,22 +131,19 @@ Triple range12To19[numElements<8>];
 Range<2> range2To4;
 
 void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
-    auto out = range12To19;
     for (auto i = std::begin(range12To19); i != std::end(range12To19) ; ++i) {
         auto sum = s + getSum(*i);
         auto prod = p * getProduct(*i);
         auto index = n + getNumber(*i);
         for (const auto& tmp2 : range2To4) {
-            auto result = index + getNumber(tmp2);
-            if (innerMostBody(sum + getSum(tmp2), prod * getProduct(tmp2), result)) {
-                str << result << std::endl;
+            if (tmp2.isQuodigious(sum, prod, index)) {
+                str << tmp2.buildNumber(index) << std::endl;
             }
         }
     }
 }
 
 std::string doIt(int start, int stop) noexcept {
-    std::stringstream storage;
     auto mkBody = [start, stop](auto offset) noexcept {
         auto fn = [start, stop](auto offset) noexcept {
 	        std::stringstream storage;
@@ -150,6 +158,7 @@ std::string doIt(int start, int stop) noexcept {
         };
         return std::async(std::launch::async, fn, offset);
     };
+    std::stringstream storage;
     auto p0 = mkBody(2);
     auto p1 = mkBody(4);
     auto p2 = mkBody(6);
@@ -159,22 +168,25 @@ std::string doIt(int start, int stop) noexcept {
 }
 
 int main() {
-	std::stringstream collection0;
-    // setup the triples
-    populateWidth<2>();
-    auto t2 = getTriples<2>();
-    for (int i = 0; i < numElements<2>; ++i) {
-        range2To4[i] = Triple(getSum(t2[i]), getProduct(t2[i]), getNumber(t2[i]) * fastPow10<1>);
-    }
-    populateWidth<8>();
-    auto t8 = getTriples<8>();
-    for (int i = 0; i < numElements<8>; ++i) {
-        range12To19[i] = Triple(getSum(t8[i]), getProduct(t8[i]), getNumber(t8[i]) * fastPow10<11>);
-    }
+    auto errorCode = 0;
     constexpr auto workUnitWidth = 2;
     constexpr auto fallOver = 8 - workUnitWidth;
     constexpr auto workUnitCount = numElements<workUnitWidth>;
     constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
+	std::stringstream collection0;
+    // setup the triples
+    populateWidth<2>();
+    auto t2 = getTriples<2>();
+    for (auto& r24 : range2To4) {
+        r24.assume(getSum(*t2), getProduct(*t2), getNumber(*t2) * fastPow10<1>);
+        ++t2;
+    }
+    populateWidth<8>();
+    auto t8 = getTriples<8>();
+    auto r1219 = range12To19;
+    for (int i = 0; i < numElements<8>; ++i, ++t8, ++r1219) {
+        r1219->assume(getSum(*t8), getProduct(*t8), getNumber(*t8) * fastPow10<11>);
+    }
     auto fn = [](auto start, auto stop) noexcept {
         return std::async(std::launch::async, doIt, start, stop);
     };
@@ -183,7 +195,8 @@ int main() {
         std::cin >> innerThreadId;
         if (innerThreadId < 0 || innerThreadId >= numElements<fallOver>) {
             std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<fallOver> - 1 << "]" << std::endl;
-            return 1;
+            errorCode = 1;
+            break;
         }
         if (!std::cin.good()) {
             break;
@@ -199,8 +212,9 @@ int main() {
         auto stop6 = oneSeventhWorkUnit + stop5;
 		auto stop = workUnitCount * (innerThreadId + 1);
         if (stop != stop6) {
+            errorCode = 1;
             std::cerr << "size mismatch!" << std::endl;
-            return 1;
+            break;
         }
 		auto b0 = fn(start, stop0);
         auto b1 = fn(stop0, stop1);
@@ -212,5 +226,5 @@ int main() {
 		collection0 << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
     }
 	std::cout << collection0.str() << std::endl;
-    return 0;
+    return errorCode;
 }
