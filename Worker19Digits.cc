@@ -24,7 +24,6 @@
 #include <future>
 #include <map>
 #include "qlib.h"
-#include <tuple>
 
 class Triple {
     private:
@@ -117,18 +116,15 @@ inline void populateWidth<2>() noexcept {
 }
 
 
-template<u64 width>
-using Range = std::array<Triple, numElements<width>>;
-
 Triple range12To19[numElements<8>];
-Range<2> range2To4;
+Triple range2To4[numElements<2>];
 
 void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
-    for (auto i = std::begin(range12To19); i != std::end(range12To19) ; ++i) {
-        auto sum = s + i->getSum();
-        auto prod = p * i->getProduct();
-        auto index = n + i->getNumber();
-        for (const auto& tmp2 : range2To4) {
+    for (auto const & i : range12To19) {
+        auto sum = s + i.getSum();
+        auto prod = p * i.getProduct();
+        auto index = n + i.getNumber();
+        for (auto const & tmp2 : range2To4) {
             if (tmp2.isQuodigious(sum, prod, index)) {
                 str << tmp2.buildNumber(index) << std::endl;
             }
@@ -136,15 +132,20 @@ void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
     }
 }
 
+template<u64 count>
 std::string doIt(int start, int stop) noexcept {
     auto mkBody = [start, stop](auto offset) noexcept {
-        auto fn = [start, stop](auto offset) noexcept {
+        std::array<Triple, count> tmp;
+        auto t8 = getTriples<8>();
+        for (int i = start, j = 0; i < stop; ++i, ++j) {
+            tmp[j] = t8[i];
+        }
+        auto fn = [tmp, start, stop](auto offset) noexcept {
 	        std::stringstream storage;
-            auto t8 = &getTriples<8>()[start];
-	        for (int i = start; i < stop; ++i, ++t8) {
-                auto product = t8->getProduct();
-                auto sum = t8->getSum();
-                auto num = t8->getNumber() * fastPow10<3>;
+            for (auto const & t8 : tmp) {
+                auto product = t8.getProduct();
+                auto sum = t8.getSum();
+                auto num = t8.getNumber() * fastPow10<3>;
                 fourthBody(storage, sum + offset, product * offset, num + offset);
 	        }
 	        return storage.str();
@@ -176,12 +177,12 @@ int main() {
     }
     populateWidth<8>();
     auto t8 = getTriples<8>();
-    auto r1219 = range12To19;
-    for (int i = 0; i < numElements<8>; ++i, ++t8, ++r1219) {
-        r1219->assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+    for (auto& r1219 : range12To19) {
+        r1219.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+        ++t8;
     }
     auto fn = [](auto start, auto stop) noexcept {
-        return std::async(std::launch::async, doIt, start, stop);
+        return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
     };
     while(std::cin.good()) {
         int innerThreadId = 0;
