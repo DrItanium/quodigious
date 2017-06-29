@@ -134,12 +134,12 @@ void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
 
 template<u64 count>
 std::string doIt(int start, int stop) noexcept {
-    auto mkBody = [start, stop](auto offset) noexcept {
-        std::array<Triple, count> tmp;
-        auto t8 = getTriples<8>();
-        for (int i = start, j = 0; i < stop; ++i, ++j) {
-            tmp[j] = t8[i];
-        }
+    std::array<Triple, count> tmp;
+    auto t8 = getTriples<8>();
+    for (int i = start, j = 0; i < stop; ++i, ++j) {
+        tmp[j] = t8[i];
+    }
+    auto mkBody = [tmp, start, stop](auto offset) noexcept {
         auto fn = [tmp, start, stop](auto offset) noexcept {
 	        std::stringstream storage;
             for (auto const & t8 : tmp) {
