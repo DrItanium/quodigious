@@ -163,7 +163,7 @@ std::string doIt(int start, int stop) noexcept {
 
 int main() {
     auto errorCode = 0;
-    constexpr auto workUnitWidth = 2;
+    constexpr auto workUnitWidth = 4;
     constexpr auto fallOver = 8 - workUnitWidth;
     constexpr auto workUnitCount = numElements<workUnitWidth>;
     constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
