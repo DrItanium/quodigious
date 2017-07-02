@@ -26,40 +26,40 @@
 #include "qlib.h"
 
 class Triple {
-    private:
-        static inline constexpr bool checkValue(u64 sum) noexcept {
-            return (sum % 2 == 0) || (sum % 3 == 0);
-        }
-        static inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-            return checkValue(sum) && (value % product == 0) && (value % sum == 0);
-        }
-    public:
-        Triple(u64 s, u64 p, u64 n) : _sum(s), _product(p), _number(n) { }
-        Triple() : Triple(0, 0, 0) { }
-        inline bool assume(u64 sum, u64 product, u64 number) noexcept {
-            _sum = sum;
-            _product = product;
-            _number = number;
-        }
-        inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
-            return innerMostBody(sCombine + _sum, pCombine * _product, nCombine + _number);
-        }
-        inline u64 buildNumber(u64 offset) const noexcept {
-            return _number + offset;
-        }
-        inline u64 getSum() const noexcept { return _sum; }
-        inline u64 getProduct() const noexcept { return _product; }
-        inline u64 getNumber() const noexcept { return _number; }
-    private:
-        u64 _sum;
-        u64 _product;
-        u64 _number;
+	private:
+		static inline constexpr bool checkValue(u64 sum) noexcept {
+			return (sum % 2 == 0) || (sum % 3 == 0);
+		}
+		static inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+			return checkValue(sum) && (value % product == 0) && (value % sum == 0);
+		}
+	public:
+		Triple(u64 s, u64 p, u64 n) : _sum(s), _product(p), _number(n) { }
+		Triple() : Triple(0, 0, 0) { }
+		inline bool assume(u64 sum, u64 product, u64 number) noexcept {
+			_sum = sum;
+			_product = product;
+			_number = number;
+		}
+		inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
+			return innerMostBody(sCombine + _sum, pCombine * _product, nCombine + _number);
+		}
+		inline u64 buildNumber(u64 offset) const noexcept {
+			return _number + offset;
+		}
+		inline u64 getSum() const noexcept { return _sum; }
+		inline u64 getProduct() const noexcept { return _product; }
+		inline u64 getNumber() const noexcept { return _number; }
+	private:
+		u64 _sum;
+		u64 _product;
+		u64 _number;
 };
 
 template<u64 width>
 constexpr int numberOfDigitsForGivenWidth() noexcept {
-    static_assert(width >= 0, "Negative width doesn't make sense");
-    return 7 * numberOfDigitsForGivenWidth<width - 1>();
+	static_assert(width >= 0, "Negative width doesn't make sense");
+	return 7 * numberOfDigitsForGivenWidth<width - 1>();
 }
 template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
 template<u64 width>
@@ -67,52 +67,52 @@ constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
-    static_assert(width >= 0, "Can't have negative width!");
-    return input * fastPow10<width>;
+	static_assert(width >= 0, "Can't have negative width!");
+	return input * fastPow10<width>;
 }
 
 template<u64 width>
 inline Triple* getTriples() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    static Triple elements[numElements<width>];
-    return elements;
+	static_assert(width >= 2 && width < 9, "Illegal width!");
+	static Triple elements[numElements<width>];
+	return elements;
 }
 
 template<u64 width>
 inline void populateWidth() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    populateWidth<width - 1>();
-    auto* triple = getTriples<width>();
-    auto* prev = getTriples<width - 1>();
-    for (int i = 0; i < numElements<width - 1>; ++i) {
-        auto tmp = prev[i];
-        auto s = tmp.getSum();
-        auto p = tmp.getProduct();
-        auto n = makeDigitAt<1>(tmp.getNumber());
-        for (int j = 2; j < 10; ++j) {
-            if (j != 5) {
-                *triple = Triple(s + j, p * j, n + j);
-                ++triple;
+	static_assert(width >= 2 && width < 9, "Illegal width!");
+	populateWidth<width - 1>();
+	auto* triple = getTriples<width>();
+	auto* prev = getTriples<width - 1>();
+	for (int i = 0; i < numElements<width - 1>; ++i) {
+		auto tmp = prev[i];
+		auto s = tmp.getSum();
+		auto p = tmp.getProduct();
+		auto n = makeDigitAt<1>(tmp.getNumber());
+		for (int j = 2; j < 10; ++j) {
+			if (j != 5) {
+				*triple = Triple(s + j, p * j, n + j);
+				++triple;
 
-            }
-        }
-    }
+			}
+		}
+	}
 }
 //TODO: reduce memory footprint by specializing on 6
 template<>
 inline void populateWidth<2>() noexcept {
-    auto* triple = getTriples<2>();
-    for (int i = 2; i < 10; ++i) {
-        if (i != 5) {
-            auto numberOuter = makeDigitAt<1>(i);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    *triple = Triple(i + j, i * j, numberOuter + j);
-                    ++triple;
-                }
-            }
-        }
-    }
+	auto* triple = getTriples<2>();
+	for (int i = 2; i < 10; ++i) {
+		if (i != 5) {
+			auto numberOuter = makeDigitAt<1>(i);
+			for (int j = 2; j < 10; ++j) {
+				if (j != 5) {
+					*triple = Triple(i + j, i * j, numberOuter + j);
+					++triple;
+				}
+			}
+		}
+	}
 }
 
 
@@ -131,82 +131,90 @@ u64 collection3[numElements<2>] = {
 };
 
 inline Triple computeForcedThreeElements(int number) noexcept {
-	auto digits0 = number % 10;
-	auto digits1 = (number / 10) % 10;
-	auto digits2 = (number / 100) % 10;
-	return Triple(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
 }
 
 template<u64 count>
 inline std::string doIt(int start, int stop) noexcept {
-    std::array<Triple, count * numElements<2>> tmp;
-    auto t8 = getTriples<8>();
-	int j = 0;
-    for (int i = start; i < stop; ++i) {
+	std::array<Triple, count * numElements<2>> tmp;
+	auto t8 = getTriples<8>();
+	for (int i = start, j = 0; i < stop; ++i) {
 		auto curr = t8[i];
+		auto sum = curr.getSum();
+		auto product = curr.getProduct();
+		auto number = curr.getNumber() * fastPow10<3>;
 		for (auto const& tmp2 : range3) {
-        	tmp[j] = Triple(curr.getSum() + tmp2.getSum(), curr.getProduct() * tmp2.getProduct(), (curr.getNumber() * fastPow10<3>) + tmp2.getNumber());
+			tmp[j].assume(sum + tmp2.getSum(), product * tmp2.getProduct(), number + tmp2.getNumber());
 			++j;
 		}
-    }
-    std::stringstream storage;
-	for (auto const & i : range12To17) {
-		auto s = i.getSum();
-		auto p = i.getProduct();
-		auto n = i.getNumber();
-		for (auto const& curr : tmp) {
-			if (curr.isQuodigious(s, p, n)) {
-				storage << curr.buildNumber(n) << std::endl;
-			}
-		}
-		//for (auto const & curr : tmp) {
-		//	auto prod = p * curr.getProduct();
-		//	auto sum = s + curr.getSum();
-		//	auto index = curr.getNumber() + n;
-		//	for (auto const & tmp2 : range3) {
-		//		if (tmp2.isQuodigious(sum, prod, index)) {
-		//			storage << tmp2.buildNumber(index) << std::endl;
-		//		}
-		//	}
-		//}
 	}
-    return storage.str();
+	std::stringstream storage;
+	auto factor = numElements<6> / 7;
+	auto mkBody = [&tmp, factor](auto mult) noexcept {
+		auto fn = [&tmp](auto start, auto stop) {
+			std::stringstream storage;
+			for (int i = start; i < stop; ++i) {
+				auto s = range12To17[i].getSum();
+				auto p = range12To17[i].getProduct();
+				auto n = range12To17[i].getNumber();
+				for (auto const & curr : tmp) {
+					if (curr.isQuodigious(s, p, n)) {
+						storage << curr.buildNumber(n) << std::endl;
+					}
+				}
+			}
+			return storage.str();
+		};
+		return std::async(std::launch::async, fn, mult * factor, (mult + 1) * factor);
+	};
+	auto b0 = mkBody(0);
+	auto b1 = mkBody(1);
+	auto b2 = mkBody(2);
+	auto b3 = mkBody(3);
+	auto b4 = mkBody(4);
+	auto b5 = mkBody(5);
+	auto b6 = mkBody(6);
+	storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
+	return storage.str();
 }
 
 int main() {
-    auto errorCode = 0;
-    constexpr auto workUnitWidth = 4;
-    constexpr auto fallOver = 8 - workUnitWidth;
-    constexpr auto workUnitCount = numElements<workUnitWidth>;
-    constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
+	auto errorCode = 0;
+	constexpr auto workUnitWidth = 4;
+	constexpr auto fallOver = 8 - workUnitWidth;
+	constexpr auto workUnitCount = numElements<workUnitWidth>;
+	constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
 	std::stringstream collection0;
-    // setup the triples
+	// setup the triples
 	populateWidth<6>();
-    auto t8 = getTriples<6>();
-    for (auto& r1217 : range12To17) {
-        r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
-        ++t8;
-    }
-    populateWidth<8>();
-	for (int i = 0; i < numElements<2>; ++i) {
-		range3[i] = computeForcedThreeElements(collection3[i]);
+	auto t8 = getTriples<6>();
+	for (auto& r1217 : range12To17) {
+		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+		++t8;
 	}
-    auto fn = [](auto start, auto stop) noexcept {
-        return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
-    };
-	
+	populateWidth<8>();
+	for (int i = 0; i < numElements<2>; ++i) {
+		auto number = collection3[i];
+		auto digits0 = number % 10;
+		auto digits1 = (number / 10) % 10;
+		auto digits2 = (number / 100) % 10;
+		range3[i].assume(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
+	}
+	auto fn = [](auto start, auto stop) noexcept {
+		return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
+	};
 
-    while(std::cin.good()) {
-        int innerThreadId = 0;
-        std::cin >> innerThreadId;
-        if (innerThreadId < 0 || innerThreadId >= numElements<fallOver>) {
-            std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<fallOver> - 1 << "]" << std::endl;
-            errorCode = 1;
-            break;
-        }
-        if (!std::cin.good()) {
-            break;
-        }
+
+	while(std::cin.good()) {
+		int innerThreadId = 0;
+		std::cin >> innerThreadId;
+		if (innerThreadId < 0 || innerThreadId >= numElements<fallOver>) {
+			std::cerr << "Illegal inner thread id, must be in the range [0," << numElements<fallOver> - 1 << "]" << std::endl;
+			errorCode = 1;
+			break;
+		}
+		if (!std::cin.good()) {
+			break;
+		}
 		// divide the code up into seven parts
 		auto start = workUnitCount * innerThreadId;
 		auto stop0 = oneSeventhWorkUnit + start;
@@ -230,7 +238,7 @@ int main() {
 		auto b5 = fn(stop4, stop5);
 		auto b6 = fn(stop5, stop6);
 		collection0 << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
-    }
+	}
 	std::cout << collection0.str() << std::endl;
-    return errorCode;
+	return errorCode;
 }
