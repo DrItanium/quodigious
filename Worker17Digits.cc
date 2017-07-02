@@ -116,7 +116,8 @@ inline void populateWidth<2>() noexcept {
 }
 
 
-Triple range12To17[numElements<6>];
+constexpr auto thirdLevelWidth = 6;
+Triple range12To17[numElements<thirdLevelWidth>];
 Triple range3[numElements<2>];
 // these were the three least significant digits for all numbers 13 digits and
 // above! So we can do 49 numbers instead of 196!
@@ -148,8 +149,8 @@ inline std::string doIt(int start, int stop) noexcept {
 		}
 	}
 	std::stringstream storage;
-	static constexpr auto factor = numElements<6> / 49;
-	static_assert((factor*49) == numElements<6>, "Not divisible");
+	static constexpr auto factor = numElements<thirdLevelWidth> / 49;
+	static_assert((factor*49) == numElements<thirdLevelWidth>, "Not divisible");
 	auto mkBody = [&tmp](auto mult) noexcept {
 		auto start = mult * factor;
 		auto stop = (mult + 1) * factor;
@@ -189,8 +190,8 @@ int main() {
 	constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
 	std::stringstream collection0;
 	// setup the triples
-	populateWidth<6>();
-	auto t8 = getTriples<6>();
+	populateWidth<thirdLevelWidth>();
+	auto t8 = getTriples<thirdLevelWidth>();
 	for (auto& r1217 : range12To17) {
 		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
 		++t8;
