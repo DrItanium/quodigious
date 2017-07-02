@@ -148,9 +148,12 @@ inline std::string doIt(int start, int stop) noexcept {
 		}
 	}
 	std::stringstream storage;
-	auto factor = numElements<6> / 49;
-	auto mkBody = [&tmp, factor](auto mult) noexcept {
-		auto fn = [&tmp](auto start, auto stop) {
+	static constexpr auto factor = numElements<6> / 49;
+	static_assert((factor*49) == numElements<6>, "Not divisible");
+	auto mkBody = [&tmp](auto mult) noexcept {
+		auto start = mult * factor;
+		auto stop = (mult + 1) * factor;
+		auto fn = [&tmp, start, stop]() noexcept {
 			std::stringstream storage;
 			for (int i = start; i < stop; ++i) {
 				auto s = range12To17[i].getSum();
@@ -164,7 +167,7 @@ inline std::string doIt(int start, int stop) noexcept {
 			}
 			return storage.str();
 		};
-		return std::async(std::launch::async, fn, mult * factor, (mult + 1) * factor);
+		return std::async(std::launch::async, fn);
 	};
 	auto b0 = mkBody(0);
 	decltype(b0) rest[48];
