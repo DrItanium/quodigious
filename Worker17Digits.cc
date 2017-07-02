@@ -148,7 +148,7 @@ inline std::string doIt(int start, int stop) noexcept {
 		}
 	}
 	std::stringstream storage;
-	auto factor = numElements<6> / 7;
+	auto factor = numElements<6> / 49;
 	auto mkBody = [&tmp, factor](auto mult) noexcept {
 		auto fn = [&tmp](auto start, auto stop) {
 			std::stringstream storage;
@@ -167,13 +167,14 @@ inline std::string doIt(int start, int stop) noexcept {
 		return std::async(std::launch::async, fn, mult * factor, (mult + 1) * factor);
 	};
 	auto b0 = mkBody(0);
-	auto b1 = mkBody(1);
-	auto b2 = mkBody(2);
-	auto b3 = mkBody(3);
-	auto b4 = mkBody(4);
-	auto b5 = mkBody(5);
-	auto b6 = mkBody(6);
-	storage << b0.get() << b1.get() << b2.get() << b3.get() << b4.get() << b5.get() << b6.get();
+	decltype(b0) rest[48];
+	for (int i = 0, j = 1; i < 48; ++i, ++j) {
+		rest[i] = mkBody(j);
+	}
+	storage << b0.get();
+	for (int i = 0; i < 48; ++i) {
+		storage << rest[i].get();
+	}
 	return storage.str();
 }
 
