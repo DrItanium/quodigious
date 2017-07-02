@@ -116,75 +116,86 @@ inline void populateWidth<2>() noexcept {
 }
 
 
-Triple range12To18[numElements<7>];
-Triple range2To4[numElements<2>];
+Triple range12To17[numElements<6>];
+Triple range3[numElements<2>];
+// these were the three least significant digits for all numbers 13 digits and
+// above! So we can do 49 numbers instead of 196!
+u64 collection3[numElements<2>] = { 
+	224, 232, 248, 264, 272, 288, 296,
+	328, 336, 344, 368, 376, 384, 392,
+	424, 432, 448, 464, 472, 488, 496,
+	624, 632, 648, 664, 672, 688, 696,
+	728, 736, 744, 768, 776, 784, 792,
+	824, 832, 848, 864, 872, 888, 896,
+	928, 936, 944, 968, 976, 984, 992, 
+};
 
-void fourthBody(std::ostream& str, u64 s, u64 p, u64 n) noexcept {
-    for (auto const & i : range12To18) {
-        auto sum = s + i.getSum();
-        auto prod = p * i.getProduct();
-        auto index = n + i.getNumber();
-        for (auto const & tmp2 : range2To4) {
-            if (tmp2.isQuodigious(sum, prod, index)) {
-                str << tmp2.buildNumber(index) << std::endl;
-            }
-        }
-    }
+inline Triple computeForcedThreeElements(int number) noexcept {
+	auto digits0 = number % 10;
+	auto digits1 = (number / 10) % 10;
+	auto digits2 = (number / 100) % 10;
+	return Triple(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
 }
 
 template<u64 count>
-std::string doIt(int start, int stop) noexcept {
-    std::array<Triple, count> tmp;
+inline std::string doIt(int start, int stop) noexcept {
+    std::array<Triple, count * numElements<2>> tmp;
     auto t8 = getTriples<8>();
-    for (int i = start, j = 0; i < stop; ++i, ++j) {
-        tmp[j] = t8[i];
+	int j = 0;
+    for (int i = start; i < stop; ++i) {
+		auto curr = t8[i];
+		for (auto const& tmp2 : range3) {
+        	tmp[j] = Triple(curr.getSum() + tmp2.getSum(), curr.getProduct() * tmp2.getProduct(), (curr.getNumber() * fastPow10<3>) + tmp2.getNumber());
+			++j;
+		}
     }
-    auto mkBody = [tmp, start, stop](auto offset) noexcept {
-        auto fn = [tmp, start, stop](auto offset) noexcept {
-	        std::stringstream storage;
-            for (auto const & t8 : tmp) {
-                auto product = t8.getProduct();
-                auto sum = t8.getSum();
-                auto num = t8.getNumber() * fastPow10<3>;
-                fourthBody(storage, sum + offset, product * offset, num + offset);
-	        }
-	        return storage.str();
-        };
-        return std::async(std::launch::async, fn, offset);
-    };
     std::stringstream storage;
-    auto p0 = mkBody(2);
-    auto p1 = mkBody(4);
-    auto p2 = mkBody(6);
-    auto p3 = mkBody(8);
-	storage << p0.get() << p1.get() << p2.get() << p3.get();
+	for (auto const & i : range12To17) {
+		auto s = i.getSum();
+		auto p = i.getProduct();
+		auto n = i.getNumber();
+		for (auto const& curr : tmp) {
+			if (curr.isQuodigious(s, p, n)) {
+				storage << curr.buildNumber(n) << std::endl;
+			}
+		}
+		//for (auto const & curr : tmp) {
+		//	auto prod = p * curr.getProduct();
+		//	auto sum = s + curr.getSum();
+		//	auto index = curr.getNumber() + n;
+		//	for (auto const & tmp2 : range3) {
+		//		if (tmp2.isQuodigious(sum, prod, index)) {
+		//			storage << tmp2.buildNumber(index) << std::endl;
+		//		}
+		//	}
+		//}
+	}
     return storage.str();
 }
 
 int main() {
     auto errorCode = 0;
-    constexpr auto workUnitWidth = 6;
+    constexpr auto workUnitWidth = 4;
     constexpr auto fallOver = 8 - workUnitWidth;
     constexpr auto workUnitCount = numElements<workUnitWidth>;
     constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
 	std::stringstream collection0;
     // setup the triples
-    populateWidth<2>();
-    auto t2 = getTriples<2>();
-    for (auto& r24 : range2To4) {
-        r24.assume(t2->getSum(), t2->getProduct(), t2->getNumber() * fastPow10<1>);
-        ++t2;
-    }
-	populateWidth<7>();
-    auto t8 = getTriples<7>();
-    for (auto& r1219 : range12To18) {
-        r1219.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+	populateWidth<6>();
+    auto t8 = getTriples<6>();
+    for (auto& r1217 : range12To17) {
+        r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
         ++t8;
     }
     populateWidth<8>();
+	for (int i = 0; i < numElements<2>; ++i) {
+		range3[i] = computeForcedThreeElements(collection3[i]);
+	}
     auto fn = [](auto start, auto stop) noexcept {
         return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
     };
+	
+
     while(std::cin.good()) {
         int innerThreadId = 0;
         std::cin >> innerThreadId;
@@ -196,24 +207,24 @@ int main() {
         if (!std::cin.good()) {
             break;
         }
-        // divide the code up into seven parts
+		// divide the code up into seven parts
 		auto start = workUnitCount * innerThreadId;
-        auto stop0 = oneSeventhWorkUnit + start;
-        auto stop1 = oneSeventhWorkUnit + stop0;
-        auto stop2 = oneSeventhWorkUnit + stop1;
-        auto stop3 = oneSeventhWorkUnit + stop2;
-        auto stop4 = oneSeventhWorkUnit + stop3;
-        auto stop5 = oneSeventhWorkUnit + stop4;
-        auto stop6 = oneSeventhWorkUnit + stop5;
-		auto stop = workUnitCount * (innerThreadId + 1);
-        if (stop != stop6) {
-            errorCode = 1;
-            std::cerr << "size mismatch!" << std::endl;
-            break;
-        }
+		auto stop0 = oneSeventhWorkUnit + start;
+		auto stop1 = oneSeventhWorkUnit + stop0;
+		auto stop2 = oneSeventhWorkUnit + stop1;
+		auto stop3 = oneSeventhWorkUnit + stop2;
+		auto stop4 = oneSeventhWorkUnit + stop3;
+		auto stop5 = oneSeventhWorkUnit + stop4;
+		auto stop6 = oneSeventhWorkUnit + stop5;
+		auto stop = workUnitCount * (innerThreadId+ 1);
+		if (stop != stop6) {
+			errorCode = 1;
+			std::cerr << "size mismatch!" << std::endl;
+			break;
+		}
 		auto b0 = fn(start, stop0);
-        auto b1 = fn(stop0, stop1);
-        auto b2 = fn(stop1, stop2);
+		auto b1 = fn(stop0, stop1);
+		auto b2 = fn(stop1, stop2);
 		auto b3 = fn(stop2, stop3);
 		auto b4 = fn(stop3, stop4);
 		auto b5 = fn(stop4, stop5);
