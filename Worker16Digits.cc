@@ -116,7 +116,7 @@ inline void populateWidth<2>() noexcept {
 }
 
 
-constexpr auto thirdLevelWidth = 6;
+constexpr auto thirdLevelWidth = 5;
 Triple range12To17[numElements<thirdLevelWidth>];
 Triple range3[numElements<2>];
 // these were the three least significant digits for all numbers 13 digits and
