@@ -27,10 +27,11 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
+WORKER16_PROG = qworker16
 WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG}
 all: ${PROGS}
 
 help:
@@ -38,6 +39,7 @@ help:
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
+	@echo "  - ${WORKER16_PROG}: a worker program to compute part of the 16 digit space"
 	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
 	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
@@ -58,6 +60,10 @@ ${QLOOPS_PROG}: inverted-loops.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
 	@echo done.
 
+${WORKER16_PROG}: Worker16Digits.o
+	@echo -n Building worker program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER16_PROG} Worker16Digits.o
+	@echo done.
 ${WORKER17_PROG}: Worker17Digits.o
 	@echo -n Building worker program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER17_PROG} Worker17Digits.o
