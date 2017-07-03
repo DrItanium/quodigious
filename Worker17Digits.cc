@@ -27,7 +27,7 @@
 #include "Triple.h"
 #include "PrecomputedRange4.h"
 
-constexpr auto thirdLevelWidth = 6;
+constexpr auto thirdLevelWidth = 5;
 Triple range12To17[numElements<thirdLevelWidth>];
 
 template<u64 count, u64 addonCount>
@@ -89,7 +89,7 @@ int main() {
 	populateWidth<thirdLevelWidth>();
 	auto t8 = getTriples<thirdLevelWidth>();
 	for (auto& r1217 : range12To17) {
-		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<12>);
 		++t8;
 	}
 	populateWidth<8>();
