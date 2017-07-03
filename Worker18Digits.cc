@@ -131,9 +131,6 @@ u64 collection3[numElements<2>] = {
 	928, 936, 944, 968, 976, 984, 992, 
 };
 
-inline Triple computeForcedThreeElements(int number) noexcept {
-}
-
 template<u64 count>
 inline std::string doIt(int start, int stop) noexcept {
 	std::array<Triple, count * numElements<2>> tmp;
