@@ -24,109 +24,11 @@
 #include <future>
 #include <map>
 #include "qlib.h"
-
-class Triple {
-	private:
-		static inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-			return (value % product == 0) && (value % sum == 0);
-		}
-	public:
-		Triple(u64 s, u64 p, u64 n) : _sum(s), _product(p), _number(n) { }
-		Triple() : Triple(0, 0, 0) { }
-		inline bool assume(u64 sum, u64 product, u64 number) noexcept {
-			_sum = sum;
-			_product = product;
-			_number = number;
-		}
-		inline bool isQuodigious(u64 sCombine, u64 pCombine, u64 nCombine) const noexcept {
-			return innerMostBody(sCombine + _sum, pCombine * _product, nCombine + _number);
-		}
-		inline u64 buildNumber(u64 offset) const noexcept {
-			return _number + offset;
-		}
-		inline u64 getSum() const noexcept { return _sum; }
-		inline u64 getProduct() const noexcept { return _product; }
-		inline u64 getNumber() const noexcept { return _number; }
-	private:
-		u64 _sum;
-		u64 _product;
-		u64 _number;
-};
-
-template<u64 width>
-constexpr int numberOfDigitsForGivenWidth() noexcept {
-	static_assert(width >= 0, "Negative width doesn't make sense");
-	return 7 * numberOfDigitsForGivenWidth<width - 1>();
-}
-template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
-template<u64 width>
-constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
-
-template<u64 width>
-constexpr u64 makeDigitAt(u64 input) noexcept {
-	static_assert(width >= 0, "Can't have negative width!");
-	return input * fastPow10<width>;
-}
-
-template<u64 width>
-inline Triple* getTriples() noexcept {
-	static_assert(width >= 2 && width < 9, "Illegal width!");
-	static Triple elements[numElements<width>];
-	return elements;
-}
-
-template<u64 width>
-inline void populateWidth() noexcept {
-	static_assert(width >= 2 && width < 9, "Illegal width!");
-	populateWidth<width - 1>();
-	auto* triple = getTriples<width>();
-	auto* prev = getTriples<width - 1>();
-	for (int i = 0; i < numElements<width - 1>; ++i) {
-		auto tmp = prev[i];
-		auto s = tmp.getSum();
-		auto p = tmp.getProduct();
-		auto n = makeDigitAt<1>(tmp.getNumber());
-		for (int j = 2; j < 10; ++j) {
-			if (j != 5) {
-				*triple = Triple(s + j, p * j, n + j);
-				++triple;
-
-			}
-		}
-	}
-}
-//TODO: reduce memory footprint by specializing on 6
-template<>
-inline void populateWidth<2>() noexcept {
-	auto* triple = getTriples<2>();
-	for (int i = 2; i < 10; ++i) {
-		if (i != 5) {
-			auto numberOuter = makeDigitAt<1>(i);
-			for (int j = 2; j < 10; ++j) {
-				if (j != 5) {
-					*triple = Triple(i + j, i * j, numberOuter + j);
-					++triple;
-				}
-			}
-		}
-	}
-}
-
+#include "Triple.h"
+#include "PrecomputedRange3.h"
 
 constexpr auto thirdLevelWidth = 7;
 Triple range12To17[numElements<thirdLevelWidth>];
-Triple range3[numElements<2>];
-// these were the three least significant digits for all numbers 13 digits and
-// above! So we can do 49 numbers instead of 196!
-u64 collection3[numElements<2>] = {
-	224, 232, 248, 264, 272, 288, 296,
-	328, 336, 344, 368, 376, 384, 392,
-	424, 432, 448, 464, 472, 488, 496,
-	624, 632, 648, 664, 672, 688, 696,
-	728, 736, 744, 768, 776, 784, 792,
-	824, 832, 848, 864, 872, 888, 896,
-	928, 936, 944, 968, 976, 984, 992,
-};
 
 template<u64 count>
 inline std::string doIt(int start, int stop) noexcept {
@@ -191,13 +93,7 @@ int main() {
 		++t8;
 	}
 	populateWidth<8>();
-	for (int i = 0; i < numElements<2>; ++i) {
-		auto number = collection3[i];
-		auto digits0 = number % 10;
-		auto digits1 = (number / 10) % 10;
-		auto digits2 = (number / 100) % 10;
-		range3[i].assume(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
-	}
+    setupPrecomputedWidth3();
 	auto fn = [](auto start, auto stop) noexcept {
 		return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
 	};

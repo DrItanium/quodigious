@@ -17,6 +17,8 @@
 
 #ifndef PRECOMPUTED_RANGE3_H__
 #define PRECOMPUTED_RANGE3_H__
+#include "qlib.h"
+#include "Triple.h"
 
 constexpr auto digits3Width = numElements<2>;
 Triple range3[digits3Width];

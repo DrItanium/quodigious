@@ -17,6 +17,9 @@
 #ifndef PRECOMPUTED_RANGE4_H__
 #define PRECOMPUTED_RANGE4_H__
 
+#include "qlib.h"
+#include "Triple.h"
+
 constexpr auto digits4Width = 171;
 Triple range4[digits4Width];
 // observations for four digit numbers!

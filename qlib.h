@@ -102,4 +102,19 @@ void merge(T value , std::ostream& input) noexcept {
     }
 }
 
+template<u64 width>
+constexpr int numberOfDigitsForGivenWidth() noexcept {
+	static_assert(width >= 0, "Negative width doesn't make sense");
+	return 7 * numberOfDigitsForGivenWidth<width - 1>();
+}
+template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
+template<u64 width>
+constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
+
+template<u64 width>
+constexpr u64 makeDigitAt(u64 input) noexcept {
+	static_assert(width >= 0, "Can't have negative width!");
+	return input * fastPow10<width>;
+}
+
 #endif // end QLIB_H__
