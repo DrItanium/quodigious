@@ -27,11 +27,8 @@
 
 class Triple {
 	private:
-		static inline constexpr bool checkValue(u64 sum) noexcept {
-			return (sum % 2 == 0) || (sum % 3 == 0);
-		}
 		static inline constexpr bool innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-			return checkValue(sum) && (value % product == 0) && (value % sum == 0);
+			return (value % product == 0) && (value % sum == 0);
 		}
 	public:
 		Triple(u64 s, u64 p, u64 n) : _sum(s), _product(p), _number(n) { }
@@ -121,14 +118,14 @@ Triple range12To17[numElements<thirdLevelWidth>];
 Triple range3[numElements<2>];
 // these were the three least significant digits for all numbers 13 digits and
 // above! So we can do 49 numbers instead of 196!
-u64 collection3[numElements<2>] = { 
+u64 collection3[numElements<2>] = {
 	224, 232, 248, 264, 272, 288, 296,
 	328, 336, 344, 368, 376, 384, 392,
 	424, 432, 448, 464, 472, 488, 496,
 	624, 632, 648, 664, 672, 688, 696,
 	728, 736, 744, 768, 776, 784, 792,
 	824, 832, 848, 864, 872, 888, 896,
-	928, 936, 944, 968, 976, 984, 992, 
+	928, 936, 944, 968, 976, 984, 992,
 };
 
 template<u64 count>
