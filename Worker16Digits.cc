@@ -116,12 +116,15 @@ inline void populateWidth<2>() noexcept {
 }
 
 
-constexpr auto thirdLevelWidth = 5;
-Triple range12To17[numElements<thirdLevelWidth>];
-Triple range3[numElements<2>];
+constexpr auto thirdLevelWidth = 4;
+constexpr auto digits4Width = 171;
+constexpr auto digits3Width = numElements<2>;
+Triple topRange[numElements<thirdLevelWidth>];
+Triple range3[digits3Width];
+Triple range4[digits4Width];
 // these were the three least significant digits for all numbers 13 digits and
 // above! So we can do 49 numbers instead of 196!
-u64 collection3[numElements<2>] = { 
+u64 collection3[digits3Width] = { 
 	224, 232, 248, 264, 272, 288, 296,
 	328, 336, 344, 368, 376, 384, 392,
 	424, 432, 448, 464, 472, 488, 496,
@@ -131,16 +134,45 @@ u64 collection3[numElements<2>] = {
 	928, 936, 944, 968, 976, 984, 992, 
 };
 
+u64 collection4[digits4Width] = {
+2224, 2272, 2288, 2336, 2368, 2384, 2432,
+2448, 2464, 2496, 2624, 2672, 2688, 2736,
+2768, 2784, 2832, 2848, 2864, 2896, 2928,
+2944, 2976, 2992, 3232, 3248, 3264, 3296,
+3328, 3344, 3376, 3392, 3424, 3472, 3488,
+3632, 3648, 3664, 3696, 3728, 3744, 3776,
+3792, 3824, 3872, 3888, 3936, 3968, 3984,
+4224, 4272, 4288, 4336, 4368, 4384, 4432,
+4448, 4464, 4496, 4624, 4672, 4688, 4736,
+4768, 4784, 4832, 4848, 4864, 4896, 4928,
+4944, 4976, 4992, 6224, 6272, 6288, 6336,
+6368, 6384, 6432, 6448, 6464, 6496, 6624,
+6672, 6688, 6736, 6768, 6784, 6832, 6848,
+6864, 6896, 6928, 6944, 6976, 6992, 7232,
+7248, 7264, 7296, 7328, 7344, 7376, 7392,
+7424, 7472, 7488, 7632, 7648, 7664, 7696,
+7728, 7744, 7776, 7792, 7824, 7872, 7888,
+7936, 7968, 7984, 8224, 8272, 8288, 8336,
+8368, 8384, 8432, 8448, 8464, 8496, 8624,
+8672, 8688, 8736, 8768, 8784, 8832, 8848,
+8864, 8896, 8928, 8944, 8976, 8992, 9232,
+9248, 9264, 9296, 9328, 9344, 9376, 9392,
+9424, 9472, 9488, 9632, 9648, 9664, 9696,
+9728, 9744, 9776, 9792, 9824, 9872, 9888,
+9936, 9968, 9984,
+};
+
+constexpr auto addonWidth = digits4Width;
 template<u64 count>
 inline std::string doIt(int start, int stop) noexcept {
-	std::array<Triple, count * numElements<2>> tmp;
+	std::array<Triple, count * addonWidth> tmp;
 	auto t8 = getTriples<8>();
 	for (int i = start, j = 0; i < stop; ++i) {
 		auto curr = t8[i];
 		auto sum = curr.getSum();
 		auto product = curr.getProduct();
-		auto number = curr.getNumber() * fastPow10<3>;
-		for (auto const& tmp2 : range3) {
+		auto number = curr.getNumber() * fastPow10<4>;
+		for (auto const& tmp2 : range4) {
 			tmp[j].assume(sum + tmp2.getSum(), product * tmp2.getProduct(), number + tmp2.getNumber());
 			++j;
 		}
@@ -154,9 +186,9 @@ inline std::string doIt(int start, int stop) noexcept {
 		auto fn = [&tmp, start, stop]() noexcept {
 			std::stringstream storage;
 			for (int i = start; i < stop; ++i) {
-				auto s = range12To17[i].getSum();
-				auto p = range12To17[i].getProduct();
-				auto n = range12To17[i].getNumber();
+				auto s = topRange[i].getSum();
+				auto p = topRange[i].getProduct();
+				auto n = topRange[i].getNumber();
 				for (auto const& curr : tmp) {
 					if (curr.isQuodigious(s, p, n)) {
 						storage << curr.buildNumber(n) << std::endl;
@@ -189,17 +221,27 @@ int main() {
 	// setup the triples
 	populateWidth<thirdLevelWidth>();
 	auto t8 = getTriples<thirdLevelWidth>();
-	for (auto& r1217 : range12To17) {
-		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+	for (auto& r1217 : topRange) {
+		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<12>);
 		++t8;
 	}
 	populateWidth<8>();
-	for (int i = 0; i < numElements<2>; ++i) {
+	for (int i = 0; i < digits3Width; ++i) {
 		auto number = collection3[i];
 		auto digits0 = number % 10;
 		auto digits1 = (number / 10) % 10;
 		auto digits2 = (number / 100) % 10;
 		range3[i].assume(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
+	}
+	for (int i = 0; i < digits4Width; ++i) {
+		auto number = collection4[i];
+		auto digits0 = number % 10;
+		auto digits1 = (number / 10) % 10;
+		auto digits2 = (number / 100) % 10;
+		auto digits3 = (number / 1000) % 10;
+		auto sum = digits0 + digits1 + digits2 + digits3;
+		auto product = digits0 * digits1 * digits2 * digits3;
+		range4[i].assume(sum, product, number);
 	}
 	auto fn = [](auto start, auto stop) noexcept {
 		return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
