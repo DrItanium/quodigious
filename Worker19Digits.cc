@@ -25,28 +25,28 @@
 #include <map>
 #include "qlib.h"
 #include "Triple.h"
-#include "PrecomputedRange3.h"
+#include "PrecomputedRange4.h"
 
-constexpr auto thirdLevelWidth = 8;
+constexpr auto thirdLevelWidth = 7;
 Triple range12To17[numElements<thirdLevelWidth>];
 
-template<u64 count>
+template<u64 count, u64 addonCount>
 inline std::string doIt(int start, int stop) noexcept {
-	std::array<Triple, count * numElements<2>> tmp;
+    ArrayView<count, addonCount> tmp;
 	auto t8 = getTriples<8>();
 	for (int i = start, j = 0; i < stop; ++i) {
 		auto curr = t8[i];
 		auto sum = curr.getSum();
 		auto product = curr.getProduct();
-		auto number = curr.getNumber() * fastPow10<3>;
-		for (auto const& tmp2 : range3) {
+		auto number = curr.getNumber() * fastPow10<4>;
+		for (auto const& tmp2 : range4) {
 			tmp[j].assume(sum + tmp2.getSum(), product * tmp2.getProduct(), number + tmp2.getNumber());
 			++j;
 		}
 	}
 	std::stringstream storage;
-	static constexpr auto factor = numElements<thirdLevelWidth> / 49;
-	static_assert((factor*49) == numElements<thirdLevelWidth>, "Not divisible");
+    static constexpr auto factor = getPartialSize<thirdLevelWidth, 49>();
+    static_assert(isDivisibleBy<thirdLevelWidth, 49>(factor), "Not divisible");
 	auto mkBody = [&tmp](auto mult) noexcept {
 		auto start = mult * factor;
 		auto stop = (mult + 1) * factor;
@@ -89,19 +89,13 @@ int main() {
 	populateWidth<thirdLevelWidth>();
 	auto t8 = getTriples<thirdLevelWidth>();
 	for (auto& r1217 : range12To17) {
-		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<11>);
+		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<12>);
 		++t8;
 	}
 	populateWidth<8>();
-	for (int i = 0; i < numElements<2>; ++i) {
-		auto number = collection3[i];
-		auto digits0 = number % 10;
-		auto digits1 = (number / 10) % 10;
-		auto digits2 = (number / 100) % 10;
-		range3[i].assume(digits0 + digits1 + digits2, digits0 * digits1 * digits2, number);
-	}
+    setupPrecomputedWidth4();
 	auto fn = [](auto start, auto stop) noexcept {
-		return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
+		return std::async(std::launch::async, doIt<oneSeventhWorkUnit, digits4Width>, start, stop);
 	};
 
 

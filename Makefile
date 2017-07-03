@@ -118,6 +118,6 @@ loops32.o: qlib.h
 
 Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h
-Worker18Digits.o: qlib.h Triple.h PrecomputedRange3.h
-Worker19Digits.o: qlib.h Triple.h PrecomputedRange3.h
+Worker18Digits.o: qlib.h Triple.h PrecomputedRange4.h
+Worker19Digits.o: qlib.h Triple.h PrecomputedRange4.h
 .PHONY: tests longer_tests
