@@ -30,11 +30,9 @@
 constexpr auto thirdLevelWidth = 4;
 Triple topRange[numElements<thirdLevelWidth>];
 
-
-constexpr auto addonWidth = digits4Width;
-template<u64 count>
+template<u64 count, u64 addonWidth>
 inline std::string doIt(int start, int stop) noexcept {
-	std::array<Triple, count * addonWidth> tmp;
+    ArrayView<count, addonWidth> tmp;
 	auto t8 = getTriples<8>();
 	for (int i = start, j = 0; i < stop; ++i) {
 		auto curr = t8[i];
@@ -47,8 +45,8 @@ inline std::string doIt(int start, int stop) noexcept {
 		}
 	}
 	std::stringstream storage;
-	static constexpr auto factor = numElements<thirdLevelWidth> / 49;
-	static_assert((factor*49) == numElements<thirdLevelWidth>, "Not divisible");
+	static constexpr auto factor = getPartialSize<thirdLevelWidth, 49>();
+    static_assert(isDivisibleBy<thirdLevelWidth, 49>(factor), "Not divisible");
 	auto mkBody = [&tmp](auto mult) noexcept {
 		auto start = mult * factor;
 		auto stop = (mult + 1) * factor;
@@ -98,7 +96,7 @@ int main() {
 	populateWidth<8>();
     setupPrecomputedWidth4();
 	auto fn = [](auto start, auto stop) noexcept {
-		return std::async(std::launch::async, doIt<oneSeventhWorkUnit>, start, stop);
+		return std::async(std::launch::async, doIt<oneSeventhWorkUnit, digits4Width>, start, stop);
 	};
 
 

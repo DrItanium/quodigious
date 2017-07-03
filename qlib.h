@@ -117,4 +117,14 @@ constexpr u64 makeDigitAt(u64 input) noexcept {
 	return input * fastPow10<width>;
 }
 
+template<u64 width, u64 divide>
+constexpr int getPartialSize() noexcept {
+    static_assert(divide > 0, "Can't have a divisor of 0");
+    return numElements<width> / divide;
+}
+
+template<u64 width, u64 divisible>
+constexpr bool isDivisibleBy(u64 factor) noexcept {
+    return (factor * divisible) == numElements<width>;
+}
 #endif // end QLIB_H__

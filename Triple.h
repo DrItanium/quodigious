@@ -89,4 +89,7 @@ inline void populateWidth<2>() noexcept {
 	}
 }
 
+template<u64 count, u64 addonWidth>
+using ArrayView = std::array<Triple, count * addonWidth>;
+
 #endif
