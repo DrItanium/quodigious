@@ -92,4 +92,21 @@ inline void populateWidth<2>() noexcept {
 template<u64 count, u64 addonWidth>
 using ArrayView = std::array<Triple, count * addonWidth>;
 
+template<u64 width>
+inline Triple* getTopRangeTriples() noexcept {
+    static_assert(width != 0 && width < 8, "Illegal width!");
+    static bool init = true;
+    static Triple elements[numElements<width>];
+    if (init) {
+        init = false;
+        populateWidth<width>();
+        auto curr = getTriples<width>();
+        for (auto& e : elements) {
+            e.assume(curr->getSum(), curr->getProduct(), curr->getNumber() * fastPow10<12>);
+            ++curr;
+        }
+    }
+    return elements;
+}
+
 #endif

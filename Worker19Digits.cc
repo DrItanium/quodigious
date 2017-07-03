@@ -27,8 +27,7 @@
 #include "Triple.h"
 #include "PrecomputedRange4.h"
 
-constexpr auto thirdLevelWidth = 7;
-Triple topRange[numElements<thirdLevelWidth>];
+constexpr auto topRangeWidth = 7;
 
 template<u64 count, u64 addonCount>
 inline std::string doIt(int start, int stop) noexcept {
@@ -45,13 +44,14 @@ inline std::string doIt(int start, int stop) noexcept {
 		}
 	}
 	std::stringstream storage;
-    static constexpr auto factor = getPartialSize<thirdLevelWidth, 49>();
-    static_assert(isDivisibleBy<thirdLevelWidth, 49>(factor), "Not divisible");
+    static constexpr auto factor = getPartialSize<topRangeWidth, 49>();
+    static_assert(isDivisibleBy<topRangeWidth, 49>(factor), "Not divisible");
 	auto mkBody = [&tmp](auto mult) noexcept {
 		auto start = mult * factor;
 		auto stop = (mult + 1) * factor;
 		auto fn = [&tmp, start, stop]() noexcept {
 			std::stringstream storage;
+            auto topRange = getTopRangeTriples<topRangeWidth>();
 			for (int i = start; i < stop; ++i) {
 				auto s = topRange[i].getSum();
 				auto p = topRange[i].getProduct();
@@ -86,12 +86,7 @@ int main() {
 	constexpr auto oneSeventhWorkUnit = workUnitCount / 7;
 	std::stringstream collection0;
 	// setup the triples
-	populateWidth<thirdLevelWidth>();
-	auto t8 = getTriples<thirdLevelWidth>();
-	for (auto& r1217 : topRange) {
-		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<12>);
-		++t8;
-	}
+    (void)getTopRangeTriples<topRangeWidth>();
 	populateWidth<8>();
     setupPrecomputedWidth4();
 	auto fn = [](auto start, auto stop) noexcept {
