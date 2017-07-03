@@ -131,9 +131,6 @@ u64 collection3[numElements<2>] = {
 	928, 936, 944, 968, 976, 984, 992, 
 };
 
-inline Triple computeForcedThreeElements(int number) noexcept {
-}
-
 template<u64 count>
 inline std::string doIt(int start, int stop) noexcept {
 	std::array<Triple, count * numElements<2>> tmp;
@@ -160,7 +157,7 @@ inline std::string doIt(int start, int stop) noexcept {
 				auto s = range12To17[i].getSum();
 				auto p = range12To17[i].getProduct();
 				auto n = range12To17[i].getNumber();
-				for (auto const & curr : tmp) {
+				for (auto const& curr : tmp) {
 					if (curr.isQuodigious(s, p, n)) {
 						storage << curr.buildNumber(n) << std::endl;
 					}
