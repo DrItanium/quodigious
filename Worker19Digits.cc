@@ -28,7 +28,7 @@
 #include "PrecomputedRange4.h"
 
 constexpr auto thirdLevelWidth = 7;
-Triple range12To17[numElements<thirdLevelWidth>];
+Triple topRange[numElements<thirdLevelWidth>];
 
 template<u64 count, u64 addonCount>
 inline std::string doIt(int start, int stop) noexcept {
@@ -53,9 +53,9 @@ inline std::string doIt(int start, int stop) noexcept {
 		auto fn = [&tmp, start, stop]() noexcept {
 			std::stringstream storage;
 			for (int i = start; i < stop; ++i) {
-				auto s = range12To17[i].getSum();
-				auto p = range12To17[i].getProduct();
-				auto n = range12To17[i].getNumber();
+				auto s = topRange[i].getSum();
+				auto p = topRange[i].getProduct();
+				auto n = topRange[i].getNumber();
 				for (auto const & curr : tmp) {
 					if (curr.isQuodigious(s, p, n)) {
 						storage << curr.buildNumber(n) << std::endl;
@@ -88,7 +88,7 @@ int main() {
 	// setup the triples
 	populateWidth<thirdLevelWidth>();
 	auto t8 = getTriples<thirdLevelWidth>();
-	for (auto& r1217 : range12To17) {
+	for (auto& r1217 : topRange) {
 		r1217.assume(t8->getSum(), t8->getProduct(), t8->getNumber() * fastPow10<12>);
 		++t8;
 	}
