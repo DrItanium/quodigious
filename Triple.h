@@ -109,4 +109,5 @@ inline Triple* getTopRangeTriples() noexcept {
     return elements;
 }
 
+
 #endif

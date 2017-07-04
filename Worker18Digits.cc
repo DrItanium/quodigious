@@ -29,55 +29,6 @@
 
 constexpr auto topRangeWidth = 6;
 
-template<u64 count, u64 addonCount>
-inline std::string doIt(int start, int stop) noexcept {
-    ArrayView<count, addonCount> tmp;
-	auto t8 = getTriples<8>();
-	for (int i = start, j = 0; i < stop; ++i) {
-		auto curr = t8[i];
-		auto sum = curr.getSum();
-		auto product = curr.getProduct();
-		auto number = curr.getNumber() * fastPow10<4>;
-		for (auto const& tmp2 : range4) {
-			tmp[j].assume(sum + tmp2.getSum(), product * tmp2.getProduct(), number + tmp2.getNumber());
-			++j;
-		}
-	}
-	std::stringstream storage;
-    static constexpr auto factor = getPartialSize<topRangeWidth, 49>();
-    static_assert(isDivisibleBy<topRangeWidth, 49>(factor), "Not divisible");
-	auto mkBody = [&tmp](auto mult) noexcept {
-		auto start = mult * factor;
-		auto stop = (mult + 1) * factor;
-		auto fn = [&tmp, start, stop]() noexcept {
-			std::stringstream storage;
-            auto topRange = getTopRangeTriples<topRangeWidth>();
-			for (int i = start; i < stop; ++i) {
-				auto s = topRange[i].getSum();
-				auto p = topRange[i].getProduct();
-				auto n = topRange[i].getNumber();
-				for (auto const & curr : tmp) {
-					if (curr.isQuodigious(s, p, n)) {
-						storage << curr.buildNumber(n) << std::endl;
-					}
-				}
-			}
-			return storage.str();
-		};
-		return std::async(std::launch::async, fn);
-	};
-	auto b0 = mkBody(0);
-	decltype(b0) rest[48];
-	for (int i = 0, j = 1; i < 48; ++i, ++j) {
-		rest[i] = mkBody(j);
-	}
-	storage << b0.get();
-	for (int i = 0; i < 48; ++i) {
-		storage << rest[i].get();
-	}
-	return storage.str();
-}
-
 int main() {
 	auto errorCode = 0;
 	constexpr auto workUnitWidth = 4;
@@ -90,7 +41,7 @@ int main() {
 	populateWidth<8>();
     setupPrecomputedWidth4();
 	auto fn = [](auto start, auto stop) noexcept {
-		return std::async(std::launch::async, doIt<oneSeventhWorkUnit, digits4Width>, start, stop);
+		return std::async(std::launch::async, performQuodigiousWalk4<oneSeventhWorkUnit, digits4Width, topRangeWidth>, start, stop);
 	};
 
 
