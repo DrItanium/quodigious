@@ -41,7 +41,7 @@ int main() {
 	populateWidth<8>();
     setupPrecomputedWidth4();
 	auto fn = [](auto start, auto stop) noexcept {
-		return std::async(std::launch::async, performQuodigiousWalk4<oneSeventhWorkUnit, digits4Width, topRangeWidth>, start, stop);
+		return std::async(std::launch::async, performQuodigiousWalk4<oneSeventhWorkUnit, topRangeWidth>, start, stop);
 	};
 
 
