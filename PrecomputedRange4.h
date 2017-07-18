@@ -64,9 +64,9 @@ inline void setupPrecomputedWidth4() {
 	}
 }
 
-template<u64 count, u64 addonWidth, u64 topRangeWidth>
+template<u64 count, u64 topRangeWidth>
 inline std::string performQuodigiousWalk4(int start, int stop) noexcept {
-    ArrayView<count, addonWidth> tmp;
+    ArrayView<count, digits4Width> tmp;
 	auto t8 = getTriples<8>();
 	for (int i = start, j = 0; i < stop; ++i) {
 		auto curr = t8[i];
@@ -101,13 +101,11 @@ inline std::string performQuodigiousWalk4(int start, int stop) noexcept {
 		};
 		return std::async(std::launch::async, fn);
 	};
-	auto b0 = mkBody(0);
-	decltype(b0) rest[48];
-	for (int i = 0, j = 1; i < 48; ++i, ++j) {
-		rest[i] = mkBody(j);
+	decltype(mkBody(0)) rest[49];
+	for (int i = 0; i < 49; ++i) {
+		rest[i] = mkBody(i);
 	}
-	storage << b0.get();
-	for (int i = 0; i < 48; ++i) {
+	for (int i = 0; i < 49; ++i) {
 		storage << rest[i].get();
 	}
 	return storage.str();
