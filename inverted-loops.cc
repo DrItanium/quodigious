@@ -197,18 +197,16 @@ struct ActualLoopBody {
 			auto* ptrSum = sums2;
 			auto* ptrProd = products2;
 			auto* ptrVals = values2To4;
-			auto first = mkComputation(*ptrSum, *ptrProd, *ptrVals);
-			decltype(first) watcher[48];
+			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[49];
 			auto* w = watcher;
 			++ptrSum;
 			++ptrProd;
 			++ptrVals;
-			for (int i = 0; i < 48; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
+			for (int i = 0; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			}
 			w = watcher;
-			storage << first.get();
-			for (int i = 0; i < 48; ++i, ++w) {
+			for (int i = 0; i < 49; ++i, ++w) {
 				storage << w->get();
 			}
 		} else if (pos == 4 && max >= 12) {
