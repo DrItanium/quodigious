@@ -199,9 +199,9 @@ struct ActualLoopBody {
 			auto* ptrVals = values2To4;
 			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[49];
 			auto* w = watcher;
-			++ptrSum;
-			++ptrProd;
-			++ptrVals;
+			//++ptrSum;
+			//++ptrProd;
+			//++ptrVals;
 			for (int i = 0; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			}
