@@ -193,20 +193,18 @@ struct ActualLoopBody {
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		if (pos == 2) {
-			auto mkComputation = [&sum, &product, &index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
+			static constexpr auto threadCount = 49;
+			auto mkComputation = [sum, product, index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
 			auto* ptrSum = sums2;
 			auto* ptrProd = products2;
 			auto* ptrVals = values2To4;
-			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[49];
+			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[threadCount];
 			auto* w = watcher;
-			//++ptrSum;
-			//++ptrProd;
-			//++ptrVals;
-			for (int i = 0; i < 49; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
+			for (int i = 0; i < threadCount; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
 				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			}
 			w = watcher;
-			for (int i = 0; i < 49; ++i, ++w) {
+			for (int i = 0; i < threadCount; ++i, ++w) {
 				storage << w->get();
 			}
 		} else if (pos == 4 && max >= 12) {
@@ -226,11 +224,19 @@ struct ActualLoopBody {
 			product <<= 1;
 			sum += 2;
 			index += multiply<2>(next);
-			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
-				if (i != 5) {
-					loopBody<follow, max>(storage, sum, product, index);
-				}
-			}
+			auto advance = [next, originalProduct, &product, &sum, &index]() noexcept {
+				product += originalProduct;
+				++sum;
+				index += next;
+			};
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 2
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 3
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 4
+			advance(); // 5
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 6
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 7
+			loopBody<follow, max>(storage, sum, product, index); advance(); // 8
+			loopBody<follow, max>(storage, sum, product, index); // 9
 		}
 	}
 };
@@ -250,7 +256,7 @@ struct ActualLoopBody<true> {
         product <<= 1;
         sum += 2;
         index += multiply<2>(next);
-        auto advance = [&originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
+        auto advance = [next, originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
         merge(innerMostBody(sum, product, index)); // 2
         advance();
         merge(innerMostBody(sum, product, index)); // 3
@@ -265,6 +271,8 @@ struct ActualLoopBody<true> {
         merge(innerMostBody(sum, product, index)); // 8
         advance();
         merge(innerMostBody(sum, product, index)); // 9
+
+
 	}
 };
 
