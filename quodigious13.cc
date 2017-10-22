@@ -38,17 +38,17 @@ inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 
 template<u64 width>
 inline u64* getSums() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static_assert(width >= 2 && width <= 9, "Illegal width!");
     return nullptr;
 }
 template<u64 width>
 inline u64* getProducts() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static_assert(width >= 2 && width <= 9, "Illegal width!");
     return nullptr;
 }
 template<u64 width>
 inline u64* getNumbers() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static_assert(width >= 2 && width <= 9, "Illegal width!");
     return nullptr;
 }
 #define defTripleStorage(width) \
@@ -65,11 +65,12 @@ defTripleStorage(5);
 defTripleStorage(6);
 defTripleStorage(7);
 defTripleStorage(8);
+defTripleStorage(9);
 #undef defTripleStorage
 
 template<u64 width>
 void populateWidth() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
+    static_assert(width >= 2 && width <= 9, "Illegal width!");
     static bool populated = false;
     if (!populated) {
         populated = true;
@@ -126,11 +127,7 @@ void populateWidth<2>() noexcept {
 }
 
 u64 values2To4[numElements<2>] = { 0 };
-u64 values4To12[numElements<8>] = { 0 };
-//u64 values12To14[numElements<2>] = { 0 };
-//u64 values12To15[numElements<3>] = { 0 };
-//u64 values12To16[numElements<4>] = { 0 };
-//u64 values12To17[numElements<5>] = { 0 };
+u64 values4To13[numElements<9>] = { 0 };
 
 template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
@@ -146,17 +143,9 @@ inline void populateArray(u64* storage) noexcept {
 }
 
 void setup() noexcept {
-    populateWidth<2>();
-    populateWidth<3>();
-    populateWidth<4>();
-    populateWidth<5>();
-    populateWidth<8>();
+    populateWidth<9>();
     populateArray<2, 1>(values2To4);
-    populateArray<8, 3>(values4To12);
-    //populateArray<2, 11>(values12To14);
-    //populateArray<3, 11>(values12To15);
-    //populateArray<4, 11>(values12To16);
-    //populateArray<5, 11>(values12To17);
+    populateArray<9, 3>(values4To13);
 }
 
 
@@ -176,9 +165,6 @@ template<u64 nextPosition, u64 max, u64 width>
 inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
     iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
 }
-
-//template<> inline void loopBody<12, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
-//template<> inline void loopBody<12, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
 
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
@@ -207,8 +193,8 @@ struct ActualLoopBody {
 			for (int i = 0; i < threadCount; ++i, ++w) {
 				storage << w->get();
 			}
-		} else if (pos == 4 && max >= 12) {
-			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
+		} else if (pos == 4) {
+			iterativePrecomputedLoopBody<13, max, 9>(storage, sum, product, index, values4To13);
 		} else {
             constexpr auto next = fastPow10<pos - 1>;
             constexpr auto follow = pos + 1;
