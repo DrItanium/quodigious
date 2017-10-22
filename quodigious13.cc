@@ -163,7 +163,7 @@ struct ActualLoopBody {
 			auto* s9 = sums9;
 			auto* p9 = products9;
 			auto* v9 = values4To13;
-			for (auto i = 0u; i < numElements<9>; ++i, ++s9, ++p9, ++v9) {
+			for (auto i = 0; i < numElements<9>; ++i, ++s9, ++p9, ++v9) {
 				loopBody<13>(storage, sum + *s9, product * (*p9), index + *v9);
 			}
 		} 
