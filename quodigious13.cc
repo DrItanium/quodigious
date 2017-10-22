@@ -26,10 +26,10 @@
 #include <map>
 #include "qlib.h"
 
-inline constexpr bool checkValue(u64 sum) noexcept {
+constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
-inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	if (checkValue(sum) && isQuodigious(value, sum, product)) {
 		return value;
 	}
@@ -142,13 +142,6 @@ inline void populateArray(u64* storage) noexcept {
     populateArray<width, factor>(getNumbers<width>(), storage);
 }
 
-void setup() noexcept {
-    populateWidth<9>();
-    populateArray<2, 1>(values2To4);
-    populateArray<9, 3>(values4To13);
-}
-
-
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
@@ -167,18 +160,15 @@ struct ActualLoopBody {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		if (pos == 2) {
 			static constexpr auto threadCount = 49;
-			auto mkComputation = [sum, product, index](auto uS, auto uP, auto uInd) noexcept { return std::async(std::launch::async, loopBodyString<4, max>, sum + uS, product * uP, index + uInd); };
-			auto* ptrSum = sums2;
-			auto* ptrProd = products2;
-			auto* ptrVals = values2To4;
-			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[threadCount];
-			auto* w = watcher;
-			for (int i = 0; i < threadCount; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
-				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
+			auto mkComputation = [sum, product, index](auto i) noexcept {
+				return std::async(std::launch::async, loopBodyString<4, max>, sum + sums2[i], product * products2[i], index + values2To4[i]); 
+			};
+			decltype(mkComputation(0)) watcher[threadCount];
+			for (int i = 0; i < threadCount; ++i) {
+				watcher[i] = mkComputation(i);
 			}
-			w = watcher;
-			for (int i = 0; i < threadCount; ++i, ++w) {
-				storage << w->get();
+			for (int i = 0; i < threadCount; ++i) {
+				storage << watcher[i].get();
 			}
 		} else if (pos == 4) {
 			auto* ptrSum = getSums<9>();
@@ -194,19 +184,11 @@ struct ActualLoopBody {
 			product <<= 1;
 			sum += 2;
 			index += (next << 1);
-			auto advance = [originalProduct, &product, &sum, &index]() noexcept {
-				product += originalProduct;
-				++sum;
-				index += next;
-			};
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 2
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 3
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 4
-			advance(); // 5
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 6
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 7
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 8
-			loopBody<follow, max>(storage, sum, product, index); // 9
+			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
+				if (i != 5) {
+					loopBody<follow, max>(storage, sum, product, index);
+				}
+			}
 		}
 	}
 };
@@ -221,12 +203,12 @@ struct ActualLoopBody<true> {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
 		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-        constexpr auto next = fastPow10<pos - 1>;
+        static constexpr auto next = fastPow10<pos - 1>;
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
-        index += multiply<2>(next);
-        auto advance = [next, originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
+        index += (next << 1);
+        auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
         merge(innerMostBody(sum, product, index)); advance(); // 2
         merge(innerMostBody(sum, product, index)); advance(); // 3
         merge(innerMostBody(sum, product, index)); advance(); // 4
@@ -254,24 +236,14 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	return storage.str();
 }
 
-template<u64 length>
-inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-    // spawn each section at the same time, 196 threads will be spawned for
-    // simultaneous processing
-	std::stringstream ss0, ss1, ss2, ss3;
-	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
-	auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
-	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
-	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
-	storage << p0.get() << p1.get() << p2.get() << p3.get();
-}
-
-
 int main() {
-	setup();
-    std::ostringstream storage;
-	body<13>(storage);
-	std::cout << storage.str() << std::endl;
+    populateWidth<9>();
+    populateArray<2, 1>(values2To4);
+    populateArray<9, 3>(values4To13);
+	auto p0 = std::async(std::launch::async, loopBodyString<2, 13>, 2, 2, 2);
+	auto p1 = std::async(std::launch::async, loopBodyString<2, 13>, 4, 4, 4);
+	auto p2 = std::async(std::launch::async, loopBodyString<2, 13>, 6, 6, 6);
+	auto p3 = std::async(std::launch::async, loopBodyString<2, 13>, 8, 8, 8);
+	std::cout << p0.get() << p1.get() << p2.get() << p3.get() << std::endl;
     return 0;
 }
