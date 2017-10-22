@@ -26,7 +26,7 @@
 #include "qlib.h"
 
 constexpr bool checkValue(u64 sum) noexcept {
-	return (sum % 2 == 0) || (sum % 3 == 0);
+	return (isEven(sum) || (sum % 3 == 0));
 }
 constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
 	if (checkValue(sum) && isQuodigious(value, sum, product)) {
@@ -84,17 +84,17 @@ void populateWidth() noexcept {
             auto s = prevSum[i];
             auto p = prevProd[i];
             auto n = makeDigitAt<1>(prevNum[i]);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    *numPtr = n + j;
-                    *sumPtr = s + j;
-                    *prodPtr = p * j;
-                    ++numPtr;
-                    ++sumPtr;
-                    ++prodPtr;
-
-                }
-            }
+			for (int j = 2; j < 10; ++j) {
+				if (j == 5) {
+					continue;
+				}
+				*numPtr = n + j;
+				*sumPtr = s + j;
+				*prodPtr = p * j;
+				++numPtr;
+				++sumPtr;
+				++prodPtr;
+			}
         }
     }
 }
@@ -107,21 +107,23 @@ void populateWidth<2>() noexcept {
         auto* sumPtr = getSums<2>();
         auto* prodPtr = getProducts<2>();
         auto* numPtr = getNumbers<2>();
-        for (int i = 2; i < 10; ++i) {
-            if (i != 5) {
-                auto numberOuter = makeDigitAt<1>(i);
-                for (int j = 2; j < 10; ++j) {
-                    if (j != 5) {
-                        *sumPtr = i + j;
-                        *prodPtr = i * j;
-                        *numPtr = numberOuter + j;
-                        ++sumPtr;
-                        ++prodPtr;
-                        ++numPtr;
-                    }
-                }
-            }
-        }
+		for (int i = 2; i < 10; ++i) {
+			if (i == 5) {
+				continue;
+			}
+			auto numberOuter = makeDigitAt<1>(i);
+			for (int j = 2; j < 10; ++j) {
+				if (j == 5) {
+					continue;
+				}
+				*sumPtr = i + j;
+				*prodPtr = i * j;
+				*numPtr = numberOuter + j;
+				++sumPtr;
+				++prodPtr;
+				++numPtr;
+			}
+		}
     }
 }
 constexpr auto length1To4 = numElements<2> * 4;
@@ -216,22 +218,21 @@ std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 int main() {
 	populateWidth<2>();
-    populateArray<2, 1>(values2To4);
+	populateArray<2, 1>(values2To4);
 	auto* v1To4 = values1To4;
 	auto* s1To4 = sums1To4;
 	auto* p1To4 = products1To4;
 	for (int i = 2; i < 10; ++i) {
-		if ((i % 2) != 0) {
-			continue;
-		}
-		for (auto j = 0; j < numElements<2>; ++j, ++v1To4, ++s1To4, ++p1To4) {
-			*v1To4 = values2To4[j] + i;
-			*s1To4 = sums2[j] + i;
-			*p1To4 = products2[j] * i;
+		if (isEven(i)) {
+			for (auto j = 0; j < numElements<2>; ++j, ++v1To4, ++s1To4, ++p1To4) {
+				*v1To4 = values2To4[j] + i;
+				*s1To4 = sums2[j] + i;
+				*p1To4 = products2[j] * i;
+			}
 		}
 	}
     populateWidth<9>();
-    populateArray<9, 3>(values4To13);
+	populateArray<9, 3>(values4To13);
 	static constexpr auto threadCount = length1To4;
 	auto mkComputation = [](auto i) noexcept {
 		return std::async(std::launch::async, loopBodyString<4, 13>, sums1To4[i], products1To4[i], values1To4[i]);
