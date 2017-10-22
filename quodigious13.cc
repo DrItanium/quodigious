@@ -153,19 +153,6 @@ template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
-template<u64 nextPosition, u64 max, u64 count, u64 width>
-void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
-	auto* ptrSum = getSums<width>();
-	auto* ptrProd = getProducts<width>();
-	for (auto i = 0u; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
-	}
-}
-template<u64 nextPosition, u64 max, u64 width>
-inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-    iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
-}
-
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
@@ -194,15 +181,20 @@ struct ActualLoopBody {
 				storage << w->get();
 			}
 		} else if (pos == 4) {
-			iterativePrecomputedLoopBody<13, max, 9>(storage, sum, product, index, values4To13);
+			auto* ptrSum = getSums<9>();
+			auto* ptrProd = getProducts<9>();
+			auto* values = values4To13;
+			for (auto i = 0u; i < numElements<9>; ++i, ++ptrSum, ++ptrProd, ++values) {
+				loopBody<13, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
+			}
 		} else {
-            constexpr auto next = fastPow10<pos - 1>;
-            constexpr auto follow = pos + 1;
+            static constexpr auto next = fastPow10<pos - 1>;
+            static constexpr auto follow = pos + 1;
             auto originalProduct = product;
 			product <<= 1;
 			sum += 2;
-			index += multiply<2>(next);
-			auto advance = [next, originalProduct, &product, &sum, &index]() noexcept {
+			index += (next << 1);
+			auto advance = [originalProduct, &product, &sum, &index]() noexcept {
 				product += originalProduct;
 				++sum;
 				index += next;
