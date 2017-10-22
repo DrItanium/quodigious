@@ -23,7 +23,6 @@
 #include <sstream>
 #include <functional>
 #include <future>
-#include <map>
 #include "qlib.h"
 
 constexpr bool checkValue(u64 sum) noexcept {
@@ -163,7 +162,8 @@ struct ActualLoopBody {
 			auto mkComputation = [sum, product, index](auto i) noexcept {
 				return std::async(std::launch::async, loopBodyString<4, max>, sum + sums2[i], product * products2[i], index + values2To4[i]); 
 			};
-			decltype(mkComputation(0)) watcher[threadCount];
+			using AsyncWorker = decltype(mkComputation(0));
+			AsyncWorker watcher[threadCount];
 			for (int i = 0; i < threadCount; ++i) {
 				watcher[i] = mkComputation(i);
 			}
@@ -171,11 +171,8 @@ struct ActualLoopBody {
 				storage << watcher[i].get();
 			}
 		} else if (pos == 4) {
-			auto* ptrSum = getSums<9>();
-			auto* ptrProd = getProducts<9>();
-			auto* values = values4To13;
-			for (auto i = 0u; i < numElements<9>; ++i, ++ptrSum, ++ptrProd, ++values) {
-				loopBody<13, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
+			for (auto i = 0u; i < numElements<9>; ++i) {
+				loopBody<13, max>(storage, sum + sums9[i], product * products9[i], index + values4To13[i]);
 			}
 		} else {
             static constexpr auto next = fastPow10<pos - 1>;
