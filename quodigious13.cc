@@ -146,7 +146,7 @@ inline void populateArray(u64* storage) noexcept {
     populateArray<width, factor>(getNumbers<width>(), storage);
 }
 
-template<u64 pos, u64 max>
+template<u64 pos>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
@@ -157,14 +157,14 @@ struct ActualLoopBody {
 	ActualLoopBody(ActualLoopBody&&) = delete;
 	ActualLoopBody(const ActualLoopBody&) = delete;
 
-	template<u64 pos, u64 max>
+	template<u64 pos>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		if (pos == 4) {
 			auto* s9 = sums9;
 			auto* p9 = products9;
 			auto* v9 = values4To13;
 			for (auto i = 0u; i < numElements<9>; ++i, ++s9, ++p9, ++v9) {
-				loopBody<13, max>(storage, sum + *s9, product * (*p9), index + *v9);
+				loopBody<13>(storage, sum + *s9, product * (*p9), index + *v9);
 			}
 		} 
 	}
@@ -176,42 +176,54 @@ struct ActualLoopBody<true> {
 	~ActualLoopBody() = delete;
 	ActualLoopBody(ActualLoopBody&&) = delete;
 	ActualLoopBody(const ActualLoopBody&) = delete;
-	template<u64 pos, u64 max>
+	template<u64 pos>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
+		static_assert(13 == pos, "Can't have a top level if the position and max don't match!");
         static constexpr auto next = fastPow10<pos - 1>;
 		static constexpr auto doubleNext = next << 1;
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
 		index += doubleNext;
-        auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index), storage); advance(); // 2
-        merge(innerMostBody(sum, product, index), storage); advance(); // 3
+        merge(innerMostBody(sum, product, index), storage); // 2
+		product += originalProduct; 
+		++sum; 
+		index += next; 
+        merge(innerMostBody(sum, product, index), storage); // 3
+		product += originalProduct; 
+		++sum; 
+		index += next; 
         merge(innerMostBody(sum, product, index), storage); // 4
 		product += (originalProduct << 1);
 		sum += 2;
 		index += doubleNext;
-        merge(innerMostBody(sum, product, index), storage); advance(); // 6
-        merge(innerMostBody(sum, product, index), storage); advance(); // 7
-        merge(innerMostBody(sum, product, index), storage); advance(); // 8
+        merge(innerMostBody(sum, product, index), storage); // 6
+		product += originalProduct; 
+		++sum; 
+		index += next; 
+        merge(innerMostBody(sum, product, index), storage); // 7
+		product += originalProduct; 
+		++sum; 
+		index += next; 
+        merge(innerMostBody(sum, product, index), storage); // 8
+		product += originalProduct; 
+		++sum; 
+		index += next; 
         merge(innerMostBody(sum, product, index), storage); // 9
-
-
 	}
 };
 
-template<u64 pos, u64 max>
+template<u64 pos>
 void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos <= max, "Position can't be larger than maximum!");
+	static_assert (pos <= 13, "Position can't be larger than maximum!");
 	// walk through two separate set of actions
-	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
+	ActualLoopBody<pos == 13>::template body< pos > (storage, sum, product, index);
 }
 
-template<u64 pos, u64 max>
+template<u64 pos>
 std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	std::ostringstream storage;
-	loopBody<pos, max> (storage, sum, product, index);
+	loopBody<pos> (storage, sum, product, index);
 	return storage.str();
 }
 
@@ -235,7 +247,7 @@ int main() {
 	populateArray<9, 3>(values4To13);
 	static constexpr auto threadCount = length1To4;
 	auto mkComputation = [](auto i) noexcept {
-		return std::async(std::launch::async, loopBodyString<4, 13>, sums1To4[i], products1To4[i], values1To4[i]);
+		return std::async(std::launch::async, loopBodyString<4>, sums1To4[i], products1To4[i], values1To4[i]);
 	};
 	using AsyncWorker = decltype(mkComputation(0));
 	AsyncWorker watcher[threadCount];
