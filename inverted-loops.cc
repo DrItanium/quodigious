@@ -29,11 +29,18 @@
 inline constexpr bool checkValue(u64 sum) noexcept {
 	return (sum % 2 == 0) || (sum % 3 == 0);
 }
-inline constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+inline constexpr u64 performCheck(u64 sum, u64 product, u64 value) noexcept {
 	if (checkValue(sum) && isQuodigious(value, sum, product)) {
 		return value;
 	}
 	return 0;
+}
+void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
+	// inject the least significant digits 2,4,6,8
+	merge(performCheck(sum + 2, product << 1, value + 2), stream); // 2
+	merge(performCheck(sum + 4, product << 2, value + 4), stream); // 4
+	merge(performCheck(sum + 6, product * 6, value + 6), stream); // 6
+	merge(performCheck(sum + 8, product << 3, value + 8), stream); // 8
 }
 
 template<u64 width>
@@ -257,16 +264,16 @@ struct ActualLoopBody<true> {
         sum += 2;
         index += doubleNext;
         auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index)); advance(); // 2
-        merge(innerMostBody(sum, product, index)); advance(); // 3
-        merge(innerMostBody(sum, product, index)); // 4
+        (innerMostBody(storage, sum, product, index)); advance(); // 2
+        (innerMostBody(storage, sum, product, index)); advance(); // 3
+        (innerMostBody(storage, sum, product, index)); // 4
 		product += (originalProduct << 1);
 		sum += 2;
 		index += doubleNext;
-        merge(innerMostBody(sum, product, index)); advance(); // 6
-        merge(innerMostBody(sum, product, index)); advance(); // 7
-        merge(innerMostBody(sum, product, index)); advance(); // 8
-        merge(innerMostBody(sum, product, index)); // 9
+        (innerMostBody(storage, sum, product, index)); advance(); // 6
+        (innerMostBody(storage, sum, product, index)); advance(); // 7
+        (innerMostBody(storage, sum, product, index)); advance(); // 8
+        (innerMostBody(storage, sum, product, index)); // 9
 
 
 	}
@@ -291,12 +298,13 @@ inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
-	std::stringstream ss0, ss1, ss2, ss3;
-	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
-	auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
-	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
-	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
-	storage << p0.get() << p1.get() << p2.get() << p3.get();
+	//std::stringstream ss0, ss1, ss2, ss3;
+	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 0, 1, 0);
+	//auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
+	//auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
+	//auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
+	//storage << p0.get() << p1.get() << p2.get() << p3.get();
+	storage << p0.get();
 }
 
 
@@ -311,6 +319,7 @@ int main() {
                 case 10: body<10>(storage); break;
                 case 11: body<11>(storage); break;
                 case 12: body<12>(storage); break;
+                case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
