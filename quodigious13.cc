@@ -124,7 +124,10 @@ void populateWidth<2>() noexcept {
         }
     }
 }
-
+constexpr auto length1To4 = numElements<2> * 4;
+u64 values1To4[length1To4] = { 0 };
+u64 sums1To4[length1To4] = { 0 };
+u64 products1To4[length1To4] = { 0 };
 u64 values2To4[numElements<2>] = { 0 };
 u64 values4To13[numElements<9>] = { 0 };
 
@@ -157,20 +160,7 @@ struct ActualLoopBody {
 
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		if (pos == 2) {
-			static constexpr auto threadCount = 49;
-			auto mkComputation = [sum, product, index](auto i) noexcept {
-				return std::async(std::launch::async, loopBodyString<4, max>, sum + sums2[i], product * products2[i], index + values2To4[i]); 
-			};
-			using AsyncWorker = decltype(mkComputation(0));
-			AsyncWorker watcher[threadCount];
-			for (int i = 0; i < threadCount; ++i) {
-				watcher[i] = mkComputation(i);
-			}
-			for (int i = 0; i < threadCount; ++i) {
-				storage << watcher[i].get();
-			}
-		} else if (pos == 4) {
+		if (pos == 4) {
 			for (auto i = 0u; i < numElements<9>; ++i) {
 				loopBody<13, max>(storage, sum + sums9[i], product * products9[i], index + values4To13[i]);
 			}
@@ -227,13 +217,32 @@ std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 int main() {
 	populateWidth<2>();
     populateArray<2, 1>(values2To4);
+	auto* v1To4 = values1To4;
+	auto* s1To4 = sums1To4;
+	auto* p1To4 = products1To4;
+	for (int i = 2; i < 10; ++i) {
+		if ((i % 2) != 0) {
+			continue;
+		}
+		for (auto j = 0; j < numElements<2>; ++j, ++v1To4, ++s1To4, ++p1To4) {
+			*v1To4 = values2To4[j] + i;
+			*s1To4 = sums2[j] + i;
+			*p1To4 = products2[j] * i;
+		}
+	}
     populateWidth<9>();
     populateArray<9, 3>(values4To13);
-	auto mkCompute = [](auto v) noexcept { return std::async(std::launch::async, loopBodyString<2, 13>, v, v, v); };
-	auto p0 = mkCompute(2);
-	auto p1 = mkCompute(4);
-	auto p2 = mkCompute(6);
-	auto p3 = mkCompute(8);
-	std::cout << p0.get() << p1.get() << p2.get() << p3.get() << std::endl;
+	static constexpr auto threadCount = length1To4;
+	auto mkComputation = [](auto i) noexcept {
+		return std::async(std::launch::async, loopBodyString<4, 13>, sums1To4[i], products1To4[i], values1To4[i]);
+	};
+	using AsyncWorker = decltype(mkComputation(0));
+	AsyncWorker watcher[threadCount];
+	for (int i = 0; i < threadCount; ++i) {
+		watcher[i] = mkComputation(i);
+	}
+	for (int i = 0; i < threadCount; ++i) {
+		std::cout << watcher[i].get();
+	}
     return 0;
 }
