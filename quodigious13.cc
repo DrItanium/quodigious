@@ -142,11 +142,11 @@ inline void populateArray(u64* storage) noexcept {
 }
 
 template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
+void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
 template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
+std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
 template<bool topLevel>
 struct ActualLoopBody {
@@ -220,22 +220,23 @@ struct ActualLoopBody<true> {
 };
 
 template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
+void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 	static_assert (pos <= max, "Position can't be larger than maximum!");
 	// walk through two separate set of actions
 	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
 }
 
 template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
+std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	std::ostringstream storage;
 	loopBody<pos, max> (storage, sum, product, index);
 	return storage.str();
 }
 
 int main() {
-    populateWidth<9>();
+	populateWidth<2>();
     populateArray<2, 1>(values2To4);
+    populateWidth<9>();
     populateArray<9, 3>(values4To13);
 	auto p0 = std::async(std::launch::async, loopBodyString<2, 13>, 2, 2, 2);
 	auto p1 = std::async(std::launch::async, loopBodyString<2, 13>, 4, 4, 4);
