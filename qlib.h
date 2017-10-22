@@ -113,7 +113,6 @@ constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
 
 template<u64 width>
 constexpr u64 makeDigitAt(u64 input) noexcept {
-	static_assert(width >= 0, "Can't have negative width!");
 	return input * fastPow10<width>;
 }
 

@@ -177,7 +177,6 @@ struct ActualLoopBody<true> {
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
         static constexpr auto next = fastPow10<pos - 1>;
 		static constexpr auto doubleNext = next << 1;
         auto originalProduct = product;
@@ -185,16 +184,16 @@ struct ActualLoopBody<true> {
         sum += 2;
 		index += doubleNext;
         auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index)); advance(); // 2
-        merge(innerMostBody(sum, product, index)); advance(); // 3
-        merge(innerMostBody(sum, product, index)); // 4
+        merge(innerMostBody(sum, product, index), storage); advance(); // 2
+        merge(innerMostBody(sum, product, index), storage); advance(); // 3
+        merge(innerMostBody(sum, product, index), storage); // 4
 		product += (originalProduct << 1);
 		sum += 2;
 		index += doubleNext;
-        merge(innerMostBody(sum, product, index)); advance(); // 6
-        merge(innerMostBody(sum, product, index)); advance(); // 7
-        merge(innerMostBody(sum, product, index)); advance(); // 8
-        merge(innerMostBody(sum, product, index)); // 9
+        merge(innerMostBody(sum, product, index), storage); advance(); // 6
+        merge(innerMostBody(sum, product, index), storage); advance(); // 7
+        merge(innerMostBody(sum, product, index), storage); advance(); // 8
+        merge(innerMostBody(sum, product, index), storage); // 9
 
 
 	}
