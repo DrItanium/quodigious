@@ -220,14 +220,6 @@ void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 	ActualLoopBody<pos == 13>::template body< pos > (storage, sum, product, index);
 }
 
-template<u64 pos>
-std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
-	std::ostringstream storage;
-	loopBody<pos> (storage, sum, product, index);
-	return storage.str();
-}
-
-
 int main() {
 	populateWidth<2>();
 	populateArray<2, 1>(values2To4);
@@ -247,7 +239,12 @@ int main() {
 	populateArray<9, 3>(values4To13);
 	static constexpr auto threadCount = length1To4;
 	auto mkComputation = [](auto i) noexcept {
-		return std::async(std::launch::async, loopBodyString<4>, sums1To4[i], products1To4[i], values1To4[i]);
+		auto loopBodyString = [](auto sum, auto product, auto index) noexcept {
+			std::ostringstream storage;
+			loopBody<4>(storage, sum, product, index);
+			return storage.str();
+		};
+		return std::async(std::launch::async, loopBodyString, sums1To4[i], products1To4[i], values1To4[i]);
 	};
 	using AsyncWorker = decltype(mkComputation(0));
 	AsyncWorker watcher[threadCount];
