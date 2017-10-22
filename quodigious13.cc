@@ -128,6 +128,7 @@ constexpr auto length1To4 = numElements<2> * 4;
 u64 values1To4[length1To4] = { 0 };
 u64 sums1To4[length1To4] = { 0 };
 u64 products1To4[length1To4] = { 0 };
+u64 values2To4[numElements<2>] = { 0 };
 u64 values4To13[numElements<9>] = { 0 };
 
 template<u64 width, u64 factor>
@@ -215,8 +216,6 @@ std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 
 
 int main() {
-
-	static u64 values2To4[numElements<2>] = { 0 };
 	populateWidth<2>();
     populateArray<2, 1>(values2To4);
 	auto* v1To4 = values1To4;
