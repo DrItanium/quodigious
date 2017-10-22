@@ -174,19 +174,7 @@ struct ActualLoopBody {
 			for (auto i = 0u; i < numElements<9>; ++i) {
 				loopBody<13, max>(storage, sum + sums9[i], product * products9[i], index + values4To13[i]);
 			}
-		} else {
-            static constexpr auto next = fastPow10<pos - 1>;
-            static constexpr auto follow = pos + 1;
-            auto originalProduct = product;
-			product <<= 1;
-			sum += 2;
-			index += (next << 1);
-			for (int i = 2; i < 10; ++i, product += originalProduct, ++sum, index += next) {
-				if (i != 5) {
-					loopBody<follow, max>(storage, sum, product, index);
-				}
-			}
-		}
+		} 
 	}
 };
 
@@ -201,15 +189,18 @@ struct ActualLoopBody<true> {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
 		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
         static constexpr auto next = fastPow10<pos - 1>;
+		static constexpr auto doubleNext = next << 1;
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
-        index += (next << 1);
+		index += doubleNext;
         auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
         merge(innerMostBody(sum, product, index)); advance(); // 2
         merge(innerMostBody(sum, product, index)); advance(); // 3
-        merge(innerMostBody(sum, product, index)); advance(); // 4
-        advance();
+        merge(innerMostBody(sum, product, index)); // 4
+		product += (originalProduct << 1);
+		sum += 2;
+		index += doubleNext;
         merge(innerMostBody(sum, product, index)); advance(); // 6
         merge(innerMostBody(sum, product, index)); advance(); // 7
         merge(innerMostBody(sum, product, index)); advance(); // 8
@@ -238,10 +229,11 @@ int main() {
     populateArray<2, 1>(values2To4);
     populateWidth<9>();
     populateArray<9, 3>(values4To13);
-	auto p0 = std::async(std::launch::async, loopBodyString<2, 13>, 2, 2, 2);
-	auto p1 = std::async(std::launch::async, loopBodyString<2, 13>, 4, 4, 4);
-	auto p2 = std::async(std::launch::async, loopBodyString<2, 13>, 6, 6, 6);
-	auto p3 = std::async(std::launch::async, loopBodyString<2, 13>, 8, 8, 8);
+	auto mkCompute = [](auto v) noexcept { return std::async(std::launch::async, loopBodyString<2, 13>, v, v, v); };
+	auto p0 = mkCompute(2);
+	auto p1 = mkCompute(4);
+	auto p2 = mkCompute(6);
+	auto p3 = mkCompute(8);
 	std::cout << p0.get() << p1.get() << p2.get() << p3.get() << std::endl;
     return 0;
 }

@@ -218,21 +218,20 @@ struct ActualLoopBody {
         } else if (pos == 12 && max == 17) {
             iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
 		} else {
-            constexpr auto next = fastPow10<pos - 1>;
-            constexpr auto follow = pos + 1;
+            static constexpr auto next = fastPow10<pos - 1>;
+            static constexpr auto follow = pos + 1;
+			static constexpr auto doubleNext = next << 1;
             auto originalProduct = product;
 			product <<= 1;
 			sum += 2;
-			index += multiply<2>(next);
-			auto advance = [next, originalProduct, &product, &sum, &index]() noexcept {
-				product += originalProduct;
-				++sum;
-				index += next;
-			};
+			index += doubleNext;
+			auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
 			loopBody<follow, max>(storage, sum, product, index); advance(); // 2
 			loopBody<follow, max>(storage, sum, product, index); advance(); // 3
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 4
-			advance(); // 5
+			loopBody<follow, max>(storage, sum, product, index); // 4
+			product += (originalProduct << 1);
+			sum += 2;
+			index += doubleNext;
 			loopBody<follow, max>(storage, sum, product, index); advance(); // 6
 			loopBody<follow, max>(storage, sum, product, index); advance(); // 7
 			loopBody<follow, max>(storage, sum, product, index); advance(); // 8
@@ -251,16 +250,19 @@ struct ActualLoopBody<true> {
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
 		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
-        constexpr auto next = fastPow10<pos - 1>;
+        static constexpr auto next = fastPow10<pos - 1>;
+		static constexpr auto doubleNext = next << 1;
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
-        index += multiply<2>(next);
-        auto advance = [next, originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
+        index += doubleNext;
+        auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
         merge(innerMostBody(sum, product, index)); advance(); // 2
         merge(innerMostBody(sum, product, index)); advance(); // 3
-        merge(innerMostBody(sum, product, index)); advance(); // 4
-        advance();
+        merge(innerMostBody(sum, product, index)); // 4
+		product += (originalProduct << 1);
+		sum += 2;
+		index += doubleNext;
         merge(innerMostBody(sum, product, index)); advance(); // 6
         merge(innerMostBody(sum, product, index)); advance(); // 7
         merge(innerMostBody(sum, product, index)); advance(); // 8
@@ -309,7 +311,6 @@ int main() {
                 case 10: body<10>(storage); break;
                 case 11: body<11>(storage); break;
                 case 12: body<12>(storage); break;
-                case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
