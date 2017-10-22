@@ -168,7 +168,7 @@ template<u64 nextPosition, u64 max, u64 count, u64 width>
 void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
 	auto* ptrSum = getSums<width>();
 	auto* ptrProd = getProducts<width>();
-	for (int i = 0; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
+	for (auto i = 0u; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
 		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
 	}
 }
@@ -257,19 +257,13 @@ struct ActualLoopBody<true> {
         sum += 2;
         index += multiply<2>(next);
         auto advance = [next, originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        merge(innerMostBody(sum, product, index)); // 2
+        merge(innerMostBody(sum, product, index)); advance(); // 2
+        merge(innerMostBody(sum, product, index)); advance(); // 3
+        merge(innerMostBody(sum, product, index)); advance(); // 4
         advance();
-        merge(innerMostBody(sum, product, index)); // 3
-        advance();
-        merge(innerMostBody(sum, product, index)); // 4
-        advance();
-        advance();
-        merge(innerMostBody(sum, product, index)); // 6
-        advance();
-        merge(innerMostBody(sum, product, index)); // 7
-        advance();
-        merge(innerMostBody(sum, product, index)); // 8
-        advance();
+        merge(innerMostBody(sum, product, index)); advance(); // 6
+        merge(innerMostBody(sum, product, index)); advance(); // 7
+        merge(innerMostBody(sum, product, index)); advance(); // 8
         merge(innerMostBody(sum, product, index)); // 9
 
 
@@ -295,11 +289,12 @@ inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
     // spawn each section at the same time, 196 threads will be spawned for
     // simultaneous processing
+	std::stringstream ss0, ss1, ss2, ss3;
 	auto p0 = std::async(std::launch::async, loopBodyString<2, length>, 2, 2, 2);
 	auto p1 = std::async(std::launch::async, loopBodyString<2, length>, 4, 4, 4);
 	auto p2 = std::async(std::launch::async, loopBodyString<2, length>, 6, 6, 6);
 	auto p3 = std::async(std::launch::async, loopBodyString<2, length>, 8, 8, 8);
-    storage << p0.get() << p1.get() << p2.get() << p3.get();
+	storage << p0.get() << p1.get() << p2.get() << p3.get();
 }
 
 
