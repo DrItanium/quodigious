@@ -27,11 +27,12 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
+QUODIGIOUS13 = quodigious13 
 WORKER16_PROG = qworker16
 WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13}
 all: ${PROGS}
 
 help:
@@ -43,6 +44,7 @@ help:
 	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
 	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
+	@echo "  - ${QUODIGIOUS13}: a program that only computes 13 digits quodigious values"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
@@ -76,6 +78,11 @@ ${WORKER18_PROG}: Worker18Digits.o
 ${WORKER19_PROG}: Worker19Digits.o
 	@echo -n Building worker program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
+	@echo done.
+
+${QUODIGIOUS13}: quodigious13.o
+	@echo -n Building 13 digit quodigious program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
 	@echo done.
 
 timed_tests: ${QLOOPS_PROG}
@@ -120,4 +127,5 @@ Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker18Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker19Digits.o: qlib.h Triple.h PrecomputedRange4.h
+quodigious13.o: qlib.h
 .PHONY: tests longer_tests
