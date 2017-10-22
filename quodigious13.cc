@@ -161,8 +161,11 @@ struct ActualLoopBody {
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		if (pos == 4) {
-			for (auto i = 0u; i < numElements<9>; ++i) {
-				loopBody<13, max>(storage, sum + sums9[i], product * products9[i], index + values4To13[i]);
+			auto* s9 = sums9;
+			auto* p9 = products9;
+			auto* v9 = values4To13;
+			for (auto i = 0u; i < numElements<9>; ++i, ++s9, ++p9, ++v9) {
+				loopBody<13, max>(storage, sum + *s9, product * (*p9), index + *v9);
 			}
 		} 
 	}
@@ -214,7 +217,9 @@ std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	return storage.str();
 }
 
+
 int main() {
+
 	populateWidth<2>();
     populateArray<2, 1>(values2To4);
 	auto* v1To4 = values1To4;
