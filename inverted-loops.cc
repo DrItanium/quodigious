@@ -186,6 +186,13 @@ inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 pro
 
 template<> inline void loopBody<12, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
 template<> inline void loopBody<12, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 12>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 13>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 14>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 15>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
+template<> inline void loopBody<17, 16>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
 
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
@@ -220,8 +227,8 @@ struct ActualLoopBody {
 			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
 		} else if (pos == 12 && max == 16) {
 			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
-        } else if (pos == 12 && max == 17) {
-            iterativePrecomputedLoopBody<max, max, 5>(storage, sum, product, index, values12To17);
+		} else if (pos == 12 && max >= 17) {
+			iterativePrecomputedLoopBody<17, max, 5>(storage, sum, product, index, values12To17);
 		} else {
             static constexpr auto next = fastPow10<pos - 1>;
             static constexpr auto follow = pos + 1;
@@ -341,6 +348,8 @@ int main() {
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
                 case 17: body<17>(storage); break;
+				case 18: body<18>(storage); break;
+				case 19: body<19>(storage); break;
                 default:
                          std::cerr << "Illegal index " << currentIndex << std::endl;
                          return 1;
