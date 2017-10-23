@@ -66,11 +66,6 @@ inline u64* getNumbers() noexcept {
     template<> inline u64* getProducts< width > () noexcept { return products ## width ; } \
     template<> inline u64* getNumbers< width > () noexcept { return numbers ## width ; }
 defTripleStorage(2);
-defTripleStorage(3);
-defTripleStorage(4);
-defTripleStorage(5);
-defTripleStorage(6);
-defTripleStorage(7);
 #undef defTripleStorage
 
 template<u64 width>
@@ -278,12 +273,7 @@ inline void body(std::ostream& storage) noexcept {
 }
 
 inline void setup() noexcept {
-
-	// not sure why, but this storage here seems to make the program go much
-	// faster, the odd part is, I'm not using the majority of this memory. I
-	// think it has something to do with cache coherency.
-    populateWidth<5>();
-	populateWidth<7>();
+    populateWidth<2>();
     populateArray<2, 1>(values2To4);
 }
 
