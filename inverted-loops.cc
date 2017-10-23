@@ -133,11 +133,6 @@ void populateWidth<2>() noexcept {
 }
 
 u64 values2To4[numElements<2>] = { 0 };
-u64 values4To12[numElements<8>] = { 0 };
-u64 values12To14[numElements<2>] = { 0 };
-u64 values12To15[numElements<3>] = { 0 };
-u64 values12To16[numElements<4>] = { 0 };
-u64 values12To17[numElements<5>] = { 0 };
 
 template<u64 width, u64 factor>
 inline void populateArray(u64* nums, u64* storage) noexcept {
@@ -153,39 +148,21 @@ inline void populateArray(u64* storage) noexcept {
 }
 
 void setup() noexcept {
+	// not sure why, but this storage here seems to make the program go much
+	// faster, the odd part is, I'm not using the majority of this memory. I
+	// think it has something to do with cache coherency.
     populateWidth<2>();
     populateWidth<3>();
     populateWidth<4>();
     populateWidth<5>();
     populateWidth<8>();
     populateArray<2, 1>(values2To4);
-    populateArray<8, 3>(values4To12);
-    populateArray<2, 11>(values12To14);
-    populateArray<3, 11>(values12To15);
-    populateArray<4, 11>(values12To16);
-    populateArray<5, 11>(values12To17);
 }
 
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
-
-template<u64 nextPosition, u64 max, u64 count, u64 width>
-void iterativePrecomputedLoopBodyGeneric(std::ostream& storage, u64 sum, u64 product, u64 index, u64* values) noexcept {
-	auto* ptrSum = getSums<width>();
-	auto* ptrProd = getProducts<width>();
-	for (auto i = 0u; i < count; ++i, ++ptrSum, ++ptrProd, ++values) {
-		loopBody<nextPosition, max>(storage, sum + (*ptrSum), product * (*ptrProd), index + (*values));
-	}
-}
-template<u64 nextPosition, u64 max, u64 width>
-inline void iterativePrecomputedLoopBody(std::ostream& storage, u64 sum, u64 product, u64 index, u64* precomputedValues) noexcept {
-    iterativePrecomputedLoopBodyGeneric<nextPosition, max, numElements<width>, width>(storage, sum, product, index, precomputedValues);
-}
-
-template<> inline void loopBody<12, 11>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
-template<> inline void loopBody<12, 10>(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept { }
 
 template<u64 pos, u64 max>
 inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
@@ -212,14 +189,6 @@ struct ActualLoopBody {
 			for (int i = 0; i < threadCount; ++i) {
 				storage << watcher[i].get();
 			}
-		} else if (pos == 4 && max >= 12) {
-			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
-		} else if (pos == 12 && max == 14) {
-			iterativePrecomputedLoopBody<max, max, 2>(storage, sum, product, index, values12To14);
-		} else if (pos == 12 && max == 15) {
-			iterativePrecomputedLoopBody<max, max, 3>(storage, sum, product, index, values12To15);
-		} else if (pos == 12 && max == 16) {
-			iterativePrecomputedLoopBody<max, max, 4>(storage, sum, product, index, values12To16);
 		} else {
             static constexpr auto next = fastPow10<pos - 1>;
             static constexpr auto follow = pos + 1;
