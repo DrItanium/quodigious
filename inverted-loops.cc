@@ -274,16 +274,30 @@ struct ActualLoopBody<true> {
         product <<= 1;
         sum += 2;
         index += doubleNext;
-        auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-        (innerMostBody(storage, sum, product, index)); advance(); // 2
-        (innerMostBody(storage, sum, product, index)); advance(); // 3
+        (innerMostBody(storage, sum, product, index)); // 2
+		product += originalProduct;
+		++sum;
+		index += next;
+        (innerMostBody(storage, sum, product, index)); // 3
+		product += originalProduct;
+		++sum;
+		index += next;
         (innerMostBody(storage, sum, product, index)); // 4
 		product += (originalProduct << 1);
 		sum += 2;
 		index += doubleNext;
-        (innerMostBody(storage, sum, product, index)); advance(); // 6
-        (innerMostBody(storage, sum, product, index)); advance(); // 7
-        (innerMostBody(storage, sum, product, index)); advance(); // 8
+        (innerMostBody(storage, sum, product, index)); // 6
+		product += originalProduct;
+		++sum;
+		index += next;
+        (innerMostBody(storage, sum, product, index)); // 7
+		product += originalProduct;
+		++sum;
+		index += next;
+        (innerMostBody(storage, sum, product, index)); // 8
+		product += originalProduct;
+		++sum;
+		index += next;
         (innerMostBody(storage, sum, product, index)); // 9
 
 
