@@ -49,9 +49,6 @@ template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
 
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
-
 template<bool topLevel>
 struct ActualLoopBody {
 	ActualLoopBody() = delete;
