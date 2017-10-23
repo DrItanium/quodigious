@@ -26,10 +26,10 @@
 #include <map>
 #include "qlib.h"
 
-inline constexpr bool checkValue(u64 sum) noexcept {
-	return (sum % 2 == 0) || (sum % 3 == 0);
+constexpr bool checkValue(u64 sum) noexcept {
+	return (isEven(sum)) || (sum % 3 == 0);
 }
-inline constexpr u64 performCheck(u64 sum, u64 product, u64 value) noexcept {
+constexpr u64 performCheck(u64 sum, u64 product, u64 value) noexcept {
 	if (checkValue(sum) && isQuodigious(value, sum, product)) {
 		return value;
 	}
@@ -39,7 +39,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	// inject the least significant digits 2,4,6,8
 	merge(performCheck(sum + 2, product << 1, value + 2), stream); // 2
 	merge(performCheck(sum + 4, product << 2, value + 4), stream); // 4
-	merge(performCheck(sum + 6, product * 6, value + 6), stream); // 6
+	merge(performCheck(sum + 6, (product << 1) + (product << 2) , value + 6), stream); // 6
 	merge(performCheck(sum + 8, product << 3, value + 8), stream); // 8
 }
 
@@ -206,13 +206,11 @@ struct ActualLoopBody {
 			auto* ptrProd = products2;
 			auto* ptrVals = values2To4;
 			decltype(mkComputation(*ptrSum, *ptrProd, *ptrVals)) watcher[threadCount];
-			auto* w = watcher;
-			for (int i = 0; i < threadCount; ++i, ++w, ++ptrSum, ++ptrProd, ++ptrVals) {
-				*w = mkComputation(*ptrSum, *ptrProd, *ptrVals);
+			for (int i = 0; i < threadCount; ++i, ++ptrSum, ++ptrProd, ++ptrVals) {
+				watcher[i] = mkComputation(*ptrSum, *ptrProd, *ptrVals);
 			}
-			w = watcher;
-			for (int i = 0; i < threadCount; ++i, ++w) {
-				storage << w->get();
+			for (int i = 0; i < threadCount; ++i) {
+				storage << watcher[i].get();
 			}
 		} else if (pos == 4 && max >= 12) {
 			iterativePrecomputedLoopBody<12, max, 8>(storage, sum, product, index, values4To12);
@@ -232,16 +230,30 @@ struct ActualLoopBody {
 			product <<= 1;
 			sum += 2;
 			index += doubleNext;
-			auto advance = [originalProduct, &product, &sum, &index]() noexcept { product += originalProduct; ++sum; index += next; };
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 2
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 3
+			loopBody<follow, max>(storage, sum, product, index); // 2
+			product += originalProduct;
+			++sum;
+			index += next;
+			loopBody<follow, max>(storage, sum, product, index); // 3
+			product += originalProduct;
+			++sum;
+			index += next;
 			loopBody<follow, max>(storage, sum, product, index); // 4
 			product += (originalProduct << 1);
 			sum += 2;
 			index += doubleNext;
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 6
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 7
-			loopBody<follow, max>(storage, sum, product, index); advance(); // 8
+			loopBody<follow, max>(storage, sum, product, index); // 6
+			product += originalProduct;
+			++sum;
+			index += next;
+			loopBody<follow, max>(storage, sum, product, index); // 7
+			product += originalProduct;
+			++sum;
+			index += next;
+			loopBody<follow, max>(storage, sum, product, index); // 8
+			product += originalProduct;
+			++sum;
+			index += next;
 			loopBody<follow, max>(storage, sum, product, index); // 9
 		}
 	}
@@ -256,7 +268,6 @@ struct ActualLoopBody<true> {
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
 		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-		auto merge = [&storage](auto value) noexcept { if (value != 0) { storage << value << std::endl; } };
         static constexpr auto next = fastPow10<pos - 1>;
 		static constexpr auto doubleNext = next << 1;
         auto originalProduct = product;
