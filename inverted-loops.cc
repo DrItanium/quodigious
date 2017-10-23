@@ -71,7 +71,6 @@ defTripleStorage(4);
 defTripleStorage(5);
 defTripleStorage(6);
 defTripleStorage(7);
-defTripleStorage(8);
 #undef defTripleStorage
 
 template<u64 width>
@@ -146,19 +145,6 @@ template<u64 width, u64 factor>
 inline void populateArray(u64* storage) noexcept {
     populateArray<width, factor>(getNumbers<width>(), storage);
 }
-
-void setup() noexcept {
-	// not sure why, but this storage here seems to make the program go much
-	// faster, the odd part is, I'm not using the majority of this memory. I
-	// think it has something to do with cache coherency.
-    populateWidth<2>();
-    populateWidth<3>();
-    populateWidth<4>();
-    populateWidth<5>();
-    populateWidth<8>();
-    populateArray<2, 1>(values2To4);
-}
-
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -289,6 +275,16 @@ template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
 	loopBody<2, length>(storage, 0, 1, 0);
+}
+
+inline void setup() noexcept {
+
+	// not sure why, but this storage here seems to make the program go much
+	// faster, the odd part is, I'm not using the majority of this memory. I
+	// think it has something to do with cache coherency.
+    populateWidth<5>();
+	populateWidth<7>();
+    populateArray<2, 1>(values2To4);
 }
 
 
