@@ -96,7 +96,7 @@ template<u64 k>
 struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
 
 template<typename T>
-void merge(T value , std::ostream& input) noexcept {
+inline void merge(T value , std::ostream& input) noexcept {
     if (value != 0) {
         input << value << std::endl;
     }

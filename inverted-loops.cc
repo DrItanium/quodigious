@@ -43,103 +43,44 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	merge(performCheck(sum + 8, product << 3, value + 8), stream); // 8
 }
 
-template<u64 width>
-inline u64* getSums() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    return nullptr;
-}
-template<u64 width>
-inline u64* getProducts() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    return nullptr;
-}
-template<u64 width>
-inline u64* getNumbers() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    return nullptr;
-}
-#define defTripleStorage(width) \
-    u64 sums ## width [ numElements< width > ] = { 0 }; \
-    u64 products ## width [ numElements < width > ] = { 0 }; \
-    u64 numbers ## width [ numElements < width > ] = { 0 }; \
-    template<> inline u64* getSums< width > () noexcept { return sums ## width ; } \
-    template<> inline u64* getProducts< width > () noexcept { return products ## width ; } \
-    template<> inline u64* getNumbers< width > () noexcept { return numbers ## width ; }
-defTripleStorage(2);
-#undef defTripleStorage
 
-template<u64 width>
-void populateWidth() noexcept {
-    static_assert(width >= 2 && width < 9, "Illegal width!");
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        populateWidth<width - 1>();
-        auto* numPtr = getNumbers<width>();
-        auto* sumPtr = getSums<width>();
-        auto* prodPtr = getProducts<width>();
-        auto* prevNum = getNumbers<width - 1>();
-        auto* prevSum = getSums<width - 1>();
-        auto* prevProd = getProducts<width - 1>();
-        for (int i = 0; i < numElements<width - 1>; ++i) {
-            auto s = prevSum[i];
-            auto p = prevProd[i];
-            auto n = makeDigitAt<1>(prevNum[i]);
-            for (int j = 2; j < 10; ++j) {
-                if (j != 5) {
-                    *numPtr = n + j;
-                    *sumPtr = s + j;
-                    *prodPtr = p * j;
-                    ++numPtr;
-                    ++sumPtr;
-                    ++prodPtr;
+u64 sums2[] = {
+0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xb,
+0x5, 0x6, 0x7, 0x9, 0xa, 0xb, 0xc,
+0x6, 0x7, 0x8, 0xa, 0xb, 0xc, 0xd,
+0x8, 0x9, 0xa, 0xc, 0xd, 0xe, 0xf,
+0x9, 0xa, 0xb, 0xd, 0xe, 0xf, 0x10,
+0xa, 0xb, 0xc, 0xe, 0xf, 0x10, 0x11,
+0xb, 0xc, 0xd, 0xf, 0x10, 0x11, 0x12,
+};
+u64 products2[] = {
+0x4, 0x6, 0x8, 0xc, 0xe, 0x10, 0x12,
+0x6, 0x9, 0xc, 0x12, 0x15, 0x18, 0x1b,
+0x8, 0xc, 0x10, 0x18, 0x1c, 0x20, 0x24,
+0xc, 0x12, 0x18, 0x24, 0x2a, 0x30, 0x36,
+0xe, 0x15, 0x1c, 0x2a, 0x31, 0x38, 0x3f,
+0x10, 0x18, 0x20, 0x30, 0x38, 0x40, 0x48,
+0x12, 0x1b, 0x24, 0x36, 0x3f, 0x48, 0x51,
+};
+u64 numbers2[] = {
+0x16, 0x17, 0x18, 0x1a, 0x1b, 0x1c, 0x1d,
+0x20, 0x21, 0x22, 0x24, 0x25, 0x26, 0x27,
+0x2a, 0x2b, 0x2c, 0x2e, 0x2f, 0x30, 0x31,
+0x3e, 0x3f, 0x40, 0x42, 0x43, 0x44, 0x45,
+0x48, 0x49, 0x4a, 0x4c, 0x4d, 0x4e, 0x4f,
+0x52, 0x53, 0x54, 0x56, 0x57, 0x58, 0x59,
+0x5c, 0x5d, 0x5e, 0x60, 0x61, 0x62, 0x63,
+};
 
-                }
-            }
-        }
-    }
-}
-
-template<>
-void populateWidth<2>() noexcept {
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        auto* sumPtr = getSums<2>();
-        auto* prodPtr = getProducts<2>();
-        auto* numPtr = getNumbers<2>();
-        for (int i = 2; i < 10; ++i) {
-            if (i != 5) {
-                auto numberOuter = makeDigitAt<1>(i);
-                for (int j = 2; j < 10; ++j) {
-                    if (j != 5) {
-                        *sumPtr = i + j;
-                        *prodPtr = i * j;
-                        *numPtr = numberOuter + j;
-                        ++sumPtr;
-                        ++prodPtr;
-                        ++numPtr;
-                    }
-                }
-            }
-        }
-    }
-}
-
-u64 values2To4[numElements<2>] = { 0 };
-
-template<u64 width, u64 factor>
-inline void populateArray(u64* nums, u64* storage) noexcept {
-    for (int i = 0; i < numElements<width>; ++i) {
-        *storage = nums[i] * fastPow10<factor>;
-        ++storage;
-    }
-}
-
-template<u64 width, u64 factor>
-inline void populateArray(u64* storage) noexcept {
-    populateArray<width, factor>(getNumbers<width>(), storage);
-}
+u64 values2To4[] = {
+0xdc, 0xe6, 0xf0, 0x104, 0x10e, 0x118, 0x122,
+0x140, 0x14a, 0x154, 0x168, 0x172, 0x17c, 0x186,
+0x1a4, 0x1ae, 0x1b8, 0x1cc, 0x1d6, 0x1e0, 0x1ea,
+0x26c, 0x276, 0x280, 0x294, 0x29e, 0x2a8, 0x2b2,
+0x2d0, 0x2da, 0x2e4, 0x2f8, 0x302, 0x30c, 0x316,
+0x334, 0x33e, 0x348, 0x35c, 0x366, 0x370, 0x37a,
+0x398, 0x3a2, 0x3ac, 0x3c0, 0x3ca, 0x3d4, 0x3de,
+};
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -272,15 +213,8 @@ inline void body(std::ostream& storage) noexcept {
 	loopBody<2, length>(storage, 0, 1, 0);
 }
 
-inline void setup() noexcept {
-    populateWidth<2>();
-    populateArray<2, 1>(values2To4);
-}
-
-
 int main() {
     std::ostringstream storage;
-	setup();
     while(std::cin.good()) {
         u64 currentIndex = 0;
         std::cin >> currentIndex;
