@@ -63,35 +63,67 @@ struct ActualLoopBody {
         static constexpr auto next = fastPow10<pos - 1>;
         static constexpr auto follow = pos + 1;
         static constexpr auto doubleNext = next << 1;
+        static constexpr auto activateInnerThreadMode = (pos == 6 && max == 13) || (pos == 5 && max == 12);
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
         index += doubleNext;
-        loopBody<follow, max>(storage, sum, product, index); // 2
-        product += originalProduct;
-        ++sum;
-        index += next;
-        loopBody<follow, max>(storage, sum, product, index); // 3
-        product += originalProduct;
-        ++sum;
-        index += next;
-        loopBody<follow, max>(storage, sum, product, index); // 4
-        product += (originalProduct << 1);
-        sum += 2;
-        index += doubleNext;
-        loopBody<follow, max>(storage, sum, product, index); // 6
-        product += originalProduct;
-        ++sum;
-        index += next;
-        loopBody<follow, max>(storage, sum, product, index); // 7
-        product += originalProduct;
-        ++sum;
-        index += next;
-        loopBody<follow, max>(storage, sum, product, index); // 8
-        product += originalProduct;
-        ++sum;
-        index += next;
-        loopBody<follow, max>(storage, sum, product, index); // 9
+        if (activateInnerThreadMode) {
+            auto fn = [&sum, &product, &index]() { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
+            auto p0 = fn();
+            product += originalProduct;
+            ++sum;
+            index += next;
+            auto p1 = fn();
+            product += originalProduct;
+            ++sum;
+            index += next;
+            auto p2 = fn();
+            product += (originalProduct << 1);
+            sum += 2;
+            index += doubleNext;
+            auto p3 = fn();
+            product += originalProduct;
+            ++sum;
+            index += next;
+            auto p4 = fn();
+            product += originalProduct;
+            ++sum;
+            index += next;
+            auto p5 = fn();
+            product += originalProduct;
+            ++sum;
+            index += next;
+            auto p6 = fn();
+
+            storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+        } else {
+            loopBody<follow, max>(storage, sum, product, index); // 2
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage, sum, product, index); // 3
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage, sum, product, index); // 4
+            product += (originalProduct << 1);
+            sum += 2;
+            index += doubleNext;
+            loopBody<follow, max>(storage, sum, product, index); // 6
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage, sum, product, index); // 7
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage, sum, product, index); // 8
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage, sum, product, index); // 9
+        }
     }
 };
 
@@ -207,14 +239,9 @@ inline void body(std::ostream& storage) noexcept {
         static constexpr auto workUnitSize = 4;
         auto fn = [](auto index) noexcept {
             std::stringstream output;
-            using AsyncWorker = decltype(std::async(std::launch::async, loopBodyString<4, length>,0, 1, 0));
-            AsyncWorker workers[workUnitSize];
             for (int j = 0; j < workUnitSize; ++j) {
                 auto base = j + index;
-                workers[j] = std::async(std::launch::async, loopBodyString<4, length>, sums2[base], products2[base], values2To4[base]);
-            }
-            for (auto j = 0; j < workUnitSize; ++j) {
-                output << workers[j].get();
+                loopBody<4, length>(output, sums2[base], products2[base], values2To4[base]);
             }
             return output.str();
         };
@@ -230,19 +257,7 @@ inline void body(std::ostream& storage) noexcept {
         auto t9 = std::async(std::launch::async, fn, 9 * workUnitSize); // 36
         auto t10 = std::async(std::launch::async, fn, 10 * workUnitSize); // 40
         auto t11 = std::async(std::launch::async, fn, 11 * workUnitSize); // 44
-        auto tlast = std::async(std::launch::async, []() {
-            std::stringstream output;
-            using AsyncWorker = decltype(std::async(std::launch::async, loopBodyString<4, length>,0, 1, 0));
-            constexpr auto count = 1;
-            AsyncWorker workers[count];
-            for (int i = 0, j = 48; j < 49; ++j, ++i) {
-                workers[i] = std::async(std::launch::async, loopBodyString<4, length>, sums2[j], products2[j], values2To4[j]);
-            }
-            for (auto j = 0; j < count; ++j) {
-                output << workers[j].get();
-            }
-            return output.str();
-            });
+        auto tlast = std::async(std::launch::async, []() { return loopBodyString<4, length>(sums2[48], products2[48], values2To4[48]); });
         storage << tlast.get() << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get() << t7.get() << t8.get() << t9.get() << t10.get() << t11.get();
     } else {
         static constexpr auto threadCount = 49;
