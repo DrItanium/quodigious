@@ -58,17 +58,28 @@ struct ActualLoopBody {
 	ActualLoopBody(ActualLoopBody&&) = delete;
 	ActualLoopBody(const ActualLoopBody&) = delete;
 
+    template<u64 pos, u64 max>
+    static constexpr bool activateInnerThreadMode() noexcept {
+        switch(pos) {
+            //case 4:
+            case 5:
+                return max == 12;
+            case 6:
+                return max == 13;
+            default:
+                return false;
+        }
+    }
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
         static constexpr auto next = fastPow10<pos - 1>;
         static constexpr auto follow = pos + 1;
         static constexpr auto doubleNext = next << 1;
-        static constexpr auto activateInnerThreadMode = (pos == 6 && max == 13) || (pos == 5 && max == 12);
         auto originalProduct = product;
         product <<= 1;
         sum += 2;
         index += doubleNext;
-        if (activateInnerThreadMode) {
+        if (activateInnerThreadMode<pos, max>()) {
             auto fn = [&sum, &product, &index]() { return std::async(std::launch::async, loopBodyString<follow, max>, sum, product, index); };
             auto p0 = fn();
             product += originalProduct;
@@ -216,7 +227,7 @@ constexpr u64 values2To4[] = {
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-    if (length < 12) {
+    if (length < 13) {
         // break up into seven parts instead of 49 as the space is pretty tiny
         auto fn = [](auto index) noexcept {
             std::stringstream output;
@@ -234,7 +245,7 @@ inline void body(std::ostream& storage) noexcept {
         auto t5 = std::async(std::launch::async, fn, 35);
         auto t6 = std::async(std::launch::async, fn, 42);
         storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-    } else if (length == 12 || length == 13) {
+    } else if (length == 13) {
         // break up into 5 parts per thread instead of 49 as the space is pretty tiny
         static constexpr auto workUnitSize = 4;
         auto fn = [](auto index) noexcept {
