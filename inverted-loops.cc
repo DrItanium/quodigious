@@ -48,6 +48,8 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
 
+template<u64 pos, u64 max>
+inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
 
 template<bool topLevel>
 struct ActualLoopBody {
@@ -200,14 +202,19 @@ inline void body(std::ostream& storage) noexcept {
         auto t5 = std::async(std::launch::async, fn, 35);
         auto t6 = std::async(std::launch::async, fn, 42);
         storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-    } else if (length == 12) {
+    } else if (length == 12 || length == 13) {
         // break up into 5 parts per thread instead of 49 as the space is pretty tiny
-        static constexpr auto workUnitSize = 5;
+        static constexpr auto workUnitSize = 4;
         auto fn = [](auto index) noexcept {
             std::stringstream output;
+            using AsyncWorker = decltype(std::async(std::launch::async, loopBodyString<4, length>,0, 1, 0));
+            AsyncWorker workers[workUnitSize];
             for (int j = 0; j < workUnitSize; ++j) {
                 auto base = j + index;
-                loopBody<4, length>(output, sums2[base], products2[base], values2To4[base]);
+                workers[j] = std::async(std::launch::async, loopBodyString<4, length>, sums2[base], products2[base], values2To4[base]);
+            }
+            for (auto j = 0; j < workUnitSize; ++j) {
+                output << workers[j].get();
             }
             return output.str();
         };
@@ -218,13 +225,25 @@ inline void body(std::ostream& storage) noexcept {
         auto t4 = std::async(std::launch::async, fn, 4 * workUnitSize);
         auto t5 = std::async(std::launch::async, fn, 5 * workUnitSize);
         auto t6 = std::async(std::launch::async, fn, 6 * workUnitSize); // 30
-        auto t7 = std::async(std::launch::async, fn, 7 * workUnitSize); // 35
-        auto t8 = std::async(std::launch::async, fn, 8 * workUnitSize); // 40
-        // the remaining entries just compute on the primary thread
-        for (auto k = 45; k < 49; ++k) {
-            loopBody<4, length>(storage, sums2[k], products2[k], values2To4[k]);
-        }
-        storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get() << t7.get() << t8.get();
+        auto t7 = std::async(std::launch::async, fn, 7 * workUnitSize); //
+        auto t8 = std::async(std::launch::async, fn, 8 * workUnitSize); // 32
+        auto t9 = std::async(std::launch::async, fn, 9 * workUnitSize); // 36
+        auto t10 = std::async(std::launch::async, fn, 10 * workUnitSize); // 40
+        auto t11 = std::async(std::launch::async, fn, 11 * workUnitSize); // 44
+        auto tlast = std::async(std::launch::async, []() {
+            std::stringstream output;
+            using AsyncWorker = decltype(std::async(std::launch::async, loopBodyString<4, length>,0, 1, 0));
+            constexpr auto count = 1;
+            AsyncWorker workers[count];
+            for (int i = 0, j = 48; j < 49; ++j, ++i) {
+                workers[i] = std::async(std::launch::async, loopBodyString<4, length>, sums2[j], products2[j], values2To4[j]);
+            }
+            for (auto j = 0; j < count; ++j) {
+                output << workers[j].get();
+            }
+            return output.str();
+            });
+        storage << tlast.get() << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get() << t7.get() << t8.get() << t9.get() << t10.get() << t11.get();
     } else {
         static constexpr auto threadCount = 49;
         decltype(std::async(std::launch::async, loopBodyString<4, length>, 0, 1, 0)) watcher[threadCount] = {
