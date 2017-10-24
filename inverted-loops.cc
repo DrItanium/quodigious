@@ -221,10 +221,9 @@ inline void body(std::ostream& storage) noexcept {
         auto t7 = std::async(std::launch::async, fn, 7 * workUnitSize); // 35
         auto t8 = std::async(std::launch::async, fn, 8 * workUnitSize); // 40
         // the remaining entries just compute on the primary thread
-        loopBody<4, length>(storage, sums2[45], products2[45], values2To4[45]);
-        loopBody<4, length>(storage, sums2[46], products2[46], values2To4[46]);
-        loopBody<4, length>(storage, sums2[47], products2[47], values2To4[47]);
-        loopBody<4, length>(storage, sums2[48], products2[48], values2To4[48]);
+        for (auto k = 45; k < 49; ++k) {
+            loopBody<4, length>(storage, sums2[k], products2[k], values2To4[k]);
+        }
         storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get() << t7.get() << t8.get();
     } else {
         static constexpr auto threadCount = 49;
