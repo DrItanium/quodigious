@@ -200,6 +200,32 @@ inline void body(std::ostream& storage) noexcept {
         auto t5 = std::async(std::launch::async, fn, 35);
         auto t6 = std::async(std::launch::async, fn, 42);
         storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
+    } else if (length == 12) {
+        // break up into 5 parts per thread instead of 49 as the space is pretty tiny
+        static constexpr auto workUnitSize = 5;
+        auto fn = [](auto index) noexcept {
+            std::stringstream output;
+            for (int j = 0; j < workUnitSize; ++j) {
+                auto base = j + index;
+                loopBody<4, length>(output, sums2[base], products2[base], values2To4[base]);
+            }
+            return output.str();
+        };
+        auto t0 = std::async(std::launch::async, fn, 0 * workUnitSize);
+        auto t1 = std::async(std::launch::async, fn, 1 * workUnitSize);
+        auto t2 = std::async(std::launch::async, fn, 2 * workUnitSize);
+        auto t3 = std::async(std::launch::async, fn, 3 * workUnitSize);
+        auto t4 = std::async(std::launch::async, fn, 4 * workUnitSize);
+        auto t5 = std::async(std::launch::async, fn, 5 * workUnitSize);
+        auto t6 = std::async(std::launch::async, fn, 6 * workUnitSize); // 30
+        auto t7 = std::async(std::launch::async, fn, 7 * workUnitSize); // 35
+        auto t8 = std::async(std::launch::async, fn, 8 * workUnitSize); // 40
+        // the remaining entries just compute on the primary thread
+        loopBody<4, length>(storage, sums2[45], products2[45], values2To4[45]);
+        loopBody<4, length>(storage, sums2[46], products2[46], values2To4[46]);
+        loopBody<4, length>(storage, sums2[47], products2[47], values2To4[47]);
+        loopBody<4, length>(storage, sums2[48], products2[48], values2To4[48]);
+        storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get() << t7.get() << t8.get();
     } else {
         static constexpr auto threadCount = 49;
         decltype(std::async(std::launch::async, loopBodyString<4, length>, 0, 1, 0)) watcher[threadCount] = {
