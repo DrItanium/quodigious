@@ -182,118 +182,139 @@ constexpr u64 values2To4[] = {
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-    static constexpr auto threadCount = 49;
-    decltype(std::async(std::launch::async, loopBodyString<4, length>, 0, 1, 0)) watcher[threadCount] = {
-    std::async(std::launch::async, loopBodyString<4, length>, 4, 4, 220),
-    std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 230),
-    std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 240),
-    std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 260),
-    std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 270),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 280),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 290),
-    std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 320),
-    std::async(std::launch::async, loopBodyString<4, length>, 6, 9, 330),
-    std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 340),
-    std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 360),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 370),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 380),
-    std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 390),
-    std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 420),
-    std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 430),
-    std::async(std::launch::async, loopBodyString<4, length>, 8, 16, 440),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 460),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 470),
-    std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 480),
-    std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 490),
-    std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 620),
-    std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 630),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 640),
-    std::async(std::launch::async, loopBodyString<4, length>, 12, 36, 660),
-    std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 670),
-    std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 680),
-    std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 690),
-    std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 720),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 730),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 740),
-    std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 760),
-    std::async(std::launch::async, loopBodyString<4, length>, 14, 49, 770),
-    std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 780),
-    std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 790),
-    std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 820),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 830),
-    std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 840),
-    std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 860),
-    std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 870),
-    std::async(std::launch::async, loopBodyString<4, length>, 16, 64, 880),
-    std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 890),
-    std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 920),
-    std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 930),
-    std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 940),
-    std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 960),
-    std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 970),
-    std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 980),
-    std::async(std::launch::async, loopBodyString<4, length>, 18, 81, 990),
+    if (length < 12) {
+        // break up into seven parts instead of 49 as the space is pretty tiny
+        auto fn = [](auto index) noexcept {
+            std::stringstream output;
+            for (int j = 0; j < 7; ++j) {
+                auto base = j + index;
+                loopBody<4, length>(output, sums2[base], products2[base], values2To4[base]);
+            }
+            return output.str();
+        };
+        auto t0 = std::async(std::launch::async, fn, 0);
+        auto t1 = std::async(std::launch::async, fn, 7);
+        auto t2 = std::async(std::launch::async, fn, 14);
+        auto t3 = std::async(std::launch::async, fn, 21);
+        auto t4 = std::async(std::launch::async, fn, 28);
+        auto t5 = std::async(std::launch::async, fn, 35);
+        auto t6 = std::async(std::launch::async, fn, 42);
+        storage << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
+    } else {
+        static constexpr auto threadCount = 49;
+        decltype(std::async(std::launch::async, loopBodyString<4, length>, 0, 1, 0)) watcher[threadCount] = {
+        std::async(std::launch::async, loopBodyString<4, length>, 4, 4, 220),
+        std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 230),
+        std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 240),
+        std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 260),
+        std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 270),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 280),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 290),
+        std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 320),
+        std::async(std::launch::async, loopBodyString<4, length>, 6, 9, 330),
+        std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 340),
+        std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 360),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 370),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 380),
+        std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 390),
+        std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 420),
+        std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 430),
+        std::async(std::launch::async, loopBodyString<4, length>, 8, 16, 440),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 460),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 470),
+        std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 480),
+        std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 490),
+        std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 620),
+        std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 630),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 640),
+        std::async(std::launch::async, loopBodyString<4, length>, 12, 36, 660),
+        std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 670),
+        std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 680),
+        std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 690),
+        std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 720),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 730),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 740),
+        std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 760),
+        std::async(std::launch::async, loopBodyString<4, length>, 14, 49, 770),
+        std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 780),
+        std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 790),
+        std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 820),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 830),
+        std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 840),
+        std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 860),
+        std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 870),
+        std::async(std::launch::async, loopBodyString<4, length>, 16, 64, 880),
+        std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 890),
+        std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 920),
+        std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 930),
+        std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 940),
+        std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 960),
+        std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 970),
+        std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 980),
+        std::async(std::launch::async, loopBodyString<4, length>, 18, 81, 990),
 
-    };
-    /*
-    watcher[0] = std::async(std::launch::async, loopBodyString<4, length>, 4, 4, 220);
-    watcher[1] = std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 230);
-    watcher[2] = std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 240);
-    watcher[3] = std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 260);
-    watcher[4] = std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 270);
-    watcher[5] = std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 280);
-    watcher[6] = std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 290);
-    watcher[7] = std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 320);
-    watcher[8] = std::async(std::launch::async, loopBodyString<4, length>, 6, 9, 330);
-    watcher[9] = std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 340);
-    watcher[10] = std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 360);
-    watcher[11] = std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 370);
-    watcher[12] = std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 380);
-    watcher[13] = std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 390);
-    watcher[14] = std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 420);
-    watcher[15] = std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 430);
-    watcher[16] = std::async(std::launch::async, loopBodyString<4, length>, 8, 16, 440);
-    watcher[17] = std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 460);
-    watcher[18] = std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 470);
-    watcher[19] = std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 480);
-    watcher[20] = std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 490);
-    watcher[21] = std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 620);
-    watcher[22] = std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 630);
-    watcher[23] = std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 640);
-    watcher[24] = std::async(std::launch::async, loopBodyString<4, length>, 12, 36, 660);
-    watcher[25] = std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 670);
-    watcher[26] = std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 680);
-    watcher[27] = std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 690);
-    watcher[28] = std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 720);
-    watcher[29] = std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 730);
-    watcher[30] = std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 740);
-    watcher[31] = std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 760);
-    watcher[32] = std::async(std::launch::async, loopBodyString<4, length>, 14, 49, 770);
-    watcher[33] = std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 780);
-    watcher[34] = std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 790);
-    watcher[35] = std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 820);
-    watcher[36] = std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 830);
-    watcher[37] = std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 840);
-    watcher[38] = std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 860);
-    watcher[39] = std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 870);
-    watcher[40] = std::async(std::launch::async, loopBodyString<4, length>, 16, 64, 880);
-    watcher[41] = std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 890);
-    watcher[42] = std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 920);
-    watcher[43] = std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 930);
-    watcher[44] = std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 940);
-    watcher[45] = std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 960);
-    watcher[46] = std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 970);
-    watcher[47] = std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 980);
-    watcher[48] = std::async(std::launch::async, loopBodyString<4, length>, 18, 81, 990);
-    */
-    // above code is an unroll of the the following code
-    //for (int i = 0; i < threadCount; ++i) {
-    //    watcher[i] = std::async(std::launch::async, loopBodyString<4, length>, sums2[i], products2[i], values2To4[i]);
-    //}
-    for (int i = 0; i < threadCount; ++i) {
-        storage << watcher[i].get();
+        };
+        /*
+        watcher[0] = std::async(std::launch::async, loopBodyString<4, length>, 4, 4, 220);
+        watcher[1] = std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 230);
+        watcher[2] = std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 240);
+        watcher[3] = std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 260);
+        watcher[4] = std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 270);
+        watcher[5] = std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 280);
+        watcher[6] = std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 290);
+        watcher[7] = std::async(std::launch::async, loopBodyString<4, length>, 5, 6, 320);
+        watcher[8] = std::async(std::launch::async, loopBodyString<4, length>, 6, 9, 330);
+        watcher[9] = std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 340);
+        watcher[10] = std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 360);
+        watcher[11] = std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 370);
+        watcher[12] = std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 380);
+        watcher[13] = std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 390);
+        watcher[14] = std::async(std::launch::async, loopBodyString<4, length>, 6, 8, 420);
+        watcher[15] = std::async(std::launch::async, loopBodyString<4, length>, 7, 12, 430);
+        watcher[16] = std::async(std::launch::async, loopBodyString<4, length>, 8, 16, 440);
+        watcher[17] = std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 460);
+        watcher[18] = std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 470);
+        watcher[19] = std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 480);
+        watcher[20] = std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 490);
+        watcher[21] = std::async(std::launch::async, loopBodyString<4, length>, 8, 12, 620);
+        watcher[22] = std::async(std::launch::async, loopBodyString<4, length>, 9, 18, 630);
+        watcher[23] = std::async(std::launch::async, loopBodyString<4, length>, 10, 24, 640);
+        watcher[24] = std::async(std::launch::async, loopBodyString<4, length>, 12, 36, 660);
+        watcher[25] = std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 670);
+        watcher[26] = std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 680);
+        watcher[27] = std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 690);
+        watcher[28] = std::async(std::launch::async, loopBodyString<4, length>, 9, 14, 720);
+        watcher[29] = std::async(std::launch::async, loopBodyString<4, length>, 10, 21, 730);
+        watcher[30] = std::async(std::launch::async, loopBodyString<4, length>, 11, 28, 740);
+        watcher[31] = std::async(std::launch::async, loopBodyString<4, length>, 13, 42, 760);
+        watcher[32] = std::async(std::launch::async, loopBodyString<4, length>, 14, 49, 770);
+        watcher[33] = std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 780);
+        watcher[34] = std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 790);
+        watcher[35] = std::async(std::launch::async, loopBodyString<4, length>, 10, 16, 820);
+        watcher[36] = std::async(std::launch::async, loopBodyString<4, length>, 11, 24, 830);
+        watcher[37] = std::async(std::launch::async, loopBodyString<4, length>, 12, 32, 840);
+        watcher[38] = std::async(std::launch::async, loopBodyString<4, length>, 14, 48, 860);
+        watcher[39] = std::async(std::launch::async, loopBodyString<4, length>, 15, 56, 870);
+        watcher[40] = std::async(std::launch::async, loopBodyString<4, length>, 16, 64, 880);
+        watcher[41] = std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 890);
+        watcher[42] = std::async(std::launch::async, loopBodyString<4, length>, 11, 18, 920);
+        watcher[43] = std::async(std::launch::async, loopBodyString<4, length>, 12, 27, 930);
+        watcher[44] = std::async(std::launch::async, loopBodyString<4, length>, 13, 36, 940);
+        watcher[45] = std::async(std::launch::async, loopBodyString<4, length>, 15, 54, 960);
+        watcher[46] = std::async(std::launch::async, loopBodyString<4, length>, 16, 63, 970);
+        watcher[47] = std::async(std::launch::async, loopBodyString<4, length>, 17, 72, 980);
+        watcher[48] = std::async(std::launch::async, loopBodyString<4, length>, 18, 81, 990);
+        */
+        // above code is an unroll of the the following code
+        //for (int i = 0; i < threadCount; ++i) {
+        //    watcher[i] = std::async(std::launch::async, loopBodyString<4, length>, sums2[i], products2[i], values2To4[i]);
+        //}
+        for (int i = 0; i < threadCount; ++i) {
+            storage << watcher[i].get();
+        }
     }
 }
+
 int main() {
     std::ostringstream storage;
     while(std::cin.good()) {
