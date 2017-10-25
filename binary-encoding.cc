@@ -68,9 +68,25 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 	}
 }
 
-int main() {
+int main(int argv, char* argc[]) {
 	// generate a binary encoding that we can save to a file and load as needed!
     // do 8 digits instead of 9, we'll enlarge it when reloading it on the other side
-	body<8>();
+    if (argv > 1) {
+        switch(argc[1][0]) {
+            case '1': body<1>(); break;
+            case '2': body<2>(); break;
+            case '3': body<3>(); break;
+            case '4': body<4>(); break;
+            case '5': body<5>(); break;
+            case '6': body<6>(); break;
+            case '7': body<7>(); break;
+            case '8': body<8>(); break;
+            case '9': body<9>(); break;
+            default:
+                      return 1;
+        }
+    } else {
+	    body<8>();
+    }
     return 0;
 }
