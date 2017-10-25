@@ -36,13 +36,7 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
     }
     return 0;
 }
-void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
-    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-    merge(inspectValue(value + 2, sum + 2, product * 2), stream);
-    merge(inspectValue(value + 4, sum + 4, product * 4), stream);
-    merge(inspectValue(value + 6, sum + 6, product * 6), stream);
-    merge(inspectValue(value + 8, sum + 8, product * 8), stream);
-}
+void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept;
 
 using container = std::tuple<u64, u64, u64>;
 
@@ -111,33 +105,40 @@ struct ActualLoopBody<true> {
         product <<= 1;
         sum += 2;
         index += doubleNext;
-        (innerMostBody(storage, sum, product, index)); // 2
+        auto fn = [](auto sum, auto product, auto value) noexcept {
+            std::ostringstream str;
+            innerMostBody(str, sum, product, value);
+            return str.str();
+        };
+        auto op = [fn](auto sum, auto product, auto value) noexcept {
+            return std::async(std::launch::async, fn, sum, product, value);
+        };
+        auto p0 = op(sum, product, index);
 		product += originalProduct;
 		++sum;
 		index += next;
-        (innerMostBody(storage, sum, product, index)); // 3
+        auto p1 = op(sum, product, index);
 		product += originalProduct;
 		++sum;
 		index += next;
-        (innerMostBody(storage, sum, product, index)); // 4
+        auto p2 = op(sum, product, index);
 		product += (originalProduct << 1);
 		sum += 2;
 		index += doubleNext;
-        (innerMostBody(storage, sum, product, index)); // 6
+        auto p3 = op(sum, product, index);
 		product += originalProduct;
 		++sum;
 		index += next;
-        (innerMostBody(storage, sum, product, index)); // 7
+        auto p4 = op(sum, product, index);
 		product += originalProduct;
 		++sum;
 		index += next;
-        (innerMostBody(storage, sum, product, index)); // 8
+        auto p5 = op(sum, product, index);
 		product += originalProduct;
 		++sum;
 		index += next;
-        (innerMostBody(storage, sum, product, index)); // 9
-
-
+        auto p6 = op(sum, product, index);
+        storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 	}
 };
 
@@ -157,28 +158,51 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto dataCacheSize = numElements<dimensionCount>;
-constexpr auto numParts = 49;
-constexpr auto onePart = dataCacheSize / numParts;
 container dataCache[dataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-	auto fn = [](auto start, auto end) {
+    loopBody<expectedDimensionCount + 1, length>(storage, 0, 1, 0);
+}
+
+void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
+    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+#ifndef SINGLE_THREAD_INNER
+	auto fn = [sum, product, value](auto start, auto end) {
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
 			auto result = dataCache[i];
-            loopBody<expectedDimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
+            auto v = std::get<0>(result) + value;
+            auto s = std::get<1>(result) + sum;
+            auto p = std::get<2>(result) * product;
+            merge(inspectValue(v + 2, s + 2, p * 2), str);
+            merge(inspectValue(v + 4, s + 4, p * 4), str);
+            merge(inspectValue(v + 6, s + 6, p * 6), str);
+            merge(inspectValue(v + 8, s + 8, p * 8), str);
 		}
 		return str.str();
 	};
 	using AsyncWorker = decltype(std::async(std::launch::async, fn, 0, 1));
+    constexpr auto numParts = 7;
+    constexpr auto onePart = dataCacheSize / numParts;
 	AsyncWorker pool[numParts];
 	for (int i = 0; i < numParts; ++i) {
 		pool[i] = std::async(std::launch::async, fn, onePart * i, onePart * (i + 1));
 	}
 	for (int i = 0; i < numParts; ++i) {
-		storage << pool[i].get();
+		stream << pool[i].get();
 	}
+#else
+    for (const auto& result : dataCache) {
+        auto v = std::get<0>(result);
+        auto s = std::get<1>(result);
+        auto p = std::get<2>(result);
+        merge(inspectValue(v + value + 2, s + sum + 2, p * product * 2), stream);
+        merge(inspectValue(v + value + 4, s + sum + 4, p * product * 4), stream);
+        merge(inspectValue(v + value + 6, s + sum + 6, p * product * 6), stream);
+        merge(inspectValue(v + value + 8, s + sum + 8, p * product * 8), stream);
+    }
+#endif
 }
 
 int main() {
