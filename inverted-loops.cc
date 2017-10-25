@@ -148,7 +148,7 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 }
 constexpr auto dimensionCount = 8;
 constexpr auto dataCacheSize = numElements<dimensionCount>;
-constexpr auto numParts = 49;
+constexpr auto numParts = 343;
 constexpr auto onePart = dataCacheSize / numParts;
 container dataCache[dataCacheSize];
 template<u64 length>
