@@ -70,6 +70,7 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 
 int main() {
 	// generate a binary encoding that we can save to a file and load as needed!
-	body<9>();
+    // do 8 digits instead of 9, we'll enlarge it when reloading it on the other side
+	body<8>();
     return 0;
 }

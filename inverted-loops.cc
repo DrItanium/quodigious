@@ -30,13 +30,21 @@
 constexpr bool checkValue(u64 sum) noexcept {
 	return (isEven(sum)) || (sum % 3 == 0);
 }
+constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
+    if (checkValue(sum) && isQuodigious(value, sum, product)) {
+        return value;
+    }
+    return 0;
+}
 void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
-	if (checkValue(sum) && isQuodigious(value, sum, product)) {
-		stream << value << std::endl;
-	}
+    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+    merge(inspectValue(value + 2, sum + 2, product * 2), stream);
+    merge(inspectValue(value + 4, sum + 4, product * 4), stream);
+    merge(inspectValue(value + 6, sum + 6, product * 6), stream);
+    merge(inspectValue(value + 8, sum + 8, product * 8), stream);
 }
 
-using container = std::tuple<u64, u64, u64, bool>;
+using container = std::tuple<u64, u64, u64>;
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -146,7 +154,8 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	loopBody<pos, max> (storage, sum, product, index);
 	return storage.str();
 }
-constexpr auto dimensionCount = 9;
+constexpr auto dimensionCount = 8;
+constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto dataCacheSize = numElements<dimensionCount>;
 constexpr auto numParts = 49;
 constexpr auto onePart = dataCacheSize / numParts;
@@ -154,13 +163,11 @@ container dataCache[dataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-	auto fn = [](auto start, auto end) { 
+	auto fn = [](auto start, auto end) {
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
 			auto result = dataCache[i];
-			if (std::get<3>(result)) {
-				loopBody<dimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
-			}
+            loopBody<expectedDimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
 		}
 		return str.str();
 	};
@@ -186,7 +193,7 @@ int main() {
 	// seen so far!
 	//
 	// We can also reintroduce nested threading, the difference is that we can
-	// just eliminate the values needed 
+	// just eliminate the values needed
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < dataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
@@ -203,8 +210,8 @@ int main() {
 		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
 		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
 		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
-		auto lastDigit = value % 10;
-		dataCache[i] = std::make_tuple(value, sum, product, isEven(value%10));
+        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
+		dataCache[i] = std::make_tuple(value * 10, sum, product);
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
@@ -212,7 +219,7 @@ int main() {
 	}
 
 	cachedCopy.close();
-	
+
     std::ostringstream storage;
     while(std::cin.good()) {
         u64 currentIndex = 0;
