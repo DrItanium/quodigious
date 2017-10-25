@@ -101,21 +101,21 @@ cache.bin: ${BINARY_ENCODING_GENERATOR}
 timed_tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
 	@echo "12 digits"
-	@time echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
+	@time echo 12 | ./${QLOOPS_PROG} | sort | diff -B -- - outputs/qnums12
 	@echo "11 digits"
-	@time echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
+	@time echo 11 | ./${QLOOPS_PROG} | sort | diff -B -- - outputs/qnums11
 
 timed_longer_tests: ${QLOOPS_PROG}
 	@echo Running longer tests with time analysis
 	@echo "13 digits"
-	@time echo 13 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums13
+	@time echo 13 | ./${QLOOPS_PROG} | sort | diff -B -- - outputs/qnums13
 
 tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite
 	@echo "12 digits"
-	@echo 12 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums12
+	@echo 12 | ./${QLOOPS_PROG} | sort | diff -B -- - outputs/qnums12
 	@echo "11 digits"
-	@echo 11 | ./${QLOOPS_PROG} | diff -B -- - outputs/qnums11
+	@echo 11 | ./${QLOOPS_PROG} | sort | diff -B -- - outputs/qnums11
 
 longer_tests: ${QLOOPS_PROG}
 	@echo Running longer tests
