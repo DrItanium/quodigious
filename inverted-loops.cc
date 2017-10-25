@@ -88,7 +88,7 @@ struct ActualLoopBody {
 			case 13:
 				return pos == 3 || pos == 4;
             case 14:
-                return pos >= 2 && pos <= 5;
+                return pos > 2 && pos <= 5;
 			case 15:
 				return pos == 2 || pos == 6 || pos == 8;
             default:
