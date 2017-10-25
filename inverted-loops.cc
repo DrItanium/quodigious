@@ -71,11 +71,6 @@ struct ActualLoopBody {
                 return pos == 2 || pos == 3;
             case 12:
                 return pos == 3 || pos == 4;
-            case 14:
-            case 15:
-            case 16:
-            case 17:
-                return pos == 2 || pos == 7;
             default:
                 return false;
         }
@@ -84,7 +79,10 @@ struct ActualLoopBody {
     static constexpr bool activateHalvingMode() noexcept {
         // instead of dividing by seven, do it in half
         switch(max) {
+            case 12:
+                return pos == 2;
             case 13:
+            case 14:
                 return pos >= 2 && pos <= 5;
             default:
                 return false;
