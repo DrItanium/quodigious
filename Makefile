@@ -32,7 +32,8 @@ WORKER16_PROG = qworker16
 WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13}
+BINARY_ENCODING_GENERATOR = bingen7
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR}
 all: ${PROGS}
 
 help:
@@ -45,6 +46,7 @@ help:
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
 	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
 	@echo "  - ${QUODIGIOUS13}: a program that only computes 13 digits quodigious values"
+	@echo "  - ${BINARY_ENCODING_GENERATOR}: a program that generates a binary encoding for the larger value computation"
 	@echo "  - tests: runs short regression tests"
 	@echo "  - longer_tests: runs longer regression tests (more digits)"
 	@echo "  - timed_tests: runs short regression tests"
@@ -85,6 +87,11 @@ ${QUODIGIOUS13}: quodigious13.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
 	@echo done.
 
+${BINARY_ENCODING_GENERATOR}: binary-encoding.o
+	@echo -n Building 13 digit quodigious program ...
+	@${CXX} ${LXXFLAGS} -o ${BINARY_ENCODING_GENERATOR} binary-encoding.o
+	@echo done.
+
 timed_tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
 	@echo "12 digits"
@@ -122,7 +129,7 @@ clean:
 inverted-loops.o: qlib.h
 
 loops32.o: qlib.h
-
+binary-encoding.o: qlib.h
 Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker18Digits.o: qlib.h Triple.h PrecomputedRange4.h
