@@ -84,6 +84,8 @@ struct ActualLoopBody {
             case 13:
             case 14:
                 return pos >= 2 && pos <= 5;
+			case 15:
+				return pos == 2 || pos == 6 || pos == 8;
             default:
                 return false;
         }
@@ -144,25 +146,13 @@ struct ActualLoopBody {
                 return output.str();
             };
             auto p0 = std::async(std::launch::async, doThree, sum, product, index);
-            product += originalProduct;
-            ++sum;
-            index += next;
-            product += originalProduct;
-            ++sum;
-            index += next;
-            product += (originalProduct << 1);
-            sum += 2;
-            index += doubleNext;
+			product += (originalProduct << 2);
+			sum += 4;
+            index += (doubleNext << 1);
             auto p1 = std::async(std::launch::async, doThree, sum, product, index);
-            product += originalProduct;
-            ++sum;
-            index += next;
-            product += originalProduct;
-            ++sum;
-            index += next;
-            product += originalProduct;
-            ++sum;
-            index += next;
+			product += ((originalProduct << 1) + originalProduct);
+			sum += 3;
+			index += (doubleNext + next);
             loopBody<follow, max>(storage,sum,product,index);
 
             storage << p0.get() << p1.get();
