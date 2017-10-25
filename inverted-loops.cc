@@ -72,7 +72,7 @@ struct ActualLoopBody {
             case 12:
                 return pos == 3 || pos == 4;
             case 13:
-                return pos == 4 || pos == 5;
+                return pos == 2;
             case 14:
             case 15:
             case 16:
@@ -82,6 +82,22 @@ struct ActualLoopBody {
                 return false;
         }
     }
+    template<u64 pos, u64 max>
+    static constexpr bool activateHalvingMode() noexcept {
+        // instead of dividing by seven, do it in half
+        switch(max) {
+            case 13:
+                return pos == 4 || pos == 6 || pos == 7;
+            case 14:
+            case 15:
+            case 16:
+            case 17:
+                return pos == 8;
+            default:
+                return false;
+        }
+    }
+    // TODO: add support for disallowing the activation of halving and seven mode at the same time
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
         static constexpr auto next = fastPow10<pos - 1>;
@@ -120,6 +136,46 @@ struct ActualLoopBody {
             auto p6 = fn();
 
             storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+        } else if (activateHalvingMode<pos, max>()) {
+            auto doThree = [originalProduct](auto s, auto p, auto i) {
+                std::ostringstream output;
+                auto sum = s;
+                auto product = p;
+                auto index = i;
+                loopBody<follow, max>(output, sum, product, index); // 2
+                product += originalProduct;
+                ++sum;
+                index += next;
+                loopBody<follow, max>(output, sum, product, index); // 3
+                product += originalProduct;
+                ++sum;
+                index += next;
+                loopBody<follow, max>(output, sum, product, index); // 4
+                return output.str();
+            };
+            auto p0 = std::async(std::launch::async, doThree, sum, product, index);
+            product += originalProduct;
+            ++sum;
+            index += next;
+            product += originalProduct;
+            ++sum;
+            index += next;
+            product += (originalProduct << 1);
+            sum += 2;
+            index += doubleNext;
+            auto p1 = std::async(std::launch::async, doThree, sum, product, index);
+            product += originalProduct;
+            ++sum;
+            index += next;
+            product += originalProduct;
+            ++sum;
+            index += next;
+            product += originalProduct;
+            ++sum;
+            index += next;
+            loopBody<follow, max>(storage,sum,product,index);
+
+            storage << p0.get() << p1.get();
         } else {
             loopBody<follow, max>(storage, sum, product, index); // 2
             product += originalProduct;
