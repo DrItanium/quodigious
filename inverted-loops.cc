@@ -71,8 +71,6 @@ struct ActualLoopBody {
                 return pos == 2 || pos == 3;
             case 12:
                 return pos == 3 || pos == 4;
-            case 13:
-                return pos == 2;
             case 14:
             case 15:
             case 16:
@@ -87,17 +85,11 @@ struct ActualLoopBody {
         // instead of dividing by seven, do it in half
         switch(max) {
             case 13:
-                return pos == 4 || pos == 6 || pos == 7;
-            case 14:
-            case 15:
-            case 16:
-            case 17:
-                return pos == 8;
+                return pos >= 2 && pos <= 5;
             default:
                 return false;
         }
     }
-    // TODO: add support for disallowing the activation of halving and seven mode at the same time
 	template<u64 pos, u64 max>
 	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
         static constexpr auto next = fastPow10<pos - 1>;
