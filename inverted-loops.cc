@@ -71,6 +71,10 @@ struct ActualLoopBody {
                 return pos == 2 || pos == 3;
             case 12:
                 return pos == 3 || pos == 4;
+			case 13:
+				return pos == 5;
+			case 14:
+				return pos == 6;
             default:
                 return false;
         }
@@ -81,7 +85,8 @@ struct ActualLoopBody {
         switch(max) {
             case 12:
                 return pos == 2;
-            case 13:
+			case 13:
+				return pos == 3 || pos == 4;
             case 14:
                 return pos >= 2 && pos <= 5;
 			case 15:
@@ -134,15 +139,9 @@ struct ActualLoopBody {
                 auto sum = s;
                 auto product = p;
                 auto index = i;
-                loopBody<follow, max>(output, sum, product, index); // 2
-                product += originalProduct;
-                ++sum;
-                index += next;
-                loopBody<follow, max>(output, sum, product, index); // 3
-                product += originalProduct;
-                ++sum;
-                index += next;
-                loopBody<follow, max>(output, sum, product, index); // 4
+				loopBody<follow, max>(output, sum, product, index); // 2
+				loopBody<follow, max>(output, sum + 1, product + originalProduct, index + next); // 3
+				loopBody<follow, max>(output, sum + 2, product + (originalProduct << 1), index + (next << 1)); // 4
                 return output.str();
             };
             auto p0 = std::async(std::launch::async, doThree, sum, product, index);
