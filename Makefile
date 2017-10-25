@@ -59,7 +59,7 @@ ${QLOOPS_PROG32}: loops32.o
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
-${QLOOPS_PROG}: inverted-loops.o
+${QLOOPS_PROG}: inverted-loops.o cache.bin
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
 	@echo done.
@@ -88,9 +88,15 @@ ${QUODIGIOUS13}: quodigious13.o
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
-	@echo -n Building 13 digit quodigious program ...
+	@echo -n Building binary cache generator ...
 	@${CXX} ${LXXFLAGS} -o ${BINARY_ENCODING_GENERATOR} binary-encoding.o
 	@echo done.
+
+cache.bin: ${BINARY_ENCODING_GENERATOR}
+	@echo -n Generating binary cache file ...
+	@./${BINARY_ENCODING_GENERATOR} > cache.bin
+	@echo done.
+
 
 timed_tests: ${QLOOPS_PROG}
 	@echo Running simple testing suite with time analysis
@@ -123,7 +129,7 @@ longer_tests: ${QLOOPS_PROG}
 
 clean:
 	@echo -n cleaning...
-	@rm -rf *.o ${PROGS}
+	@rm -rf *.o ${PROGS} cache.bin
 	@echo done.
 
 inverted-loops.o: qlib.h
