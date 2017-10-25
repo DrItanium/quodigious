@@ -32,15 +32,15 @@ inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     sum += 2;
     product <<= 1;
     index += multiply<2>(next);
-    for (int i = 2; i < 10; ++i) {
+	for (int i = 2; i < 10; ++i) {
 		if (i != 5) {
 			// skip the fives digit
-        	innerBody<inner>(sum, product, index);
+			innerBody<inner>(sum, product, index);
 		}
-        ++sum;
-        product += baseProduct;
-        index += next;
-    }
+		++sum;
+		product += baseProduct;
+		index += next;
+	}
 }
 
 template<u32 length>
