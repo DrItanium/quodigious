@@ -146,14 +146,29 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	loopBody<pos, max> (storage, sum, product, index);
 	return storage.str();
 }
-container dataCache[2097152];
+constexpr auto dataCacheSize = 2097152;
+constexpr auto oneEighth = dataCacheSize / 8;
+container dataCache[dataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-	for (int i = 0; i < 2097152; ++i) {
-		auto result = dataCache[i];
-		loopBody<8, length>(storage, std::get<1>(result), std::get<2>(result), std::get<0>(result));
-	}
+	auto fn = [](auto start, auto end) { 
+		std::ostringstream str;
+		for (auto i = start; i < end; ++i) {
+			auto result = dataCache[i];
+			loopBody<8, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
+		}
+		return str.str();
+	};
+	auto p0 = std::async(std::launch::async, fn, oneEighth * 0, oneEighth * 1);
+	auto p1 = std::async(std::launch::async, fn, oneEighth * 1, oneEighth * 2);
+	auto p2 = std::async(std::launch::async, fn, oneEighth * 2, oneEighth * 3);
+	auto p3 = std::async(std::launch::async, fn, oneEighth * 3, oneEighth * 4);
+	auto p4 = std::async(std::launch::async, fn, oneEighth * 4, oneEighth * 5);
+	auto p5 = std::async(std::launch::async, fn, oneEighth * 5, oneEighth * 6);
+	auto p6 = std::async(std::launch::async, fn, oneEighth * 6, oneEighth * 7);
+	auto p7 = std::async(std::launch::async, fn, oneEighth * 7, oneEighth * 8);
+	storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get() << p7.get();
 }
 
 int main() {
