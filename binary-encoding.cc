@@ -33,7 +33,10 @@ inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     product <<= 1;
     index += multiply<2>(next);
     for (int i = 2; i < 10; ++i) {
-        innerBody<inner>(sum, product, index);
+		if (i != 5) {
+			// skip the fives digit
+        	innerBody<inner>(sum, product, index);
+		}
         ++sum;
         product += baseProduct;
         index += next;
@@ -67,6 +70,6 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 
 int main() {
 	// generate a binary encoding that we can save to a file and load as needed!
-	body<7>();
+	body<8>();
     return 0;
 }

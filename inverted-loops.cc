@@ -146,8 +146,9 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	loopBody<pos, max> (storage, sum, product, index);
 	return storage.str();
 }
-constexpr auto dataCacheSize = 2097152;
-constexpr auto oneEighth = dataCacheSize / 8;
+constexpr auto dimensionCount = 8;
+constexpr auto dataCacheSize = numElements<dimensionCount>;
+constexpr auto onePart = dataCacheSize / 7;
 container dataCache[dataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
@@ -156,41 +157,42 @@ inline void body(std::ostream& storage) noexcept {
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
 			auto result = dataCache[i];
-			loopBody<8, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
+			loopBody<dimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
 		}
 		return str.str();
 	};
-	auto p0 = std::async(std::launch::async, fn, oneEighth * 0, oneEighth * 1);
-	auto p1 = std::async(std::launch::async, fn, oneEighth * 1, oneEighth * 2);
-	auto p2 = std::async(std::launch::async, fn, oneEighth * 2, oneEighth * 3);
-	auto p3 = std::async(std::launch::async, fn, oneEighth * 3, oneEighth * 4);
-	auto p4 = std::async(std::launch::async, fn, oneEighth * 4, oneEighth * 5);
-	auto p5 = std::async(std::launch::async, fn, oneEighth * 5, oneEighth * 6);
-	auto p6 = std::async(std::launch::async, fn, oneEighth * 6, oneEighth * 7);
-	auto p7 = std::async(std::launch::async, fn, oneEighth * 7, oneEighth * 8);
-	storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get() << p7.get();
+	auto p0 = std::async(std::launch::async, fn, onePart * 0, onePart * 1);
+	auto p1 = std::async(std::launch::async, fn, onePart * 1, onePart * 2);
+	auto p2 = std::async(std::launch::async, fn, onePart * 2, onePart * 3);
+	auto p3 = std::async(std::launch::async, fn, onePart * 3, onePart * 4);
+	auto p4 = std::async(std::launch::async, fn, onePart * 4, onePart * 5);
+	auto p5 = std::async(std::launch::async, fn, onePart * 5, onePart * 6);
+	auto p6 = std::async(std::launch::async, fn, onePart * 6, onePart * 7);
+	storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 }
 
 int main() {
-	std::ifstream cachedCopy("nums7", std::ifstream::in | std::ifstream::binary);
+	std::ifstream cachedCopy("cache.bin", std::ifstream::in | std::ifstream::binary);
 	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open nums7 data cache! Make sure it exists and is named nums7" << std::endl;
+		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache.bin" << std::endl;
 		return 1;
 	}
-	for (int i = 0; i < 2097152 || cachedCopy.good(); ++i) {
+	char tmpCache[sizeof(u32) * 3] = { 0 };
+	for (int i = 0; i < dataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
-		u64 value = cachedCopy.get();
-		value |= (static_cast<u64>(cachedCopy.get()) << 8);
-		value |= (static_cast<u64>(cachedCopy.get()) << 16);
-		value |= (static_cast<u64>(cachedCopy.get()) << 24);
-		u64 sum = cachedCopy.get();
-		sum |= (static_cast<u64>(cachedCopy.get()) << 8);
-		sum |= (static_cast<u64>(cachedCopy.get()) << 16);
-		sum |= (static_cast<u64>(cachedCopy.get()) << 24);
-		u64 product = cachedCopy.get();
-		product |= (static_cast<u64>(cachedCopy.get()) << 8);
-		product |= (static_cast<u64>(cachedCopy.get()) << 16);
-		product |= (static_cast<u64>(cachedCopy.get()) << 24);
+		cachedCopy.read(tmpCache, sizeof(u32) * 3);
+		u64 value = (uint8_t)tmpCache[0];
+		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
+		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
+		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
+		u64 sum = (uint8_t)tmpCache[4];
+		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
+		u64 product = (uint8_t)tmpCache[8];
+		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
+		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
+		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
 		dataCache[i] = std::make_tuple(value, sum, product);
 	}
 	if (!cachedCopy.eof()) {
