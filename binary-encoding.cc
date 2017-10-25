@@ -70,6 +70,6 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 
 int main() {
 	// generate a binary encoding that we can save to a file and load as needed!
-	body<8>();
+	body<9>();
     return 0;
 }

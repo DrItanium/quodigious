@@ -146,9 +146,9 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 	loopBody<pos, max> (storage, sum, product, index);
 	return storage.str();
 }
-constexpr auto dimensionCount = 8;
+constexpr auto dimensionCount = 9;
 constexpr auto dataCacheSize = numElements<dimensionCount>;
-constexpr auto numParts = 343;
+constexpr auto numParts = 49;
 constexpr auto onePart = dataCacheSize / numParts;
 container dataCache[dataCacheSize];
 template<u64 length>
@@ -180,6 +180,13 @@ int main() {
 		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache.bin" << std::endl;
 		return 1;
 	}
+	// TODO: update the binary generator to eliminate the last digit from the
+	// computation, then we can do four numbers at a time in the inner most
+	// loop of this code which should make up the computation difference we've
+	// seen so far!
+	//
+	// We can also reintroduce nested threading, the difference is that we can
+	// just eliminate the values needed 
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < dataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
