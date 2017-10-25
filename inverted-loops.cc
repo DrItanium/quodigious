@@ -36,7 +36,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	}
 }
 
-using container = std::tuple<u64, u64, u64>;
+using container = std::tuple<u64, u64, u64, bool>;
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -148,7 +148,8 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 }
 constexpr auto dimensionCount = 8;
 constexpr auto dataCacheSize = numElements<dimensionCount>;
-constexpr auto onePart = dataCacheSize / 7;
+constexpr auto numParts = 49;
+constexpr auto onePart = dataCacheSize / numParts;
 container dataCache[dataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
@@ -157,18 +158,20 @@ inline void body(std::ostream& storage) noexcept {
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
 			auto result = dataCache[i];
-			loopBody<dimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
+			if (std::get<3>(result)) {
+				loopBody<dimensionCount + 1, length>(str, std::get<1>(result), std::get<2>(result), std::get<0>(result));
+			}
 		}
 		return str.str();
 	};
-	auto p0 = std::async(std::launch::async, fn, onePart * 0, onePart * 1);
-	auto p1 = std::async(std::launch::async, fn, onePart * 1, onePart * 2);
-	auto p2 = std::async(std::launch::async, fn, onePart * 2, onePart * 3);
-	auto p3 = std::async(std::launch::async, fn, onePart * 3, onePart * 4);
-	auto p4 = std::async(std::launch::async, fn, onePart * 4, onePart * 5);
-	auto p5 = std::async(std::launch::async, fn, onePart * 5, onePart * 6);
-	auto p6 = std::async(std::launch::async, fn, onePart * 6, onePart * 7);
-	storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+	using AsyncWorker = decltype(std::async(std::launch::async, fn, 0, 1));
+	AsyncWorker pool[numParts];
+	for (int i = 0; i < numParts; ++i) {
+		pool[i] = std::async(std::launch::async, fn, onePart * i, onePart * (i + 1));
+	}
+	for (int i = 0; i < numParts; ++i) {
+		storage << pool[i].get();
+	}
 }
 
 int main() {
@@ -193,7 +196,8 @@ int main() {
 		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
 		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
 		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
-		dataCache[i] = std::make_tuple(value, sum, product);
+		auto lastDigit = value % 10;
+		dataCache[i] = std::make_tuple(value, sum, product, isEven(value%10));
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
