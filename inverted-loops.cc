@@ -252,8 +252,6 @@ int main() {
             switch(currentIndex) {
                 case 10: body<10>(storage); break;
                 case 11: body<11>(storage); break;
-                case 12: body<12>(storage); break;
-                case 13: body<13>(storage); break;
                 case 14: body<14>(storage); break;
                 case 15: body<15>(storage); break;
                 case 16: body<16>(storage); break;
