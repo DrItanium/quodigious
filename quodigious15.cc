@@ -36,7 +36,7 @@ constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
 container primaryDataCache[primaryDataCacheSize];
-constexpr auto secondaryDimensionCount = 4;
+constexpr auto secondaryDimensionCount = 5;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
