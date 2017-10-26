@@ -27,24 +27,8 @@
 #include <map>
 #include "qlib.h"
 
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
-}
-void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept;
-
 using container = std::tuple<u64, u64, u64>;
 
-template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos == max, "Position can't be larger than maximum!");
-	// walk through two separate set of actions
-}
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
 
@@ -57,7 +41,17 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
+constexpr bool checkValue(u64 sum) noexcept {
+	return (isEven(sum)) || (sum % 3 == 0);
+}
+constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
+    if (checkValue(sum) && isQuodigious(value, sum, product)) {
+        return value;
+    }
+    return 0;
+}
+std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+    std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
     for (const auto& outer : primaryDataCache) {
         u64 ov, os, op;
@@ -77,6 +71,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
             merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
         }
     }
+    return stream.str();
 }
 
 bool loadPrimaryDataCache() noexcept {
@@ -160,7 +155,10 @@ bool loadSecondaryDataCache() noexcept {
 	cachedCopy.close();
     return true;
 }
-
+template<u64 pos, u64 index>
+decltype(auto) makeWorker() noexcept {
+    return std::async(std::launch::async, innerMostBody, pos, pos, index);
+}
 int main() {
     if (!loadPrimaryDataCache()) {
         return 1;
@@ -168,40 +166,15 @@ int main() {
     if (!loadSecondaryDataCache()) {
         return 1;
     }
-    std::ostringstream storage;
     static constexpr auto next = fastPow10<12 - 1>;
     static constexpr auto doubleNext = next << 1;
-    auto originalProduct = 1;
-    auto product = 2;
-    auto index = doubleNext;
-    auto fn = [](auto sum, auto product, auto value) noexcept {
-        std::ostringstream str;
-        innerMostBody(str, sum, product, value);
-        return str.str();
-    };
-    auto op = [fn](auto sum, auto product, auto value) noexcept {
-        return std::async(std::launch::async, fn, sum, product, value);
-    };
-    auto p0 = op(2, product, index);
-    product += originalProduct;
-    index += next;
-    auto p1 = op(3, product, index);
-    product += originalProduct;
-    index += next;
-    auto p2 = op(4, product, index);
-    product += (originalProduct << 1);
-    index += doubleNext;
-    auto p3 = op(6, product, index);
-    product += originalProduct;
-    index += next;
-    auto p4 = op(7, product, index);
-    product += originalProduct;
-    index += next;
-    auto p5 = op(8, product, index);
-    product += originalProduct;
-    index += next;
-    auto p6 = op(9, product, index);
-    storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-    std::cout << storage.str() << std::endl;
+    auto p0 = makeWorker<2, doubleNext>(); // 2
+    auto p1 = makeWorker<3, doubleNext + next>(); // 3
+    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
+    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
+    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
+    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
+    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
+    std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }
