@@ -163,7 +163,7 @@ int main() {
     if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
         return 1;
     }
-    static constexpr auto next = fastPow10<12 - 1>;
+    static constexpr auto next = fastPow10<13 - 1>;
     static constexpr auto doubleNext = next << 1;
     auto p0 = makeWorker<2, doubleNext>(); // 2
     auto p1 = makeWorker<3, doubleNext + next>(); // 3
