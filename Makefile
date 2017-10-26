@@ -30,12 +30,13 @@ QLOOPS_PROG32 = quodigious32
 QUODIGIOUS13 = quodigious13
 QUODIGIOUS12 = quodigious12
 QUODIGIOUS14 = quodigious14
+QUODIGIOUS15 = quodigious15
 WORKER16_PROG = qworker16
 WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
 BINARY_ENCODING_GENERATOR = bingen
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15}
 all: ${PROGS}
 
 help:
@@ -47,6 +48,7 @@ help:
 	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
 	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
+	@echo "  - ${QUODIGIOUS15}: a program that only computes 15 digits quodigious values"
 	@echo "  - ${QUODIGIOUS14}: a program that only computes 14 digits quodigious values"
 	@echo "  - ${QUODIGIOUS13}: a program that only computes 13 digits quodigious values"
 	@echo "  - ${QUODIGIOUS12}: a program that only computes 12 digits quodigious values"
@@ -101,6 +103,10 @@ ${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin
 	@echo -n Building 14 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o
 	@echo done.
+${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin
+	@echo -n Building 15 digit quodigious program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o
+	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
 	@echo -n Building binary cache generator ...
@@ -122,6 +128,10 @@ cache3.bin: ${BINARY_ENCODING_GENERATOR}
 cache4.bin: ${BINARY_ENCODING_GENERATOR}
 	@echo -n Generating binary cache file of 4 digits ...
 	@./${BINARY_ENCODING_GENERATOR} 4 > cache4.bin
+	@echo done.
+cache5.bin: ${BINARY_ENCODING_GENERATOR}
+	@echo -n Generating binary cache file of 5 digits ...
+	@./${BINARY_ENCODING_GENERATOR} 5 > cache5.bin
 	@echo done.
 
 
@@ -156,7 +166,7 @@ longer_tests: ${QLOOPS_PROG}
 
 clean:
 	@echo -n cleaning...
-	@rm -rf *.o ${PROGS} cache.bin cache2.bin cache3.bin
+	@rm -rf *.o ${PROGS} cache.bin cache2.bin cache3.bin cache4.bin cache5.bin
 	@echo done.
 
 inverted-loops.o: qlib.h
@@ -167,7 +177,8 @@ Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker18Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker19Digits.o: qlib.h Triple.h PrecomputedRange4.h
+q12.o: qlib.h
 quodigious13.o: qlib.h
 quodigious14.o: qlib.h
-q12.o: qlib.h
+quodigious15.o: qlib.h
 .PHONY: tests longer_tests
