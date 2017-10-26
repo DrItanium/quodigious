@@ -261,7 +261,7 @@ bool loadSecondaryDataCache() noexcept {
 		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
 		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
         // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		secondaryDataCache[i] = std::make_tuple(value * fastPow10<10>, sum, product);
+		secondaryDataCache[i] = std::make_tuple(value * fastPow10<9>, sum, product);
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
