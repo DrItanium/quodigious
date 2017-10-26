@@ -41,119 +41,9 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 using container = std::tuple<u64, u64, u64>;
 
 template<u64 pos, u64 max>
-inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
-
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept;
-
-template<bool topLevel>
-struct ActualLoopBody {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-        static constexpr auto next = fastPow10<pos - 1>;
-        static constexpr auto follow = pos + 1;
-        static constexpr auto doubleNext = next << 1;
-        auto originalProduct = product;
-        product <<= 1;
-        sum += 2;
-		index += doubleNext;
-		loopBody<follow, max>(storage, sum, product, index); // 2
-		product += originalProduct;
-		++sum;
-		index += next;
-		loopBody<follow, max>(storage, sum, product, index); // 3
-		product += originalProduct;
-		++sum;
-		index += next;
-		loopBody<follow, max>(storage, sum, product, index); // 4
-		product += (originalProduct << 1);
-		sum += 2;
-		index += doubleNext;
-		loopBody<follow, max>(storage, sum, product, index); // 6
-		product += originalProduct;
-		++sum;
-		index += next;
-		loopBody<follow, max>(storage, sum, product, index); // 7
-		product += originalProduct;
-		++sum;
-		index += next;
-		loopBody<follow, max>(storage, sum, product, index); // 8
-		product += originalProduct;
-		++sum;
-		index += next;
-		loopBody<follow, max>(storage, sum, product, index); // 9
-    }
-};
-
-template<>
-struct ActualLoopBody<true> {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-	template<u64 pos, u64 max>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		static_assert(max == pos, "Can't have a top level if the position and max don't match!");
-        static constexpr auto next = fastPow10<pos - 1>;
-		static constexpr auto doubleNext = next << 1;
-        auto originalProduct = product;
-        product <<= 1;
-        sum += 2;
-        index += doubleNext;
-        auto fn = [](auto sum, auto product, auto value) noexcept {
-            std::ostringstream str;
-            innerMostBody(str, sum, product, value);
-            return str.str();
-        };
-        auto op = [fn](auto sum, auto product, auto value) noexcept {
-            return std::async(std::launch::async, fn, sum, product, value);
-        };
-        auto p0 = op(sum, product, index);
-		product += originalProduct;
-		++sum;
-		index += next;
-        auto p1 = op(sum, product, index);
-		product += originalProduct;
-		++sum;
-		index += next;
-        auto p2 = op(sum, product, index);
-		product += (originalProduct << 1);
-		sum += 2;
-		index += doubleNext;
-        auto p3 = op(sum, product, index);
-		product += originalProduct;
-		++sum;
-		index += next;
-        auto p4 = op(sum, product, index);
-		product += originalProduct;
-		++sum;
-		index += next;
-        auto p5 = op(sum, product, index);
-		product += originalProduct;
-		++sum;
-		index += next;
-        auto p6 = op(sum, product, index);
-        storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-	}
-};
-
-template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos <= max, "Position can't be larger than maximum!");
+	static_assert (pos == max, "Position can't be larger than maximum!");
 	// walk through two separate set of actions
-	ActualLoopBody<pos == max>::template body< pos, max > (storage, sum, product, index);
-}
-
-template<u64 pos, u64 max>
-inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
-	std::ostringstream storage;
-	loopBody<pos, max> (storage, sum, product, index);
-	return storage.str();
 }
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
@@ -166,26 +56,25 @@ constexpr auto secondaryDimensionCount = 2;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
-template<u64 length>
-inline void body(std::ostream& storage) noexcept {
-    static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
-    loopBody<expectedDimensionCount + 1, length>(storage, 0, 1, 0);
-}
 
 void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-    for (const auto& outer : secondaryDataCache) {
-        auto ov = std::get<0>(outer) + value;
-        auto os = std::get<1>(outer) + sum;
-        auto op = std::get<2>(outer) * product;
-        for (const auto& result : primaryDataCache) {
-            auto iv = std::get<0>(result) + ov;
-            auto is = std::get<1>(result) + os;
-            auto ip = std::get<2>(result) * op;
-            merge(inspectValue(iv + 2, is + 2, ip * 2), stream);
-            merge(inspectValue(iv + 4, is + 4, ip * 4), stream);
+    for (const auto& outer : primaryDataCache) {
+        u64 ov, os, op;
+        std::tie(ov, os, op) = outer;
+        ov += value;
+        os += sum;
+        op *= product;
+        for (const auto& inner : secondaryDataCache) {
+            u64 iv, is, ip;
+            std::tie(iv, is, ip) = inner;
+            iv += ov;
+            is += os;
+            ip *= op;
+            merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
+            merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
             merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
-            merge(inspectValue(iv + 8, is + 8, ip * 8), stream);
+            merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
         }
     }
 }
@@ -280,7 +169,39 @@ int main() {
         return 1;
     }
     std::ostringstream storage;
-    loopBody<12, 12>(storage, 0, 1, 0);
+    static constexpr auto next = fastPow10<12 - 1>;
+    static constexpr auto doubleNext = next << 1;
+    auto originalProduct = 1;
+    auto product = 2;
+    auto index = doubleNext;
+    auto fn = [](auto sum, auto product, auto value) noexcept {
+        std::ostringstream str;
+        innerMostBody(str, sum, product, value);
+        return str.str();
+    };
+    auto op = [fn](auto sum, auto product, auto value) noexcept {
+        return std::async(std::launch::async, fn, sum, product, value);
+    };
+    auto p0 = op(2, product, index);
+    product += originalProduct;
+    index += next;
+    auto p1 = op(3, product, index);
+    product += originalProduct;
+    index += next;
+    auto p2 = op(4, product, index);
+    product += (originalProduct << 1);
+    index += doubleNext;
+    auto p3 = op(6, product, index);
+    product += originalProduct;
+    index += next;
+    auto p4 = op(7, product, index);
+    product += originalProduct;
+    index += next;
+    auto p5 = op(8, product, index);
+    product += originalProduct;
+    index += next;
+    auto p6 = op(9, product, index);
+    storage << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     std::cout << storage.str() << std::endl;
     return 0;
 }
