@@ -53,24 +53,39 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
 std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-    for (const auto& outer : primaryDataCache) {
-        u64 ov, os, op;
-        std::tie(ov, os, op) = outer;
-        ov += value;
-        os += sum;
-        op *= product;
-        for (const auto& inner : secondaryDataCache) {
-            u64 iv, is, ip;
-            std::tie(iv, is, ip) = inner;
-            iv += ov;
-            is += os;
-            ip *= op;
-            merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
-            merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
-            merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
-            merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
-        }
-    }
+	static constexpr auto threadCount = 7;
+	static constexpr auto onePart = primaryDataCacheSize / threadCount;
+	auto fn = [sum, product, value](auto start, auto end) noexcept {
+    	std::ostringstream stream;
+		for (auto i = start; i < end; ++i) {
+			auto outer = primaryDataCache[i];
+			u64 ov, os, op;
+			std::tie(ov, os, op) = outer;
+			ov += value;
+			os += sum;
+			op *= product;
+			for (const auto& inner : secondaryDataCache) {
+				u64 iv, is, ip;
+				std::tie(iv, is, ip) = inner;
+				iv += ov;
+				is += os;
+				ip *= op;
+				merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
+				merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
+				merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
+				merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
+			}
+		}
+		return stream.str();
+	};
+	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
+	Worker workers[threadCount];
+	for (auto a = 0; a < threadCount; ++a) {
+		workers[a] = std::async(std::launch::async, fn, (a * onePart), ((a + 1) * onePart));
+	}
+	for (auto a = 0; a < threadCount; ++a) {
+		stream << workers[a].get();
+	}
     return stream.str();
 }
 
