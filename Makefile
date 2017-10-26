@@ -85,7 +85,7 @@ ${WORKER19_PROG}: Worker19Digits.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
-${QUODIGIOUS13}: quodigious13.o
+${QUODIGIOUS13}: quodigious13.o cache.bin cache3.bin
 	@echo -n Building 13 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
 	@echo done.
@@ -107,6 +107,10 @@ cache.bin: ${BINARY_ENCODING_GENERATOR}
 cache2.bin: ${BINARY_ENCODING_GENERATOR}
 	@echo -n Generating binary cache file of 2 digits ...
 	@./${BINARY_ENCODING_GENERATOR} 2 > cache2.bin
+	@echo done.
+cache3.bin: ${BINARY_ENCODING_GENERATOR}
+	@echo -n Generating binary cache file of 3 digits ...
+	@./${BINARY_ENCODING_GENERATOR} 3 > cache3.bin
 	@echo done.
 
 
@@ -141,7 +145,7 @@ longer_tests: ${QLOOPS_PROG}
 
 clean:
 	@echo -n cleaning...
-	@rm -rf *.o ${PROGS} cache.bin cache2.bin
+	@rm -rf *.o ${PROGS} cache.bin cache2.bin cache3.bin
 	@echo done.
 
 inverted-loops.o: qlib.h

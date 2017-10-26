@@ -18,241 +18,160 @@
 
 // Perform quodigious checks on numbers using tons of different C++ tricks
 #include <iostream>
+#include <fstream>
 #include <cmath>
 #include <cstdint>
 #include <sstream>
 #include <functional>
 #include <future>
+#include <map>
 #include "qlib.h"
 
+using container = std::tuple<u64, u64, u64>;
+
+template<u64 count>
+constexpr auto dataCacheSize = numElements<count>;
+
+constexpr auto dimensionCount = 8;
+constexpr auto expectedDimensionCount = dimensionCount + 1;
+constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
+container primaryDataCache[primaryDataCacheSize];
+constexpr auto secondaryDimensionCount = 3;
+constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
+
+container secondaryDataCache[secondaryDataCacheSize];
+
 constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum) || (sum % 3 == 0));
+	return (isEven(sum)) || (sum % 3 == 0);
 }
-constexpr u64 innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-	if (checkValue(sum) && isQuodigious(value, sum, product)) {
-		return value;
-	}
-	return 0;
+constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
+    if (checkValue(sum) && isQuodigious(value, sum, product)) {
+        return value;
+    }
+    return 0;
 }
-
-template<u64 width>
-inline u64* getSums() noexcept {
-    static_assert(width >= 2 && width <= 9, "Illegal width!");
-    return nullptr;
-}
-template<u64 width>
-inline u64* getProducts() noexcept {
-    static_assert(width >= 2 && width <= 9, "Illegal width!");
-    return nullptr;
-}
-template<u64 width>
-inline u64* getNumbers() noexcept {
-    static_assert(width >= 2 && width <= 9, "Illegal width!");
-    return nullptr;
-}
-#define defTripleStorage(width) \
-    u64 sums ## width [ numElements< width > ] = { 0 }; \
-    u64 products ## width [ numElements < width > ] = { 0 }; \
-    u64 numbers ## width [ numElements < width > ] = { 0 }; \
-    template<> inline u64* getSums< width > () noexcept { return sums ## width ; } \
-    template<> inline u64* getProducts< width > () noexcept { return products ## width ; } \
-    template<> inline u64* getNumbers< width > () noexcept { return numbers ## width ; }
-defTripleStorage(2);
-defTripleStorage(3);
-defTripleStorage(4);
-defTripleStorage(5);
-defTripleStorage(6);
-defTripleStorage(7);
-defTripleStorage(8);
-defTripleStorage(9);
-#undef defTripleStorage
-
-template<u64 width>
-void populateWidth() noexcept {
-    static_assert(width >= 2 && width <= 9, "Illegal width!");
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        populateWidth<width - 1>();
-        auto* numPtr = getNumbers<width>();
-        auto* sumPtr = getSums<width>();
-        auto* prodPtr = getProducts<width>();
-        auto* prevNum = getNumbers<width - 1>();
-        auto* prevSum = getSums<width - 1>();
-        auto* prevProd = getProducts<width - 1>();
-        for (int i = 0; i < numElements<width - 1>; ++i) {
-            auto s = prevSum[i];
-            auto p = prevProd[i];
-            auto n = makeDigitAt<1>(prevNum[i]);
-			for (int j = 2; j < 10; ++j) {
-				if (j == 5) {
-					continue;
-				}
-				*numPtr = n + j;
-				*sumPtr = s + j;
-				*prodPtr = p * j;
-				++numPtr;
-				++sumPtr;
-				++prodPtr;
-			}
+std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+    std::ostringstream stream;
+    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+    for (const auto& outer : primaryDataCache) {
+        u64 ov, os, op;
+        std::tie(ov, os, op) = outer;
+        ov += value;
+        os += sum;
+        op *= product;
+        for (const auto& inner : secondaryDataCache) {
+            u64 iv, is, ip;
+            std::tie(iv, is, ip) = inner;
+            iv += ov;
+            is += os;
+            ip *= op;
+            merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
+            merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
+            merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
+            merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
         }
     }
+    return stream.str();
 }
 
-template<>
-void populateWidth<2>() noexcept {
-    static bool populated = false;
-    if (!populated) {
-        populated = true;
-        auto* sumPtr = getSums<2>();
-        auto* prodPtr = getProducts<2>();
-        auto* numPtr = getNumbers<2>();
-		for (int i = 2; i < 10; ++i) {
-			if (i == 5) {
-				continue;
-			}
-			auto numberOuter = makeDigitAt<1>(i);
-			for (int j = 2; j < 10; ++j) {
-				if (j == 5) {
-					continue;
-				}
-				*sumPtr = i + j;
-				*prodPtr = i * j;
-				*numPtr = numberOuter + j;
-				++sumPtr;
-				++prodPtr;
-				++numPtr;
-			}
-		}
-    }
-}
-constexpr auto length1To4 = numElements<2> * 4;
-u64 values1To4[length1To4] = { 0 };
-u64 sums1To4[length1To4] = { 0 };
-u64 products1To4[length1To4] = { 0 };
-u64 values2To4[numElements<2>] = { 0 };
-u64 values4To13[numElements<9>] = { 0 };
-
-template<u64 width, u64 factor>
-inline void populateArray(u64* nums, u64* storage) noexcept {
-    for (int i = 0; i < numElements<width>; ++i) {
-        *storage = nums[i] * fastPow10<factor>;
-        ++storage;
-    }
-}
-
-template<u64 width, u64 factor>
-inline void populateArray(u64* storage) noexcept {
-    populateArray<width, factor>(getNumbers<width>(), storage);
-}
-
-template<u64 pos>
-void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
-
-
-template<bool topLevel>
-struct ActualLoopBody {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-
-	template<u64 pos>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		if (pos == 4) {
-			auto* s9 = sums9;
-			auto* p9 = products9;
-			auto* v9 = values4To13;
-			for (auto i = 0; i < numElements<9>; ++i, ++s9, ++p9, ++v9) {
-				loopBody<13>(storage, sum + *s9, product * (*p9), index + *v9);
-			}
-		} 
+bool loadPrimaryDataCache() noexcept {
+	std::ifstream cachedCopy("cache.bin", std::ifstream::in | std::ifstream::binary);
+	if (!cachedCopy.good()) {
+		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache.bin" << std::endl;
+        return false;
 	}
-};
-
-template<>
-struct ActualLoopBody<true> {
-	ActualLoopBody() = delete;
-	~ActualLoopBody() = delete;
-	ActualLoopBody(ActualLoopBody&&) = delete;
-	ActualLoopBody(const ActualLoopBody&) = delete;
-	template<u64 pos>
-	static void body(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-		static_assert(13 == pos, "Can't have a top level if the position and max don't match!");
-        static constexpr auto next = fastPow10<pos - 1>;
-		static constexpr auto doubleNext = next << 1;
-        auto originalProduct = product;
-        product <<= 1;
-        sum += 2;
-		index += doubleNext;
-        merge(innerMostBody(sum, product, index), storage); // 2
-		product += originalProduct; 
-		++sum; 
-		index += next; 
-        merge(innerMostBody(sum, product, index), storage); // 3
-		product += originalProduct; 
-		++sum; 
-		index += next; 
-        merge(innerMostBody(sum, product, index), storage); // 4
-		product += (originalProduct << 1);
-		sum += 2;
-		index += doubleNext;
-        merge(innerMostBody(sum, product, index), storage); // 6
-		product += originalProduct; 
-		++sum; 
-		index += next; 
-        merge(innerMostBody(sum, product, index), storage); // 7
-		product += originalProduct; 
-		++sum; 
-		index += next; 
-        merge(innerMostBody(sum, product, index), storage); // 8
-		product += originalProduct; 
-		++sum; 
-		index += next; 
-        merge(innerMostBody(sum, product, index), storage); // 9
+	// TODO: update the binary generator to eliminate the last digit from the
+	// computation, then we can do four numbers at a time in the inner most
+	// loop of this code which should make up the computation difference we've
+	// seen so far!
+	//
+	// We can also reintroduce nested threading, the difference is that we can
+	// just eliminate the values needed
+	char tmpCache[sizeof(u32) * 3] = { 0 };
+	for (int i = 0; i < primaryDataCacheSize || cachedCopy.good(); ++i) {
+		// layout is value, sum, product
+		cachedCopy.read(tmpCache, sizeof(u32) * 3);
+		u64 value = (uint8_t)tmpCache[0];
+		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
+		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
+		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
+		u64 sum = (uint8_t)tmpCache[4];
+		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
+		u64 product = (uint8_t)tmpCache[8];
+		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
+		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
+		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
+        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
+		primaryDataCache[i] = std::make_tuple(value * 10, sum, product);
 	}
-};
+	if (!cachedCopy.eof()) {
+		std::cerr << "data cache is too small!" << std::endl;
+        return false;
+	}
 
-template<u64 pos>
-void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept {
-	static_assert (pos <= 13, "Position can't be larger than maximum!");
-	// walk through two separate set of actions
-	ActualLoopBody<pos == 13>::template body< pos > (storage, sum, product, index);
+	cachedCopy.close();
+    return true;
 }
 
+bool loadSecondaryDataCache() noexcept {
+	std::ifstream cachedCopy("cache3.bin", std::ifstream::in | std::ifstream::binary);
+	if (!cachedCopy.good()) {
+		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache3.bin" << std::endl;
+        return false;
+	}
+	// TODO: update the binary generator to eliminate the last digit from the
+	// computation, then we can do four numbers at a time in the inner most
+	// loop of this code which should make up the computation difference we've
+	// seen so far!
+	//
+	// We can also reintroduce nested threading, the difference is that we can
+	// just eliminate the values needed
+	char tmpCache[sizeof(u32) * 3] = { 0 };
+	for (int i = 0; i < secondaryDataCacheSize || cachedCopy.good(); ++i) {
+		// layout is value, sum, product
+		cachedCopy.read(tmpCache, sizeof(u32) * 3);
+		u64 value = (uint8_t)tmpCache[0];
+		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
+		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
+		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
+		u64 sum = (uint8_t)tmpCache[4];
+		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
+		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
+		u64 product = (uint8_t)tmpCache[8];
+		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
+		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
+		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
+        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
+		secondaryDataCache[i] = std::make_tuple(value * fastPow10<9>, sum, product);
+	}
+	if (!cachedCopy.eof()) {
+		std::cerr << "data cache is too small!" << std::endl;
+        return false;
+	}
+
+	cachedCopy.close();
+    return true;
+}
+template<u64 pos, u64 index>
+decltype(auto) makeWorker() noexcept {
+    return std::async(std::launch::async, innerMostBody, pos, pos, index);
+}
 int main() {
-	populateWidth<2>();
-	populateArray<2, 1>(values2To4);
-	auto* v1To4 = values1To4;
-	auto* s1To4 = sums1To4;
-	auto* p1To4 = products1To4;
-	for (int i = 2; i < 10; ++i) {
-		if (isEven(i)) {
-			for (auto j = 0; j < numElements<2>; ++j, ++v1To4, ++s1To4, ++p1To4) {
-				*v1To4 = values2To4[j] + i;
-				*s1To4 = sums2[j] + i;
-				*p1To4 = products2[j] * i;
-			}
-		}
-	}
-    populateWidth<9>();
-	populateArray<9, 3>(values4To13);
-	static constexpr auto threadCount = length1To4;
-	auto mkComputation = [](auto i) noexcept {
-		auto loopBodyString = [](auto sum, auto product, auto index) noexcept {
-			std::ostringstream storage;
-			loopBody<4>(storage, sum, product, index);
-			return storage.str();
-		};
-		return std::async(std::launch::async, loopBodyString, sums1To4[i], products1To4[i], values1To4[i]);
-	};
-	using AsyncWorker = decltype(mkComputation(0));
-	AsyncWorker watcher[threadCount];
-	for (int i = 0; i < threadCount; ++i) {
-		watcher[i] = mkComputation(i);
-	}
-	for (int i = 0; i < threadCount; ++i) {
-		std::cout << watcher[i].get();
-	}
+    if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
+        return 1;
+    }
+    static constexpr auto next = fastPow10<12 - 1>;
+    static constexpr auto doubleNext = next << 1;
+    auto p0 = makeWorker<2, doubleNext>(); // 2
+    auto p1 = makeWorker<3, doubleNext + next>(); // 3
+    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
+    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
+    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
+    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
+    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
+    std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }
