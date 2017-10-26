@@ -160,10 +160,7 @@ decltype(auto) makeWorker() noexcept {
     return std::async(std::launch::async, innerMostBody, pos, pos, index);
 }
 int main() {
-    if (!loadPrimaryDataCache()) {
-        return 1;
-    }
-    if (!loadSecondaryDataCache()) {
+    if (!loadPrimaryDataCache() || loadSecondaryDataCache()) {
         return 1;
     }
     static constexpr auto next = fastPow10<12 - 1>;
