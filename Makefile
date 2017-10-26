@@ -92,7 +92,7 @@ ${QUODIGIOUS13}: quodigious13.o
 
 ${QUODIGIOUS12}: q12.o cache.bin cache2.bin
 	@echo -n Building 12 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} quodigious12.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
@@ -105,7 +105,7 @@ cache.bin: ${BINARY_ENCODING_GENERATOR}
 	@./${BINARY_ENCODING_GENERATOR} > cache.bin
 	@echo done.
 cache2.bin: ${BINARY_ENCODING_GENERATOR}
-	@echo -n Generating binary cache file of 2 digits
+	@echo -n Generating binary cache file of 2 digits ...
 	@./${BINARY_ENCODING_GENERATOR} 2 > cache2.bin
 	@echo done.
 

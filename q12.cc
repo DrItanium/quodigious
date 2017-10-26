@@ -161,7 +161,7 @@ constexpr auto dataCacheSize = numElements<count>;
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
-container dataCache[primaryDataCacheSize];
+container primaryDataCache[primaryDataCacheSize];
 constexpr auto secondaryDimensionCount = 2;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
@@ -175,17 +175,17 @@ inline void body(std::ostream& storage) noexcept {
 void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept {
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
     for (const auto& outer : secondaryDataCache) {
-        auto ov = std::get<0>(result) + value;
-        auto os = std::get<1>(result) + sum;
-        auto op = std::get<2>(result) * product;
+        auto ov = std::get<0>(outer) + value;
+        auto os = std::get<1>(outer) + sum;
+        auto op = std::get<2>(outer) * product;
         for (const auto& result : primaryDataCache) {
             auto iv = std::get<0>(result) + ov;
             auto is = std::get<1>(result) + os;
             auto ip = std::get<2>(result) * op;
-            merge(inspectValue(v + 2, s + 2, p * 2), stream);
-            merge(inspectValue(v + 4, s + 4, p * 4), stream);
-            merge(inspectValue(v + 6, s + 6, p * 6), stream);
-            merge(inspectValue(v + 8, s + 8, p * 8), stream);
+            merge(inspectValue(iv + 2, is + 2, ip * 2), stream);
+            merge(inspectValue(iv + 4, is + 4, ip * 4), stream);
+            merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
+            merge(inspectValue(iv + 8, is + 8, ip * 8), stream);
         }
     }
 }
@@ -281,6 +281,6 @@ int main() {
     }
     std::ostringstream storage;
     loopBody<12, 12>(storage, 0, 1, 0);
-    std::cout << storage << std::endl;
+    std::cout << storage.str() << std::endl;
     return 0;
 }
