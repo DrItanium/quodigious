@@ -31,12 +31,13 @@ QUODIGIOUS13 = quodigious13
 QUODIGIOUS12 = quodigious12
 QUODIGIOUS14 = quodigious14
 QUODIGIOUS15 = quodigious15
+QUODIGIOUS16 = quodigious16
 WORKER16_PROG = qworker16
 WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
 BINARY_ENCODING_GENERATOR = bingen
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16}
 all: ${PROGS}
 
 help:
@@ -48,6 +49,7 @@ help:
 	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
 	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
+	@echo "  - ${QUODIGIOUS16}: a program that only computes 16 digits quodigious values"
 	@echo "  - ${QUODIGIOUS15}: a program that only computes 15 digits quodigious values"
 	@echo "  - ${QUODIGIOUS14}: a program that only computes 14 digits quodigious values"
 	@echo "  - ${QUODIGIOUS13}: a program that only computes 13 digits quodigious values"
@@ -106,6 +108,11 @@ ${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin
 ${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin
 	@echo -n Building 15 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o
+	@echo done.
+
+${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin
+	@echo -n Building 16 digit quodigious program ...
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
