@@ -26,7 +26,12 @@
 #include <future>
 #include "qlib.h"
 
-using container = std::tuple<u64, u64, u64>;
+//using container = std::tuple<u64, u64, u64>;
+struct container {
+	u64 value;
+	u64 sum;
+	u64 product;
+};
 
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
@@ -58,18 +63,14 @@ std::string innerMostBody() noexcept {
 	auto fn = [](auto start, auto end) noexcept {
 		std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
-			auto outer = primaryDataCache[i];
-			u64 ov, os, op;
-			std::tie(ov, os, op) = outer;
-			ov += value;
-			os += sum;
-			op = multiply<product>(op);
+			const auto& outer = primaryDataCache[i];
+			auto ov = value + outer.value;
+			auto os = sum + outer.sum;
+			auto op = multiply<product>(outer.product);
 			for (const auto& inner : secondaryDataCache) {
-				u64 iv, is, ip;
-				std::tie(iv, is, ip) = inner;
-				iv += ov;
-				is += os;
-				ip *= op;
+				auto iv = ov + inner.value;
+				auto is = os + inner.sum;
+				auto ip = op * inner.product;
 				merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
 				merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
 				merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
@@ -105,6 +106,7 @@ bool loadPrimaryDataCache() noexcept {
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < primaryDataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
+		container tmp;
 		cachedCopy.read(tmpCache, sizeof(u32) * 3);
 		u64 value = (uint8_t)tmpCache[0];
 		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
@@ -119,7 +121,11 @@ bool loadPrimaryDataCache() noexcept {
 		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
 		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
         // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		primaryDataCache[i] = std::make_tuple(value * 10, sum, product);
+//		primaryDataCache[i] = std::make_tuple(value * 10, sum, product);
+		tmp.value = value * 10;
+		tmp.product = product;
+		tmp.sum = sum;
+		primaryDataCache[i] = tmp;
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
@@ -146,6 +152,7 @@ bool loadSecondaryDataCache() noexcept {
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < secondaryDataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
+		container tmp;
 		cachedCopy.read(tmpCache, sizeof(u32) * 3);
 		u64 value = (uint8_t)tmpCache[0];
 		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
@@ -160,7 +167,11 @@ bool loadSecondaryDataCache() noexcept {
 		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
 		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
         // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		secondaryDataCache[i] = std::make_tuple(value * fastPow10<9>, sum, product);
+		//secondaryDataCache[i] = std::make_tuple(value * fastPow10<9>, sum, product);
+		tmp.value = value * fastPow10<9>;
+		tmp.product = product;
+		tmp.sum = sum;
+		secondaryDataCache[i] = tmp;
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
