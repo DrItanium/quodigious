@@ -35,3 +35,8 @@ QUAD CORE TIMES:
 real    773m44.643s
 user    3093m24.631s
 sys     0m0.180s
+
+16 digits (cache 8 digits technique)
+real    636m24.102s
+user    2544m33.564s
+sys     0m0.203s
