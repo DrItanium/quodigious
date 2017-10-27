@@ -36,7 +36,7 @@ constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
 container primaryDataCache[primaryDataCacheSize];
-constexpr auto secondaryDimensionCount = 3;
+constexpr auto secondaryDimensionCount = 2;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
@@ -50,14 +50,14 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
     }
     return 0;
 }
-
-std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+template<u64 sum, u64 product, u64 value>
+std::string innerMostBody() noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto primaryThreadCount = 14;
+	static constexpr auto primaryThreadCount = 7;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
-	auto fn = [sum, product, value](auto start, auto end) noexcept {
+	auto fn = [](auto start, auto end) noexcept {
     	std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
@@ -137,9 +137,9 @@ bool loadPrimaryDataCache() noexcept {
 }
 
 bool loadSecondaryDataCache() noexcept {
-	std::ifstream cachedCopy("cache3.bin", std::ifstream::in | std::ifstream::binary);
+	std::ifstream cachedCopy("cache2.bin", std::ifstream::in | std::ifstream::binary);
 	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache3.bin" << std::endl;
+		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache2.bin" << std::endl;
         return false;
 	}
 	// TODO: update the binary generator to eliminate the last digit from the
@@ -176,23 +176,39 @@ bool loadSecondaryDataCache() noexcept {
 	cachedCopy.close();
     return true;
 }
-template<u64 pos, u64 index>
+template<u64 sum, u64 product, u64 value>
 decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, innerMostBody, pos, pos, index);
+    return std::async(std::launch::async, innerMostBody<sum, product, value>);
+}
+template<u64 outer>
+decltype(auto) makeSuperWorker() noexcept {
+	return std::async(std::launch::deferred, []() {
+			static constexpr auto next = fastPow10<13 - 1>;
+			static constexpr auto nextNext = fastPow10<13 - 2>;
+			static constexpr auto outerMost = outer * next;
+			std::ostringstream output;
+			auto p0 = makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2)>();
+			auto p1 = makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3)>();
+			auto p2 = makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4)>();
+			auto p3 = makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6)>();
+			auto p4 = makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7)>();
+			auto p5 = makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8)>();
+			auto p6 = makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9)>();
+			output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+			return output.str();
+	});
 }
 int main() {
     if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
         return 1;
     }
-    static constexpr auto next = fastPow10<13 - 1>;
-    static constexpr auto doubleNext = next << 1;
-    auto p0 = makeWorker<2, doubleNext>(); // 2
-    auto p1 = makeWorker<3, doubleNext + next>(); // 3
-    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
-    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
-    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
-    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
-    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
+	auto p0 = makeSuperWorker<2>();
+	auto p1 = makeSuperWorker<3>();
+	auto p2 = makeSuperWorker<4>();
+	auto p3 = makeSuperWorker<6>();
+	auto p4 = makeSuperWorker<7>();
+	auto p5 = makeSuperWorker<8>();
+	auto p6 = makeSuperWorker<9>();
     std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }

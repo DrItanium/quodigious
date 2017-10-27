@@ -89,7 +89,7 @@ ${WORKER19_PROG}: Worker19Digits.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
-${QUODIGIOUS13}: quodigious13.o cache.bin cache3.bin
+${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin
 	@echo -n Building 13 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
 	@echo done.
