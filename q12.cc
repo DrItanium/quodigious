@@ -24,7 +24,6 @@
 #include <sstream>
 #include <functional>
 #include <future>
-#include <map>
 #include "qlib.h"
 
 using container = std::tuple<u64, u64, u64>;
@@ -57,7 +56,7 @@ std::string innerMostBody() noexcept {
 	static constexpr auto threadCount = 7;
 	static constexpr auto onePart = primaryDataCacheSize / threadCount;
 	auto fn = [](auto start, auto end) noexcept {
-    	std::ostringstream stream;
+		std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
 			u64 ov, os, op;
