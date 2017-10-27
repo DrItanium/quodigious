@@ -50,12 +50,13 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
     }
     return 0;
 }
-std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
+template<u64 sum, u64 product, u64 value>
+std::string innerMostBody() noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto threadCount = 7;
 	static constexpr auto onePart = primaryDataCacheSize / threadCount;
-	auto fn = [sum, product, value](auto start, auto end) noexcept {
+	auto fn = [](auto start, auto end) noexcept {
     	std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
@@ -170,23 +171,22 @@ bool loadSecondaryDataCache() noexcept {
 	cachedCopy.close();
     return true;
 }
-template<u64 pos, u64 index>
+template<u64 pos>
 decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, innerMostBody, pos, pos, index);
+    static constexpr auto next = fastPow10<12 - 1>;
+    return std::async(std::launch::async, innerMostBody<pos, pos, next * pos>);
 }
 int main() {
     if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
         return 1;
     }
-    static constexpr auto next = fastPow10<12 - 1>;
-    static constexpr auto doubleNext = next << 1;
-    auto p0 = makeWorker<2, doubleNext>(); // 2
-    auto p1 = makeWorker<3, doubleNext + next>(); // 3
-    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
-    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
-    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
-    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
-    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
+    auto p0 = makeWorker<2>(); // 2
+    auto p1 = makeWorker<3>(); // 3
+    auto p2 = makeWorker<4>(); // 4
+    auto p3 = makeWorker<6>(); // 6
+    auto p4 = makeWorker<7>(); // 7
+    auto p5 = makeWorker<8>(); // 8
+    auto p6 = makeWorker<9>(); // 9
     std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }
