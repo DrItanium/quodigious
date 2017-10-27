@@ -133,6 +133,10 @@ cache5.bin: ${BINARY_ENCODING_GENERATOR}
 	@echo -n Generating binary cache file of 5 digits ...
 	@./${BINARY_ENCODING_GENERATOR} 5 > cache5.bin
 	@echo done.
+cache9.bin: ${BINARY_ENCODING_GENERATOR}
+	@echo -n Generating binary cache file of 9 digits ...
+	@./${BINARY_ENCODING_GENERATOR} 9 > cache9.bin
+	@echo done.
 
 
 timed_tests: ${QLOOPS_PROG}
@@ -166,7 +170,7 @@ longer_tests: ${QLOOPS_PROG}
 
 clean:
 	@echo -n cleaning...
-	@rm -rf *.o ${PROGS} cache.bin cache2.bin cache3.bin cache4.bin cache5.bin
+	@rm -rf *.o ${PROGS} cache.bin cache2.bin cache3.bin cache4.bin cache5.bin cache9.bin
 	@echo done.
 
 inverted-loops.o: qlib.h

@@ -63,7 +63,7 @@ std::string innerMostBody() noexcept {
 			std::tie(ov, os, op) = outer;
 			ov += value;
 			os += sum;
-			op *= product;
+			op = multiply<product>(op);
 			for (const auto& inner : secondaryDataCache) {
 				u64 iv, is, ip;
 				std::tie(iv, is, ip) = inner;
@@ -133,7 +133,7 @@ bool loadPrimaryDataCache() noexcept {
 bool loadSecondaryDataCache() noexcept {
 	std::ifstream cachedCopy("cache2.bin", std::ifstream::in | std::ifstream::binary);
 	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache2.bin" << std::endl;
+		std::cerr << "ERROR Couldn't open cache2.bin data cache! Make sure it exists and is named cache2.bin" << std::endl;
         return false;
 	}
 	// TODO: update the binary generator to eliminate the last digit from the
