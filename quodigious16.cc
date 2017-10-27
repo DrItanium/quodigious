@@ -54,7 +54,7 @@ template<u64 sum, u64 product, u64 value>
 std::string innerMostBody() noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto primaryThreadCount = 7;
+	static constexpr auto primaryThreadCount = 14;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
 	auto fn = [](auto start, auto end) noexcept {
