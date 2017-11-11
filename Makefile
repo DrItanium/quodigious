@@ -91,28 +91,28 @@ ${WORKER19_PROG}: Worker19Digits.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
-${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin
+${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin qlib.o
 	@echo -n Building 13 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o qlib.o
 	@echo done.
 
-${QUODIGIOUS12}: q12.o cache.bin cache2.bin
+${QUODIGIOUS12}: q12.o cache.bin cache2.bin qlib.o
 	@echo -n Building 12 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o qlib.o
 	@echo done.
 
-${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin
+${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin qlib.o
 	@echo -n Building 14 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o qlib.o
 	@echo done.
-${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin
+${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin qlib.o
 	@echo -n Building 15 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o qlib.o
 	@echo done.
 
-${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin
+${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin qlib.o
 	@echo -n Building 16 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o qlib.o
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
@@ -192,4 +192,5 @@ q12.o: qlib.h
 quodigious13.o: qlib.h
 quodigious14.o: qlib.h
 quodigious15.o: qlib.h
+qlib.o: qlib.cc qlib.h
 .PHONY: tests longer_tests

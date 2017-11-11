@@ -20,6 +20,7 @@
 #define QLIB_H__
 #include <cstdint>
 #include <iostream>
+#include <tuple>
 using u64 = uint64_t;
 using u32 = uint32_t;
 
@@ -126,4 +127,16 @@ template<u64 width, u64 divisible>
 constexpr bool isDivisibleBy(u64 factor) noexcept {
     return (factor * divisible) == numElements<width>;
 }
+
+constexpr u64 makeU64(char a, char b, char c, char d) noexcept {
+	u64 value = static_cast<uint8_t>(a);
+	value |= static_cast<u64>(static_cast<uint8_t>(b) << 8);
+	value |= static_cast<u64>(static_cast<uint8_t>(c) << 16);
+	value |= static_cast<u64>(static_cast<uint8_t>(d) << 24);
+	return value;
+}
+
+
+using container = std::tuple<u64, u64, u64>;
+bool loadDataCache(const std::string& fileName, container* collection, size_t size);
 #endif // end QLIB_H__

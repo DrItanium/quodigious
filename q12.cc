@@ -27,7 +27,7 @@
 #include "qlib.h"
 
 //using container = std::tuple<u64, u64, u64>;
-struct container {
+struct PreComputedData {
 	u64 value;
 	u64 sum;
 	u64 product;
@@ -39,11 +39,11 @@ constexpr auto dataCacheSize = numElements<count>;
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
-container primaryDataCache[primaryDataCacheSize];
+PreComputedData primaryDataCache[primaryDataCacheSize];
 constexpr auto secondaryDimensionCount = 2;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
-container secondaryDataCache[secondaryDataCacheSize];
+PreComputedData secondaryDataCache[secondaryDataCacheSize];
 
 constexpr bool checkValue(u64 sum) noexcept {
 	return (isEven(sum)) || (sum % 3 == 0);
@@ -106,7 +106,7 @@ bool loadPrimaryDataCache() noexcept {
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < primaryDataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
-		container tmp;
+		PreComputedData tmp;
 		cachedCopy.read(tmpCache, sizeof(u32) * 3);
 		u64 value = (uint8_t)tmpCache[0];
 		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
@@ -152,7 +152,7 @@ bool loadSecondaryDataCache() noexcept {
 	char tmpCache[sizeof(u32) * 3] = { 0 };
 	for (int i = 0; i < secondaryDataCacheSize || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
-		container tmp;
+		PreComputedData tmp;
 		cachedCopy.read(tmpCache, sizeof(u32) * 3);
 		u64 value = (uint8_t)tmpCache[0];
 		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
