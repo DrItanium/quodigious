@@ -33,27 +33,19 @@ constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
 container primaryDataCache[primaryDataCacheSize];
 constexpr auto secondaryDimensionCount = 5;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
-
 container secondaryDataCache[secondaryDataCacheSize];
-
-template<u64 pos, u64 index>
-decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, typicalInnerMostBody<15, primaryDataCacheSize, secondaryDataCacheSize, 21>, pos, pos, index, primaryDataCache, secondaryDataCache);
-}
 
 int main() {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
-    static constexpr auto next = fastPow10<15 - 1>;
-    static constexpr auto doubleNext = next << 1;
-    auto p0 = makeWorker<2, doubleNext>(); // 2
-    auto p1 = makeWorker<3, doubleNext + next>(); // 3
-    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
-    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
-    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
-    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
-    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
+    auto p0 = makeWorker<2, 2, (2 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 2
+    auto p1 = makeWorker<3, 3, (3 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 3
+    auto p2 = makeWorker<4, 4, (4 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 4
+    auto p3 = makeWorker<6, 6, (6 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 6
+    auto p4 = makeWorker<7, 7, (7 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 7
+    auto p5 = makeWorker<8, 8, (8 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 8
+    auto p6 = makeWorker<9, 9, (9 * fastPow10<14>), 15, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 9
     std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }
