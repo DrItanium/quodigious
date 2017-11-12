@@ -36,53 +36,9 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-template<u64 primaryThreadCount = 21>
-std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
-    std::ostringstream stream;
-    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
-	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
-	auto fn = [sum, product, value](auto start, auto end) noexcept {
-    	std::ostringstream stream;
-		for (auto i = start; i < end; ++i) {
-			auto outer = primaryDataCache[i];
-			u64 ov, os, op;
-			std::tie(ov, os, op) = outer;
-			ov += value;
-			os += sum;
-			op *= product;
-			for (const auto& inner : secondaryDataCache) {
-				u64 iv, is, ip;
-				std::tie(iv, is, ip) = inner;
-				iv += ov;
-				is += os;
-				ip *= op;
-				merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
-				merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
-				merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
-				merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
-			}
-		}
-		return stream.str();
-	};
-	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
-	Worker workers[primaryThreadCount];
-	
-	for (auto a = 0; a < primaryThreadCount; ++a) {
-		workers[a] = std::async(std::launch::async, fn, (a * primaryOnePart), ((a + 1) * primaryOnePart));
-	}
-	// compute the rest on teh primary thread
-	auto lastWorker = std::async(std::launch::async, fn, primaryDataCacheSize - difference, primaryDataCacheSize);
-	for (auto a = 0; a < primaryThreadCount; ++a) {
-		stream << workers[a].get();
-	}
-	stream << lastWorker.get();
-    return stream.str();
-}
-
 template<u64 pos, u64 index>
 decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, innerMostBody, pos, pos, index);
+    return std::async(std::launch::async, typicalInnerMostBody<15, primaryDataCacheSize, secondaryDataCacheSize, 21>, pos, pos, index, primaryDataCache, secondaryDataCache);
 }
 
 int main() {
