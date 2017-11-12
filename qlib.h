@@ -192,4 +192,76 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
+
+template<u64 width>
+constexpr auto primaryThreadCount = 7;
+
+template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize>
+std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
+    std::ostringstream stream;
+    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount<width>;
+	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount<width>;
+	auto fn = [sum, product, value, primaryDataCache, secondaryDataCache](auto start, auto end) noexcept {
+    	std::ostringstream stream;
+		for (auto i = start; i < end; ++i) {
+			auto outer = primaryDataCache[i];
+			u64 ov, os, op;
+			std::tie(ov, os, op) = outer;
+			ov += value;
+			os += sum;
+			op *= product;
+			for (auto j = 0; j < secondaryDataCacheSize; ++j)  {
+				auto inner = secondaryDataCache[j];
+				u64 iv, is, ip;
+				std::tie(iv, is, ip) = inner;
+				iv += ov;
+				is += os;
+				ip *= op;
+				merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
+				merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
+				merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
+				merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
+			}
+		}
+		return stream.str();
+	};
+	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
+	Worker workers[primaryThreadCount<width>];
+	
+	for (auto a = 0; a < primaryThreadCount<width>; ++a) {
+		workers[a] = std::async(std::launch::async, fn, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+	}
+	// compute the rest on teh primary thread
+	auto lastWorker = std::async(std::launch::async, fn, primaryDataCacheSize - difference, primaryDataCacheSize);
+	for (auto a = 0; a < primaryThreadCount<width>; ++a) {
+		stream << workers[a].get();
+	}
+	stream << lastWorker.get();
+    return stream.str();
+}
+
+template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth>
+decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
+    return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>>, sum, product, value, primary, secondary);
+}
+
+template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize>
+decltype(auto) makeSuperWorker(container* primary, container* secondary, decltype(std::launch::deferred) policy = std::launch::deferred) noexcept {
+	return std::async(policy, [primary, secondary]() {
+			static constexpr auto next = fastPow10<digitWidth - 1>;
+			static constexpr auto nextNext = fastPow10<digitWidth - 2>;
+			static constexpr auto outerMost = outer * next;
+			std::ostringstream output;
+			auto p0 = makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p1 = makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p2 = makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p3 = makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p4 = makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p5 = makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			auto p6 = makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize>(primary, secondary);
+			output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+			return output.str();
+	});
+}
 #endif // end QLIB_H__
