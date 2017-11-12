@@ -223,6 +223,12 @@ template<u64 secondarySize>
 std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
 	std::ostringstream stream;
 	for (auto i = start; i < end; i+= 3) {
+		// NOTE: this comment assumes that we are reading three outer numbers
+		// at a time. If the number above has changed to a large number (say
+		// 4,5,6,7,etc) then understand that the logic is the same just on a
+		// larger scale
+		//
+		//
 		// not every range is going to be evenly divisible by three so instead
 		// do some logic walking through to figure out how many outer numbers
 		// can be safely interleaved into an inner loop. So if we had an outer
@@ -255,6 +261,7 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 		// optimization) with the special cases being a reduced number.
 		// However, in all cases we do reduce the amount of data being loaded
 		// from main memory and (hopefully) keep more data in the cache :D
+		
 		auto outer0 = primary[i];
 		u64 ov0 = outer0.value + value;
 		u64 os0 = outer0.sum + sum;
