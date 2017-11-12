@@ -21,6 +21,12 @@
 #include <cstdint>
 #include <iostream>
 #include <tuple>
+#include <fstream>
+#include <cmath>
+#include <sstream>
+#include <functional>
+#include <future>
+#include <map>
 using u64 = uint64_t;
 using u32 = uint32_t;
 
@@ -148,5 +154,39 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
         return value;
     }
     return 0;
+}
+
+template<u64 factor>
+bool loadDataCache(const std::string& fileName, container* collection, size_t size) {
+	std::ifstream cachedCopy(fileName, std::ifstream::in | std::ifstream::binary);
+	if (!cachedCopy.good()) {
+		std::cerr << "ERROR: Couldn't open " << fileName << " data cache file! Make sure it exists and is named " << fileName << std::endl;
+		return false;
+	}
+	// TODO: update the binary generator to eliminate the last digit from the
+	// computation, then we can do four numbers at a time in the inner most
+	// loop of this code which should make up the computation difference we've
+	// seen so far!
+	//
+	// We can also reintroduce nested threading, the difference is that we can
+	// just eliminate the values needed
+	constexpr auto readSize = sizeof(u32) * 3;
+	char tmpCache[readSize] = { 0 };
+	for (int i = 0; i < size || cachedCopy.good(); ++i) {
+		// layout is value, sum, product
+		cachedCopy.read(tmpCache, readSize);
+		u64 value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]);
+		u64 sum = makeU64(tmpCache[4], tmpCache[5], tmpCache[6], tmpCache[7]);
+		u64 product = makeU64(tmpCache[8], tmpCache[9], tmpCache[10], tmpCache[11]);
+        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
+		collection[i] = std::make_tuple(value * fastPow10<factor>, sum, product);
+	}
+	if (!cachedCopy.eof()) {
+		std::cerr << "data cache is too small!" << std::endl;
+        return false;
+	}
+
+	cachedCopy.close();
+    return true;
 }
 #endif // end QLIB_H__

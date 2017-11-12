@@ -91,7 +91,7 @@ decltype(auto) makeWorker() noexcept {
     return std::async(std::launch::async, innerMostBody, pos, pos, index);
 }
 int main() {
-	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
     static constexpr auto next = fastPow10<14 - 1>;

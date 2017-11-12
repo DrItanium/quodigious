@@ -195,7 +195,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 }
 
 int main() {
-	if (!loadDataCache("cache.bin", dataCache, dataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", dataCache, dataCacheSize)) {
 		return 1;
 	}
     std::ostringstream storage;

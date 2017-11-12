@@ -109,7 +109,7 @@ decltype(auto) makeSuperWorker() noexcept {
 	});
 }
 int main() {
-	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache2.bin", secondaryDataCache, secondaryDataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache2.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
 	auto p0 = makeSuperWorker<2>();

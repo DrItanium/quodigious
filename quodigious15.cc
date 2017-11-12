@@ -91,7 +91,7 @@ decltype(auto) makeWorker() noexcept {
 }
 
 int main() {
-	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
     static constexpr auto next = fastPow10<15 - 1>;

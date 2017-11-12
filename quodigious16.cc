@@ -111,7 +111,7 @@ decltype(auto) makeSuperWorker() noexcept {
 }
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
 	if (argc > 1) {

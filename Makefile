@@ -67,9 +67,9 @@ ${QLOOPS_PROG32}: loops32.o
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
-${QLOOPS_PROG}: inverted-loops.o qlib.o cache.bin
+${QLOOPS_PROG}: inverted-loops.o cache.bin
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o 
 	@echo done.
 
 
@@ -91,28 +91,28 @@ ${WORKER19_PROG}: Worker19Digits.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
-${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin qlib.o
+${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin 
 	@echo -n Building 13 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o 
 	@echo done.
 
-${QUODIGIOUS12}: q12.o cache.bin cache2.bin qlib.o
+${QUODIGIOUS12}: q12.o cache.bin cache2.bin 
 	@echo -n Building 12 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o 
 	@echo done.
 
-${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin qlib.o
+${QUODIGIOUS14}: quodigious14.o cache.bin cache4.bin 
 	@echo -n Building 14 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o 
 	@echo done.
-${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin qlib.o
+${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin 
 	@echo -n Building 15 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o 
 	@echo done.
 
-${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin qlib.o
+${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin 
 	@echo -n Building 16 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o qlib.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o 
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
@@ -192,5 +192,4 @@ q12.o: qlib.h
 quodigious13.o: qlib.h
 quodigious14.o: qlib.h
 quodigious15.o: qlib.h
-qlib.o: qlib.cc qlib.h
 .PHONY: tests longer_tests
