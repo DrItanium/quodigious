@@ -261,4 +261,18 @@ decltype(auto) makeSuperWorker(container* primary, container* secondary, decltyp
 			return output.str();
 	});
 }
+
+template<u64 digitWidth, u64 primaryDimensions, u64 secondaryDimensions, u64 threadCount>
+std::string nonSuperComputation(container* cache0, container* cache1) {
+	std::ostringstream stream;
+	auto p0 = makeWorker<2, 2, (2 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 2
+	auto p1 = makeWorker<3, 3, (3 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 3
+	auto p2 = makeWorker<4, 4, (4 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 4
+	auto p3 = makeWorker<6, 6, (6 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 6
+	auto p4 = makeWorker<7, 7, (7 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 7
+	auto p5 = makeWorker<8, 8, (8 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 8
+	auto p6 = makeWorker<9, 9, (9 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 9
+	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+	return stream.str();
+}
 #endif // end QLIB_H__
