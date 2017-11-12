@@ -193,15 +193,12 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
 
-template<u64 width>
-constexpr auto primaryThreadCount = 7;
-
-template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize>
+template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
 std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount<width>;
-	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount<width>;
+	static constexpr auto difference = primaryDataCacheSize % threadCount;
+	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
 	auto fn = [sum, product, value, primaryDataCache, secondaryDataCache](auto start, auto end) noexcept {
     	std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
@@ -227,26 +224,26 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 		return stream.str();
 	};
 	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
-	Worker workers[primaryThreadCount<width>];
+	Worker workers[threadCount];
 	
-	for (auto a = 0; a < primaryThreadCount<width>; ++a) {
+	for (auto a = 0; a < threadCount; ++a) {
 		workers[a] = std::async(std::launch::async, fn, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	}
 	// compute the rest on teh primary thread
 	auto lastWorker = std::async(std::launch::async, fn, primaryDataCacheSize - difference, primaryDataCacheSize);
-	for (auto a = 0; a < primaryThreadCount<width>; ++a) {
+	for (auto a = 0; a < threadCount; ++a) {
 		stream << workers[a].get();
 	}
 	stream << lastWorker.get();
     return stream.str();
 }
 
-template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth>
+template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7>
 decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
     return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>>, sum, product, value, primary, secondary);
 }
 
-template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize>
+template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
 decltype(auto) makeSuperWorker(container* primary, container* secondary, decltype(std::launch::deferred) policy = std::launch::deferred) noexcept {
 	return std::async(policy, [primary, secondary]() {
 			static constexpr auto next = fastPow10<digitWidth - 1>;
