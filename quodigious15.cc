@@ -37,10 +37,14 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 container secondaryDataCache[secondaryDataCacheSize];
 constexpr auto threadCount = 21;
 
-int main() {
+int main(int argc, char* argv[]) {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
-	std::cout << nonSuperComputation<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
+	if (argc > 1) {
+		std::cout << oneSeventhSuperComputation<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(argv[1][0], primaryDataCache, secondaryDataCache);
+	} else {
+		std::cout << nonSuperComputation<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
+	}
     return 0;
 }

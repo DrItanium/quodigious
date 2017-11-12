@@ -68,7 +68,7 @@ constexpr u64 multiply(u64 product) noexcept {
 
 template<u32 times>
 constexpr u32 multiply(u32 product) noexcept {
-    return times * product;
+	return times * product;
 }
 
 template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
@@ -96,7 +96,7 @@ template<> constexpr u32 multiply<9>(u32 product) noexcept { return (product << 
 template<> constexpr u32 multiply<10>(u32 product) noexcept { return (product << 3) + (product << 1); }
 
 constexpr bool isEven(u64 value) noexcept {
-    return (value & 1) == 0;
+	return (value & 1) == 0;
 }
 
 template<u64 k>
@@ -104,9 +104,9 @@ struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
 
 template<typename T>
 inline void merge(T value , std::ostream& input) noexcept {
-    if (value != 0) {
-        input << value << std::endl;
-    }
+	if (value != 0) {
+		input << value << std::endl;
+	}
 }
 
 template<u64 width>
@@ -125,13 +125,13 @@ constexpr u64 makeDigitAt(u64 input) noexcept {
 
 template<u64 width, u64 divide>
 constexpr int getPartialSize() noexcept {
-    static_assert(divide > 0, "Can't have a divisor of 0");
-    return numElements<width> / divide;
+	static_assert(divide > 0, "Can't have a divisor of 0");
+	return numElements<width> / divide;
 }
 
 template<u64 width, u64 divisible>
 constexpr bool isDivisibleBy(u64 factor) noexcept {
-    return (factor * divisible) == numElements<width>;
+	return (factor * divisible) == numElements<width>;
 }
 
 constexpr u64 makeU64(char a, char b, char c, char d) noexcept {
@@ -150,10 +150,10 @@ constexpr bool checkValue(u64 sum) noexcept {
 	return (isEven(sum)) || (sum % 3 == 0);
 }
 constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
+	if (checkValue(sum) && isQuodigious(value, sum, product)) {
+		return value;
+	}
+	return 0;
 }
 
 template<u64 factor>
@@ -178,16 +178,16 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 		u64 value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]);
 		u64 sum = makeU64(tmpCache[4], tmpCache[5], tmpCache[6], tmpCache[7]);
 		u64 product = makeU64(tmpCache[8], tmpCache[9], tmpCache[10], tmpCache[11]);
-        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
+		// multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
 		collection[i] = std::make_tuple(value * fastPow10<factor>, sum, product);
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
-        return false;
+		return false;
 	}
 
 	cachedCopy.close();
-    return true;
+	return true;
 }
 
 template<u64 count>
@@ -195,12 +195,12 @@ constexpr auto dataCacheSize = numElements<count>;
 
 template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
 std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
-    std::ostringstream stream;
-    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+	std::ostringstream stream;
+	// the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto difference = primaryDataCacheSize % threadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
 	auto fn = [sum, product, value, primaryDataCache, secondaryDataCache](auto start, auto end) noexcept {
-    	std::ostringstream stream;
+		std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
 			u64 ov, os, op;
@@ -225,7 +225,7 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 	};
 	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
 	Worker workers[threadCount];
-	
+
 	for (auto a = 0; a < threadCount; ++a) {
 		workers[a] = std::async(std::launch::async, fn, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	}
@@ -235,12 +235,12 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 		stream << workers[a].get();
 	}
 	stream << lastWorker.get();
-    return stream.str();
+	return stream.str();
 }
 
 template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7>
 decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
-    return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount>, sum, product, value, primary, secondary);
+	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount>, sum, product, value, primary, secondary);
 }
 
 template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
@@ -259,7 +259,7 @@ decltype(auto) makeSuperWorker(container* primary, container* secondary, decltyp
 			auto p6 = makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
 			output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 			return output.str();
-	});
+			});
 }
 
 template<u64 digitWidth, u64 primaryDimensions, u64 secondaryDimensions, u64 threadCount>
@@ -273,6 +273,23 @@ std::string nonSuperComputation(container* cache0, container* cache1) {
 	auto p5 = makeWorker<8, 8, (8 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 8
 	auto p6 = makeWorker<9, 9, (9 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 9
 	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-	return stream.str();
+	auto s = stream.str();
+	return s;
+}
+template<u64 digitCount, u64 dim0, u64 dim1, u64 threadCount>
+std::string oneSeventhSuperComputation(char symbol, container* cache0, container* cache1) {
+	std::ostringstream stream;
+	switch (symbol) {
+		case '2': stream << makeSuperWorker<2, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '3': stream << makeSuperWorker<3, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '4': stream << makeSuperWorker<4, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '6': stream << makeSuperWorker<6, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '7': stream << makeSuperWorker<7, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '8': stream << makeSuperWorker<8, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '9': stream << makeSuperWorker<9, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		default: break;
+	}
+	auto s = stream.str();
+	return s;
 }
 #endif // end QLIB_H__
