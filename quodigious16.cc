@@ -40,14 +40,13 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-template<u64 sum, u64 product, u64 value>
-std::string innerMostBody() noexcept {
+std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto primaryThreadCount = 14;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
-	auto fn = [](auto start, auto end) noexcept {
+	auto fn = [sum, product, value](auto start, auto end) noexcept {
     	std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
@@ -88,7 +87,7 @@ std::string innerMostBody() noexcept {
 
 template<u64 sum, u64 product, u64 value>
 decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, innerMostBody<sum, product, value>);
+    return std::async(std::launch::async, innerMostBody, sum, product, value);
 }
 
 template<u64 outer>

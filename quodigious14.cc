@@ -27,11 +27,6 @@
 #include <map>
 #include "qlib.h"
 
-using container = std::tuple<u64, u64, u64>;
-
-template<u64 count>
-constexpr auto dataCacheSize = numElements<count>;
-
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;

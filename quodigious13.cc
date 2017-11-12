@@ -27,10 +27,6 @@
 #include <map>
 #include "qlib.h"
 
-using container = std::tuple<u64, u64, u64>;
-
-template<u64 count>
-constexpr auto dataCacheSize = numElements<count>;
 
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
@@ -41,14 +37,13 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-template<u64 sum, u64 product, u64 value>
-std::string innerMostBody() noexcept {
+std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto primaryThreadCount = 7;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
-	auto fn = [](auto start, auto end) noexcept {
+	auto fn = [sum, product, value](auto start, auto end) noexcept {
     	std::ostringstream stream;
 		for (auto i = start; i < end; ++i) {
 			auto outer = primaryDataCache[i];
@@ -88,13 +83,13 @@ std::string innerMostBody() noexcept {
 
 template<u64 sum, u64 product, u64 value>
 decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, innerMostBody<sum, product, value>);
+    return std::async(std::launch::async, innerMostBody, sum, product, value);
 }
-template<u64 outer>
+template<u64 outer, u64 digitWidth = 13>
 decltype(auto) makeSuperWorker() noexcept {
 	return std::async(std::launch::deferred, []() {
-			static constexpr auto next = fastPow10<13 - 1>;
-			static constexpr auto nextNext = fastPow10<13 - 2>;
+			static constexpr auto next = fastPow10<digitWidth - 1>;
+			static constexpr auto nextNext = fastPow10<digitWidth - 2>;
 			static constexpr auto outerMost = outer * next;
 			std::ostringstream output;
 			auto p0 = makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2)>();

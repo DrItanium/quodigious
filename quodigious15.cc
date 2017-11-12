@@ -27,11 +27,6 @@
 #include <map>
 #include "qlib.h"
 
-using container = std::tuple<u64, u64, u64>;
-
-template<u64 count>
-constexpr auto dataCacheSize = numElements<count>;
-
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
@@ -41,10 +36,10 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
+template<u64 primaryThreadCount = 21>
 std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto primaryThreadCount = 21;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
 	auto fn = [sum, product, value](auto start, auto end) noexcept {

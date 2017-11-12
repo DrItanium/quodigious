@@ -146,8 +146,8 @@ inline std::string loopBodyString(u64 sum, u64 product, u64 index) noexcept {
 }
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
-constexpr auto dataCacheSize = numElements<dimensionCount>;
-container dataCache[dataCacheSize];
+constexpr auto primaryDataCacheSize = numElements<dimensionCount>;
+container primaryDataCache[primaryDataCacheSize];
 template<u64 length>
 inline void body(std::ostream& storage) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits at this time!");
@@ -160,7 +160,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	auto fn = [sum, product, value](auto start, auto end) {
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
-			auto result = dataCache[i];
+			auto result = primaryDataCache[i];
             auto v = std::get<0>(result) + value;
             auto s = std::get<1>(result) + sum;
             auto p = std::get<2>(result) * product;
@@ -173,7 +173,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	};
 	using AsyncWorker = decltype(std::async(std::launch::async, fn, 0, 1));
     constexpr auto numParts = 7;
-    constexpr auto onePart = dataCacheSize / numParts;
+    constexpr auto onePart = primaryDataCacheSize / numParts;
 	AsyncWorker pool[numParts];
 	for (int i = 0; i < numParts; ++i) {
 		pool[i] = std::async(std::launch::async, fn, onePart * i, onePart * (i + 1));
@@ -182,7 +182,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 		stream << pool[i].get();
 	}
 #else
-    for (const auto& result : dataCache) {
+    for (const auto& result : primaryDataCache) {
         auto v = std::get<0>(result);
         auto s = std::get<1>(result);
         auto p = std::get<2>(result);
@@ -195,7 +195,7 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 }
 
 int main() {
-	if (!loadDataCache<1>("cache.bin", dataCache, dataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize)) {
 		return 1;
 	}
     std::ostringstream storage;

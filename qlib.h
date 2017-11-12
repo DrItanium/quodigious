@@ -189,4 +189,7 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 	cachedCopy.close();
     return true;
 }
+
+template<u64 count>
+constexpr auto dataCacheSize = numElements<count>;
 #endif // end QLIB_H__
