@@ -39,13 +39,13 @@ int main() {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache2.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
-    auto p0 = makeWorker<2, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 2
-    auto p1 = makeWorker<3, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 3
-    auto p2 = makeWorker<4, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 4
-    auto p3 = makeWorker<6, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 6
-    auto p4 = makeWorker<7, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 7
-    auto p5 = makeWorker<8, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 8
-    auto p6 = makeWorker<9, 2, 2, 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 9
+    auto p0 = makeWorker<2, 2, (2 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 2
+    auto p1 = makeWorker<3, 3, (3 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 3
+    auto p2 = makeWorker<4, 4, (4 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 4
+    auto p3 = makeWorker<6, 6, (6 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 6
+    auto p4 = makeWorker<7, 7, (7 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 7
+    auto p5 = makeWorker<8, 8, (8 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 8
+    auto p6 = makeWorker<9, 9, (9 * fastPow10<11>), 12, dimensionCount, secondaryDimensionCount>(primaryDataCache, secondaryDataCache); // 9
     std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
     return 0;
 }
