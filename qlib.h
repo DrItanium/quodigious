@@ -225,7 +225,36 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 	for (auto i = start; i < end; i+= 3) {
 		// not every range is going to be evenly divisible by three so instead
 		// do some logic walking through to figure out how many outer numbers
-		// can be safely interleaved into an inner loop.
+		// can be safely interleaved into an inner loop. So if we had an outer
+		// number count of 8 digits with inner loop of 2 digits or so then we
+		// encounter roughly 7^8 numbers in the outer and 49 inner numbers so
+		// this is the equivalent of doing 49 operations per outer number in
+		// the old model. This primarly relates to accessing the inner object
+		// more than anything else. Thus for every three outer numbers we do
+		// only  49 memory accesses instead of 147! However, that is assuming
+		// that the entire contents of the structure will fit inside a register
+		// (which it will not a 64-bit machine). Instead we have to use either
+		// two registers or do memory access offsets. Assuming the later, we
+		// actually save even more. For each value if we assume that each
+		// memory access is separate we actually have:
+		//   1 (initial memory access) from the array
+		//   3 (to access each element in the structure separately)
+		// this yields 4 memory accesses, if we assume that the compiler
+		// optmizes loading the sum and product into a single load then we
+		// have:
+		//
+		//   1 (initial memory access) from the array
+		//   2 (one to access the value, the other to load sum and product)
+		// this yields 3 memory accesses per inner loop cycle. 
+		//
+		// With 4 accesses per loop cycle we get 196 memory accesses total
+		// With 3 accesses per loop cycle we get 147 memory accesses total
+		//
+		// With the interleaved version below we will save in the general case 
+		// 588 to 441 memory accesses per complete loop cycle (depending on 
+		// optimization) with the special cases being a reduced number.
+		// However, in all cases we do reduce the amount of data being loaded
+		// from main memory and (hopefully) keep more data in the cache :D
 		auto outer0 = primary[i];
 		u64 ov0 = outer0.value + value;
 		u64 os0 = outer0.sum + sum;
