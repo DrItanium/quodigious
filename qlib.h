@@ -223,6 +223,9 @@ template<u64 secondarySize>
 std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
 	std::ostringstream stream;
 	for (auto i = start; i < end; i+= 3) {
+		// not every range is going to be evenly divisible by three so instead
+		// do some logic walking through to figure out how many outer numbers
+		// can be safely interleaved into an inner loop.
 		auto outer0 = primary[i];
 		u64 ov0 = outer0.value + value;
 		u64 os0 = outer0.sum + sum;
