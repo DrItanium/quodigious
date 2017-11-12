@@ -41,15 +41,6 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
-}
 
 std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     std::ostringstream stream;
@@ -95,93 +86,12 @@ std::string innerMostBody(u64 sum, u64 product, u64 value) noexcept {
     return stream.str();
 }
 
-bool loadPrimaryDataCache() noexcept {
-	std::ifstream cachedCopy("cache.bin", std::ifstream::in | std::ifstream::binary);
-	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache.bin" << std::endl;
-        return false;
-	}
-	// TODO: update the binary generator to eliminate the last digit from the
-	// computation, then we can do four numbers at a time in the inner most
-	// loop of this code which should make up the computation difference we've
-	// seen so far!
-	//
-	// We can also reintroduce nested threading, the difference is that we can
-	// just eliminate the values needed
-	char tmpCache[sizeof(u32) * 3] = { 0 };
-	for (int i = 0; i < primaryDataCacheSize || cachedCopy.good(); ++i) {
-		// layout is value, sum, product
-		cachedCopy.read(tmpCache, sizeof(u32) * 3);
-		u64 value = (uint8_t)tmpCache[0];
-		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
-		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
-		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
-		u64 sum = (uint8_t)tmpCache[4];
-		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
-		u64 product = (uint8_t)tmpCache[8];
-		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
-		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
-		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
-        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		primaryDataCache[i] = std::make_tuple(value * 10, sum, product);
-	}
-	if (!cachedCopy.eof()) {
-		std::cerr << "data cache is too small!" << std::endl;
-        return false;
-	}
-
-	cachedCopy.close();
-    return true;
-}
-
-bool loadSecondaryDataCache() noexcept {
-	std::ifstream cachedCopy("cache4.bin", std::ifstream::in | std::ifstream::binary);
-	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache4.bin" << std::endl;
-        return false;
-	}
-	// TODO: update the binary generator to eliminate the last digit from the
-	// computation, then we can do four numbers at a time in the inner most
-	// loop of this code which should make up the computation difference we've
-	// seen so far!
-	//
-	// We can also reintroduce nested threading, the difference is that we can
-	// just eliminate the values needed
-	char tmpCache[sizeof(u32) * 3] = { 0 };
-	for (int i = 0; i < secondaryDataCacheSize || cachedCopy.good(); ++i) {
-		// layout is value, sum, product
-		cachedCopy.read(tmpCache, sizeof(u32) * 3);
-		u64 value = (uint8_t)tmpCache[0];
-		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
-		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
-		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
-		u64 sum = (uint8_t)tmpCache[4];
-		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
-		u64 product = (uint8_t)tmpCache[8];
-		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
-		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
-		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
-        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		secondaryDataCache[i] = std::make_tuple(value * fastPow10<9>, sum, product);
-	}
-	if (!cachedCopy.eof()) {
-		std::cerr << "data cache is too small!" << std::endl;
-        return false;
-	}
-
-	cachedCopy.close();
-    return true;
-}
 template<u64 pos, u64 index>
 decltype(auto) makeWorker() noexcept {
     return std::async(std::launch::async, innerMostBody, pos, pos, index);
 }
 int main() {
-    if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
+	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
     static constexpr auto next = fastPow10<14 - 1>;

@@ -40,15 +40,6 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
-}
 template<u64 sum, u64 product, u64 value, u64 primaryThreadCount = 14>
 std::string innerMostBody() noexcept {
     std::ostringstream stream;

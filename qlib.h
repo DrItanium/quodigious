@@ -139,4 +139,14 @@ constexpr u64 makeU64(char a, char b, char c, char d) noexcept {
 
 using container = std::tuple<u64, u64, u64>;
 bool loadDataCache(const std::string& fileName, container* collection, size_t size);
+
+constexpr bool checkValue(u64 sum) noexcept {
+	return (isEven(sum)) || (sum % 3 == 0);
+}
+constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
+    if (checkValue(sum) && isQuodigious(value, sum, product)) {
+        return value;
+    }
+    return 0;
+}
 #endif // end QLIB_H__

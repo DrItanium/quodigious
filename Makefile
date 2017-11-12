@@ -67,9 +67,9 @@ ${QLOOPS_PROG32}: loops32.o
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
 	@echo done.
 
-${QLOOPS_PROG}: inverted-loops.o cache.bin
+${QLOOPS_PROG}: inverted-loops.o qlib.o cache.bin
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o qlib.o
 	@echo done.
 
 

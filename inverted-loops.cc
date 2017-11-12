@@ -27,18 +27,7 @@
 #include <map>
 #include "qlib.h"
 
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
-}
 void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexcept;
-
-using container = std::tuple<u64, u64, u64>;
 
 template<u64 pos, u64 max>
 inline void loopBody(std::ostream& storage, u64 sum, u64 product, u64 index) noexcept;
@@ -206,44 +195,9 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 }
 
 int main() {
-	std::ifstream cachedCopy("cache.bin", std::ifstream::in | std::ifstream::binary);
-	if (!cachedCopy.good()) {
-		std::cerr << "ERROR Couldn't open cache.bin data cache! Make sure it exists and is named cache.bin" << std::endl;
+	if (!loadDataCache("cache.bin", dataCache, dataCacheSize)) {
 		return 1;
 	}
-	// TODO: update the binary generator to eliminate the last digit from the
-	// computation, then we can do four numbers at a time in the inner most
-	// loop of this code which should make up the computation difference we've
-	// seen so far!
-	//
-	// We can also reintroduce nested threading, the difference is that we can
-	// just eliminate the values needed
-	char tmpCache[sizeof(u32) * 3] = { 0 };
-	for (int i = 0; i < dataCacheSize || cachedCopy.good(); ++i) {
-		// layout is value, sum, product
-		cachedCopy.read(tmpCache, sizeof(u32) * 3);
-		u64 value = (uint8_t)tmpCache[0];
-		value |= (static_cast<u64>((uint8_t)tmpCache[1]) << 8);
-		value |= (static_cast<u64>((uint8_t)tmpCache[2]) << 16);
-		value |= (static_cast<u64>((uint8_t)tmpCache[3]) << 24);
-		u64 sum = (uint8_t)tmpCache[4];
-		sum |= (static_cast<u64>((uint8_t)tmpCache[5]) << 8);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[6]) << 16);
-		sum |= (static_cast<u64>((uint8_t)tmpCache[7]) << 24);
-		u64 product = (uint8_t)tmpCache[8];
-		product |= (static_cast<u64>((uint8_t)tmpCache[9]) << 8);
-		product |= (static_cast<u64>((uint8_t)tmpCache[10]) << 16);
-		product |= (static_cast<u64>((uint8_t)tmpCache[11]) << 24);
-        // multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		dataCache[i] = std::make_tuple(value * 10, sum, product);
-	}
-	if (!cachedCopy.eof()) {
-		std::cerr << "data cache is too small!" << std::endl;
-		return 1;
-	}
-
-	cachedCopy.close();
-
     std::ostringstream storage;
     while(std::cin.good()) {
         u64 currentIndex = 0;

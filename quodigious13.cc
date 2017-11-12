@@ -41,19 +41,11 @@ constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 
 container secondaryDataCache[secondaryDataCacheSize];
 
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-    if (checkValue(sum) && isQuodigious(value, sum, product)) {
-        return value;
-    }
-    return 0;
-}
-template<u64 sum, u64 product, u64 value, u64 primaryThreadCount = 7>
+template<u64 sum, u64 product, u64 value>
 std::string innerMostBody() noexcept {
     std::ostringstream stream;
     // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+	static constexpr auto primaryThreadCount = 7;
 	static constexpr auto difference = primaryDataCacheSize % primaryThreadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / primaryThreadCount;
 	auto fn = [](auto start, auto end) noexcept {
@@ -94,13 +86,6 @@ std::string innerMostBody() noexcept {
     return stream.str();
 }
 
-bool loadPrimaryDataCache() noexcept {
-	return loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize);
-}
-
-bool loadSecondaryDataCache() noexcept {
-	return loadDataCache("cache2.bin", secondaryDataCache, secondaryDataCacheSize);
-}
 template<u64 sum, u64 product, u64 value>
 decltype(auto) makeWorker() noexcept {
     return std::async(std::launch::async, innerMostBody<sum, product, value>);
@@ -124,7 +109,7 @@ decltype(auto) makeSuperWorker() noexcept {
 	});
 }
 int main() {
-    if (!loadPrimaryDataCache() || !loadSecondaryDataCache()) {
+	if (!loadDataCache("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache("cache2.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
 	auto p0 = makeSuperWorker<2>();
