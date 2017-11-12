@@ -211,12 +211,19 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
 template<u64 index>
-void performFinalCompute(u64 value, u64 sum, u64 product, std::ostream& stream) noexcept {
+inline void performFinalCompute(u64 value, u64 sum, u64 product, std::ostream& stream) noexcept {
 	merge(inspectValue(value + index, sum + index, product * index), stream);
 }
 template<u64 index>
-void performFinalCompute(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
+inline void performFinalCompute(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
 	performFinalCompute<index>(inner.value + value, inner.sum + sum, inner.product * product, stream);
+}
+
+inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
+	performFinalCompute<2>(sum, product, value, inner, stream);
+	performFinalCompute<4>(sum, product, value, inner, stream);
+	performFinalCompute<6>(sum, product, value, inner, stream);
+	performFinalCompute<8>(sum, product, value, inner, stream);
 }
 
 template<u64 secondarySize>
@@ -269,10 +276,7 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 		if ((i + 1) >= end) {
 			for (auto j = 0; j < secondarySize ; ++j)  {
 				auto inner = secondary[j];
-				performFinalCompute<2>(os0, op0, ov0, inner, stream);
-				performFinalCompute<4>(os0, op0, ov0, inner, stream);
-				performFinalCompute<6>(os0, op0, ov0, inner, stream);
-				performFinalCompute<8>(os0, op0, ov0, inner, stream);
+				finalCompute4(os0, op0, ov0, inner, stream);
 			}
 		} else {
 			auto outer1 = primary[i + 1];
@@ -282,14 +286,8 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 			if ((i + 2) >= end) {
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					performFinalCompute<2>(os0, op0, ov0, inner, stream);
-					performFinalCompute<4>(os0, op0, ov0, inner, stream);
-					performFinalCompute<6>(os0, op0, ov0, inner, stream);
-					performFinalCompute<8>(os0, op0, ov0, inner, stream);
-					performFinalCompute<2>(os1, op1, ov1, inner, stream);
-					performFinalCompute<4>(os1, op1, ov1, inner, stream);
-					performFinalCompute<6>(os1, op1, ov1, inner, stream);
-					performFinalCompute<8>(os1, op1, ov1, inner, stream);
+					finalCompute4(os0, op0, ov0, inner, stream);
+					finalCompute4(os1, op1, ov1, inner, stream);
 				}
 			} else {
 				auto outer2 = primary[i + 2];
@@ -298,18 +296,9 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 				u64 op2 = outer2.product * product;
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					performFinalCompute<2>(os0, op0, ov0, inner, stream);
-					performFinalCompute<4>(os0, op0, ov0, inner, stream);
-					performFinalCompute<6>(os0, op0, ov0, inner, stream);
-					performFinalCompute<8>(os0, op0, ov0, inner, stream);
-					performFinalCompute<2>(os1, op1, ov1, inner, stream);
-					performFinalCompute<4>(os1, op1, ov1, inner, stream);
-					performFinalCompute<6>(os1, op1, ov1, inner, stream);
-					performFinalCompute<8>(os1, op1, ov1, inner, stream);
-					performFinalCompute<2>(os2, op2, ov2, inner, stream);
-					performFinalCompute<4>(os2, op2, ov2, inner, stream);
-					performFinalCompute<6>(os2, op2, ov2, inner, stream);
-					performFinalCompute<8>(os2, op2, ov2, inner, stream);
+					finalCompute4(os0, op0, ov0, inner, stream);
+					finalCompute4(os1, op1, ov1, inner, stream);
+					finalCompute4(os2, op2, ov2, inner, stream);
 				}
 			}
 		}
@@ -330,11 +319,13 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	}
 	// compute the rest on teh primary thread
-	auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+	if (difference > 0) {
+		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+		stream << lastWorker.get();
+	}
 	for (auto a = 0; a < threadCount; ++a) {
 		stream << workers[a].get();
 	}
-	stream << lastWorker.get();
 	return stream.str();
 }
 
