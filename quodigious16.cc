@@ -46,16 +46,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 	if (argc > 1) {
-		switch (argv[1][0]) {
-			case '2': std::cout << makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '3': std::cout << makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '4': std::cout << makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '6': std::cout << makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '7': std::cout << makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '8': std::cout << makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '9': std::cout << makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			default: break;
-		}
+		std::cout << oneSeventhSuperComputation<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(argv[1][0], primaryDataCache, secondaryDataCache);
 	} else {
 		auto p0 = makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
 		auto p1 = makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
