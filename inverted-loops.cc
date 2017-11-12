@@ -161,9 +161,9 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 		std::ostringstream str;
 		for (auto i = start; i < end; ++i) {
 			auto result = primaryDataCache[i];
-            auto v = std::get<0>(result) + value;
-            auto s = std::get<1>(result) + sum;
-            auto p = std::get<2>(result) * product;
+			auto v = result.value + value;
+			auto s = result.sum + sum;
+			auto p = result.product * product;
             merge(inspectValue(v + 2, s + 2, p * 2), str);
             merge(inspectValue(v + 4, s + 4, p * 4), str);
             merge(inspectValue(v + 6, s + 6, p * 6), str);
@@ -183,9 +183,9 @@ void innerMostBody(std::ostream& stream, u64 sum, u64 product, u64 value) noexce
 	}
 #else
     for (const auto& result : primaryDataCache) {
-        auto v = std::get<0>(result);
-        auto s = std::get<1>(result);
-        auto p = std::get<2>(result);
+		auto v = result.value;
+		auto s = result.sum;
+		auto p = result.product;
         merge(inspectValue(v + value + 2, s + sum + 2, p * product * 2), stream);
         merge(inspectValue(v + value + 4, s + sum + 4, p * product * 4), stream);
         merge(inspectValue(v + value + 6, s + sum + 6, p * product * 6), stream);

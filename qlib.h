@@ -142,9 +142,23 @@ constexpr u64 makeU64(char a, char b, char c, char d) noexcept {
 	return value;
 }
 
+constexpr u32 makeU32(char a, char b, char c, char d) noexcept {
+	u32 value = static_cast<uint8_t>(a);
+	value |= static_cast<u32>(static_cast<uint8_t>(b) << 8);
+	value |= static_cast<u32>(static_cast<uint8_t>(c) << 16);
+	value |= static_cast<u32>(static_cast<uint8_t>(d) << 24);
+	return value;
+}
 
-using container = std::tuple<u64, u64, u64>;
-bool loadDataCache(const std::string& fileName, container* collection, size_t size);
+
+struct container {
+	// these containers are meant to be fixed based on the data at hand from
+	// cache import, at most we are going to do 10 digit precomputed (that is a
+	// lot of storage!), only the value has to be 64-bits wide
+	u64 value;
+	u32 product;
+	uint8_t sum;
+};
 
 constexpr bool checkValue(u64 sum) noexcept {
 	return (isEven(sum)) || (sum % 3 == 0);
@@ -170,16 +184,20 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 	//
 	// We can also reintroduce nested threading, the difference is that we can
 	// just eliminate the values needed
-	constexpr auto readSize = sizeof(u32) * 3;
+	constexpr auto readSize = (sizeof(u32) * 2) + sizeof(uint8_t);
 	char tmpCache[readSize] = { 0 };
 	for (int i = 0; i < size || cachedCopy.good(); ++i) {
 		// layout is value, sum, product
 		cachedCopy.read(tmpCache, readSize);
-		u64 value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]);
-		u64 sum = makeU64(tmpCache[4], tmpCache[5], tmpCache[6], tmpCache[7]);
-		u64 product = makeU64(tmpCache[8], tmpCache[9], tmpCache[10], tmpCache[11]);
-		// multiply the value by 10 so we get an extra digit out of it, our dimensions become 9 in the process though!
-		collection[i] = std::make_tuple(value * fastPow10<factor>, sum, product);
+		container temp;
+		temp.value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]) * fastPow10<factor>;
+		temp.product = makeU32(tmpCache[4], tmpCache[5], tmpCache[6], tmpCache[7]);
+		temp.sum = uint8_t(tmpCache[8]);
+		if (temp.sum >= 255) {
+			std::cerr << "Found a sum greater than 255!" << std::endl;
+			return false;
+		}
+		collection[i] = temp;
 	}
 	if (!cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
@@ -192,6 +210,73 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
+template<u64 index>
+void performFinalCompute(u64 value, u64 sum, u64 product, std::ostream& stream) noexcept {
+	merge(inspectValue(value + index, sum + index, product * index), stream);
+}
+template<u64 index>
+void performFinalCompute(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
+	performFinalCompute<index>(inner.value + value, inner.sum + sum, inner.product * product, stream);
+}
+
+template<u64 secondarySize>
+std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
+	std::ostringstream stream;
+	for (auto i = start; i < end; i+= 3) {
+		auto outer0 = primary[i];
+		u64 ov0 = outer0.value + value;
+		u64 os0 = outer0.sum + sum;
+		u64 op0 = outer0.product * product;
+		if ((i + 1) >= end) {
+			for (auto j = 0; j < secondarySize ; ++j)  {
+				auto inner = secondary[j];
+				performFinalCompute<2>(os0, op0, ov0, inner, stream);
+				performFinalCompute<4>(os0, op0, ov0, inner, stream);
+				performFinalCompute<6>(os0, op0, ov0, inner, stream);
+				performFinalCompute<8>(os0, op0, ov0, inner, stream);
+			}
+		} else {
+			auto outer1 = primary[i + 1];
+			u64 ov1 = outer1.value + value;
+			u64 os1 = outer1.sum + sum;
+			u64 op1 = outer1.product * product;
+			if ((i + 2) >= end) {
+				for (auto j = 0; j < secondarySize ; ++j)  {
+					auto inner = secondary[j];
+					performFinalCompute<2>(os0, op0, ov0, inner, stream);
+					performFinalCompute<4>(os0, op0, ov0, inner, stream);
+					performFinalCompute<6>(os0, op0, ov0, inner, stream);
+					performFinalCompute<8>(os0, op0, ov0, inner, stream);
+					performFinalCompute<2>(os1, op1, ov1, inner, stream);
+					performFinalCompute<4>(os1, op1, ov1, inner, stream);
+					performFinalCompute<6>(os1, op1, ov1, inner, stream);
+					performFinalCompute<8>(os1, op1, ov1, inner, stream);
+				}
+			} else {
+				auto outer2 = primary[i + 2];
+				u64 ov2 = outer2.value + value;
+				u64 os2 = outer2.sum + sum;
+				u64 op2 = outer2.product * product;
+				for (auto j = 0; j < secondarySize ; ++j)  {
+					auto inner = secondary[j];
+					performFinalCompute<2>(os0, op0, ov0, inner, stream);
+					performFinalCompute<4>(os0, op0, ov0, inner, stream);
+					performFinalCompute<6>(os0, op0, ov0, inner, stream);
+					performFinalCompute<8>(os0, op0, ov0, inner, stream);
+					performFinalCompute<2>(os1, op1, ov1, inner, stream);
+					performFinalCompute<4>(os1, op1, ov1, inner, stream);
+					performFinalCompute<6>(os1, op1, ov1, inner, stream);
+					performFinalCompute<8>(os1, op1, ov1, inner, stream);
+					performFinalCompute<2>(os2, op2, ov2, inner, stream);
+					performFinalCompute<4>(os2, op2, ov2, inner, stream);
+					performFinalCompute<6>(os2, op2, ov2, inner, stream);
+					performFinalCompute<8>(os2, op2, ov2, inner, stream);
+				}
+			}
+		}
+	}
+	return stream.str();
+}
 
 template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
 std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
@@ -199,38 +284,14 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 	// the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto difference = primaryDataCacheSize % threadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
-	auto fn = [sum, product, value, primaryDataCache, secondaryDataCache](auto start, auto end) noexcept {
-		std::ostringstream stream;
-		for (auto i = start; i < end; ++i) {
-			auto outer = primaryDataCache[i];
-			u64 ov, os, op;
-			std::tie(ov, os, op) = outer;
-			ov += value;
-			os += sum;
-			op *= product;
-			for (auto j = 0; j < secondaryDataCacheSize; ++j)  {
-				auto inner = secondaryDataCache[j];
-				u64 iv, is, ip;
-				std::tie(iv, is, ip) = inner;
-				iv += ov;
-				is += os;
-				ip *= op;
-				merge(inspectValue(iv + 2, is + 2, ip << 1), stream);
-				merge(inspectValue(iv + 4, is + 4, ip << 2), stream);
-				merge(inspectValue(iv + 6, is + 6, ip * 6), stream);
-				merge(inspectValue(iv + 8, is + 8, ip << 3), stream);
-			}
-		}
-		return stream.str();
-	};
-	using Worker = decltype(std::async(std::launch::async, fn, 0, 1));
+	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, 0, 1, 0, nullptr, nullptr, 0, 1));
 	Worker workers[threadCount];
 
 	for (auto a = 0; a < threadCount; ++a) {
-		workers[a] = std::async(std::launch::async, fn, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	}
 	// compute the rest on teh primary thread
-	auto lastWorker = std::async(std::launch::async, fn, primaryDataCacheSize - difference, primaryDataCacheSize);
+	auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
 	for (auto a = 0; a < threadCount; ++a) {
 		stream << workers[a].get();
 	}

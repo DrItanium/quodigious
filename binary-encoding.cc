@@ -58,12 +58,12 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 	for (int i = 0; i < sizeof(u32); ++i) {
 		std::cout.put(tmp.bytes[i]);
 	}
-	tmp.value = sum;
+	tmp.value = product;
 	for (int i = 0; i < sizeof(u32); ++i) {
 		std::cout.put(tmp.bytes[i]);
 	}
-	tmp.value = product;
-	for (int i = 0; i < sizeof(u32); ++i) {
+	tmp.value = sum;
+	for (int i = 0; i < sizeof(uint8_t); ++i) {
 		std::cout.put(tmp.bytes[i]);
 	}
 }
