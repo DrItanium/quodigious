@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 			default: break;
 		}
 	} else {
-		std::cout << useSuperWorkers<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		useSuperWorkers<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
 	}
 	return 0;
 }

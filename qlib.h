@@ -385,8 +385,7 @@ std::string oneSeventhSuperComputation(char symbol, container* cache0, container
 }
 
 template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7>
-std::string useSuperWorkers(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
-	std::ostringstream output;
+inline void useSuperWorkers(std::ostream& stream, container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
 	auto p0 = makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
 	auto p1 = makeSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
 	auto p2 = makeSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
@@ -394,7 +393,6 @@ std::string useSuperWorkers(container* primary, container* secondary, decltype(s
 	auto p4 = makeSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
 	auto p5 = makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
 	auto p6 = makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-	return output.str();
+	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 }
 #endif // end QLIB_H__
