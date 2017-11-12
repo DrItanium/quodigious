@@ -27,31 +27,40 @@
 #include <map>
 #include "qlib.h"
 
+constexpr auto digitCount = 14;
+constexpr auto threadCount = 14;
 constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
 container primaryDataCache[primaryDataCacheSize];
-constexpr auto secondaryDimensionCount = 4;
+constexpr auto secondaryDimensionCount = 3;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 container secondaryDataCache[secondaryDataCacheSize];
 
-template<u64 pos, u64 index>
-decltype(auto) makeWorker() noexcept {
-    return std::async(std::launch::async, typicalInnerMostBody<14, primaryDataCacheSize, secondaryDataCacheSize, 14>, pos, pos, index, primaryDataCache, secondaryDataCache);
-}
-int main() {
-	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
-        return 1;
-    }
-    static constexpr auto next = fastPow10<14 - 1>;
-    static constexpr auto doubleNext = next << 1;
-    auto p0 = makeWorker<2, doubleNext>(); // 2
-    auto p1 = makeWorker<3, doubleNext + next>(); // 3
-    auto p2 = makeWorker<4, (2 * doubleNext)>(); // 4
-    auto p3 = makeWorker<6, (3 * doubleNext)>(); // 6
-    auto p4 = makeWorker<7, (3 * doubleNext) + next>(); // 7
-    auto p5 = makeWorker<8, (4 * doubleNext)>(); // 8
-    auto p6 = makeWorker<9, (4 * doubleNext) + next>(); // 9
-    std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-    return 0;
+int main(int argc, char* argv[]) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<8>) || !loadDataCache<9>("cache3.bin", secondaryDataCache, dataCacheSize<2>)) {
+		return 1;
+	}
+	if (argc > 1) {
+		switch (argv[1][0]) {
+			case '2': std::cout << makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '3': std::cout << makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '4': std::cout << makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '6': std::cout << makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '7': std::cout << makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '8': std::cout << makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '9': std::cout << makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			default: break;
+		}
+	} else {
+		auto p0 = makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p1 = makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p2 = makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p3 = makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p4 = makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p5 = makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		auto p6 = makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache, std::launch::deferred);
+		std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+	}
+	return 0;
 }
