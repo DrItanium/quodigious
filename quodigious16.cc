@@ -36,7 +36,7 @@ container primaryDataCache[primaryDataCacheSize];
 constexpr auto secondaryDimensionCount = 5;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 container secondaryDataCache[secondaryDataCacheSize];
-constexpr auto threadCount = 14;
+constexpr auto threadCount = 28;
 
 
 

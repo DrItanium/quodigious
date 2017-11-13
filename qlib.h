@@ -377,36 +377,6 @@ decltype(auto) makeSuperWorker(int subMask, container* primary, container* secon
 			});
 }
 
-template<u64 digitWidth, u64 primaryDimensions, u64 secondaryDimensions, u64 threadCount, byte mask = 0b1111>
-std::string nonSuperComputation(container* cache0, container* cache1) {
-	std::ostringstream stream;
-	auto p0 = makeWorker<2, 2, (2 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 2
-	auto p1 = makeWorker<3, 3, (3 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 3
-	auto p2 = makeWorker<4, 4, (4 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 4
-	auto p3 = makeWorker<6, 6, (6 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 6
-	auto p4 = makeWorker<7, 7, (7 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 7
-	auto p5 = makeWorker<8, 8, (8 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 8
-	auto p6 = makeWorker<9, 9, (9 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 9
-	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-	auto s = stream.str();
-	return s;
-}
-template<u64 digitCount, u64 dim0, u64 dim1, u64 threadCount, byte mask = 0b1111>
-std::string oneSeventhSuperComputation(char symbol, container* cache0, container* cache1) {
-	std::ostringstream stream;
-	switch (symbol) {
-		case '2': stream << makeSuperWorker<2, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '3': stream << makeSuperWorker<3, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '4': stream << makeSuperWorker<4, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '6': stream << makeSuperWorker<6, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '7': stream << makeSuperWorker<7, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '8': stream << makeSuperWorker<8, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		case '9': stream << makeSuperWorker<9, digitCount, dim0, dim1, threadCount, mask>(0x7f, cache0, cache1).get(); break;
-		default: break;
-	}
-	auto s = stream.str();
-	return s;
-}
 template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7, byte mask = 0b1111>
 inline void useSuperWorkers(std::ostream& stream, int primaryDigitsMask, int secondaryMask, container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
 	auto p0 = ((primaryDigitsMask & 0x1) != 0) ? 
