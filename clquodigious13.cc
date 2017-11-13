@@ -32,11 +32,11 @@
 
 
 constexpr auto threadCount = 7;
-constexpr auto dimensionCount = 4;
+constexpr auto dimensionCount = 6;
 constexpr auto secondaryDimensionCount = 2;
 constexpr auto digitCount = 13;
-container primaryDataCache[dataCacheSize<dimensionCount>];
-container secondaryDataCache[dataCacheSize<secondaryDimensionCount>];
+container primaryDataCache[dataCacheSize<6>];
+container secondaryDataCache[dataCacheSize<2>];
 
 constexpr auto maxSourceSize = 0x100000;
 
@@ -118,7 +118,7 @@ std::string getErrorString(cl_int error)
 }
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache<1>("cache4.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
+	if (!loadDataCache<1>("cache6.bin", primaryDataCache, dataCacheSize<6>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<2>)) {
 		return 1;
 	}
 	cl_uint platformIdCount = 0;
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
 
 	std::vector<cl_platform_id> platformIds (platformIdCount);
 	clGetPlatformIDs(platformIdCount, platformIds.data(), nullptr);
-	constexpr auto listSize = dataCacheSize<2> * 4 * 7 * 7 * 7 * 7 * 7 * 7;
+	constexpr auto listSize = dataCacheSize<2> * 4 * 7 * 7 * 7 * 7;
 	u64* sum = new u64[listSize];
 	u64* product = new u64[listSize];
 	u64* value = new u64[listSize];
@@ -222,28 +222,16 @@ int main(int argc, char* argv[]) {
 							continue;
 						}
 						auto zv = z * fastPow10<7> + hv;
-						for (int y = 2; y < 10; ++y) {
-							if (y == 5) {
-								continue;
-							}
-							auto yv = (y * fastPow10<6>) + zv;
-							for (int w = 2; w < 10; ++w) {
-								if (w == 5) {
-									continue;
-								}
-								auto wv = (w * fastPow10<5>) + yv;
-								for (auto const& inner : secondaryDataCache) {
-									auto nv = inner.value + wv;
-									for (int k = 2; k < 9; ++k) {
-										if ((k % 2) == 0) {
-											*s = i + j + outer.sum + inner.sum + k + h + z;
-											*p = i * j * outer.product * inner.product * k * h * z;
-											*v = nv + k;
-											++s;
-											++p;
-											++v;
-										}
-									}
+						for (auto const& inner : secondaryDataCache) {
+							auto nv = inner.value + zv;
+							for (int k = 2; k < 9; ++k) {
+								if ((k % 2) == 0) {
+									*s = i + j + outer.sum + inner.sum + k + h + z;
+									*p = i * j * outer.product * inner.product * k * h * z;
+									*v = nv + k;
+									++s;
+									++p;
+									++v;
 								}
 							}
 						}
