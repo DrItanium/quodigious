@@ -45,17 +45,6 @@ int main(int argc, char* argv[]) {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
-	if (argc > 1) {
-		std::cout << oneSeventhSuperComputation<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(argv[1][0], primaryDataCache, secondaryDataCache);
-	} else {
-		auto p0 = makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p1 = makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p2 = makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p3 = makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p4 = makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p5 = makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		auto p6 = makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
-		std::cout << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
-	}
+	doMaskedSuperWorker<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(readInputDescription(), std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
     return 0;
 }

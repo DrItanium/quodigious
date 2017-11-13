@@ -41,10 +41,6 @@ int main(int argc, char* argv[]) {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
-	auto type = 'f';
-	if (argc > 1) {
-		type = argv[1][0];
-	}
-	doMaskedSuperWorker<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(type, std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
+	doMaskedSuperWorker<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(readInputDescription(), std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
 	return 0;
 }
