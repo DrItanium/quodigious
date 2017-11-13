@@ -32,9 +32,9 @@
 
 
 constexpr auto threadCount = 7;
-constexpr auto dimensionCount = 8;
-constexpr auto secondaryDimensionCount = 5;
-constexpr auto digitCount = 15;
+constexpr auto dimensionCount = 4;
+constexpr auto secondaryDimensionCount = 2;
+constexpr auto digitCount = 14;
 container primaryDataCache[dataCacheSize<dimensionCount>];
 container secondaryDataCache[dataCacheSize<secondaryDimensionCount>];
 
@@ -118,7 +118,7 @@ std::string getErrorString(cl_int error)
 }
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<10>("cache5.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
+	if (!loadDataCache<1>("cache4.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
 		return 1;
 	}
 	cl_uint platformIdCount = 0;
@@ -126,8 +126,8 @@ int main(int argc, char* argv[]) {
 
 	std::vector<cl_platform_id> platformIds (platformIdCount);
 	clGetPlatformIDs(platformIdCount, platformIds.data(), nullptr);
-	constexpr auto listSize = dataCacheSize<secondaryDimensionCount> * 4;
-	uint8_t * sum = new uint8_t[listSize];
+	constexpr auto listSize = dataCacheSize<2> * 4 * 7 * 7 * 7 * 7 * 7 * 7 * 7;
+	u64* sum = new u64[listSize];
 	u64* product = new u64[listSize];
 	u64* value = new u64[listSize];
 	u64* result = new u64[listSize];
@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
 	// Create a command queue
 	cl_command_queue command_queue = clCreateCommandQueue(context, device_id, 0, &ret);
 	// Create memory buffers on the device for each vector 
-	cl_mem sum_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(uint8_t), nullptr, &ret);
+	cl_mem sum_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(u64), nullptr, &ret);
 	cl_mem product_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(u64), nullptr, &ret);
 	cl_mem value_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(u64), nullptr, &ret);
 	cl_mem result_mem_obj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, listSize * sizeof(u64), nullptr, &ret);
@@ -198,28 +198,69 @@ int main(int argc, char* argv[]) {
 	ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&product_mem_obj);
 	ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&value_mem_obj);
 	ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&result_mem_obj);
-	int count = 0;
-	for (const auto& outer : secondaryDataCache) {
+	for (const auto& outer : primaryDataCache) {
 		auto* s = sum;
 		auto* p = product;
 		auto* v = value;
-		for (auto const& inner : primaryDataCache) {
-			auto nv = inner.value + outer.value;
-			auto ns = inner.sum + outer.sum;
-			auto np = inner.product * outer.product;
-			for (int k = 2; k < 9; ++k) {
-				if ((k % 2) == 0) {
-					*s = ns + k;
-					*p = np * k;
-					*v = nv + k;
-					++s;
-					++p;
-					++v;
+		for (int i = 2; i < 10; ++i) {
+			if (i == 5) {
+				continue;
+			}
+			auto iv = i * fastPow10<12> + outer.value;
+			for (int j = 2; j < 10; ++j) {
+				if (j == 5) {
+					continue;
+				}
+				auto jv = j * fastPow10<11> + iv;
+				for (int h = 2; h < 10; ++h) {
+					if (h == 5) {
+						continue;
+					}
+					auto hv = h * fastPow10<8> + jv;
+					for (int z = 2; z < 10; ++z) {
+						if (z == 5) {
+							continue;
+						}
+						auto zv = z * fastPow10<7> + hv;
+						for (int y = 2; y < 10; ++y) {
+							if (y == 5) {
+								continue;
+							}
+							auto yv = (y * fastPow10<6>) + zv;
+							for (int w = 2; w < 10; ++w) {
+								if (w == 5) {
+									continue;
+								}
+								auto wv = (w * fastPow10<5>) + yv;
+								for (int a = 2; a < 10; ++a) {
+									if (a == 5) {
+										continue;
+									}
+									auto av = (a * fastPow10<13>) + wv;
+								for (auto const& inner : secondaryDataCache) {
+									auto nv = inner.value + av;
+									auto ns = inner.sum + outer.sum + i + j + h + z +y + w + a;
+									auto np = inner.product * outer.product * i * j * h * z * y * w * a;
+									for (int k = 2; k < 9; ++k) {
+										if ((k % 2) == 0) {
+											*s = ns + k;
+											*p = np * k;
+											*v = nv + k;
+											++s;
+											++p;
+											++v;
+										}
+									}
+								}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
 		// Copy the lists A and B to their respective memory buffers
-		ret = clEnqueueWriteBuffer(command_queue, sum_mem_obj, CL_TRUE, 0, listSize * sizeof(uint8_t), sum, 0, nullptr, nullptr);
+		ret = clEnqueueWriteBuffer(command_queue, sum_mem_obj, CL_TRUE, 0, listSize * sizeof(u64), sum, 0, nullptr, nullptr);
 		if (ret != CL_SUCCESS) {
 			std::cout << "ERROR OCCURRED: " << getErrorString(ret) << std::endl;
 			return 1;
@@ -253,12 +294,11 @@ int main(int argc, char* argv[]) {
 			std::cout << "ERROR OCCURRED during buffer read: " << getErrorString(ret) << std::endl;
 			return 1;
 		}
-		std::cerr << "Completed part " << count << " of " << dataCacheSize<secondaryDimensionCount> << std::endl;
+
 		// Display the result to the screen
 		for (int i = 0; i < listSize; ++i) {
 			merge(result[i], std::cout);
 		}
-		++count;
 	}
 	// Clean up
 	ret = clFlush(command_queue);
