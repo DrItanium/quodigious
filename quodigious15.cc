@@ -32,19 +32,19 @@ constexpr auto dimensionCount = 8;
 constexpr auto expectedDimensionCount = dimensionCount + 1;
 constexpr auto primaryDataCacheSize = dataCacheSize<dimensionCount>;
 container primaryDataCache[primaryDataCacheSize];
-constexpr auto secondaryDimensionCount = 5;
+constexpr auto secondaryDimensionCount = 4;
 constexpr auto secondaryDataCacheSize = dataCacheSize<secondaryDimensionCount>;
 container secondaryDataCache[secondaryDataCacheSize];
 constexpr auto threadCount = 21;
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache5.bin", secondaryDataCache, secondaryDataCacheSize)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, primaryDataCacheSize) || !loadDataCache<9>("cache4.bin", secondaryDataCache, secondaryDataCacheSize)) {
         return 1;
     }
+	auto type = 'f';
 	if (argc > 1) {
-		std::cout << oneSeventhSuperComputation<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(argv[1][0], primaryDataCache, secondaryDataCache);
-	} else {
-		std::cout << nonSuperComputation<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache);
+		type = argv[1][0];
 	}
-    return 0;
+	doMaskedSuperWorker<digitWidth, dimensionCount, secondaryDimensionCount, threadCount>(type, std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
+	return 0;
 }

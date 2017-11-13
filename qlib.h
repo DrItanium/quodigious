@@ -30,6 +30,7 @@
 using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;
+using LaunchPolicy = decltype(std::launch::async);
 
 template<u64 length>
 constexpr u64 quickPow10() noexcept {
@@ -221,17 +222,16 @@ inline void performFinalCompute(u64 sum, u64 product, u64 value, container& inne
 }
 template<byte mask = 0b1111>
 inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
-	constexpr auto fixedMask = 0x0f & mask;
-	if ((fixedMask & 0x1) != 0) {
+	if ((mask & 0x1) != 0) {
 		performFinalCompute<2>(sum, product, value, inner, stream);
 	}
-	if ((fixedMask & 0x2) != 0) {
+	if ((mask & 0x2) != 0) {
 		performFinalCompute<4>(sum, product, value, inner, stream);
 	}
-	if ((fixedMask & 0x4) != 0) {
+	if ((mask & 0x4) != 0) {
 		performFinalCompute<6>(sum, product, value, inner, stream);
 	}
-	if ((fixedMask & 0x8) != 0) {
+	if ((mask & 0x8) != 0) {
 		performFinalCompute<8>(sum, product, value, inner, stream);
 	}
 }
@@ -326,11 +326,11 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 	Worker workers[threadCount];
 
 	for (auto a = 0; a < threadCount; ++a) {
-		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	}
 	// compute the rest on teh primary thread
 	if (difference > 0) {
-		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
 		stream << lastWorker.get();
 	}
 	for (auto a = 0; a < threadCount; ++a) {
@@ -345,7 +345,7 @@ decltype(auto) makeWorker(container* primary, container* secondary, decltype(std
 }
 
 template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
-decltype(auto) makeSuperWorker(container* primary, container* secondary, decltype(std::launch::deferred) policy = std::launch::deferred) noexcept {
+decltype(auto) makeSuperWorker(container* primary, container* secondary, LaunchPolicy policy = std::launch::deferred) noexcept {
 	return std::async(policy, [primary, secondary]() {
 			static constexpr auto next = fastPow10<digitWidth - 1>;
 			static constexpr auto nextNext = fastPow10<digitWidth - 2>;
@@ -393,7 +393,6 @@ std::string oneSeventhSuperComputation(char symbol, container* cache0, container
 	auto s = stream.str();
 	return s;
 }
-
 template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7, byte mask = 0b1111>
 inline void useSuperWorkers(std::ostream& stream, container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
 	auto p0 = makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
@@ -404,5 +403,33 @@ inline void useSuperWorkers(std::ostream& stream, container* primary, container*
 	auto p5 = makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
 	auto p6 = makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
 	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+}
+template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7>
+inline void doMaskedSuperWorker(char input, std::ostream& stream, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
+	switch (input) {
+		case '0': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0000>(stream, primary, secondary, policy); break;
+		case '1': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0001>(stream, primary, secondary, policy); break;
+		case '2': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0010>(stream, primary, secondary, policy); break;
+		case '3': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0011>(stream, primary, secondary, policy); break;
+		case '4': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0100>(stream, primary, secondary, policy); break;
+		case '5': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0101>(stream, primary, secondary, policy); break;
+		case '6': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0110>(stream, primary, secondary, policy); break;
+		case '7': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0111>(stream, primary, secondary, policy); break;
+		case '8': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1000>(stream, primary, secondary, policy); break;
+		case '9': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1001>(stream, primary, secondary, policy); break;
+		case 'a':
+		case 'A': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1010>(stream, primary, secondary, policy); break;
+		case 'b':
+		case 'B': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1011>(stream, primary, secondary, policy); break;
+		case 'c':
+		case 'C': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1100>(stream, primary, secondary, policy); break;
+		case 'd':
+		case 'D': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1101>(stream, primary, secondary, policy); break;
+		case 'e':
+		case 'E': useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1110>(stream, primary, secondary, policy); break;
+		case 'f':
+		case 'F':
+		default:  useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b1111>(stream, primary, secondary, policy); break;
+	}
 }
 #endif // end QLIB_H__

@@ -105,7 +105,7 @@ ${QUODIGIOUS14}: quodigious14.o cache.bin cache3.bin cache4.bin
 	@echo -n Building 14 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o 
 	@echo done.
-${QUODIGIOUS15}: quodigious15.o cache.bin cache5.bin 
+${QUODIGIOUS15}: quodigious15.o cache.bin cache4.bin cache5.bin
 	@echo -n Building 15 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o 
 	@echo done.
