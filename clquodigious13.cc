@@ -34,7 +34,7 @@
 constexpr auto threadCount = 7;
 constexpr auto dimensionCount = 4;
 constexpr auto secondaryDimensionCount = 2;
-constexpr auto digitCount = 14;
+constexpr auto digitCount = 13;
 container primaryDataCache[dataCacheSize<dimensionCount>];
 container secondaryDataCache[dataCacheSize<secondaryDimensionCount>];
 
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
 
 	std::vector<cl_platform_id> platformIds (platformIdCount);
 	clGetPlatformIDs(platformIdCount, platformIds.data(), nullptr);
-	constexpr auto listSize = dataCacheSize<2> * 4 * 7 * 7 * 7 * 7 * 7 * 7 * 7;
+	constexpr auto listSize = dataCacheSize<2> * 4 * 7 * 7 * 7 * 7 * 7 * 7;
 	u64* sum = new u64[listSize];
 	u64* product = new u64[listSize];
 	u64* value = new u64[listSize];
@@ -232,26 +232,18 @@ int main(int argc, char* argv[]) {
 									continue;
 								}
 								auto wv = (w * fastPow10<5>) + yv;
-								for (int a = 2; a < 10; ++a) {
-									if (a == 5) {
-										continue;
-									}
-									auto av = (a * fastPow10<13>) + wv;
 								for (auto const& inner : secondaryDataCache) {
-									auto nv = inner.value + av;
-									auto ns = inner.sum + outer.sum + i + j + h + z +y + w + a;
-									auto np = inner.product * outer.product * i * j * h * z * y * w * a;
+									auto nv = inner.value + wv;
 									for (int k = 2; k < 9; ++k) {
 										if ((k % 2) == 0) {
-											*s = ns + k;
-											*p = np * k;
+											*s = i + j + outer.sum + inner.sum + k + h + z;
+											*p = i * j * outer.product * inner.product * k * h * z;
 											*v = nv + k;
 											++s;
 											++p;
 											++v;
 										}
 									}
-								}
 								}
 							}
 						}

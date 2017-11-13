@@ -27,7 +27,6 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
-CLQUODIGIOUS13 = clquodigious13
 QUODIGIOUS13 = quodigious13
 QUODIGIOUS12 = quodigious12
 QUODIGIOUS14 = quodigious14
@@ -39,7 +38,7 @@ WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
 BINARY_ENCODING_GENERATOR = bingen
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17} ${CLQUODIGIOUS13}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17}
 all: ${PROGS}
 
 help:
@@ -56,7 +55,6 @@ help:
 	@echo "  - ${QUODIGIOUS15}: a program that only computes 15 digits quodigious values"
 	@echo "  - ${QUODIGIOUS14}: a program that only computes 14 digits quodigious values"
 	@echo "  - ${QUODIGIOUS13}: a program that only computes 13 digits quodigious values"
-	@echo "  - ${CLQUODIGIOUS13}: a program that only computes 13 digits quodigious values (uses OpenCL)"
 	@echo "  - ${QUODIGIOUS12}: a program that only computes 12 digits quodigious values"
 	@echo "  - ${BINARY_ENCODING_GENERATOR}: a program that generates a binary encoding for the larger value computation"
 	@echo "  - tests: runs short regression tests"
@@ -98,11 +96,6 @@ ${WORKER19_PROG}: Worker19Digits.o
 ${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin 
 	@echo -n Building 13 digit quodigious program ...
 	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o 
-	@echo done.
-
-${CLQUODIGIOUS13}: clquodigious13.o cache4.bin cache2.bin 
-	@echo -n Building 13 OpenCL digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${CLQUODIGIOUS13} clquodigious13.o -lOpenCL
 	@echo done.
 
 ${QUODIGIOUS12}: q12.o cache.bin cache2.bin 
@@ -212,5 +205,4 @@ quodigious14.o: qlib.h
 quodigious15.o: qlib.h
 quodigious16.o: qlib.h
 quodigious17.o: qlib.h
-clquodigious13.o: qlib.h
 .PHONY: tests longer_tests
