@@ -35,19 +35,21 @@ constexpr auto digitCount = 13;
 container primaryDataCache[dataCacheSize<8>];
 container secondaryDataCache[dataCacheSize<2>];
 
+constexpr auto leastSignificantDigitMask = 0b0101;
+
 int main(int argc, char* argv[]) {
 	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<8>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<2>)) {
 		return 1;
 	}
 	if (argc > 1) {
 		switch (argv[1][0]) {
-			case '2': std::cout << makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '3': std::cout << makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '4': std::cout << makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '6': std::cout << makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '7': std::cout << makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '8': std::cout << makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
-			case '9': std::cout << makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount>(primaryDataCache, secondaryDataCache).get(); break;
+			case '2': std::cout << makeSuperWorker<2, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '3': std::cout << makeSuperWorker<3, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '4': std::cout << makeSuperWorker<4, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '6': std::cout << makeSuperWorker<6, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '7': std::cout << makeSuperWorker<7, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '8': std::cout << makeSuperWorker<8, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
+			case '9': std::cout << makeSuperWorker<9, digitCount, dimensionCount, secondaryDimensionCount, threadCount, leastSignificantDigitMask>(primaryDataCache, secondaryDataCache).get(); break;
 			default: break;
 		}
 	} else {

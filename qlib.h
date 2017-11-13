@@ -27,6 +27,7 @@
 #include <functional>
 #include <future>
 #include <map>
+using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;
 
@@ -218,15 +219,24 @@ template<u64 index>
 inline void performFinalCompute(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
 	performFinalCompute<index>(inner.value + value, inner.sum + sum, inner.product * product, stream);
 }
-
+template<byte mask = 0b1111>
 inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
-	performFinalCompute<2>(sum, product, value, inner, stream);
-	performFinalCompute<4>(sum, product, value, inner, stream);
-	performFinalCompute<6>(sum, product, value, inner, stream);
-	performFinalCompute<8>(sum, product, value, inner, stream);
+	constexpr auto fixedMask = 0x0f & mask;
+	if ((fixedMask & 0x1) != 0) {
+		performFinalCompute<2>(sum, product, value, inner, stream);
+	}
+	if ((fixedMask & 0x2) != 0) {
+		performFinalCompute<4>(sum, product, value, inner, stream);
+	}
+	if ((fixedMask & 0x4) != 0) {
+		performFinalCompute<6>(sum, product, value, inner, stream);
+	}
+	if ((fixedMask & 0x8) != 0) {
+		performFinalCompute<8>(sum, product, value, inner, stream);
+	}
 }
 
-template<u64 secondarySize>
+template<u64 secondarySize, byte mask = 0b1111>
 std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
 	std::ostringstream stream;
 	for (auto i = start; i < end; i+= 3) {
@@ -276,7 +286,7 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 		if ((i + 1) >= end) {
 			for (auto j = 0; j < secondarySize ; ++j)  {
 				auto inner = secondary[j];
-				finalCompute4(os0, op0, ov0, inner, stream);
+				finalCompute4<mask>(os0, op0, ov0, inner, stream);
 			}
 		} else {
 			auto outer1 = primary[i + 1];
@@ -286,8 +296,8 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 			if ((i + 2) >= end) {
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					finalCompute4(os0, op0, ov0, inner, stream);
-					finalCompute4(os1, op1, ov1, inner, stream);
+					finalCompute4<mask>(os0, op0, ov0, inner, stream);
+					finalCompute4<mask>(os1, op1, ov1, inner, stream);
 				}
 			} else {
 				auto outer2 = primary[i + 2];
@@ -296,9 +306,9 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 				u64 op2 = outer2.product * product;
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					finalCompute4(os0, op0, ov0, inner, stream);
-					finalCompute4(os1, op1, ov1, inner, stream);
-					finalCompute4(os2, op2, ov2, inner, stream);
+					finalCompute4<mask>(os0, op0, ov0, inner, stream);
+					finalCompute4<mask>(os1, op1, ov1, inner, stream);
+					finalCompute4<mask>(os2, op2, ov2, inner, stream);
 				}
 			}
 		}
@@ -306,13 +316,13 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 	return stream.str();
 }
 
-template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
+template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
 std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
 	std::ostringstream stream;
 	// the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto difference = primaryDataCacheSize % threadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
-	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, 0, 1, 0, nullptr, nullptr, 0, 1));
+	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, 0, 1, 0, nullptr, nullptr, 0, 1));
 	Worker workers[threadCount];
 
 	for (auto a = 0; a < threadCount; ++a) {
@@ -329,70 +339,70 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 	return stream.str();
 }
 
-template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7>
+template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7, byte mask = 0b1111>
 decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
-	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount>, sum, product, value, primary, secondary);
+	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount, mask>, sum, product, value, primary, secondary);
 }
 
-template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
+template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
 decltype(auto) makeSuperWorker(container* primary, container* secondary, decltype(std::launch::deferred) policy = std::launch::deferred) noexcept {
 	return std::async(policy, [primary, secondary]() {
 			static constexpr auto next = fastPow10<digitWidth - 1>;
 			static constexpr auto nextNext = fastPow10<digitWidth - 2>;
 			static constexpr auto outerMost = outer * next;
 			std::ostringstream output;
-			auto p0 = makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p1 = makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p2 = makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p3 = makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p4 = makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p5 = makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
-			auto p6 = makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount>(primary, secondary);
+			auto p0 = makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p1 = makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p2 = makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p3 = makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p4 = makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p5 = makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
+			auto p6 = makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary);
 			output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 			return output.str();
 			});
 }
 
-template<u64 digitWidth, u64 primaryDimensions, u64 secondaryDimensions, u64 threadCount>
+template<u64 digitWidth, u64 primaryDimensions, u64 secondaryDimensions, u64 threadCount, byte mask = 0b1111>
 std::string nonSuperComputation(container* cache0, container* cache1) {
 	std::ostringstream stream;
-	auto p0 = makeWorker<2, 2, (2 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 2
-	auto p1 = makeWorker<3, 3, (3 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 3
-	auto p2 = makeWorker<4, 4, (4 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 4
-	auto p3 = makeWorker<6, 6, (6 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 6
-	auto p4 = makeWorker<7, 7, (7 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 7
-	auto p5 = makeWorker<8, 8, (8 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 8
-	auto p6 = makeWorker<9, 9, (9 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount>(cache0, cache1); // 9
+	auto p0 = makeWorker<2, 2, (2 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 2
+	auto p1 = makeWorker<3, 3, (3 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 3
+	auto p2 = makeWorker<4, 4, (4 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 4
+	auto p3 = makeWorker<6, 6, (6 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 6
+	auto p4 = makeWorker<7, 7, (7 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 7
+	auto p5 = makeWorker<8, 8, (8 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 8
+	auto p6 = makeWorker<9, 9, (9 * fastPow10<digitWidth - 1>), digitWidth, primaryDimensions, secondaryDimensions, threadCount, mask>(cache0, cache1); // 9
 	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 	auto s = stream.str();
 	return s;
 }
-template<u64 digitCount, u64 dim0, u64 dim1, u64 threadCount>
+template<u64 digitCount, u64 dim0, u64 dim1, u64 threadCount, byte mask = 0b1111>
 std::string oneSeventhSuperComputation(char symbol, container* cache0, container* cache1) {
 	std::ostringstream stream;
 	switch (symbol) {
-		case '2': stream << makeSuperWorker<2, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '3': stream << makeSuperWorker<3, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '4': stream << makeSuperWorker<4, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '6': stream << makeSuperWorker<6, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '7': stream << makeSuperWorker<7, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '8': stream << makeSuperWorker<8, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
-		case '9': stream << makeSuperWorker<9, digitCount, dim0, dim1, threadCount>(cache0, cache1).get(); break;
+		case '2': stream << makeSuperWorker<2, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '3': stream << makeSuperWorker<3, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '4': stream << makeSuperWorker<4, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '6': stream << makeSuperWorker<6, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '7': stream << makeSuperWorker<7, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '8': stream << makeSuperWorker<8, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
+		case '9': stream << makeSuperWorker<9, digitCount, dim0, dim1, threadCount, mask>(cache0, cache1).get(); break;
 		default: break;
 	}
 	auto s = stream.str();
 	return s;
 }
 
-template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7>
+template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7, byte mask = 0b1111>
 inline void useSuperWorkers(std::ostream& stream, container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
-	auto p0 = makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p1 = makeSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p2 = makeSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p3 = makeSuperWorker<6, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p4 = makeSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p5 = makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
-	auto p6 = makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount>(primary, secondary, policy);
+	auto p0 = makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p1 = makeSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p2 = makeSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p3 = makeSuperWorker<6, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p4 = makeSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p5 = makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
+	auto p6 = makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount, mask>(primary, secondary, policy);
 	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
 }
 #endif // end QLIB_H__
