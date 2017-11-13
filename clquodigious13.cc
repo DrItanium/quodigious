@@ -33,7 +33,7 @@
 
 constexpr auto threadCount = 7;
 constexpr auto dimensionCount = 8;
-constexpr auto secondaryDimensionCount = 6;
+constexpr auto secondaryDimensionCount = 5;
 constexpr auto digitCount = 15;
 container primaryDataCache[dataCacheSize<dimensionCount>];
 container secondaryDataCache[dataCacheSize<secondaryDimensionCount>];
@@ -118,7 +118,7 @@ std::string getErrorString(cl_int error)
 }
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<9>("cache6.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<10>("cache5.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
 		return 1;
 	}
 	cl_uint platformIdCount = 0;
@@ -126,11 +126,11 @@ int main(int argc, char* argv[]) {
 
 	std::vector<cl_platform_id> platformIds (platformIdCount);
 	clGetPlatformIDs(platformIdCount, platformIds.data(), nullptr);
-	constexpr auto listSize = dataCacheSize<secondaryDimensionCount>;
+	constexpr auto listSize = dataCacheSize<secondaryDimensionCount> * 4;
 	uint8_t * sum = new uint8_t[listSize];
 	u64* product = new u64[listSize];
 	u64* value = new u64[listSize];
-	u64* result = new u64[listSize * 4];
+	u64* result = new u64[listSize];
 	// Load the kernel source code into the array source_str
 	FILE *fp;
 	char *source_str;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
 	cl_mem sum_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(uint8_t), nullptr, &ret);
 	cl_mem product_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(u64), nullptr, &ret);
 	cl_mem value_mem_obj = clCreateBuffer(context, CL_MEM_READ_ONLY, listSize * sizeof(u64), nullptr, &ret);
-	cl_mem result_mem_obj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, 4 * listSize * sizeof(u64), nullptr, &ret);
+	cl_mem result_mem_obj = clCreateBuffer(context, CL_MEM_WRITE_ONLY, listSize * sizeof(u64), nullptr, &ret);
 	// Create a program from the kernel source
 	auto program = clCreateProgramWithSource(context, 1, (const char **)&source_str, (const size_t *)&source_size, &ret);
 
@@ -199,17 +199,24 @@ int main(int argc, char* argv[]) {
 	ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&value_mem_obj);
 	ret = clSetKernelArg(kernel, 3, sizeof(cl_mem), (void *)&result_mem_obj);
 	int count = 0;
-	for (const auto& outer : primaryDataCache) {
+	for (const auto& outer : secondaryDataCache) {
 		auto* s = sum;
 		auto* p = product;
 		auto* v = value;
-		for (auto const& inner : secondaryDataCache) {
-			*s = inner.value + outer.value;
-			*p = inner.sum + outer.sum;
-			*v = inner.product * outer.product;
-			++s;
-			++p;
-			++v;
+		for (auto const& inner : primaryDataCache) {
+			auto nv = inner.value + outer.value;
+			auto ns = inner.sum + outer.sum;
+			auto np = inner.product * outer.product;
+			for (int k = 2; k < 9; ++k) {
+				if ((k % 2) == 0) {
+					*s = ns + k;
+					*p = np * k;
+					*v = nv + k;
+					++s;
+					++p;
+					++v;
+				}
+			}
 		}
 		// Copy the lists A and B to their respective memory buffers
 		ret = clEnqueueWriteBuffer(command_queue, sum_mem_obj, CL_TRUE, 0, listSize * sizeof(uint8_t), sum, 0, nullptr, nullptr);
@@ -241,14 +248,14 @@ int main(int argc, char* argv[]) {
 			std::cout << "ERROR OCCURRED: " << getErrorString(ret) << std::endl;
 			return 1;
 		}
-		ret = clEnqueueReadBuffer(command_queue, result_mem_obj, CL_TRUE, 0, 4 * listSize * sizeof(u64), result, 0, nullptr, nullptr);
+		ret = clEnqueueReadBuffer(command_queue, result_mem_obj, CL_TRUE, 0, listSize * sizeof(u64), result, 0, nullptr, nullptr);
 		if (ret != CL_SUCCESS) {
 			std::cout << "ERROR OCCURRED during buffer read: " << getErrorString(ret) << std::endl;
 			return 1;
 		}
-		std::cerr << "Completed part " << count << " of " << dataCacheSize<dimensionCount> << std::endl;
+		std::cerr << "Completed part " << count << " of " << dataCacheSize<secondaryDimensionCount> << std::endl;
 		// Display the result to the screen
-		for (int i = 0; i < (4 * listSize); ++i) {
+		for (int i = 0; i < listSize; ++i) {
 			merge(result[i], std::cout);
 		}
 		++count;
