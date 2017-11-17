@@ -188,7 +188,8 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 	// just eliminate the values needed
 	constexpr auto readSize = (sizeof(u32) * 2) + sizeof(uint8_t);
 	char tmpCache[readSize] = { 0 };
-	for (int i = 0; i < size || cachedCopy.good(); ++i) {
+	int i = 0;
+	for (i = 0; i < size && cachedCopy.good(); ++i) {
 		// layout is value, sum, product
 		cachedCopy.read(tmpCache, readSize);
 		container temp;
@@ -201,7 +202,7 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 		}
 		collection[i] = temp;
 	}
-	if (!cachedCopy.eof()) {
+	if (i < size && !cachedCopy.eof()) {
 		std::cerr << "data cache is too small!" << std::endl;
 		return false;
 	}

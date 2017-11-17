@@ -32,14 +32,15 @@ constexpr auto threadCount = 7;
 constexpr auto dimensionCount = 8;
 constexpr auto secondaryDimensionCount = 2;
 constexpr auto digitCount = 13;
-container primaryDataCache[dataCacheSize<8>];
-container secondaryDataCache[dataCacheSize<2>];
 
 int main(int argc, char* argv[]) {
-	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<8>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<2>)) {
+	auto* primaryDataCache = new container[dataCacheSize<dimensionCount>];
+	auto* secondaryDataCache = new container[dataCacheSize<secondaryDimensionCount>];
+	if (!loadDataCache<1>("cache.bin", primaryDataCache, dataCacheSize<dimensionCount>) || !loadDataCache<9>("cache2.bin", secondaryDataCache, dataCacheSize<secondaryDimensionCount>)) {
 		return 1;
 	}
 	doMaskedSuperWorker<digitCount, dimensionCount, secondaryDimensionCount, threadCount>(readInputDescription(), std::cout, primaryDataCache, secondaryDataCache, std::launch::deferred);
-	
+	delete [] primaryDataCache;
+	delete [] secondaryDataCache;
 	return 0;
 }
