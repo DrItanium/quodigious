@@ -172,8 +172,7 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
 	return 0;
 }
 
-template<u64 factor>
-bool loadDataCache(const std::string& fileName, container* collection, size_t size) {
+inline bool loadDataCache(const std::string& fileName, container* collection, size_t size, u64 offset) {
 	std::ifstream cachedCopy(fileName, std::ifstream::in | std::ifstream::binary);
 	if (!cachedCopy.good()) {
 		std::cerr << "ERROR: Couldn't open " << fileName << " data cache file! Make sure it exists and is named " << fileName << std::endl;
@@ -193,7 +192,7 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 		// layout is value, sum, product
 		cachedCopy.read(tmpCache, readSize);
 		container temp;
-		temp.value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]) * fastPow10<factor>;
+		temp.value = makeU64(tmpCache[0], tmpCache[1], tmpCache[2], tmpCache[3]) * offset;
 		temp.product = makeU32(tmpCache[4], tmpCache[5], tmpCache[6], tmpCache[7]);
 		temp.sum = uint8_t(tmpCache[8]);
 		if (temp.sum >= 255) {
@@ -211,6 +210,11 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 	return true;
 }
 
+template<u64 factor>
+bool loadDataCache(const std::string& fileName, container* collection, size_t size) {
+	return loadDataCache(fileName, collection, size, fastPow10<factor>);
+}
+
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
 template<u64 index>
@@ -221,8 +225,7 @@ template<u64 index>
 inline void performFinalCompute(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
 	performFinalCompute<index>(inner.value + value, inner.sum + sum, inner.product * product, stream);
 }
-template<byte mask = 0b1111>
-inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream) noexcept {
+inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std::ostream& stream, byte mask = 0b1111) noexcept {
 	if ((mask & 0x1) != 0) {
 		performFinalCompute<2>(sum, product, value, inner, stream);
 	}
@@ -237,8 +240,8 @@ inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std
 	}
 }
 
-template<u64 secondarySize, byte mask = 0b1111>
-std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
+template<u64 secondarySize>
+std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end, byte mask = 0b1111) noexcept {
 	std::ostringstream stream;
 	for (auto i = start; i < end; i+= 3) {
 		// NOTE: this comment assumes that we are reading three outer numbers
@@ -287,7 +290,7 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 		if ((i + 1) >= end) {
 			for (auto j = 0; j < secondarySize ; ++j)  {
 				auto inner = secondary[j];
-				finalCompute4<mask>(os0, op0, ov0, inner, stream);
+				finalCompute4(os0, op0, ov0, inner, stream, mask);
 			}
 		} else {
 			auto outer1 = primary[i + 1];
@@ -297,8 +300,8 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 			if ((i + 2) >= end) {
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					finalCompute4<mask>(os0, op0, ov0, inner, stream);
-					finalCompute4<mask>(os1, op1, ov1, inner, stream);
+					finalCompute4(os0, op0, ov0, inner, stream, mask);
+					finalCompute4(os1, op1, ov1, inner, stream, mask);
 				}
 			} else {
 				auto outer2 = primary[i + 2];
@@ -307,9 +310,9 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 				u64 op2 = outer2.product * product;
 				for (auto j = 0; j < secondarySize ; ++j)  {
 					auto inner = secondary[j];
-					finalCompute4<mask>(os0, op0, ov0, inner, stream);
-					finalCompute4<mask>(os1, op1, ov1, inner, stream);
-					finalCompute4<mask>(os2, op2, ov2, inner, stream);
+					finalCompute4(os0, op0, ov0, inner, stream, mask);
+					finalCompute4(os1, op1, ov1, inner, stream, mask);
+					finalCompute4(os2, op2, ov2, inner, stream, mask);
 				}
 			}
 		}
@@ -317,21 +320,21 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 	return stream.str();
 }
 
-template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
-std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
+template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7>
+std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache, byte mask = 0b1111) noexcept {
 	std::ostringstream stream;
 	// the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	static constexpr auto difference = primaryDataCacheSize % threadCount;
 	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
-	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, 0, 1, 0, nullptr, nullptr, 0, 1));
+	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, 0, 1, 0, nullptr, nullptr, 0, 1, mask));
 	Worker workers[threadCount];
 
 	for (auto a = 0; a < threadCount; ++a) {
-		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart), mask);
 	}
 	// compute the rest on teh primary thread
 	if (difference > 0) {
-		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize, mask);
 		stream << lastWorker.get();
 	}
 	for (auto a = 0; a < threadCount; ++a) {
@@ -342,7 +345,7 @@ std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* pri
 
 template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7, byte mask = 0b1111>
 decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
-	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount, mask>, sum, product, value, primary, secondary);
+	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount>, sum, product, value, primary, secondary, mask);
 }
 
 template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
