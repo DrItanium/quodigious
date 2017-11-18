@@ -41,19 +41,11 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 				product += baseProduct;
 				index += next;
 				innerBody<inner>(stream, sum, product, index, depth); // 3
+				++sum;
+				product += baseProduct;
+				index += next;
+				innerBody<inner>(stream, sum, product, index, depth); // 4
 				return stream.str();
-				}, sum, product, index, depth);
-		auto middle = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
-					std::ostringstream stream;
-					sum += 2;
-					product += (baseProduct << 1);
-					index += (next << 1);
-					innerBody<inner>(stream, sum, product, index, depth); // 4
-					sum += 2;
-					product += (baseProduct << 1);
-					index += (next << 1);
-					innerBody<inner>(stream, sum, product, index, depth); // 6
-					return stream.str();
 				}, sum, product, index, depth);
 		auto upperHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 					std::ostringstream stream;
@@ -63,6 +55,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 					sum += 2;
 					product += (baseProduct << 1);
 					index += (next << 1);
+					innerBody<inner>(stream, sum, product, index, depth); // 6
 					++sum;
 					product += baseProduct;
 					index += next;
@@ -77,7 +70,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 					innerBody<inner>(stream, sum, product, index, depth); // 9
 					return stream.str();
 				}, sum, product, index, depth);
-		stream << lowerHalf.get() << middle.get() << upperHalf.get();
+		stream << lowerHalf.get() << upperHalf.get();
 	} else {
 		if (length == 1 && (depth >= 10)) {
 			innerBody<inner>(stream, sum, product,index, depth); // 2
