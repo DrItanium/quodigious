@@ -32,8 +32,8 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noe
     sum += 2;
     product <<= 1;
     index += multiply<2>(next);
-    innerBody<inner>(sum, product,index, depth); // 2
     if (length == 1 && (depth >= 10)) {
+        innerBody<inner>(sum, product,index, depth); // 2
         sum += 2;
         product += (baseProduct << 1);
         index += (next << 1);
@@ -47,30 +47,40 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noe
         index += (next << 1);
         innerBody<inner>(sum, product,index, depth); // 8
     } else {
+        innerBody<inner>(sum, product, index, depth); // 2
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product,index, depth); // 3
+        innerBody<inner>(sum, product, index, depth); // 3
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product,index, depth); // 4
-        sum += 2;
-        product <<= 1;
-        index += multiply<2>(next);
-        innerBody<inner>(sum, product,index, depth); // 6
+        innerBody<inner>(sum, product, index, depth); // 4
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product,index, depth); // 7
+        if (length == 1) {
+            innerBody<inner>(sum, product, index, depth); // 5
+        }
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product,index, depth); // 8
+        innerBody<inner>(sum, product, index, depth); // 6
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product,index, depth); // 9
+        innerBody<inner>(sum, product, index, depth); // 7
+        ++sum;
+        product += baseProduct;
+        index += next;
+        innerBody<inner>(sum, product, index, depth); // 8
+        ++sum;
+        product += baseProduct;
+        index += next;
+        innerBody<inner>(sum, product, index, depth); // 9
+        ++sum;
+        product += baseProduct;
+        index += next;
     }
 }
 
