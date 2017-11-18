@@ -25,7 +25,6 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
-QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
 QLOOPS_PROG64 = quodigious64
 PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_PROG64}
@@ -34,7 +33,6 @@ all: ${PROGS}
 help:
 	@echo "available options: "
 	@echo "  - all : builds the quodigious programs "
-	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values using no threads"
 	@echo "  - clean : cleans the program artifacts"
@@ -50,12 +48,6 @@ ${QLOOPS_PROG64}: loops64.o
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
 
-${QLOOPS_PROG}: inverted-loops.o cache.bin
-	@echo -n Building 64-bit number quodigious inverted loop bodies ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
-	@echo done.
-
-
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -67,6 +59,5 @@ clean:
 	@rm -rf *.o ${PROGS} 
 	@echo done.
 
-inverted-loops.o: qlib.h
 loops32.o: qlib.h
 loops64.o: qlib.h
