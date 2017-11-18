@@ -33,17 +33,22 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noe
     product <<= 1;
     index += multiply<2>(next);
     if (length == 1 && (depth >= 10)) {
-        for (int i = 2; i < 10; ++i) {
-            if (i % 2 == 0) {
-                innerBody<inner>(sum, product, index, depth);
-            }
-            ++sum;
-            product += baseProduct;
-            index += next;
-        }
+        innerBody<inner>(sum, product,index, depth); // 2
+        sum += 2;
+        product += (baseProduct << 1);
+        index += (next << 1);
+        innerBody<inner>(sum, product,index, depth); // 4
+        sum += 2;
+        product += (baseProduct << 1);
+        index += (next << 1);
+        innerBody<inner>(sum, product,index, depth); // 6
+        sum += 2;
+        product += (baseProduct << 1);
+        index += (next << 1);
+        innerBody<inner>(sum, product,index, depth); // 8
     } else {
         for (int i = 2; i < 10; ++i) {
-            if (length <= 3 || i != 5) {
+            if (length == 1 || i != 5) {
                 innerBody<inner>(sum, product, index, depth);
             }
             ++sum;
@@ -82,6 +87,13 @@ int main() {
                 case 10: body<10>(); break;
                 case 11: body<11>(); break;
                 case 12: body<12>(); break;
+                case 13: body<13>(); break;
+                case 14: body<14>(); break;
+                case 15: body<15>(); break;
+                case 16: body<16>(); break;
+                case 17: body<17>(); break;
+                case 18: body<18>(); break;
+                case 19: body<19>(); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
