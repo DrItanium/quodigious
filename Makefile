@@ -34,12 +34,8 @@ QUODIGIOUS14 = quodigious14
 QUODIGIOUS15 = quodigious15
 QUODIGIOUS16 = quodigious16
 QUODIGIOUS17 = quodigious17
-WORKER16_PROG = qworker16
-WORKER17_PROG = qworker17
-WORKER18_PROG = qworker18
-WORKER19_PROG = qworker19
 BINARY_ENCODING_GENERATOR = bingen
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17} ${QLOOPS_PROG64}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17} ${QLOOPS_PROG64}
 all: ${PROGS}
 
 help:
@@ -48,10 +44,6 @@ help:
 	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values using no threads"
-	@echo "  - ${WORKER16_PROG}: a worker program to compute part of the 16 digit space"
-	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
-	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
-	@echo "  - ${WORKER19_PROG}: a worker program to compute part of the 19 digit space"
 	@echo "  - ${QUODIGIOUS17}: a program that only computes 17 digits quodigious values"
 	@echo "  - ${QUODIGIOUS16}: a program that only computes 16 digits quodigious values"
 	@echo "  - ${QUODIGIOUS15}: a program that only computes 15 digits quodigious values"
@@ -82,23 +74,6 @@ ${QLOOPS_PROG}: inverted-loops.o cache.bin
 	@echo done.
 
 
-${WORKER16_PROG}: Worker16Digits.o
-	@echo -n Building worker program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER16_PROG} Worker16Digits.o
-	@echo done.
-${WORKER17_PROG}: Worker17Digits.o
-	@echo -n Building worker program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER17_PROG} Worker17Digits.o
-	@echo done.
-${WORKER18_PROG}: Worker18Digits.o
-	@echo -n Building worker program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER18_PROG} Worker18Digits.o
-	@echo done.
-
-${WORKER19_PROG}: Worker19Digits.o
-	@echo -n Building worker program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
-	@echo done.
 
 ${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin
 	@echo -n Building 13 digit quodigious program ...
@@ -203,10 +178,6 @@ inverted-loops.o: qlib.h
 loops32.o: qlib.h
 loops64.o: qlib.h
 binary-encoding.o: qlib.h
-Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
-Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h
-Worker18Digits.o: qlib.h Triple.h PrecomputedRange4.h
-Worker19Digits.o: qlib.h Triple.h PrecomputedRange4.h
 q12.o: qlib.h
 quodigious13.o: qlib.h
 quodigious14.o: qlib.h
