@@ -27,6 +27,7 @@ LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG = quodigious
 QLOOPS_PROG32 = quodigious32
+QLOOPS_PROG64 = quodigious64
 QUODIGIOUS13 = quodigious13
 QUODIGIOUS12 = quodigious12
 QUODIGIOUS14 = quodigious14
@@ -38,7 +39,7 @@ WORKER17_PROG = qworker17
 WORKER18_PROG = qworker18
 WORKER19_PROG = qworker19
 BINARY_ENCODING_GENERATOR = bingen
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${WORKER18_PROG} ${WORKER19_PROG} ${WORKER17_PROG} ${WORKER16_PROG} ${QUODIGIOUS13} ${BINARY_ENCODING_GENERATOR} ${QUODIGIOUS12} ${QUODIGIOUS14} ${QUODIGIOUS15} ${QUODIGIOUS16} ${QUODIGIOUS17} ${QLOOPS_PROG64}
 all: ${PROGS}
 
 help:
@@ -46,6 +47,7 @@ help:
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - ${QLOOPS_PROG}: program to compute 64-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
+	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values using no threads"
 	@echo "  - ${WORKER16_PROG}: a worker program to compute part of the 16 digit space"
 	@echo "  - ${WORKER17_PROG}: a worker program to compute part of the 17 digit space"
 	@echo "  - ${WORKER18_PROG}: a worker program to compute part of the 18 digit space"
@@ -65,13 +67,18 @@ help:
 
 
 ${QLOOPS_PROG32}: loops32.o
-	@echo -n Building 32-bit number quodigious quodigious ...
+	@echo -n Building 32-bit number quodigious computer (single-thread) ...
 	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
+	@echo done.
+
+${QLOOPS_PROG64}: loops64.o
+	@echo -n Building 64-bit number quodigious computer (single-thread) ...
+	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
 
 ${QLOOPS_PROG}: inverted-loops.o cache.bin
 	@echo -n Building 64-bit number quodigious inverted loop bodies ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QLOOPS_PROG} inverted-loops.o
 	@echo done.
 
 
@@ -93,33 +100,33 @@ ${WORKER19_PROG}: Worker19Digits.o
 	@${CXX} -pthread ${LXXFLAGS} -o ${WORKER19_PROG} Worker19Digits.o
 	@echo done.
 
-${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin 
+${QUODIGIOUS13}: quodigious13.o cache.bin cache2.bin
 	@echo -n Building 13 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS13} quodigious13.o
 	@echo done.
 
-${QUODIGIOUS12}: q12.o cache.bin cache2.bin 
+${QUODIGIOUS12}: q12.o cache.bin cache2.bin
 	@echo -n Building 12 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS12} q12.o
 	@echo done.
 
-${QUODIGIOUS14}: quodigious14.o cache.bin cache3.bin cache4.bin 
+${QUODIGIOUS14}: quodigious14.o cache.bin cache3.bin cache4.bin
 	@echo -n Building 14 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS14} quodigious14.o
 	@echo done.
 ${QUODIGIOUS15}: quodigious15.o cache.bin cache4.bin cache5.bin
 	@echo -n Building 15 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS15} quodigious15.o
 	@echo done.
 
-${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin 
+${QUODIGIOUS16}: quodigious16.o cache.bin cache5.bin
 	@echo -n Building 16 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS16} quodigious16.o
 	@echo done.
 
-${QUODIGIOUS17}: quodigious17.o cache.bin cache6.bin 
+${QUODIGIOUS17}: quodigious17.o cache.bin cache6.bin
 	@echo -n Building 17 digit quodigious program ...
-	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS17} quodigious17.o 
+	@${CXX} -pthread ${LXXFLAGS} -o ${QUODIGIOUS17} quodigious17.o
 	@echo done.
 
 ${BINARY_ENCODING_GENERATOR}: binary-encoding.o
@@ -194,6 +201,7 @@ clean:
 inverted-loops.o: qlib.h
 
 loops32.o: qlib.h
+loops64.o: qlib.h
 binary-encoding.o: qlib.h
 Worker16Digits.o: qlib.h Triple.h PrecomputedRange4.h
 Worker17Digits.o: qlib.h Triple.h PrecomputedRange4.h

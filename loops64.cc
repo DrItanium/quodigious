@@ -19,12 +19,12 @@
 // Perform 32-bit numeric quodigious checks
 #include "qlib.h"
 
-template<u32 length>
-inline void innerBody(u32 sum, u32 product, u32 index) noexcept;
+template<u64 length>
+inline void innerBody(u64 sum, u64 product, u64 index) noexcept;
 
-template<u32 length>
-inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
-    static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+template<u64 length>
+inline void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     constexpr auto inner = length - 1;
     constexpr auto next = fastPow10<inner>;
@@ -40,13 +40,13 @@ inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     }
 }
 
-template<u32 length>
-inline void innerBody(u32 sum, u32 product, u32 index) noexcept {
+template<u64 length>
+inline void innerBody(u64 sum, u64 product, u64 index) noexcept {
     body<length>(sum, product, index);
 }
 
 template<>
-inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
+inline void innerBody<0>(u64 sum, u64 product, u64 index) noexcept {
     if (isQuodigious(index, sum, product)) {
         std::cout << index << std::endl;
     }
@@ -54,7 +54,7 @@ inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
 
 int main() {
     while(std::cin.good()) {
-        u32 currentIndex = 0;
+        u64 currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
@@ -67,6 +67,9 @@ int main() {
                 case 7: body<7>(); break;
                 case 8: body<8>(); break;
                 case 9: body<9>(); break;
+                case 10: body<10>(); break;
+                case 11: body<11>(); break;
+                case 12: body<12>(); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
