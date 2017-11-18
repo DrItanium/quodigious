@@ -64,8 +64,8 @@ ${QLOOPS_PROG32}: loops32.o
 	@echo done.
 
 ${QLOOPS_PROG64}: loops64.o
-	@echo -n "Building 64-bit number quodigious computer (single-thread) ..."
-	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
+	@echo -n "Building 64-bit number quodigious computer ..."
+	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
 
 ${QLOOPS_PROG}: inverted-loops.o cache.bin

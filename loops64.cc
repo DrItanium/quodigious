@@ -18,6 +18,7 @@
 
 // Perform 32-bit numeric quodigious checks
 #include "qlib.h"
+#include <future>
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
@@ -26,63 +27,104 @@ template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
-    constexpr auto inner = length - 1;
-    constexpr auto next = fastPow10<inner>;
-    auto baseProduct = product;
-    sum += 2;
-    product <<= 1;
-    index += multiply<2>(next);
-    if (length == 1 && (depth >= 10)) {
-        innerBody<inner>(stream, sum, product,index, depth); // 2
-        sum += 2;
-        product += (baseProduct << 1);
-        index += (next << 1);
-        innerBody<inner>(stream, sum, product,index, depth); // 4
-        sum += 2;
-        product += (baseProduct << 1);
-        index += (next << 1);
-        innerBody<inner>(stream, sum, product,index, depth); // 6
-        sum += 2;
-        product += (baseProduct << 1);
-        index += (next << 1);
-        innerBody<inner>(stream, sum, product,index, depth); // 8
-    } else {
-        innerBody<inner>(stream, sum, product, index, depth); // 2
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 3
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 4
-        ++sum;
-        product += baseProduct;
-        index += next;
-        if (length == 1) {
-            innerBody<inner>(stream, sum, product, index, depth); // 5
-        }
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 6
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 7
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 8
-        ++sum;
-        product += baseProduct;
-        index += next;
-        innerBody<inner>(stream, sum, product, index, depth); // 9
-        ++sum;
-        product += baseProduct;
-        index += next;
-    }
+	constexpr auto inner = length - 1;
+	constexpr auto next = fastPow10<inner>;
+	auto baseProduct = product;
+	sum += 2;
+	product <<= 1;
+	index += multiply<2>(next);
+	if (length == 12) {
+		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
+				std::ostringstream stream;
+				innerBody<inner>(stream, sum, product, index, depth); // 2
+				++sum;
+				product += baseProduct;
+				index += next;
+				innerBody<inner>(stream, sum, product, index, depth); // 3
+				++sum;
+				product += baseProduct;
+				index += next;
+				innerBody<inner>(stream, sum, product, index, depth); // 4
+				return stream.str();
+				}, sum, product, index, depth);
+		auto upperHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
+					std::ostringstream stream;
+					sum += 2;
+					product += (baseProduct << 1);
+					index += (next << 1);
+					sum += 2;
+					product += (baseProduct << 1);
+					index += (next << 1);
+					innerBody<inner>(stream, sum, product, index, depth); // 6
+					++sum;
+					product += baseProduct;
+					index += next;
+					innerBody<inner>(stream, sum, product, index, depth); // 7
+					++sum;
+					product += baseProduct;
+					index += next;
+					innerBody<inner>(stream, sum, product, index, depth); // 8
+					++sum;
+					product += baseProduct;
+					index += next;
+					innerBody<inner>(stream, sum, product, index, depth); // 9
+					return stream.str();
+				}, sum, product, index, depth);
+		stream << lowerHalf.get() << upperHalf.get();
+	} else {
+		if (length == 1 && (depth >= 10)) {
+			innerBody<inner>(stream, sum, product,index, depth); // 2
+			sum += 2;
+			product += (baseProduct << 1);
+			index += (next << 1);
+			innerBody<inner>(stream, sum, product,index, depth); // 4
+			sum += 2;
+			product += (baseProduct << 1);
+			index += (next << 1);
+			innerBody<inner>(stream, sum, product,index, depth); // 6
+			sum += 2;
+			product += (baseProduct << 1);
+			index += (next << 1);
+			innerBody<inner>(stream, sum, product,index, depth); // 8
+		} else {
+			innerBody<inner>(stream, sum, product, index, depth); // 2
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 3
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 4
+			++sum;
+			product += baseProduct;
+			index += next;
+			if (length == 1) {
+				innerBody<inner>(stream, sum, product, index, depth); // 5
+			}
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 6
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 7
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 8
+			++sum;
+			product += baseProduct;
+			index += next;
+			innerBody<inner>(stream, sum, product, index, depth); // 9
+			++sum;
+			product += baseProduct;
+			index += next;
+		}
+	}
 }
+
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
