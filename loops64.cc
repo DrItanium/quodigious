@@ -95,31 +95,36 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
     }
 }
 
+template<u64 index>
+inline void initialBody() noexcept {
+    body<index>(std::cout);
+}
+
 int main() {
     while(std::cin.good()) {
         u64 currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 1: body<1>(std::cout); break;
-                case 2: body<2>(std::cout); break;
-                case 3: body<3>(std::cout); break;
-                case 4: body<4>(std::cout); break;
-                case 5: body<5>(std::cout); break;
-                case 6: body<6>(std::cout); break;
-                case 7: body<7>(std::cout); break;
-                case 8: body<8>(std::cout); break;
-                case 9: body<9>(std::cout); break;
-                case 10: body<10>(std::cout); break;
-                case 11: body<11>(std::cout); break;
-                case 12: body<12>(std::cout); break;
-                case 13: body<13>(std::cout); break;
-                case 14: body<14>(std::cout); break;
-                case 15: body<15>(std::cout); break;
-                case 16: body<16>(std::cout); break;
-                case 17: body<17>(std::cout); break;
-                case 18: body<18>(std::cout); break;
-                case 19: body<19>(std::cout); break;
+                case 1: initialBody<1>(); break;
+                case 2: initialBody<2>(); break;
+                case 3: initialBody<3>(); break;
+                case 4: initialBody<4>(); break;
+                case 5: initialBody<5>(); break;
+                case 6: initialBody<6>(); break;
+                case 7: initialBody<7>(); break;
+                case 8: initialBody<8>(); break;
+                case 9: initialBody<9>(); break;
+                case 10: initialBody<10>(); break;
+                case 11: initialBody<11>(); break;
+                case 12: initialBody<12>(); break;
+                case 13: initialBody<13>(); break;
+                case 14: initialBody<14>(); break;
+                case 15: initialBody<15>(); break;
+                case 16: initialBody<16>(); break;
+                case 17: initialBody<17>(); break;
+                case 18: initialBody<18>(); break;
+                case 19: initialBody<19>(); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
