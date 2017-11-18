@@ -172,7 +172,7 @@ constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
 	return 0;
 }
 
-inline bool loadDataCache(const std::string& fileName, container* collection, size_t size, u64 offset) {
+inline bool loadDataCache(const std::string& fileName, container* collection, size_t size, u64 offset) noexcept {
 	std::ifstream cachedCopy(fileName, std::ifstream::in | std::ifstream::binary);
 	if (!cachedCopy.good()) {
 		std::cerr << "ERROR: Couldn't open " << fileName << " data cache file! Make sure it exists and is named " << fileName << std::endl;
@@ -211,7 +211,7 @@ inline bool loadDataCache(const std::string& fileName, container* collection, si
 }
 
 template<u64 factor>
-bool loadDataCache(const std::string& fileName, container* collection, size_t size) {
+bool loadDataCache(const std::string& fileName, container* collection, size_t size) noexcept {
 	return loadDataCache(fileName, collection, size, fastPow10<factor>);
 }
 
@@ -273,17 +273,17 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 		//
 		//   1 (initial memory access) from the array
 		//   2 (one to access the value, the other to load sum and product)
-		// this yields 3 memory accesses per inner loop cycle. 
+		// this yields 3 memory accesses per inner loop cycle.
 		//
 		// With 4 accesses per loop cycle we get 196 memory accesses total
 		// With 3 accesses per loop cycle we get 147 memory accesses total
 		//
-		// With the interleaved version below we will save in the general case 
-		// 588 to 441 memory accesses per complete loop cycle (depending on 
+		// With the interleaved version below we will save in the general case
+		// 588 to 441 memory accesses per complete loop cycle (depending on
 		// optimization) with the special cases being a reduced number.
 		// However, in all cases we do reduce the amount of data being loaded
 		// from main memory and (hopefully) keep more data in the cache :D
-		
+
 		auto outer0 = primary[i];
 		u64 ov0 = outer0.value + value;
 		u64 os0 = outer0.sum + sum;
@@ -324,93 +324,101 @@ std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* prim
 template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
 std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
 	std::ostringstream stream;
-	// the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
-	static constexpr auto difference = primaryDataCacheSize % threadCount;
-	static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount; 
-	using Worker = decltype(std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, 0, 1, 0, nullptr, nullptr, 0, 1));
-	Worker workers[threadCount];
+    if (mask != 0) {
+	    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
+	    static constexpr auto difference = primaryDataCacheSize % threadCount;
+	    static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount;
+	    using Worker = decltype(std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, 0, 1, 0, nullptr, nullptr, 0, 1));
+	    Worker workers[threadCount];
 
-	for (auto a = 0; a < threadCount; ++a) {
-		workers[a] = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
-	}
-	// compute the rest on teh primary thread
-	if (difference > 0) {
-		auto lastWorker = std::async(std::launch::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
-		stream << lastWorker.get();
-	}
-	for (auto a = 0; a < threadCount; ++a) {
-		stream << workers[a].get();
-	}
+	    for (auto a = 0; a < threadCount; ++a) {
+	    	workers[a] = std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+	    }
+	    // compute the rest on teh primary thread
+	    if (difference > 0) {
+	    	auto lastWorker = std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+	    	stream << lastWorker.get();
+	    }
+	    for (auto a = 0; a < threadCount; ++a) {
+	    	stream << workers[a].get();
+	    }
+    }
 	return stream.str();
 }
 
 template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7, byte mask = 0b1111>
-decltype(auto) makeWorker(container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::async) noexcept {
+decltype(auto) makeWorker(container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::async) noexcept {
 	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount, mask>, sum, product, value, primary, secondary);
 }
 
+template<u64 index>
+constexpr byte getBitmask() noexcept {
+    switch(index) {
+        case 2: return 0x1;
+        case 3: return 0x2;
+        case 4: return 0x4;
+        case 6: return 0x8;
+        case 7: return 0x10;
+        case 8: return 0x20;
+        case 9: return 0x40;
+        default: return 0;
+    }
+}
+template<u64 outer, u64 index, u64 digitWidth, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7, byte mask = 0b1111>
+inline decltype(auto) buildWorker(int invokeMask, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::async) noexcept {
+    constexpr auto next = fastPow10<digitWidth - 1>;
+    constexpr auto nextNext = fastPow10<digitWidth - 2>;
+    constexpr auto outerMost = outer * next;
+    if ((invokeMask & getBitmask<index>()) != 0) {
+        return makeWorker<outer + index, multiply<index>(outer), outerMost + (multiply<index>(nextNext)), digitWidth, primaryCacheWidth, secondaryCacheWidth, threadCount, mask>(primary, secondary, policy);
+    } else {
+        return makeWorker<outer + index, multiply<index>(outer), outerMost + (multiply<index>(nextNext)), digitWidth, primaryCacheWidth, secondaryCacheWidth, threadCount, 0>(primary, secondary, policy);
+    }
+}
+
 template<u64 outer, u64 digitWidth, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
-decltype(auto) makeSuperWorker(int subMask, container* primary, container* secondary, LaunchPolicy policy = std::launch::deferred) noexcept {
+inline decltype(auto) makeSuperWorker(int subMask, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
 	return std::async(policy, [subMask, primary, secondary]() {
-			static constexpr auto next = fastPow10<digitWidth - 1>;
-			static constexpr auto nextNext = fastPow10<digitWidth - 2>;
-			static constexpr auto outerMost = outer * next;
 			std::ostringstream output;
-			auto p0 = ((subMask & 0x1) != 0) ? 
-			makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 2, outer * 2, outerMost + (nextNext * 2), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p1 = ((subMask & 0x2) != 0) ? 
-			makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 3, outer * 3, outerMost + (nextNext * 3), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p2 = ((subMask & 0x4) != 0) ? 
-			makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 4, outer * 4, outerMost + (nextNext * 4), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p3 = ((subMask & 0x8) != 0) ? 
-			makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 6, outer * 6, outerMost + (nextNext * 6), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p4 = ((subMask & 0x10) != 0) ? 
-			makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 7, outer * 7, outerMost + (nextNext * 7), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p5 = ((subMask & 0x20) != 0) ? 
-			makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 8, outer * 8, outerMost + (nextNext * 8), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			auto p6 = ((subMask & 0x40) != 0) ? 
-			makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(primary, secondary) :
-			makeWorker<outer + 9, outer * 9, outerMost + (nextNext * 9), digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, 0>(primary, secondary);
-			output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+            if (mask != 0) {
+                auto p0 = buildWorker<outer, 2, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p1 = buildWorker<outer, 3, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p2 = buildWorker<outer, 4, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p3 = buildWorker<outer, 6, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p4 = buildWorker<outer, 7, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p5 = buildWorker<outer, 8, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+                auto p6 = buildWorker<outer, 9, digitWidth, primaryDataCacheSize, secondaryDataCacheSize, threadCount, mask>(subMask, primary, secondary);
+			    output << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+            }
 			return output.str();
 			});
 }
+template<u64 index, u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7, byte mask = 0b1111>
+inline decltype(auto) buildSuperWorker(int checkMask, int secondaryMask, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
+    if ((checkMask & getBitmask<index>()) != 0) {
+        return makeSuperWorker<index, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy);
+    } else {
+        return makeSuperWorker<index, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
+    }
+}
 
 template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7, byte mask = 0b1111>
-inline void useSuperWorkers(std::ostream& stream, int primaryDigitsMask, int secondaryMask, container* primary, container* secondary, decltype(std::launch::async) policy = std::launch::deferred) noexcept {
-	auto p0 = ((primaryDigitsMask & 0x1) != 0) ? 
-		makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p1 = ((primaryDigitsMask & 0x2) != 0) ? 
-		makeSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p2 = ((primaryDigitsMask & 0x4) != 0) ? 
-		makeSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p3 = ((primaryDigitsMask & 0x8) != 0) ? 
-		makeSuperWorker<6, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<6, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p4 = ((primaryDigitsMask & 0x10) != 0) ? 
-		makeSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p5 = ((primaryDigitsMask & 0x20) != 0) ? 
-		makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	auto p6 = ((primaryDigitsMask & 0x40) != 0) ? 
-		makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount, mask>(secondaryMask, primary, secondary, policy) :
-		makeSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount, 0>(secondaryMask, primary, secondary, policy);
-	stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+inline void useSuperWorkers(std::ostream& stream, int primaryDigitsMask, int secondaryMask, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
+    if (mask != 0) {
+        auto p0 = buildSuperWorker<2, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p1 = buildSuperWorker<3, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p2 = buildSuperWorker<4, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p3 = buildSuperWorker<6, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p4 = buildSuperWorker<7, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p5 = buildSuperWorker<8, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+        auto p6 = buildSuperWorker<9, digitWidth, primarySize, secondarySize, threadCount, mask>(primaryDigitsMask, secondaryMask, primary, secondary, policy);
+	    stream << p0.get() << p1.get() << p2.get() << p3.get() << p4.get() << p5.get() << p6.get();
+    }
 }
 template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7>
 inline void doMaskedSuperWorker(int input, int digitsMask, int secondaryMask, std::ostream& stream, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
 	switch (input) {
-		case 0x0: useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0000>(stream, digitsMask, secondaryMask, primary, secondary, policy); break;
+		case 0x0: break;
 		case 0x1: useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0001>(stream, digitsMask, secondaryMask, primary, secondary, policy); break;
 		case 0x2: useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0010>(stream, digitsMask, secondaryMask, primary, secondary, policy); break;
 		case 0x3: useSuperWorkers<digitWidth, primarySize, secondarySize, threadCount, 0b0011>(stream, digitsMask, secondaryMask, primary, secondary, policy); break;
@@ -444,10 +452,13 @@ template<u64 digitWidth, u64 primarySize, u64 secondarySize, u64 threadCount = 7
 inline void doMaskedSuperWorker(InputDescription description, std::ostream& stream, container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::deferred) noexcept {
 	int input, digits, secondaryMask;
 	std::tie(input, digits, secondaryMask) = description;
+    if (input == 0 || digits == 0 || secondaryMask == 0) {
+        return;
+    }
 	doMaskedSuperWorker<digitWidth, primarySize, secondarySize, threadCount>(input, digits, secondaryMask, stream, primary, secondary, policy);
 }
 
-inline InputDescription readInputDescription(std::istream& stream = std::cin) {
+inline InputDescription readInputDescription(std::istream& stream = std::cin) noexcept {
 	int type;
 	int digs;
 	int secondaryMask;
