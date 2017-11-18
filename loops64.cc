@@ -20,10 +20,10 @@
 #include "qlib.h"
 
 template<u64 length>
-inline void innerBody(u64 sum, u64 product, u64 index, u64 depth) noexcept;
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
 
 template<u64 length>
-inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
+inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     constexpr auto inner = length - 1;
@@ -33,51 +33,51 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noe
     product <<= 1;
     index += multiply<2>(next);
     if (length == 1 && (depth >= 10)) {
-        innerBody<inner>(sum, product,index, depth); // 2
+        innerBody<inner>(stream, sum, product,index, depth); // 2
         sum += 2;
         product += (baseProduct << 1);
         index += (next << 1);
-        innerBody<inner>(sum, product,index, depth); // 4
+        innerBody<inner>(stream, sum, product,index, depth); // 4
         sum += 2;
         product += (baseProduct << 1);
         index += (next << 1);
-        innerBody<inner>(sum, product,index, depth); // 6
+        innerBody<inner>(stream, sum, product,index, depth); // 6
         sum += 2;
         product += (baseProduct << 1);
         index += (next << 1);
-        innerBody<inner>(sum, product,index, depth); // 8
+        innerBody<inner>(stream, sum, product,index, depth); // 8
     } else {
-        innerBody<inner>(sum, product, index, depth); // 2
+        innerBody<inner>(stream, sum, product, index, depth); // 2
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 3
+        innerBody<inner>(stream, sum, product, index, depth); // 3
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 4
+        innerBody<inner>(stream, sum, product, index, depth); // 4
         ++sum;
         product += baseProduct;
         index += next;
         if (length == 1) {
-            innerBody<inner>(sum, product, index, depth); // 5
+            innerBody<inner>(stream, sum, product, index, depth); // 5
         }
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 6
+        innerBody<inner>(stream, sum, product, index, depth); // 6
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 7
+        innerBody<inner>(stream, sum, product, index, depth); // 7
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 8
+        innerBody<inner>(stream, sum, product, index, depth); // 8
         ++sum;
         product += baseProduct;
         index += next;
-        innerBody<inner>(sum, product, index, depth); // 9
+        innerBody<inner>(stream, sum, product, index, depth); // 9
         ++sum;
         product += baseProduct;
         index += next;
@@ -85,13 +85,13 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noe
 }
 
 template<u64 length>
-inline void innerBody(u64 sum, u64 product, u64 index, u64 depth) noexcept {
-    body<length>(sum, product, index, depth + 1);
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+    body<length>(stream, sum, product, index, depth + 1);
 }
 template<>
-inline void innerBody<0>(u64 sum, u64 product, u64 index, u64 depth) noexcept {
+inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     if (isQuodigious(index, sum, product)) {
-        std::cout << index << std::endl;
+        stream << index << std::endl;
     }
 }
 
@@ -101,25 +101,25 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 1: body<1>(); break;
-                case 2: body<2>(); break;
-                case 3: body<3>(); break;
-                case 4: body<4>(); break;
-                case 5: body<5>(); break;
-                case 6: body<6>(); break;
-                case 7: body<7>(); break;
-                case 8: body<8>(); break;
-                case 9: body<9>(); break;
-                case 10: body<10>(); break;
-                case 11: body<11>(); break;
-                case 12: body<12>(); break;
-                case 13: body<13>(); break;
-                case 14: body<14>(); break;
-                case 15: body<15>(); break;
-                case 16: body<16>(); break;
-                case 17: body<17>(); break;
-                case 18: body<18>(); break;
-                case 19: body<19>(); break;
+                case 1: body<1>(std::cout); break;
+                case 2: body<2>(std::cout); break;
+                case 3: body<3>(std::cout); break;
+                case 4: body<4>(std::cout); break;
+                case 5: body<5>(std::cout); break;
+                case 6: body<6>(std::cout); break;
+                case 7: body<7>(std::cout); break;
+                case 8: body<8>(std::cout); break;
+                case 9: body<9>(std::cout); break;
+                case 10: body<10>(std::cout); break;
+                case 11: body<11>(std::cout); break;
+                case 12: body<12>(std::cout); break;
+                case 13: body<13>(std::cout); break;
+                case 14: body<14>(std::cout); break;
+                case 15: body<15>(std::cout); break;
+                case 16: body<16>(std::cout); break;
+                case 17: body<17>(std::cout); break;
+                case 18: body<18>(std::cout); break;
+                case 19: body<19>(std::cout); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
