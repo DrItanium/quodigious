@@ -217,7 +217,6 @@ bool loadDataCache(const std::string& fileName, container* collection, size_t si
 
 template<u64 count>
 constexpr auto dataCacheSize = numElements<count>;
-
 template<u64 index>
 inline void performFinalCompute(u64 value, u64 sum, u64 product, std::ostream& stream) noexcept {
 	merge(inspectValue(value + index, sum + index, product * index), stream);
@@ -242,8 +241,8 @@ inline void finalCompute4(u64 sum, u64 product, u64 value, container& inner, std
 	}
 }
 
-template<u64 sum, u64 product, u64 value, u64 secondarySize, byte mask = 0b1111>
-std::string innerMostThreadBody(container* primary, container* secondary, u64 start, u64 end) noexcept {
+template<u64 secondarySize, byte mask = 0b1111>
+std::string innerMostThreadBody(u64 sum, u64 product, u64 value, container* primary, container* secondary, u64 start, u64 end) noexcept {
 	std::ostringstream stream;
 	for (auto i = start; i < end; i+= 3) {
 		// NOTE: this comment assumes that we are reading three outer numbers
@@ -322,22 +321,22 @@ std::string innerMostThreadBody(container* primary, container* secondary, u64 st
 	return stream.str();
 }
 
-template<u64 sum, u64 product, u64 value, u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
-std::string typicalInnerMostBody(container* primaryDataCache, container* secondaryDataCache) noexcept {
+template<u64 width, u64 primaryDataCacheSize, u64 secondaryDataCacheSize, u64 threadCount = 7, byte mask = 0b1111>
+std::string typicalInnerMostBody(u64 sum, u64 product, u64 value, container* primaryDataCache, container* secondaryDataCache) noexcept {
 	std::ostringstream stream;
     if (mask != 0) {
 	    // the last digit of all numbers is 2, 4, 6, or 8 so ignore the others and compute this right now
 	    static constexpr auto difference = primaryDataCacheSize % threadCount;
 	    static constexpr auto primaryOnePart = (primaryDataCacheSize - difference) / threadCount;
-	    using Worker = decltype(std::async(LaunchPolicy::async, innerMostThreadBody<sum, product, value, secondaryDataCacheSize, mask>, nullptr, nullptr, 0, 1));
+	    using Worker = decltype(std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, 0, 1, 0, nullptr, nullptr, 0, 1));
 	    Worker workers[threadCount];
 
 	    for (auto a = 0; a < threadCount; ++a) {
-	    	workers[a] = std::async(LaunchPolicy::async, innerMostThreadBody<sum, product, value, secondaryDataCacheSize, mask>, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
+	    	workers[a] = std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, (a * primaryOnePart), ((a + 1) * primaryOnePart));
 	    }
 	    // compute the rest on teh primary thread
 	    if (difference > 0) {
-	    	auto lastWorker = std::async(LaunchPolicy::async, innerMostThreadBody<sum, product, value, secondaryDataCacheSize, mask>, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
+	    	auto lastWorker = std::async(LaunchPolicy::async, innerMostThreadBody<secondaryDataCacheSize, mask>, sum, product, value, primaryDataCache, secondaryDataCache, primaryDataCacheSize - difference, primaryDataCacheSize);
 	    	stream << lastWorker.get();
 	    }
 	    for (auto a = 0; a < threadCount; ++a) {
@@ -349,7 +348,7 @@ std::string typicalInnerMostBody(container* primaryDataCache, container* seconda
 
 template<u64 sum, u64 product, u64 value, u64 width, u64 primaryCacheWidth, u64 secondaryCacheWidth, u64 threadCount = 7, byte mask = 0b1111>
 decltype(auto) makeWorker(container* primary, container* secondary, LaunchPolicy policy = LaunchPolicy::async) noexcept {
-	return std::async(policy, typicalInnerMostBody<sum, product, value, width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount, mask>, primary, secondary);
+	return std::async(policy, typicalInnerMostBody<width, dataCacheSize<primaryCacheWidth>, dataCacheSize<secondaryCacheWidth>, threadCount, mask>, sum, product, value, primary, secondary);
 }
 
 template<u64 index>
