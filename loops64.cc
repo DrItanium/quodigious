@@ -20,10 +20,10 @@
 #include "qlib.h"
 
 template<u64 length>
-inline void innerBody(u64 sum, u64 product, u64 index) noexcept;
+inline void innerBody(u64 sum, u64 product, u64 index, u64 depth) noexcept;
 
 template<u64 length>
-inline void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+inline void body(u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     constexpr auto inner = length - 1;
@@ -32,21 +32,33 @@ inline void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     sum += 2;
     product <<= 1;
     index += multiply<2>(next);
-    for (int i = 2; i < 10; ++i) {
-        innerBody<inner>(sum, product, index);
-        ++sum;
-        product += baseProduct;
-        index += next;
+    if (length == 1 && (depth >= 10)) {
+        for (int i = 2; i < 10; ++i) {
+            if (i % 2 == 0) {
+                innerBody<inner>(sum, product, index, depth);
+            }
+            ++sum;
+            product += baseProduct;
+            index += next;
+        }
+    } else {
+        for (int i = 2; i < 10; ++i) {
+            if (length <= 3 || i != 5) {
+                innerBody<inner>(sum, product, index, depth);
+            }
+            ++sum;
+            product += baseProduct;
+            index += next;
+        }
     }
 }
 
 template<u64 length>
-inline void innerBody(u64 sum, u64 product, u64 index) noexcept {
-    body<length>(sum, product, index);
+inline void innerBody(u64 sum, u64 product, u64 index, u64 depth) noexcept {
+    body<length>(sum, product, index, depth + 1);
 }
-
 template<>
-inline void innerBody<0>(u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody<0>(u64 sum, u64 product, u64 index, u64 depth) noexcept {
     if (isQuodigious(index, sum, product)) {
         std::cout << index << std::endl;
     }
