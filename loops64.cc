@@ -33,7 +33,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	sum += 2;
 	product <<= 1;
 	index += multiply<2>(next);
-	if (length >= 15 && depth == 0) {
+	if (length >= 12 && depth == 0) {
 		auto t0 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
 				std::ostringstream str;
 				innerBody<inner>(str, sum, product, index, depth);
