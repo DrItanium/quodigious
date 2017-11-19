@@ -126,9 +126,6 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
-	if (depth >= 10 && ((sum % 3) != 0)) {
-		return;
-	}
     if (isQuodigious(index, sum, product)) {
 #ifdef COMPUTATION_ONLY
         stream << index << std::endl;
@@ -149,7 +146,16 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 1: initialBody<1>(); break;
+				case 1: 
+					std::cout << 2 << std::endl;
+					std::cout << 3 << std::endl;
+					std::cout << 4 << std::endl;
+					std::cout << 5 << std::endl;
+					std::cout << 6 << std::endl;
+					std::cout << 7 << std::endl;
+					std::cout << 8 << std::endl;
+					std::cout << 9 << std::endl;
+					break;
                 case 2: initialBody<2>(); break;
                 case 3: initialBody<3>(); break;
                 case 4: initialBody<4>(); break;
