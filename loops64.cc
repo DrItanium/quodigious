@@ -33,7 +33,65 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	sum += 2;
 	product <<= 1;
 	index += multiply<2>(next);
-	if (length >= 9) {
+	if (length >= 15 && depth == 0) {
+		auto t0 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t1 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t2 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t3 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t4 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t5 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+				++sum;
+				product += baseProduct;
+				index += next;
+		auto t6 = std::async(std::launch::async, [sum, product, index](auto depth) noexcept {
+				std::ostringstream str;
+				innerBody<inner>(str, sum, product, index, depth);
+				return str.str();
+				}, depth);
+		stream << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
+	} else if (length >= 11) {
 		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 				std::ostringstream stream;
 				innerBody<inner>(stream, sum, product, index, depth); // 2
@@ -49,12 +107,9 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 				}, sum, product, index, depth);
 		auto upperHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 					std::ostringstream stream;
-					sum += 2;
-					product += (baseProduct << 1);
-					index += (next << 1);
-					sum += 2;
-					product += (baseProduct << 1);
-					index += (next << 1);
+					sum += 4;
+					product += (baseProduct << 2);
+					index += (next << 2);
 					innerBody<inner>(stream, sum, product, index, depth); // 6
 					++sum;
 					product += baseProduct;
@@ -118,9 +173,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			product += baseProduct;
 			index += next;
 			innerBody<inner>(stream, sum, product, index, depth); // 9
-			++sum;
-			product += baseProduct;
-			index += next;
 		}
 	}
 }
