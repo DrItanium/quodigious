@@ -25,23 +25,15 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
-QLOOPS_PROG32 = quodigious32
 QLOOPS_PROG64 = quodigious64
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG32} ${QLOOPS_PROG64}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG64}
 all: ${PROGS}
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the quodigious programs "
-	@echo "  - ${QLOOPS_PROG32}: program to compute 32-bit quodigious values"
 	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values using no threads"
 	@echo "  - clean : cleans the program artifacts"
-
-
-${QLOOPS_PROG32}: loops32.o
-	@echo -n "Building 32-bit number quodigious computer (single-thread) ..."
-	@${CXX} ${LXXFLAGS} -o ${QLOOPS_PROG32} loops32.o
-	@echo done.
 
 ${QLOOPS_PROG64}: loops64.o
 	@echo -n "Building 64-bit number quodigious computer ..."
@@ -59,5 +51,4 @@ clean:
 	@rm -rf *.o ${PROGS} 
 	@echo done.
 
-loops32.o: qlib.h
 loops64.o: qlib.h

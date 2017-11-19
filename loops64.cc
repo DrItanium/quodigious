@@ -133,11 +133,48 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 		stream << "index: " << index << ", sum: " << sum << ", product: " << product << ", sum is multiple of three: " << ((sum % 3) == 0)  << std::endl;
 #endif
     }
-}
+} 
 
 template<u64 index>
 inline void initialBody() noexcept {
     body<index>(std::cout);
+}
+
+template<u32 length>
+inline void innerBody(u32 sum, u32 product, u32 index) noexcept;
+
+template<u32 length>
+inline void body(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
+    static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+    static_assert(length != 0, "Can't have length of zero!");
+    constexpr auto inner = length - 1;
+    constexpr auto next = fastPow10<inner>;
+    auto baseProduct = product;
+    sum += 2;
+    product <<= 1;
+    index += multiply<2>(next);
+    for (int i = 2; i < 10; ++i) {
+        innerBody<inner>(sum, product, index);
+        ++sum;
+        product += baseProduct;
+        index += next;
+    }
+}
+
+template<u32 length>
+inline void innerBody(u32 sum, u32 product, u32 index) noexcept {
+    body<length>(sum, product, index);
+}
+
+template<>
+inline void innerBody<0>(u32 sum, u32 product, u32 index) noexcept {
+    if (isQuodigious(index, sum, product)) {
+        std::cout << index << std::endl;
+    }
+}
+template<u32 index>
+inline void initialBody32() noexcept {
+	body<index>(std::cout);
 }
 
 int main() {
@@ -146,24 +183,15 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-				case 1: 
-					std::cout << 2 << std::endl;
-					std::cout << 3 << std::endl;
-					std::cout << 4 << std::endl;
-					std::cout << 5 << std::endl;
-					std::cout << 6 << std::endl;
-					std::cout << 7 << std::endl;
-					std::cout << 8 << std::endl;
-					std::cout << 9 << std::endl;
-					break;
-                case 2: initialBody<2>(); break;
-                case 3: initialBody<3>(); break;
-                case 4: initialBody<4>(); break;
-                case 5: initialBody<5>(); break;
-                case 6: initialBody<6>(); break;
-                case 7: initialBody<7>(); break;
-                case 8: initialBody<8>(); break;
-                case 9: initialBody<9>(); break;
+				case 1: initialBody32<1>(); break;
+                case 2: initialBody32<2>(); break;
+                case 3: initialBody32<3>(); break;
+                case 4: initialBody32<4>(); break;
+                case 5: initialBody32<5>(); break;
+                case 6: initialBody32<6>(); break;
+                case 7: initialBody32<7>(); break;
+                case 8: initialBody32<8>(); break;
+                case 9: initialBody32<9>(); break;
                 case 10: initialBody<10>(); break;
                 case 11: initialBody<11>(); break;
                 case 12: initialBody<12>(); break;

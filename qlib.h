@@ -58,7 +58,7 @@ constexpr bool isQuodigious(u64 value, u64 sum, u64 product) noexcept {
 	// more often than not, the sum is divisible by the original value, so
 	// really that sort of check is useless. If we find that the product is
 	// divisible first then we should eliminate numbers faster :D
-	return ((sum % 3 == 0) || (sum % 2 == 0)) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
+	return ((sum % 3 == 0)) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
 }
 
 
