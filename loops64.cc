@@ -19,7 +19,7 @@
 // Perform 32-bit numeric quodigious checks
 #include "qlib.h"
 #include <future>
-
+#define COMPUTATION_ONLY
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
 
@@ -127,7 +127,11 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     if (isQuodigious(index, sum, product)) {
+#ifdef COMPUTATION_ONLY
         stream << index << std::endl;
+#else
+		stream << "index: " << index << ", sum: " << sum << ", product: " << product << ", sum is multiple of three: " << ((sum % 3) == 0)  << std::endl;
+#endif
     }
 }
 
