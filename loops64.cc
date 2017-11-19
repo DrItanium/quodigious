@@ -126,6 +126,9 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+	if (depth >= 10 && ((sum % 3) != 0)) {
+		return;
+	}
     if (isQuodigious(index, sum, product)) {
 #ifdef COMPUTATION_ONLY
         stream << index << std::endl;

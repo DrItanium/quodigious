@@ -54,16 +54,12 @@ constexpr bool componentQuodigious(T value, T compare) noexcept {
  * number is actuall quodigious. All of the work before hand is to get the sum
  * and products (if we get this far).
  */
-constexpr bool isQuodigious(u64 value, u64 sum, u64 product) noexcept {
+template<typename T>
+constexpr bool isQuodigious(T value, T sum, T product) noexcept {
 	// more often than not, the sum is divisible by the original value, so
 	// really that sort of check is useless. If we find that the product is
 	// divisible first then we should eliminate numbers faster :D
-	return (sum % 3 == 0) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
-}
-
-
-constexpr bool isQuodigious(u32 value, u32 sum, u32 product) noexcept {
-	return componentQuodigious<u32>(value, product) && componentQuodigious<u32>(value, sum);
+	return componentQuodigious<T>(value, product) && componentQuodigious<T>(value, sum);
 }
 
 
