@@ -40,3 +40,16 @@ sys     0m0.180s
 real    636m24.102s
 user    2544m33.564s
 sys     0m0.203s
+
+
+HEX CORE TIMES ( updated multithreaded version ):
+
+16 Digits
+real	165m10.355s
+user	1951m45.537s
+sys	0m20.725s
+
+17 Digits
+real    1148m36.660s
+user    13727m25.984s
+sys     0m32.175s
