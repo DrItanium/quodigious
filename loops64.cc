@@ -25,7 +25,6 @@
 // incremented and never directly used!
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
-
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -118,7 +117,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
-			innerBody<inner>(stream, sum, product,index, depth); // 4
+			innerBody<inner>(stream, sum, product, index, depth); // 4
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
@@ -210,12 +209,42 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     // does not require as much optimization. We can walk through digit level
     // by digit level (even if the digit does not contribute too much to the
     // overall process!).
-    for (int i = 2; i < 10; ++i) {
-        innerBody32<inner>(sum, product, index);
-        ++sum;
-        product += baseProduct;
-        index += next;
-    }
+    //for (int i = 2; i < 10; ++i) {
+    //    innerBody32<inner>(sum, product, index);
+    //    ++sum;
+    //    product += baseProduct;
+    //    index += next;
+    //}
+    // force an unroll here
+    innerBody32<inner>(sum, product, index); // 2
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 3
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 4
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 5
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 6
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 7
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 8
+    ++sum;
+    product += baseProduct;
+    index += next;
+    innerBody32<inner>(sum, product, index); // 9
 }
 
 template<u32 length>
@@ -234,6 +263,7 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
         std::cout << index << std::endl;
     }
 }
+
 
 int main() {
     while(std::cin.good()) {
