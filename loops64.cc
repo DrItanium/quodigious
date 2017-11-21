@@ -19,6 +19,10 @@
 // Perform numeric quodigious checks
 #include "qlib.h"
 #include <future>
+
+
+// an odd discovery is that the depth variable improves performance even though it is only
+// incremented and never directly used!
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
 
@@ -107,10 +111,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
             // I can always perform the odd digit checks later on at a significant
             // reduction in speed cost!
             //
-            // We only activate this when we get to a depth of 10 or greater
-            // as that is where I observed this difference. The only downside
-            // of this design is that the depth is actually computed at runtime
-            // which can limit the amount of _potential_ optimization.
             //
             // The upside is that compilation time is reduced :D
 			innerBody<inner>(stream, sum, product,index, depth); // 2
