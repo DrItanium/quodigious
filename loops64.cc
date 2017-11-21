@@ -56,9 +56,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
         // when we are greater than 10 digit numbers, it is a smart idea to
         // perform divide and conquer at each level above 10 digits. The number of
         // threads used for computation is equal to: 2^(width - 10).
-        //
-        // This also is pretty performant (despite being uneven in the computation department)
-        // and does not nuke machines unnecessarily.
 		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 				std::ostringstream stream;
 				++sum;
@@ -91,6 +88,10 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 					innerBody<inner>(stream, sum, product, index, depth); // 9
 					return stream.str();
 				}, sum, product, index, depth);
+        // perform computation on this primary thread because we want to be able
+        // to maximize how much work we do and make the amount of work in each
+        // thread even. The same number of threads are spawned but the primary
+        // thread that spawned the children is reused below.
         innerBody<inner>(stream, sum, product, index, depth); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
