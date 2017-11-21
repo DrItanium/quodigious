@@ -16,7 +16,7 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 
-// Perform 32-bit numeric quodigious checks
+// Perform numeric quodigious checks
 #include "qlib.h"
 #include <future>
 template<u64 length>
@@ -26,13 +26,35 @@ template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
+    // start at the most significant digit and move inward, that way we don't need
+    // to keep multiple template parameters around.
+    // a 19 digit number means multiplying by 10^18 etc
 	constexpr auto inner = length - 1;
+    // use the compiler to compute the 10^inner at compile time to eliminate further
+    // multiply operations
 	constexpr auto next = fastPow10<inner>;
+    // the current product that we get in is what we add to the running product total
+    // so if product is 4 on function call then baseProduct will be 4.
+    // Then we add the baseProduct to the running total (because this is what multiplication
+    // is).
+    //
+    // So using 4 as our base, 4 * 2 is the same as 4 + 4, 4 *3 (+ 4 4 4), etc
+    // Thus we can keep updating the product after each computation.
+    //
+    // I got the idea from strength reduction in compiler optimization theory
 	auto baseProduct = product;
+    // we don't include the digits zero or 1 so just skip them by adding two
+    // or the equivalent for the corresponding thing
 	sum += 2;
 	product <<= 1;
-	index += multiply<2>(next);
+	index += multiply<2>(next); // this uses templating to make sure that multiplying two will cause a left shift by 1
 	if (length >= 11) {
+        // when we are greater than 10 digit numbers, it is a smart idea to
+        // perform divide and conquer at each level above 10 digits. The number of
+        // threads used for computation is equal to: 2^(width - 10).
+        //
+        // This also is pretty performant (despite being uneven in the computation department)
+        // and does not nuke machines unnecessarily.
 		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 				std::ostringstream stream;
 				innerBody<inner>(stream, sum, product, index, depth); // 2
@@ -68,7 +90,29 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 				}, sum, product, index, depth);
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
+        // hand unrolled loop bodies
+        // we use the stack to keep track of sums, products, and current indexes
+        // instead of starting with a whole number and breaking it apart.
+        // Walking down the call graph will cause another sum, product, and index
+        // part to be added to the provided sum, product, and index.
+        //
+        // The upside of the break apart approach is that it is simple to understand
+        // but is harder to improve performance for. When you're operating on the
+        // digits of a number instead, the digits are already broken apart and the
+        // need to use divides and modulus operations are minimized (although
+        // a compiler could technically factor divides and mods into bit shifting)
 		if (length == 1 && (depth >= 10)) {
+            // through observational evidence, I found that the least significant
+            // digits are all even. Even if it turns out that this isn't the case
+            // I can always perform the odd digit checks later on at a significant
+            // reduction in speed cost!
+            //
+            // We only activate this when we get to a depth of 10 or greater
+            // as that is where I observed this difference. The only downside
+            // of this design is that the depth is actually computed at runtime
+            // which can limit the amount of _potential_ optimization.
+            //
+            // The upside is that compilation time is reduced :D
 			innerBody<inner>(stream, sum, product,index, depth); // 2
 			sum += 2;
 			product += (baseProduct << 1);
@@ -83,6 +127,17 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			index += (next << 1);
 			innerBody<inner>(stream, sum, product,index, depth); // 8
 		} else {
+            // this of this as a for loop from 2 to 10 skipping 5. Each
+            // call in this block is as though the current digit is 2,
+            // 3, 4, 6, 7, 8, or 9. We use addition only since multiplication
+            // adds overhead and isn't really needed.
+            // These are the sum, product, and index incrementations that
+            // take place inbetween each call.
+            //
+            // Five is skipped except when length = 1, this will only invoke if
+            // you actually pass one to this (which is impossible) since passing
+            // 1 into the program will cause the 32-bit integer paths to be used
+            // instead.
 			innerBody<inner>(stream, sum, product, index, depth); // 2
 			++sum;
 			product += baseProduct;
@@ -92,15 +147,9 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			product += baseProduct;
 			index += next;
 			innerBody<inner>(stream, sum, product, index, depth); // 4
-			++sum;
-			product += baseProduct;
-			index += next;
-			if (length == 1) {
-				innerBody<inner>(stream, sum, product, index, depth); // 5
-			}
-			++sum;
-			product += baseProduct;
-			index += next;
+            sum += 2;
+            product += (baseProduct << 1);
+            index += (next << 1);
 			innerBody<inner>(stream, sum, product, index, depth); // 6
 			++sum;
 			product += baseProduct;
@@ -121,17 +170,24 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+    // this double template instantiation is done to make sure that the compiler
+    // does not attempt to instantiate infinitely, if this code was in place
+    // of the call to innerbody in body then the compiler would not stop
+    // instiantiating. we can then also perform specialization on length zero
     body<length>(stream, sum, product, index, depth + 1);
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+    // specialization
     if (isQuodigious(index, sum, product)) {
         stream << index << std::endl;
     }
-} 
+}
 
 template<u64 index>
 inline void initialBody() noexcept {
+    // we don't want main aware of any details of how computation is performed.
+    // This allows the decoupling of details from main and the computation body itself
     body<index>(std::cout);
 }
 
@@ -148,6 +204,11 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     sum += 2;
     product <<= 1;
     index += multiply<2>(next);
+    // unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
+    // numbers (this code is not used when you request 64-bit numbers!)
+    // does not require as much optimization. We can walk through digit level
+    // by digit level (even if the digit does not contribute too much to the
+    // overall process!).
     for (int i = 2; i < 10; ++i) {
         innerBody32<inner>(sum, product, index);
         ++sum;
@@ -158,11 +219,16 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 
 template<u32 length>
 void innerBody32(u32 sum, u32 product, u32 index) noexcept {
+    // this double template instantiation is done to make sure that the compiler
+    // does not attempt to instantiate infinitely, if this code was in place
+    // of the call to innerbody32 in body32 then the compiler would not stop
+    // instiantiating. we can then also perform specialization on length zero
     body32<length>(sum, product, index);
 }
 
 template<>
 void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
+    // perform the check in the case that length == 0
     if (isQuodigious(index, sum, product)) {
         std::cout << index << std::endl;
     }
