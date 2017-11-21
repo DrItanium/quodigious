@@ -47,7 +47,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
     // or the equivalent for the corresponding thing
 	sum += 2;
 	product <<= 1;
-	index += multiply<2>(next); // this uses templating to make sure that multiplying two will cause a left shift by 1
+	index += (next << 1);
 	if (length >= 11) {
         // when we are greater than 10 digit numbers, it is a smart idea to
         // perform divide and conquer at each level above 10 digits. The number of
@@ -57,7 +57,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
         // and does not nuke machines unnecessarily.
 		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 				std::ostringstream stream;
-				innerBody<inner>(stream, sum, product, index, depth); // 2
 				++sum;
 				product += baseProduct;
 				index += next;
@@ -66,17 +65,17 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 				product += baseProduct;
 				index += next;
 				innerBody<inner>(stream, sum, product, index, depth); // 4
+                sum += 2;
+                product += (baseProduct << 1);
+                index += (next << 1);
+                innerBody<inner>(stream, sum, product, index, depth); // 6
 				return stream.str();
 				}, sum, product, index, depth);
 		auto upperHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 					std::ostringstream stream;
-					sum += 4;
-					product += (baseProduct << 2);
-					index += (next << 2);
-					innerBody<inner>(stream, sum, product, index, depth); // 6
-					++sum;
-					product += baseProduct;
-					index += next;
+					sum += 5;
+					product += ((baseProduct << 2) + baseProduct);
+					index += ((next << 2) + next);
 					innerBody<inner>(stream, sum, product, index, depth); // 7
 					++sum;
 					product += baseProduct;
@@ -88,6 +87,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 					innerBody<inner>(stream, sum, product, index, depth); // 9
 					return stream.str();
 				}, sum, product, index, depth);
+        innerBody<inner>(stream, sum, product, index, depth); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
         // hand unrolled loop bodies
@@ -203,7 +203,7 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
     auto baseProduct = product;
     sum += 2;
     product <<= 1;
-    index += multiply<2>(next);
+    index += (next << 1);
     // unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
     // numbers (this code is not used when you request 64-bit numbers!)
     // does not require as much optimization. We can walk through digit level
