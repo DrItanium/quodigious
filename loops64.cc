@@ -113,6 +113,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
             //
             //
             // The upside is that compilation time is reduced :D
+            // it will also eliminate prime numbers :D
 			innerBody<inner>(stream, sum, product,index, depth); // 2
 			sum += 2;
 			product += (baseProduct << 1);
@@ -180,7 +181,11 @@ template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     // specialization
     if (isQuodigious(index, sum, product)) {
+#ifndef EXTENDED_RESEARCH
         stream << index << std::endl;
+#else /* EXTENDED_RESEARCH */
+        stream << "** " << index << " @@ " << product << " (+ (* 3 " << (product / 3) << ") " << (product % 3)  << ") $$ " << sum << " (* 3 " << (sum / 3) << ")" << std::endl;
+#endif // end !EXTENDED_RESEARCH
     }
 }
 
