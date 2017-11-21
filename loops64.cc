@@ -101,7 +101,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
         // digits of a number instead, the digits are already broken apart and the
         // need to use divides and modulus operations are minimized (although
         // a compiler could technically factor divides and mods into bit shifting)
-		if (length == 1 && (depth >= 10)) {
+		if (length == 1) {
             // through observational evidence, I found that the least significant
             // digits are all even. Even if it turns out that this isn't the case
             // I can always perform the odd digit checks later on at a significant
