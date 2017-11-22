@@ -58,9 +58,7 @@ constexpr bool isQuodigious(u64 value, u64 sum, u64 product) noexcept {
 	// really that sort of check is useless. If we find that the product is
 	// divisible first then we should eliminate numbers faster :D
 #ifndef EXACT_COMPUTATION
-    // while not exact (there are some products which are not divisble by three
-    // it will give an approximation that we can use to our advantage!
-	return ((sum % 3 == 0)) && (product % 3 == 0) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
+	return ((sum % 3 == 0)) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
 #else /* !EXACT_COMPUTATION */
 	return componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
 #endif // end EXACT_COMPUTATION
