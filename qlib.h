@@ -46,7 +46,7 @@ constexpr auto fastPow10 = quickPow10<length>();
 
 template<typename T>
 constexpr bool componentQuodigious(T value, T compare) noexcept {
-	return (value % compare) == 0;
+	return value >= compare ? ((value % compare) == 0) : false;
 }
 /**
  * This is used all over the place, it is the actual code to check to see if a
