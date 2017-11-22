@@ -42,9 +42,9 @@ ${QLOOPS_PROG64}: loops64.o
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
 
-${APPROX_PROG64}: approximateQuodigious.o
+${APPROX_PROG64}: approximationQuodigious.o
 	@echo -n "Building 64-bit number quodigious computer ..."
-	@${CXX} -lpthread ${LXXFLAGS} -o ${APPROX_PROG64} approximateQuodigious.o
+	@${CXX} -lpthread ${LXXFLAGS} -o ${APPROX_PROG64} approximationQuodigious.o
 	@echo done.
 
 
@@ -59,4 +59,4 @@ clean:
 	@echo done.
 
 loops64.o: qlib.h
-approximateQuodigious.o: qlib.h
+approximationQuodigious.o: qlib.h
