@@ -196,6 +196,46 @@ inline void initialBody() noexcept {
     body<index>(std::cout);
 }
 
+template<>
+inline void initialBody<13>() noexcept {
+    auto fn = [](auto index) noexcept {
+        std::stringstream str;
+        body<12>(str, index, index, index * fastPow10<12>);
+        return str.str();
+    };
+    auto t0 = std::async(std::launch::async, fn, 2);
+    auto t1 = std::async(std::launch::async, fn, 3);
+    auto t2 = std::async(std::launch::async, fn, 4);
+    auto t3 = std::async(std::launch::async, fn, 6);
+    auto t4 = std::async(std::launch::async, fn, 7);
+    auto t5 = std::async(std::launch::async, fn, 8);
+    auto t6 = std::async(std::launch::async, fn, 9);
+    std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
+}
+
+template<>
+inline void initialBody<14>() noexcept {
+    auto fn = [](auto index, auto offset) noexcept {
+        std::stringstream str;
+        body<12>(str, index + offset, index * offset, ((index * fastPow10<13>) + (offset * fastPow10<12>)));
+        return str.str();
+    };
+    for (u64 i = 2; i < 10; ++i) {
+        if (i == 5) {
+            continue;
+        }
+        auto t0 = std::async(std::launch::async, fn, i, 2);
+        auto t1 = std::async(std::launch::async, fn, i, 3);
+        auto t2 = std::async(std::launch::async, fn, i, 4);
+        auto t3 = std::async(std::launch::async, fn, i, 6);
+        auto t4 = std::async(std::launch::async, fn, i, 7);
+        auto t5 = std::async(std::launch::async, fn, i, 8);
+        auto t6 = std::async(std::launch::async, fn, i, 9);
+        std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
+    }
+}
+
+
 template<u32 length>
 inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
 
