@@ -215,57 +215,28 @@ inline void initialBody<13>() noexcept {
 
 template<>
 inline void initialBody<14>() noexcept {
-    auto fn = [](auto index, auto offset) noexcept {
-        std::stringstream str;
-        body<12>(str, index + offset, index * offset, (index + offset) * fastPow10<12>);
-        return str.str();
-    };
-    for (u64 i = 2; i < 10; ++i) {
-        if (i == 5) {
-            continue;
-        }
-        auto t0 = std::async(std::launch::async, fn, i, 2);
-        auto t1 = std::async(std::launch::async, fn, i, 3);
-        auto t2 = std::async(std::launch::async, fn, i, 4);
-        auto t3 = std::async(std::launch::async, fn, i, 6);
-        auto t4 = std::async(std::launch::async, fn, i, 7);
-        auto t5 = std::async(std::launch::async, fn, i, 8);
-        auto t6 = std::async(std::launch::async, fn, i, 9);
+    auto doIt = [](auto i) noexcept {
+        auto fn = [i](auto offset) noexcept {
+            std::stringstream str;
+            body<12>(str, i + offset, i * offset, ((i * fastPow10<13>) + (offset * fastPow10<12>)));
+            return str.str();
+        };
+        auto t0 = std::async(std::launch::async, fn, 2);
+        auto t1 = std::async(std::launch::async, fn, 3);
+        auto t2 = std::async(std::launch::async, fn, 4);
+        auto t3 = std::async(std::launch::async, fn, 6);
+        auto t4 = std::async(std::launch::async, fn, 7);
+        auto t5 = std::async(std::launch::async, fn, 8);
+        auto t6 = std::async(std::launch::async, fn, 9);
         std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-    }
-}
-
-template<>
-inline void initialBody<15>() noexcept {
-    auto fn = [](auto sum, auto product, auto index, auto offset) noexcept {
-        std::stringstream str;
-        body<12>(str, sum + offset, product * offset, (index + offset) * fastPow10<12>);
-        return str.str();
     };
-    for (u64 j = 2; j < 10; ++j) {
-        if (j == 5) {
-            continue;
-        }
-        auto v0 = j * 10;
-        auto s0 = j;
-        auto p0 = j;
-        for (u64 i = 2; i < 10; ++i) {
-            if (i == 5) {
-                continue;
-            }
-            auto v1 = (v0 + i) * 10;
-            auto s1 = s0 + i;
-            auto p1 = p0 * i;
-            auto t0 = std::async(std::launch::async, fn, s1, p1, v1, 2);
-            auto t1 = std::async(std::launch::async, fn, s1, p1, v1, 3);
-            auto t2 = std::async(std::launch::async, fn, s1, p1, v1, 4);
-            auto t3 = std::async(std::launch::async, fn, s1, p1, v1, 6);
-            auto t4 = std::async(std::launch::async, fn, s1, p1, v1, 7);
-            auto t5 = std::async(std::launch::async, fn, s1, p1, v1, 8);
-            auto t6 = std::async(std::launch::async, fn, s1, p1, v1, 9);
-            std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-        }
-    }
+    doIt(2);
+    doIt(3);
+    doIt(4);
+    doIt(6);
+    doIt(7);
+    doIt(8);
+    doIt(9);
 }
 
 template<u32 length>
