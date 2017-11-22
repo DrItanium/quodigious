@@ -190,61 +190,45 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 }
 
 template<>
-inline void innerBody<1>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     // try out the different combinations
 
     ++depth;
-    stream << "index: " << index << std::endl;
-    auto baseProduct = product;
-    sum += 2;
-    product += (baseProduct << 1);
     index += 20;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    ++sum;
-    product += baseProduct;
+    innerBody<0>(stream, sum + 2 + 2, product * 2 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 2 + 4, product * 2 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 2 + 6, product * 2 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 2 + 8, product * 2 * 8, index + 8, depth);
     index += 10;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    ++sum;
-    product += baseProduct;
+    innerBody<0>(stream, sum + 3 + 2, product * 3 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 3 + 4, product * 3 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 3 + 6, product * 3 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 3 + 8, product * 3 * 8, index + 8, depth);
     index += 10;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    sum += 2;
-    product += (baseProduct << 1);
+    innerBody<0>(stream, sum + 4 + 2, product * 4 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4 + 4, product * 4 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 4 + 6, product * 4 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 4 + 8, product * 4 * 8, index + 8, depth);
     index += 20;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    ++sum;
-    product += baseProduct;
+    innerBody<0>(stream, sum + 6 + 2, product * 6 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 6 + 4, product * 6 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6 + 6, product * 6 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 6 + 8, product * 6 * 8, index + 8, depth);
     index += 10;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    ++sum;
-    product += baseProduct;
+    innerBody<0>(stream, sum + 7 + 2, product * 7 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 7 + 4, product * 7 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 7 + 6, product * 7 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 7 + 8, product * 7 * 8, index + 8, depth);
     index += 10;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
-    ++sum;
-    product += baseProduct;
+    innerBody<0>(stream, sum + 8 + 2, product * 8 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 8 + 4, product * 8 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 8 + 6, product * 8 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8 + 8, product * 8 * 8, index + 8, depth);
     index += 10;
-    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
-    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
-    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
-    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    innerBody<0>(stream, sum + 9 + 2, product * 9 * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 9 + 4, product * 9 * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 9 + 6, product * 9 * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 9 + 8, product * 9 * 8, index + 8, depth);
 }
 
 template<u64 index>
