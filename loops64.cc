@@ -189,28 +189,69 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
     }
 }
 
+template<>
+inline void innerBody<1>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+    // try out the different combinations
+
+    ++depth;
+    stream << "index: " << index << std::endl;
+    auto baseProduct = product;
+    sum += 2;
+    product += (baseProduct << 1);
+    index += 20;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    ++sum;
+    product += baseProduct;
+    index += 10;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    ++sum;
+    product += baseProduct;
+    index += 10;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    sum += 2;
+    product += (baseProduct << 1);
+    index += 20;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    ++sum;
+    product += baseProduct;
+    index += 10;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    ++sum;
+    product += baseProduct;
+    index += 10;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+    ++sum;
+    product += baseProduct;
+    index += 10;
+    innerBody<0>(stream, sum + 2, product * 2, index + 2, depth);
+    innerBody<0>(stream, sum + 4, product * 4, index + 4, depth);
+    innerBody<0>(stream, sum + 6, product * 6, index + 6, depth);
+    innerBody<0>(stream, sum + 8, product * 8, index + 8, depth);
+}
+
 template<u64 index>
 inline void initialBody() noexcept {
     // we don't want main aware of any details of how computation is performed.
     // This allows the decoupling of details from main and the computation body itself
     body<index>(std::cout);
-}
-
-template<>
-inline void initialBody<13>() noexcept {
-    auto fn = [](auto index) noexcept {
-        std::stringstream str;
-        body<12>(str, index, index, index * fastPow10<12>);
-        return str.str();
-    };
-    auto t0 = std::async(std::launch::async, fn, 2);
-    auto t1 = std::async(std::launch::async, fn, 3);
-    auto t2 = std::async(std::launch::async, fn, 4);
-    auto t3 = std::async(std::launch::async, fn, 6);
-    auto t4 = std::async(std::launch::async, fn, 7);
-    auto t5 = std::async(std::launch::async, fn, 8);
-    auto t6 = std::async(std::launch::async, fn, 9);
-    std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
 }
 
 template<u32 length>
