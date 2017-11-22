@@ -213,32 +213,6 @@ inline void initialBody<13>() noexcept {
     std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
 }
 
-template<>
-inline void initialBody<14>() noexcept {
-    auto doIt = [](auto i) noexcept {
-        auto fn = [i](auto offset) noexcept {
-            std::stringstream str;
-            body<12>(str, i + offset, i * offset, ((i * fastPow10<13>) + (offset * fastPow10<12>)));
-            return str.str();
-        };
-        auto t0 = std::async(std::launch::async, fn, 2);
-        auto t1 = std::async(std::launch::async, fn, 3);
-        auto t2 = std::async(std::launch::async, fn, 4);
-        auto t3 = std::async(std::launch::async, fn, 6);
-        auto t4 = std::async(std::launch::async, fn, 7);
-        auto t5 = std::async(std::launch::async, fn, 8);
-        auto t6 = std::async(std::launch::async, fn, 9);
-        std::cout << t0.get() << t1.get() << t2.get() << t3.get() << t4.get() << t5.get() << t6.get();
-    };
-    doIt(2);
-    doIt(3);
-    doIt(4);
-    doIt(6);
-    doIt(7);
-    doIt(8);
-    doIt(9);
-}
-
 template<u32 length>
 inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
 
