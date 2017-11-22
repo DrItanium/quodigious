@@ -190,14 +190,12 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 12: initialBody<12>(); break;
-                case 13: initialBody<13>(); break;
                 case 14: initialBody<14>(); break;
-                //case 15: initialBody<15>(); break;
-                //case 16: initialBody<16>(); break;
-                //case 17: initialBody<17>(); break;
-                //case 18: initialBody<18>(); break;
-                //case 19: initialBody<19>(); break;
+                case 15: initialBody<15>(); break;
+                case 16: initialBody<16>(); break;
+                case 17: initialBody<17>(); break;
+                case 18: initialBody<18>(); break;
+                case 19: initialBody<19>(); break;
                 default:
                         std::cerr << "Illegal index " << currentIndex << std::endl;
                         return 1;
