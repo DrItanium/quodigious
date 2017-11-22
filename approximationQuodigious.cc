@@ -164,15 +164,15 @@ void innerBody<1>(std::ostream& stream, u64 product, u64 index) noexcept {
     // The upside is that compilation time is reduced :D
     // it will also eliminate prime numbers :D
     innerBody<inner>(stream, product, index); // 2
-    product += baseProduct;
-    index += shiftNext;
-    innerBody<inner>(stream, product, index); // 4
-    product += baseProduct;
-    index += shiftNext;
-    innerBody<inner>(stream, product, index); // 6
-    product += baseProduct;
-    index += shiftNext;
-    innerBody<inner>(stream, product, index); // 8
+    //product += baseProduct;
+    //index += shiftNext;
+    //innerBody<inner>(stream, product, index); // 4
+    //product += baseProduct;
+    //index += shiftNext;
+    //innerBody<inner>(stream, product, index); // 6
+    //product += baseProduct;
+    //index += shiftNext;
+    //innerBody<inner>(stream, product, index); // 8
 }
 
 template<u64 index>
@@ -190,8 +190,6 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             switch(currentIndex) {
-                case 10: initialBody<10>(); break;
-                case 11: initialBody<11>(); break;
                 case 12: initialBody<12>(); break;
                 case 13: initialBody<13>(); break;
                 case 14: initialBody<14>(); break;
