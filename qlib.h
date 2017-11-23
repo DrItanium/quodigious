@@ -30,7 +30,6 @@
 using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;
-using LaunchPolicy = decltype(std::launch::async);
 
 template<u64 length>
 constexpr u64 quickPow10() noexcept {
@@ -47,7 +46,7 @@ constexpr auto fastPow10 = quickPow10<length>();
 
 template<typename T>
 constexpr bool componentQuodigious(T value, T compare) noexcept {
-	return (value % compare) == 0;
+	return value >= compare ? ((value % compare) == 0) : false;
 }
 /**
  * This is used all over the place, it is the actual code to check to see if a
@@ -58,7 +57,12 @@ constexpr bool isQuodigious(u64 value, u64 sum, u64 product) noexcept {
 	// more often than not, the sum is divisible by the original value, so
 	// really that sort of check is useless. If we find that the product is
 	// divisible first then we should eliminate numbers faster :D
+#ifndef EXACT_COMPUTATION
 	return ((sum % 3 == 0)) && componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
+#else /* !EXACT_COMPUTATION */
+	return componentQuodigious<u64>(value, product) && componentQuodigious<u64>(value, sum);
+#endif // end EXACT_COMPUTATION
+
 }
 
 
@@ -66,89 +70,6 @@ constexpr bool isQuodigious(u32 value, u32 sum, u32 product) noexcept {
 	return componentQuodigious<u32>(value, product) && componentQuodigious<u32>(value, sum);
 }
 
-
-template<u64 times>
-constexpr u64 multiply(u64 product) noexcept {
-	return times * product;
-}
-
-template<u32 times>
-constexpr u32 multiply(u32 product) noexcept {
-	return times * product;
-}
-
-template<> constexpr u64 multiply<0>(u64 product) noexcept { return 0; }
-template<> constexpr u64 multiply<1>(u64 product) noexcept { return product; }
-template<> constexpr u64 multiply<2>(u64 product) noexcept { return product << 1; }
-template<> constexpr u64 multiply<3>(u64 product) noexcept { return (product << 1) + product; }
-template<> constexpr u64 multiply<4>(u64 product) noexcept { return (product << 2); }
-template<> constexpr u64 multiply<5>(u64 product) noexcept { return (product << 2) + product; }
-template<> constexpr u64 multiply<6>(u64 product) noexcept { return (product << 2) + (product << 1); }
-template<> constexpr u64 multiply<7>(u64 product) noexcept { return (product << 2) + (product << 1) + product; }
-template<> constexpr u64 multiply<8>(u64 product) noexcept { return (product << 3); }
-template<> constexpr u64 multiply<9>(u64 product) noexcept { return (product << 3) + product; }
-template<> constexpr u64 multiply<10>(u64 product) noexcept { return (product << 3) + (product << 1); }
-
-template<> constexpr u32 multiply<0>(u32 product) noexcept { return 0; }
-template<> constexpr u32 multiply<1>(u32 product) noexcept { return product; }
-template<> constexpr u32 multiply<2>(u32 product) noexcept { return product << 1; }
-template<> constexpr u32 multiply<3>(u32 product) noexcept { return (product << 1) + product; }
-template<> constexpr u32 multiply<4>(u32 product) noexcept { return (product << 2); }
-template<> constexpr u32 multiply<5>(u32 product) noexcept { return (product << 2) + product; }
-template<> constexpr u32 multiply<6>(u32 product) noexcept { return (product << 2) + (product << 1); }
-template<> constexpr u32 multiply<7>(u32 product) noexcept { return (product << 2) + (product << 1) + product; }
-template<> constexpr u32 multiply<8>(u32 product) noexcept { return (product << 3); }
-template<> constexpr u32 multiply<9>(u32 product) noexcept { return (product << 3) + product; }
-template<> constexpr u32 multiply<10>(u32 product) noexcept { return (product << 3) + (product << 1); }
-
-constexpr bool isEven(u64 value) noexcept {
-	return (value & 1) == 0;
-}
-
-template<u64 k>
-struct EvenCheck : std::integral_constant<bool, k == ((k >> 1) << 1)> { };
-
-template<typename T>
-inline void merge(T value , std::ostream& input) noexcept {
-	if (value != 0) {
-		input << value << std::endl;
-	}
-}
-
-template<u64 width>
-constexpr int numberOfDigitsForGivenWidth() noexcept {
-	static_assert(width >= 0, "Negative width doesn't make sense");
-	return 7 * numberOfDigitsForGivenWidth<width - 1>();
-}
-template<> constexpr int numberOfDigitsForGivenWidth<0>() noexcept { return 1; }
-template<u64 width>
-constexpr auto numElements = numberOfDigitsForGivenWidth<width>();
-
-template<u64 width>
-constexpr u64 makeDigitAt(u64 input) noexcept {
-	return input * fastPow10<width>;
-}
-
-template<u64 width, u64 divide>
-constexpr int getPartialSize() noexcept {
-	static_assert(divide > 0, "Can't have a divisor of 0");
-	return numElements<width> / divide;
-}
-
-template<u64 width, u64 divisible>
-constexpr bool isDivisibleBy(u64 factor) noexcept {
-	return (factor * divisible) == numElements<width>;
-}
-
-constexpr bool checkValue(u64 sum) noexcept {
-	return (isEven(sum)) || (sum % 3 == 0);
-}
-constexpr u64 inspectValue(u64 value, u64 sum, u64 product) noexcept {
-	if (checkValue(sum) && isQuodigious(value, sum, product)) {
-		return value;
-	}
-	return 0;
-}
 
 
 #endif // end QLIB_H__
