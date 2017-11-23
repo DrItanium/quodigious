@@ -42,6 +42,11 @@ real    636m24.102s
 user    2544m33.564s
 sys     0m0.203s
 
+16 digits (hacked together tri-divide and conquer)
+real    456m14.888s
+user    1822m30.448s
+sys     0m5.170s
+
 
 HEX CORE TIMES ( updated multithreaded version ):
 
