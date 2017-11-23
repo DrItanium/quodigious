@@ -188,25 +188,25 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 #endif // end !EXTENDED_RESEARCH
     }
 }
-/*
+
 template<>
 inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     // try out the different combinations
 
     ++depth;
-    innerBody<0>(stream, sum + 2 + 2, product << 2, index + 22, depth);
+    //innerBody<0>(stream, sum + 2 + 2, product << 2, index + 22, depth);
     innerBody<0>(stream, sum + 2 + 4, product << 3, index + 24, depth);
     innerBody<0>(stream, sum + 2 + 6, product * 2 * 6, index + 26, depth);
     innerBody<0>(stream, sum + 2 + 8, product << 4, index + 28, depth);
     innerBody<0>(stream, sum + 3 + 2, product * 3 * 2, index + 32, depth);
     innerBody<0>(stream, sum + 3 + 4, product * 3 * 4, index + 34, depth);
     innerBody<0>(stream, sum + 3 + 6, product * 3 * 6, index + 36, depth);
-    innerBody<0>(stream, sum + 3 + 8, product * 3 * 8, index + 38, depth);
-    innerBody<0>(stream, sum + 4 + 2, product * 4 * 2, index + 42, depth);
+    //innerBody<0>(stream, sum + 3 + 8, product * 3 * 8, index + 38, depth);
+    innerBody<0>(stream, sum + 4 + 2, product << 3, index + 42, depth);
     innerBody<0>(stream, sum + 4 + 4, product << 4, index + 44, depth);
     innerBody<0>(stream, sum + 4 + 6, product * 4 * 6, index + 46, depth);
     innerBody<0>(stream, sum + 4 + 8, product << 5, index + 48, depth);
-    innerBody<0>(stream, sum + 6 + 2, product * 6 * 2, index + 62, depth);
+    //innerBody<0>(stream, sum + 6 + 2, product * 6 * 2, index + 62, depth);
     innerBody<0>(stream, sum + 6 + 4, product * 6 * 4, index + 64, depth);
     innerBody<0>(stream, sum + 6 + 6, product * 6 * 6, index + 66, depth);
     innerBody<0>(stream, sum + 6 + 8, product * 6 * 8, index + 68, depth);
@@ -223,7 +223,6 @@ inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, 
     innerBody<0>(stream, sum + 9 + 6, product * 9 * 6, index + 96, depth);
     innerBody<0>(stream, sum + 9 + 8, product * 9 * 8, index + 98, depth);
 }
-*/
 
 template<u64 index>
 inline void initialBody() noexcept {
