@@ -188,7 +188,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 #endif // end !EXTENDED_RESEARCH
     }
 }
-
+/*
 template<>
 inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
     // try out the different combinations
@@ -223,6 +223,7 @@ inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, 
     innerBody<0>(stream, sum + 9 + 6, product * 9 * 6, index + 96, depth);
     innerBody<0>(stream, sum + 9 + 8, product * 9 * 8, index + 98, depth);
 }
+*/
 
 template<u64 index>
 inline void initialBody() noexcept {
