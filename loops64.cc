@@ -211,9 +211,9 @@ inline void innerBody<2>(std::ostream& stream, u64 sum, u64 product, u64 index, 
     innerBody<0>(stream, sum + 6 + 6, product * 6 * 6, index + 66, depth);
     innerBody<0>(stream, sum + 6 + 8, product * 6 * 8, index + 68, depth);
     innerBody<0>(stream, sum + 7 + 2, product * 7 * 2, index + 72, depth);
-    innerBody<0>(stream, sum + 7 + 4, product * 7 * 4, index + 74, depth);
+    //innerBody<0>(stream, sum + 7 + 4, product * 7 * 4, index + 74, depth);
     innerBody<0>(stream, sum + 7 + 6, product * 7 * 6, index + 76, depth);
-    innerBody<0>(stream, sum + 7 + 8, product * 7 * 8, index + 78, depth);
+    //innerBody<0>(stream, sum + 7 + 8, product * 7 * 8, index + 78, depth);
     innerBody<0>(stream, sum + 8 + 2, product << 4, index + 82, depth);
     innerBody<0>(stream, sum + 8 + 4, product << 5, index + 84, depth);
     innerBody<0>(stream, sum + 8 + 6, product * 8 * 6, index + 86, depth);
