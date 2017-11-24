@@ -1,4 +1,6 @@
-DUAL HEX CORE TIMES ( older multhreaded executable) :
+DUAL HEX CORE TIMES 
+
+( older multhreaded executable) :
 14 Digits
 real    4m8.773s
 user    98m58.960s
@@ -27,6 +29,15 @@ sys     0m30.700s
 real    1470m35.931s
 user    35151m16.580s
 sys     1m31.050s
+
+
+(Modified Tri-Divide Version):
+
+16 Digits:
+real    118m43.979s  
+user    2846m46.270s 
+sys     0m3.010s 
+
 
 
 
@@ -64,3 +75,4 @@ sys	0m20.725s
 real    1148m36.660s
 user    13727m25.984s
 sys     0m32.175s
+
