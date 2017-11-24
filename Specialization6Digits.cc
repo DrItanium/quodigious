@@ -6,7 +6,7 @@ inline void innerBody<6>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 	// disable quite a few, the ones commented out are the ones which do not
 	// contribute for finding quodigious numbers between 11 and 17 digits
 	//
-	// Generated with the unique5.clp expert system
+	// Generated with the unique6.clp expert system
 	innerBody<0>(stream, sum+ 2 + 7 + 2 + 2 + 2 + 2, product* 2 * 7 * 2 * 2 * 2 * 2, index + 222272, depth);
 	innerBody<0>(stream, sum+ 6 + 3 + 3 + 2 + 2 + 2, product* 6 * 3 * 3 * 2 * 2 * 2, index + 222336, depth);
 	innerBody<0>(stream, sum+ 4 + 6 + 4 + 2 + 2 + 2, product* 4 * 6 * 4 * 2 * 2 * 2, index + 222464, depth);
