@@ -48,7 +48,9 @@ user    1822m30.448s
 sys     0m5.170s
 
 
-HEX CORE TIMES ( updated multithreaded version ):
+HEX CORE TIMES 
+
+( updated multithreaded version ):
 
 15 Digits
 real	24m11.005s
@@ -64,3 +66,21 @@ sys	0m20.725s
 real    1148m36.660s
 user    13727m25.984s
 sys     0m32.175s
+
+(least signficant five digits space reduction method + multithreads!):
+
+11 Digits:
+real	0m0.154s
+user	0m0.348s
+sys	0m0.004s
+
+14 Digits:
+real	0m12.991s
+user	2m33.965s
+sys	0m0.009s
+
+15 Digits:
+real	1m29.986s
+user	17m54.610s
+sys	0m0.100s
+
