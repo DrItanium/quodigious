@@ -38,33 +38,8 @@
                             ?offset)
              (close ?input)
              (close ?output))
-
-(construct-lastN outputs/qnums11 
-                 2)
-(construct-lastN outputs/qnums12 
-                 2)
-(construct-lastN outputs/qnums13 
-                 2)
-(construct-lastN outputs/qnums14 
-                 2)
-(construct-lastN outputs/qnums15 
-                 2)
-(construct-lastN outputs/qnums16 
-                 2)
-(construct-lastN outputs/qnums17 
-                 2)
-
-(construct-lastN outputs/qnums11 
-                 3)
-(construct-lastN outputs/qnums12 
-                 3)
-(construct-lastN outputs/qnums13 
-                 3)
-(construct-lastN outputs/qnums14 
-                 3)
-(construct-lastN outputs/qnums15 
-                 3)
-(construct-lastN outputs/qnums16 
-                 3)
-(construct-lastN outputs/qnums17 
-                 3)
+(loop-for-count (?i 2 5) do
+                (loop-for-count (?w 11 17) do
+                                (construct-lastN (sym-cat outputs/qnums 
+                                                          ?w)
+                                                 ?i)))
