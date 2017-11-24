@@ -110,3 +110,8 @@ sys	0m0.021s
 real	0m4.053s
 user	0m46.550s
 sys	0m0.085s
+
+16 Digits:
+real	0m28.273s
+user	5m28.810s
+sys	0m0.631s
