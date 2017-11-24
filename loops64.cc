@@ -1046,6 +1046,8 @@ inline void innerBody<5>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 	innerBody<0>(stream, sum + 9 + 9 + 9 + 3 + 6, product * 9 * 9 * 9 * 3 * 6, index + 99936, depth);
 }
 
+#include "Specialization6Digits.cc"
+
 template<u64 index>
 inline void initialBody() noexcept {
 	// we don't want main aware of any details of how computation is performed.
