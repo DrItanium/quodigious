@@ -115,3 +115,13 @@ sys	0m0.085s
 real	0m28.273s
 user	5m28.810s
 sys	0m0.631s
+
+17 Digits:
+real	3m17.420s
+user	38m23.146s
+sys	0m4.430s
+
+18 Digits:
+real	23m1.249s
+user	268m56.744s
+sys	0m31.878s
