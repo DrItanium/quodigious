@@ -39,7 +39,7 @@
              (close ?input)
              (close ?output))
 (loop-for-count (?i 2 9) do
-                (loop-for-count (?w 11 17) do
+                (loop-for-count (?w 11 18) do
                                 (construct-lastN (sym-cat outputs/qnums 
                                                           ?w)
                                                  ?i)))
