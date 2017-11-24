@@ -26,27 +26,19 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
 QLOOPS_PROG64 = quodigious64
-APPROX_PROG64 = product_approximate_quodigious
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG64} ${APPROX_PROG64}
+PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG64} 
 all: ${PROGS}
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values"
-	@echo "  - ${APPROX_PROG64}: program to compute probable 64-bit quodigious values by identifying numbers that are divisible by their digit-product"
 	@echo "  - clean : cleans the program artifacts"
 
 ${QLOOPS_PROG64}: loops64.o
 	@echo -n "Building 64-bit number quodigious computer ..."
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
-
-${APPROX_PROG64}: approximationQuodigious.o
-	@echo -n "Building 64-bit number quodigious computer ..."
-	@${CXX} -lpthread ${LXXFLAGS} -o ${APPROX_PROG64} approximationQuodigious.o
-	@echo done.
-
 
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
@@ -58,5 +50,4 @@ clean:
 	@rm -rf *.o ${PROGS}
 	@echo done.
 
-loops64.o: qlib.h
-approximationQuodigious.o: qlib.h
+loops64.o: qlib.h Specialization6Digits.cc Specialization5Digits.cc Specialization4Digits.cc

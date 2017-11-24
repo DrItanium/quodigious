@@ -288,8 +288,8 @@ inline void innerBody<3>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 	innerBody<0>(stream, sum + 9 + 8 + 4, product * 9 * 8 * 4, index + 984, depth);
 	innerBody<0>(stream, sum + 9 + 9 + 2, product * 9 * 9 * 2, index + 992, depth);
 }
-#include "Specialization4Digits.cc"
-#include "Specialization5Digits.cc"
+//#include "Specialization4Digits.cc"
+//#include "Specialization5Digits.cc"
 #include "Specialization6Digits.cc"
 
 template<u64 index>
