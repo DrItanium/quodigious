@@ -50,4 +50,4 @@ clean:
 	@rm -rf *.o ${PROGS}
 	@echo done.
 
-loops64.o: qlib.h Specialization6Digits.cc Specialization5Digits.cc Specialization4Digits.cc
+loops64.o: qlib.h Specialization8Digits.cc

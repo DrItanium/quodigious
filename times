@@ -84,3 +84,29 @@ real	1m29.986s
 user	17m54.610s
 sys	0m0.100s
 
+(least signficant eight digits space reduction method + multithreads!):
+
+11 Digits:
+real	0m0.024s
+user	0m0.048s
+sys	0m0.002s
+
+12 Digits:
+real	0m0.044s
+user	0m0.180s
+sys	0m0.002s
+
+13 Digits:
+real	0m0.130s
+user	0m1.079s
+sys	0m0.003s
+
+14 Digits:
+real	0m0.651s
+user	0m7.162s
+sys	0m0.021s
+
+15 Digits:
+real	0m4.053s
+user	0m46.550s
+sys	0m0.085s
