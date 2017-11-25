@@ -188,6 +188,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 #endif // end !EXTENDED_RESEARCH
 	}
 }
+
 //#include "Specialization2Digits.cc"
 //#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
