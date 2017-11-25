@@ -11,13 +11,38 @@
                              ?sum
                              ?product
                              ?index)))
+(deffunction body
+             (?owidth ?width ?os ?op ?ok)
+             (if (= ?width 
+                    13) then
+               (build-program ?owidth
+                              ?os
+                              ?op
+                              ?ok)
+               else
+               (loop-for-count (?x 2 9) do
+                               (if (<> ?x 5) then
+                                 (body ?owidth
+                                       (- ?width 
+                                          1)
+                                       (+ ?os
+                                          ?x)
+                                       (* ?op
+                                          ?x)
+                                       (+ ?ok
+                                          (integer (* ?x
+                                                      (** 10 
+                                                          (- ?width
+                                                           1))))))))))
+(deffunction do-it
+             (?width)
+             (body ?width
+                   ?width
+                   0
+                   1
+                   0))
 
 
-(loop-for-count (?i 2 9) do
-                (if (<> ?i 5) then
-                    (build-program 14
-                                   ?i
-                                   ?i
-                                   (integer (* ?i (** 10 13))))))
-
+(do-it 13)
+(do-it 14)
 (exit)
