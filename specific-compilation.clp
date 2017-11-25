@@ -3,12 +3,19 @@
 (deffunction build-program
              (?width ?sum ?product ?index)
              (system (format nil
-                             "g++ -lpthread -DSUM=%d -DPRODUCT=%d -DINDEX=%d -O3 -flto -fwhole-program -std=c++14 quodigious_compilation_target.cc -o quodigious%d_%d"
+                             "g++ -lpthread -DSUM=%d -DPRODUCT=%d -DINDEX=%d -O3 -flto -fwhole-program -std=c++14 quodigious_compilation_target.cc -o /tmp/quodigious%d_%d"
                              ?sum
                              ?product
                              ?index
                              ?width
+                             ?index))
+             (system (format nil
+                             "/tmp/quodigious%d_%d > q%d_%d &"
+                             ?width
+                             ?index
+                             ?width
                              ?index)))
+
 (deffunction body
              (?owidth ?width ?os ?op ?ok)
              (if (= ?width 
