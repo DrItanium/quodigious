@@ -18,6 +18,6 @@
                     (build-program 14
                                    ?i
                                    ?i
-                                   (integer (* ?i (** 10 12))))))
+                                   (integer (* ?i (** 10 13))))))
 
 (exit)
