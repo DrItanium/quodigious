@@ -32,6 +32,26 @@
                  (unique-numbers ?width
                                  values:
                                  $?rest)))
+(defrule generate-template-bumper
+         (declare (salience 10000))
+         (unique-numbers ?width
+                         values:
+                         $?)
+         (not (made bumper for ?width))
+         =>
+         (assert (made bumper for ?width))
+         (format t
+                 "template<>%ninline void innerBody<%d>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {%n++depth;%n"
+                 ?width))
+(defrule generate-template-bumper-end
+         (declare (salience -10000))
+         (unique-numbers ?width
+                         values:)
+         (not (made end bumper for ?width))
+         =>
+         (assert (made end bumper for ?width))
+         (printout t "}" crlf))
+        
 (deffunction make-sum
              (?digits)
              (bind ?output
