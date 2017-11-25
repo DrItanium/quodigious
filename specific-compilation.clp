@@ -47,7 +47,7 @@
                    1
                    0))
 
-(do-it 19)
+;(do-it 19)
 ;(loop-for-count (?i 13 19) do
 ;                (do-it ?i))
 (exit)
