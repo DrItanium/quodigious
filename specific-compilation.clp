@@ -3,13 +3,11 @@
 (deffunction build-program
              (?width ?sum ?product ?index)
              (system (format nil
-                             "g++ -lpthread -DSUM=%d -DPRODUCT=%d -DINDEX=%d -O3 -flto -fwhole-program -std=c++14 quodigious_compilation_target.cc -o quodigious%d_%d_%d_%d"
+                             "g++ -lpthread -DSUM=%d -DPRODUCT=%d -DINDEX=%d -O3 -flto -fwhole-program -std=c++14 quodigious_compilation_target.cc -o quodigious%d_%d"
                              ?sum
                              ?product
                              ?index
                              ?width
-                             ?sum
-                             ?product
                              ?index)))
 (deffunction body
              (?owidth ?width ?os ?op ?ok)
@@ -33,7 +31,7 @@
                                           (integer (* ?x
                                                       (** 10 
                                                           (- ?width
-                                                           1))))))))))
+                                                             1))))))))))
 (deffunction do-it
              (?width)
              (body ?width
@@ -42,7 +40,7 @@
                    1
                    0))
 
-
-(loop-for-count (?i 13 19) do
-                (do-it ?i))
+(do-it 19)
+;(loop-for-count (?i 13 19) do
+;                (do-it ?i))
 (exit)
