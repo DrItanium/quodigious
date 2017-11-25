@@ -14,7 +14,7 @@
 (deffunction body
              (?owidth ?width ?os ?op ?ok)
              (if (= ?width 
-                    13) then
+                    12) then
                (build-program ?owidth
                               ?os
                               ?op
@@ -43,6 +43,6 @@
                    0))
 
 
-(do-it 13)
-(do-it 14)
+(loop-for-count (?i 13 19) do
+                (do-it ?i))
 (exit)
