@@ -206,6 +206,5 @@ inline void initialBody() noexcept {
 int main() {
 	// always make the width 13, the SUM, PRODUCT, and INDEX define the width
 	body<12>(std::cout, SUM, PRODUCT, INDEX);
-	std::cout << std::endl;
 	return 0;
 }
