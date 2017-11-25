@@ -55,13 +55,20 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
+		auto lowerMostThird = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
 				std::ostringstream stream;
 				innerBody<inner>(stream, sum, product, index, depth); // 2
 				++sum;
 				product += baseProduct;
 				index += next;
 				innerBody<inner>(stream, sum, product, index, depth); // 3
+				return stream.str();
+				}, sum, product, index, depth);
+		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index, auto depth) noexcept {
+				std::ostringstream stream;
+				++sum;
+				product += baseProduct;
+				index += next;
 				++sum;
 				product += baseProduct;
 				index += next;
@@ -93,7 +100,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// thread even. The same number of threads are spawned but the primary
 		// thread that spawned the children is reused below.
 		//innerBody<inner>(stream, sum, product, index, depth); // 2
-		stream << lowerHalf.get() << upperHalf.get();
+		stream << lowerMostThird.get() << lowerHalf.get() << upperHalf.get();
 	} else {
 		// hand unrolled loop bodies
 		// we use the stack to keep track of sums, products, and current indexes
