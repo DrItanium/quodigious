@@ -194,9 +194,9 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
 //#include "Specialization6Digits.cc"
-//#include "Specialization7Digits.cc"
+#include "Specialization7Digits.cc"
 //#include "Specialization8Digits.cc"
-#include "Specialization9Digits.cc"
+//#include "Specialization9Digits.cc"
 //#include "Specialization10Digits.cc"
 
 template<u64 index>
