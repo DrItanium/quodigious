@@ -21,10 +21,82 @@
 #include <future>
 
 
-// an odd discovery is that the depth variable improves performance even though it is only
-// incremented and never directly used!
+template<u32 length>
+inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
+
+template<u32 length>
+void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
+	static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+	static_assert(length != 0, "Can't have length of zero!");
+	constexpr auto inner = length - 1;
+	constexpr auto next = fastPow10<inner>;
+	auto baseProduct = product;
+	sum += 2;
+	product <<= 1;
+	index += (next << 1);
+	// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
+	// numbers (this code is not used when you request 64-bit numbers!)
+	// does not require as much optimization. We can walk through digit level
+	// by digit level (even if the digit does not contribute too much to the
+	// overall process!).
+	//for (int i = 2; i < 10; ++i) {
+	//    innerBody32<inner>(sum, product, index);
+	//    ++sum;
+	//    product += baseProduct;
+	//    index += next;
+	//}
+	// force an unroll here
+	innerBody32<inner>(sum, product, index); // 2
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 3
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 4
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 5
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 6
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 7
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 8
+	++sum;
+	product += baseProduct;
+	index += next;
+	innerBody32<inner>(sum, product, index); // 9
+}
+
+template<u32 length>
+void innerBody32(u32 sum, u32 product, u32 index) noexcept {
+	// this double template instantiation is done to make sure that the compiler
+	// does not attempt to instantiate infinitely, if this code was in place
+	// of the call to innerbody32 in body32 then the compiler would not stop
+	// instiantiating. we can then also perform specialization on length zero
+	body32<length>(sum, product, index);
+}
+
+template<>
+void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
+	// perform the check in the case that length == 0
+	if (isQuodigious(index, sum, product)) {
+		std::cout << index << std::endl;
+	}
+}
+
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
+
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -202,78 +274,6 @@ inline void initialBody() noexcept {
 	body<index>(std::cout);
 }
 
-template<u32 length>
-inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
-
-template<u32 length>
-void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
-	static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
-	static_assert(length != 0, "Can't have length of zero!");
-	constexpr auto inner = length - 1;
-	constexpr auto next = fastPow10<inner>;
-	auto baseProduct = product;
-	sum += 2;
-	product <<= 1;
-	index += (next << 1);
-	// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
-	// numbers (this code is not used when you request 64-bit numbers!)
-	// does not require as much optimization. We can walk through digit level
-	// by digit level (even if the digit does not contribute too much to the
-	// overall process!).
-	//for (int i = 2; i < 10; ++i) {
-	//    innerBody32<inner>(sum, product, index);
-	//    ++sum;
-	//    product += baseProduct;
-	//    index += next;
-	//}
-	// force an unroll here
-	innerBody32<inner>(sum, product, index); // 2
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 3
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 4
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 5
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 6
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 7
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 8
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 9
-}
-
-template<u32 length>
-void innerBody32(u32 sum, u32 product, u32 index) noexcept {
-	// this double template instantiation is done to make sure that the compiler
-	// does not attempt to instantiate infinitely, if this code was in place
-	// of the call to innerbody32 in body32 then the compiler would not stop
-	// instiantiating. we can then also perform specialization on length zero
-	body32<length>(sum, product, index);
-}
-
-template<>
-void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
-	// perform the check in the case that length == 0
-	if (isQuodigious(index, sum, product)) {
-		std::cout << index << std::endl;
-	}
-}
 
 
 int main() {
