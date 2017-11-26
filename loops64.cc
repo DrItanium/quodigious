@@ -95,10 +95,10 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, uint8_t sum, u64 product, u64 index) noexcept;
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
 
 template<u64 length>
-inline void body(std::ostream& stream, uint8_t sum = 0, u64 product = 1, u64 index = 0) noexcept {
+inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -242,7 +242,7 @@ inline void body(std::ostream& stream, uint8_t sum = 0, u64 product = 1, u64 ind
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, uint8_t sum, u64 product, u64 index) noexcept {
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
@@ -250,9 +250,9 @@ inline void innerBody(std::ostream& stream, uint8_t sum, u64 product, u64 index)
 	body<length>(stream, sum, product, index);
 }
 template<>
-inline void innerBody<0>(std::ostream& stream, uint8_t sum, u64 product, u64 index) noexcept {
+inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// specialization
-	if (isQuodigious(index, static_cast<u64>(sum), product)) {
+	if (isQuodigious(index, sum, product)) {
 		stream << index << '\n';
 	}
 }
@@ -263,8 +263,8 @@ inline void innerBody<0>(std::ostream& stream, uint8_t sum, u64 product, u64 ind
 //#include "Specialization5Digits.cc"
 //#include "Specialization6Digits.cc"
 //#include "Specialization7Digits.cc"
-//#include "Specialization8Digits.cc"
-#include "Specialization9Digits.cc"
+#include "Specialization8Digits.cc"
+//#include "Specialization9Digits.cc"
 //#include "Specialization10Digits.cc"
 
 template<u64 index>
