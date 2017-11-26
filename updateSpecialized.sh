@@ -8,4 +8,5 @@
 ./makeSpecialized.sh 7
 ./makeSpecialized.sh 8
 ./makeSpecialized.sh 9
+./makeSpecialized.sh 10
 
