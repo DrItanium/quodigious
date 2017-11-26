@@ -1,5 +1,5 @@
 template<>
-inline void innerBody<8>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody<8>(std::ostream& stream, uint8_t sum, u64 product, u64 index) noexcept {
 innerBody<0>(stream, sum+ 6 + 3 + 3 + 2 + 2 + 2 + 2 + 2, product* 6 * 3 * 3 * 2 * 2 * 2 * 2 * 2, index + 22222336);
 innerBody<0>(stream, sum+ 8 + 4 + 8 + 2 + 2 + 2 + 2 + 2, product* 8 * 4 * 8 * 2 * 2 * 2 * 2 * 2, index + 22222848);
 innerBody<0>(stream, sum+ 2 + 3 + 2 + 3 + 2 + 2 + 2 + 2, product* 2 * 3 * 2 * 3 * 2 * 2 * 2 * 2, index + 22223232);

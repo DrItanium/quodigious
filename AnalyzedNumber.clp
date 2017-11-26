@@ -41,7 +41,7 @@
          =>
          (assert (made bumper for ?width))
          (format t
-                 "template<>%ninline void innerBody<%d>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {%n"
+                 "template<>%ninline void innerBody<%d>(std::ostream& stream, uint8_t sum, u64 product, u64 index) noexcept {%n"
                  ?width))
 (defrule generate-template-bumper-end
          (declare (salience -10000))
