@@ -255,15 +255,17 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 	if (sum % 3 != 0) {
 		return;
 	}
+#ifdef EXACT
 	if (index % product != 0) {
 		return;
 	}
-#ifdef EXACT
 	if (index % sum == 0) {
 		stream << index << '\n';
 	}
 #else // !defined(EXACT)
-	stream << index << '\n';
+	if (index % product == 0) {
+		stream << index << '\n';
+	}
 #endif // end !defined(EXACT)
 }
 
