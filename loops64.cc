@@ -17,9 +17,9 @@
 //  3. This notice may not be removed or altered from any source distribution.
 
 // Perform numeric quodigious checks
+
 #include "qlib.h"
 #include <future>
-
 
 template<u32 length>
 inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
@@ -258,9 +258,13 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 	if (index % product != 0) {
 		return;
 	}
+#ifdef EXACT
 	if (index % sum == 0) {
 		stream << index << '\n';
 	}
+#else // !defined(EXACT)
+	stream << index << '\n';
+#endif // end !defined(EXACT)
 }
 
 //#include "Specialization2Digits.cc"
