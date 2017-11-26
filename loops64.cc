@@ -95,10 +95,10 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
 
 template<u64 length>
-inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -127,43 +127,43 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto lowerHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index) noexcept {
+		auto lowerHalf = std::async(std::launch::async, [baseProduct, depth](auto sum, auto product, auto index) noexcept {
 				std::ostringstream stream;
 				++sum;
 				product += baseProduct;
 				index += next;
-				innerBody<inner>(stream, sum, product, index); // 3
+				innerBody<inner>(stream, sum, product, index, depth); // 3
 				++sum;
 				product += baseProduct;
 				index += next;
-				innerBody<inner>(stream, sum, product, index); // 4
+				innerBody<inner>(stream, sum, product, index, depth); // 4
 				sum += 2;
 				product += (baseProduct << 1);
 				index += (next << 1);
-				innerBody<inner>(stream, sum, product, index); // 6
+				innerBody<inner>(stream, sum, product, index, depth); // 6
 				return stream.str();
 				}, sum, product, index);
-		auto upperHalf = std::async(std::launch::async, [baseProduct](auto sum, auto product, auto index) noexcept {
+		auto upperHalf = std::async(std::launch::async, [baseProduct, depth](auto sum, auto product, auto index) noexcept {
 				std::ostringstream stream;
 				sum += 5;
 				product += ((baseProduct << 2) + baseProduct);
 				index += ((next << 2) + next);
-				innerBody<inner>(stream, sum, product, index); // 7
+				innerBody<inner>(stream, sum, product, index, depth); // 7
 				++sum;
 				product += baseProduct;
 				index += next;
-				innerBody<inner>(stream, sum, product, index); // 8
+				innerBody<inner>(stream, sum, product, index, depth); // 8
 				++sum;
 				product += baseProduct;
 				index += next;
-				innerBody<inner>(stream, sum, product, index); // 9
+				innerBody<inner>(stream, sum, product, index, depth); // 9
 				return stream.str();
 				}, sum, product, index);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
 		// thread that spawned the children is reused below.
-		innerBody<inner>(stream, sum, product, index); // 2
+		innerBody<inner>(stream, sum, product, index, depth); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
 		// hand unrolled loop bodies
@@ -186,19 +186,19 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			//
 			// The upside is that compilation time is reduced :D
 			// it will also eliminate prime numbers :D
-			innerBody<inner>(stream, sum, product,index); // 2
+			innerBody<inner>(stream, sum, product, index, depth); // 2
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index); // 4
+			innerBody<inner>(stream, sum, product, index, depth); // 4
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
-			innerBody<inner>(stream, sum, product,index); // 6
+			innerBody<inner>(stream, sum, product, index, depth); // 6
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
-			innerBody<inner>(stream, sum, product,index); // 8
+			innerBody<inner>(stream, sum, product, index, depth); // 8
 		} else {
 			// this of this as a for loop from 2 to 10 skipping 5. Each
 			// call in this block is as though the current digit is 2,
@@ -211,46 +211,46 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			// you actually pass one to this (which is impossible) since passing
 			// 1 into the program will cause the 32-bit integer paths to be used
 			// instead.
-			innerBody<inner>(stream, sum, product, index); // 2
+			innerBody<inner>(stream, sum, product, index, depth); // 2
 			++sum;
 			product += baseProduct;
 			index += next;
-			innerBody<inner>(stream, sum, product, index); // 3
+			innerBody<inner>(stream, sum, product, index, depth); // 3
 			++sum;
 			product += baseProduct;
 			index += next;
-			innerBody<inner>(stream, sum, product, index); // 4
+			innerBody<inner>(stream, sum, product, index, depth); // 4
 			sum += 2;
 			product += (baseProduct << 1);
 			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index); // 6
+			innerBody<inner>(stream, sum, product, index, depth); // 6
 			++sum;
 			product += baseProduct;
 			index += next;
-			innerBody<inner>(stream, sum, product, index); // 7
+			innerBody<inner>(stream, sum, product, index, depth); // 7
 			++sum;
 			product += baseProduct;
 			index += next;
-			innerBody<inner>(stream, sum, product, index); // 8
+			innerBody<inner>(stream, sum, product, index, depth); // 8
 			++sum;
 			product += baseProduct;
 			index += next;
-			innerBody<inner>(stream, sum, product, index); // 9
+			innerBody<inner>(stream, sum, product, index, depth); // 9
 		}
 	}
 }
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
 	// instiantiating. we can then also perform specialization on length zero
-	body<length>(stream, sum, product, index);
+	body<length>(stream, sum, product, index, depth + 1);
 }
 template<>
-inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
 	// specialization
 	if (isQuodigious(index, sum, product)) {
 		stream << index << '\n';

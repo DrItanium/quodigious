@@ -41,7 +41,7 @@
          =>
          (assert (made bumper for ?width))
          (format t
-                 "template<>%ninline void innerBody<%d>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {%n"
+                 "template<>%ninline void innerBody<%d>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {%n++depth;%n"
                  ?width))
 (defrule generate-template-bumper-end
          (declare (salience -10000))
@@ -79,7 +79,7 @@
          (bind ?k 
                (create$))
          (format t 
-                 "innerBody<0>(stream, sum%s, product%s, index + %d);%n"
+                 "innerBody<0>(stream, sum%s, product%s, index + %d, depth);%n"
                  (make-sum $?digits)
                  (make-product $?digits)
                  ?number))
