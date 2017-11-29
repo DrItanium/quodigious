@@ -95,10 +95,10 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	auto baseProduct = product;
 	// we don't include the digits zero or 1 so just skip them by adding two
 	// or the equivalent for the corresponding thing
-	sum += 2;
-	product <<= 1;
-	index += (next << 1);
 	if (length >= 11) {
+        sum += 2;
+        product <<= 1;
+        index += (next << 1);
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
@@ -161,20 +161,14 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			//
 			// The upside is that compilation time is reduced :D
 			// it will also eliminate prime numbers :D
-			innerBody<inner>(stream, sum, product, index, depth); // 2
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 4
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 6
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 8
+			innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
+			innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
+			innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
+			innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
 		} else {
+            sum += 2;
+            product <<= 1;
+            index += (next << 1);
 			// this of this as a for loop from 2 to 10 skipping 5. Each
 			// call in this block is as though the current digit is 2,
 			// 3, 4, 6, 7, 8, or 9. We use addition only since multiplication
@@ -230,7 +224,7 @@ template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
 	// specialization
 #ifndef NO_HACKS
-	if (sum % 3 != 0) {
+    if (sum % 3 != 0) {
 		return;
 	}
 #endif
