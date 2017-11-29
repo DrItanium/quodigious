@@ -30,10 +30,6 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	static_assert(length != 0, "Can't have length of zero!");
 	constexpr auto inner = length - 1;
 	constexpr auto next = fastPow10<inner>;
-	auto baseProduct = product;
-	sum += 2;
-	product <<= 1;
-	index += (next << 1);
 	// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
 	// numbers (this code is not used when you request 64-bit numbers!)
 	// does not require as much optimization. We can walk through digit level
@@ -46,35 +42,14 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	//    index += next;
 	//}
 	// force an unroll here
-	innerBody32<inner>(sum, product, index); // 2
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 3
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 4
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 5
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 6
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 7
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 8
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 9
+	innerBody32<inner>(sum + 2, product * 2, index + (2 * next)); // 2
+	innerBody32<inner>(sum + 3, product * 3, index + (3 * next)); // 3
+	innerBody32<inner>(sum + 4, product * 4, index + (4 * next)); // 4
+	innerBody32<inner>(sum + 5, product * 5, index + (5 * next)); // 5
+	innerBody32<inner>(sum + 6, product * 6, index + (6 * next)); // 6
+	innerBody32<inner>(sum + 7, product * 7, index + (7 * next)); // 7
+	innerBody32<inner>(sum + 8, product * 8, index + (8 * next)); // 8
+	innerBody32<inner>(sum + 9, product * 9, index + (9 * next)); // 9
 }
 
 template<u32 length>
@@ -250,12 +225,15 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64
 	body<length>(stream, sum, product, index, depth + 1);
 }
 #define EXACT
+#define NO_HACKS
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
 	// specialization
+#ifndef NO_HACKS
 	if (sum % 3 != 0) {
 		return;
 	}
+#endif
 #ifdef EXACT
 	if (index % product != 0) {
 		return;
@@ -275,7 +253,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
 //#include "Specialization6Digits.cc"
-#include "Specialization7Digits.cc"
+//#include "Specialization7Digits.cc"
 //#include "Specialization8Digits.cc"
 //#include "Specialization9Digits.cc"
 //#include "Specialization10Digits.cc"
