@@ -260,8 +260,6 @@ inline void initialBody() noexcept {
 	body<index>(std::cout);
 }
 
-
-
 int main() {
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
