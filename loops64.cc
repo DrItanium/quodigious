@@ -20,7 +20,9 @@
 
 #include "qlib.h"
 #include <future>
+#define COMPUTE19
 
+#ifndef COMPUTE19
 template<u32 length>
 inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
 
@@ -93,6 +95,7 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 		std::cout << index << std::endl;
 	}
 }
+#endif // end ndef COMPUTE19
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
@@ -296,6 +299,7 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
+#ifndef COMPUTE19
 				case 1: body32<1>(); break;
 				case 2: body32<2>(); break;
 				case 3: body32<3>(); break;
@@ -314,6 +318,7 @@ int main() {
 				case 16: initialBody<16>(); break;
 				case 17: initialBody<17>(); break;
 				case 18: initialBody<18>(); break;
+#endif // end ndef COMPUTE19
 				case 19: initialBody<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
