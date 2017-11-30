@@ -256,7 +256,30 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
 	// specialization
-	if (sum % 3 != 0) {
+	// mod three can be changed from an expensive divide (which uses the
+	// fpu interestingly enough and is not pipelined [at least on my
+	// haswell era chips]) to multiply by one third which does not use the 
+	// fpu divide functionality and is pretty fast. It is much rarer for
+	// the product to be divisible by the original number than the sum as
+	// the sum will be in the range (at most of 38 to 171 [(* 2 19) - (* 9
+	// 19)] which means there is quite a bit of overlap. Through
+	// observation I noticed that nearly all of the digit sums were
+	// divisible by three (there is one case in 10 digits where this is not
+	// the case and it is divisible by 2 instead [very easy to rectify])
+	// which contributed to the set of quodigious numbers (this is true
+	// even earlier in 32 bit digits as well, the only number to include 5
+	// is 735 which is divisible by three (7 + 3 + 5 -> 15 -> 1 + 5 -> 6 /
+	// 3 = 2 or 15 / 3 = 5 :D). 
+	//
+	// The objective of the non exact version is to only find the numbers
+	// which are divisible by three and divisible by the product, this will
+	// greatly reduce the set to check for sum divisibility which can be
+	// done with much slower methods as needed (the classic div 10, mod 10
+	// method as the solution set is tiny). Holes can be easily computed
+	// around by adding the div 2 check and recomputing, it will slow
+	// things down because it adds more computation time but can include
+	// more options
+	if ((sum % 3 != 0) && (sum % 2 != 0)) {
 		return;
 	}
 #ifdef EXACT
@@ -276,8 +299,8 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, 
 //#include "Specialization2Digits.cc"
 //#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
-#include "Specialization5Digits.cc"
-//#include "Specialization6Digits.cc"
+//#include "Specialization5Digits.cc"
+#include "Specialization6Digits.cc"
 //#include "Specialization7Digits.cc"
 //#include "Specialization8Digits.cc"
 //#include "Specialization9Digits.cc"
