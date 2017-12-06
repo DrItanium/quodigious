@@ -126,10 +126,13 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			//
 			// The upside is that compilation time is reduced :D
 			// it will also eliminate prime numbers :D
-			innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
-			innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
-			innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
-			innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
+			// innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
+			// innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
+			// innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
+			// innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
+            for (auto i = 2; i < 10; i+=2) {
+			    innerBody<inner>(stream, sum + i, product * i, index + (i * next), depth); // 2
+            }
 		} else {
 			// this of this as a for loop from 2 to 10 skipping 5. Each
 			// call in this block is as though the current digit is 2,
@@ -142,13 +145,18 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			// you actually pass one to this (which is impossible) since passing
 			// 1 into the program will cause the 32-bit integer paths to be used
 			// instead.
-			innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
-			innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next), depth); // 3
-			innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
-			innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
-			innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next), depth); // 7
-			innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
-			innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next), depth); // 9
+			//innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
+			//innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next), depth); // 3
+			//innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
+			//innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
+			//innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next), depth); // 7
+			//innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
+			//innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next), depth); // 9
+            for (u64 i = 2; i < 10; ++i) {
+                if (i != 5) {
+                    innerBody<inner>(stream, sum + i, product * i, index + (i * next), depth);
+                }
+            }
 		}
 	}
 }
