@@ -60,6 +60,37 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 		std::cout << index << std::endl;
 	}
 }
+// 64-bit tweakables
+/* 
+ * Perform exact computation (sum and product checks) instead of approximations
+ */
+constexpr auto exact = true;
+/*
+ * Don't do sum checks, only product checks
+ */
+constexpr auto expensiveChecks = false;
+/*
+ * This will greatly improve speed but omit all sums which are not divisible by
+ * three, thus it won't be 100% accurate
+ */
+constexpr auto oddApprox = true;
+
+/*
+ * Enabling this option will force all odd sums (mod3) to be discarded (so the other half of the computation space).
+ * This option has lower priority than ODD_APPROX
+ */
+constexpr auto evenApprox = false;
+constexpr bool approximationCheckFailed(u64 sum) noexcept {
+	if (expensiveChecks) {
+		return false;
+	} else if (oddApprox && !evenApprox) {
+		return sum % 3 != 0;
+	} else if (evenApprox && !oddApprox) {
+		return sum % 2 != 0;
+	} else {
+		return (sum % 3 != 0) && (sum % 2 != 0);
+	}
+}
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
@@ -169,56 +200,14 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noe
 	// instiantiating. we can then also perform specialization on length zero
 	body<length>(stream, sum, product, index);
 }
-#define EXACT
-//#define EXPENSIVE
-/*
- * This will greatly improve speed but omit all sums which are not divisible by
- * three, thus it won't be 100% accurate
- */
-#define ODD_APPROX
-
-/*
- * Enabling this option will force all odd sums (mod3) to be discarded (so the other half of the computation space).
- * This option has lower priority than ODD_APPROX
- */
-//#define EVEN_APPROX
-constexpr bool performExpensiveCheck() noexcept {
-#ifndef EXPENSIVE
-    return false;
-#else
-    return true;
-#endif // end EXPENSIVE
-}
-constexpr bool approximationCheckFailed(u64 sum) noexcept {
-    if (performExpensiveCheck()) {
-        return false;
-    } else {
-#ifdef ODD_APPROX
-    return sum % 3 != 0;
-#else // !ODD_APPROX
-#ifdef EVEN_APPROX
-    return sum % 2 != 0;
-#else // !EVEN_APPROX
-    return (sum % 3 != 0) && (sum % 2 != 0);
-#endif // end EVEN_APPROX
-#endif // end ODD_APPROX
-    }
-}
-constexpr bool performExactCheck() noexcept {
-#ifdef EXACT
-    return true;
-#else
-    return false;
-#endif
-}
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
     // specialization
-    if (!performExpensiveCheck()) {
+	if (!expensiveChecks) {
         if (approximationCheckFailed(sum)) {
             return;
         }
-        if (performExactCheck()) {
+		if (exact) {
             if (index % product != 0) {
                 return;
             }
@@ -231,7 +220,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) 
             }
         }
     } else {
-        if (performExactCheck()) {
+		if (exact) {
             if ((index % product == 0) && (index % sum == 0)) {
                 stream << index << '\n';
             }
@@ -243,8 +232,8 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) 
     }
 }
 
-#include "Specialization2Digits.cc"
-//#include "Specialization3Digits.cc"
+//#include "Specialization2Digits.cc"
+#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
 //#include "Specialization6Digits.cc"
