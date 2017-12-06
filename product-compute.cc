@@ -6,35 +6,27 @@
 using u64 = std::uint64_t;
 using u8 = std::uint8_t;
 using unique_set = std::unordered_set<std::uint64_t>;
-void computeProduct(unique_set& set, u8 depth, u64 product = 1) noexcept {
-	if (depth == 0) {
-		set.emplace(product);
-	} else if (depth >= 10) {
-		auto fn = [](u8 depth, u64 product, int p0, int p1, int p2) noexcept {
-			unique_set set;
-			auto newDepth = depth - 1;
-			computeProduct(set, newDepth , product * p0);
-			computeProduct(set, newDepth , product * p1);
-			computeProduct(set, newDepth , product * p2);
-			return set;
-		};
-
-		auto p0 = std::async(std::launch::async, fn, depth, product, 3, 4, 6);
-		auto p1 = std::async(std::launch::async, fn, depth, product, 7, 8, 9);
-
-		computeProduct(set, depth - 1, product * 2);
-		auto s0 = p0.get();
-		for (auto const p : s0) {
-			set.emplace(p);
-		}
-		auto s1 = p1.get();
-		for (auto const p : s1) {
-			set.emplace(p);
-		}
+constexpr auto skipFive = true;
+void computeProduct(unique_set& set, u8 depth) noexcept {
+	if (depth == 1) {
+		set.emplace(2);
+		set.emplace(3);
+		set.emplace(4);
+		set.emplace(6);
+		set.emplace(7);
+		set.emplace(8);
+		set.emplace(9);
+	} else if (depth == 0) {
+		set.emplace(1);
 	} else {
-		for (int i = 2; i < 10; ++i) {
-			if (i != 5) {
-				computeProduct(set, depth - 1, product * i);
+		unique_set inner;
+		computeProduct(inner, depth - 1);
+		for (auto const p : inner) {
+			for (int i = 2; i < 10; ++i) {
+				if (i == 5) {
+					continue;
+				} 
+				set.emplace(p * i);
 			}
 		}
 	}
@@ -47,6 +39,7 @@ int main(int argc, char** argv) {
 		std::istringstream number(a0);
 		int depth;
 		number >> depth;
+		std::cerr << "number: " << depth << std::endl;
 		if (depth > 19) {
 			std::cout << "Please provide a number between zero and 19" << std::endl;
 			return 1;
