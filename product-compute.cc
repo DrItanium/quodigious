@@ -9,7 +9,7 @@ using unique_set = std::unordered_set<std::uint64_t>;
 void computeProduct(unique_set& set, u8 depth, u64 product = 1) noexcept {
 	if (depth == 0) {
 		set.emplace(product);
-	} else if (depth >= 12) {
+	} else if (depth >= 10) {
 		auto fn = [](u8 depth, u64 product, int p0, int p1, int p2) noexcept {
 			unique_set set;
 			auto newDepth = depth - 1;

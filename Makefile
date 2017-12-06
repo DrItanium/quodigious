@@ -25,19 +25,26 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
+PRODUCT_COMPUTATION = product-compute
 QLOOPS_PROG64 = quodigious64
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG64} 
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} 
 all: ${PROGS}
 
 help:
 	@echo "available options: "
 	@echo "  - all : builds the quodigious programs "
 	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values"
+	@echo "  - ${PRODUCT_COMPUTATION}: program to compute the unique set of products for a given digit width"
 	@echo "  - clean : cleans the program artifacts"
 
 ${QLOOPS_PROG64}: loops64.o
 	@echo -n "Building 64-bit number quodigious computer ..."
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
+	@echo done.
+
+${PRODUCT_COMPUTATION}: product-compute.o
+	@echo -n "Building unique product computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
 	@echo done.
 
 %.o: %.cc
