@@ -40,36 +40,6 @@ void computeProduct(unique_set& set, u8 depth, u64 product = 1) noexcept {
 	}
 }
 
-void computeProductParallel(unique_set& top, u8 depth, u64 product = 1) noexcept {
-	// do parallel computation at the top level
-	auto merge = [&top](auto& collection) noexcept {
-		for (const auto p : collection) {
-			top.emplace(p);
-		}
-	};
-	unique_set s0, s1, s2, s3, s4, s5, s6;
-	auto p0 = std::async(std::launch::async, computeProduct, std::ref(s0), depth - 1, 2);
-	auto p1 = std::async(std::launch::async, computeProduct, std::ref(s1), depth - 1, 3);
-	auto p2 = std::async(std::launch::async, computeProduct, std::ref(s2), depth - 1, 4);
-	auto p3 = std::async(std::launch::async, computeProduct, std::ref(s3), depth - 1, 6);
-	auto p4 = std::async(std::launch::async, computeProduct, std::ref(s4), depth - 1, 7);
-	auto p5 = std::async(std::launch::async, computeProduct, std::ref(s5), depth - 1, 8);
-	auto p6 = std::async(std::launch::async, computeProduct, std::ref(s6), depth - 1, 9);
-	p0.get();
-	merge(s0);
-	p1.get();
-	merge(s1);
-	p2.get();
-	merge(s2);
-	p3.get();
-	merge(s3);
-	p4.get();
-	merge(s4);
-	p5.get();
-	merge(s5);
-	p6.get();
-	merge(s6);
-}
 
 int main(int argc, char** argv) {
 	if (argc == 2) {
@@ -82,7 +52,7 @@ int main(int argc, char** argv) {
 			return 1;
 		} else {
 			unique_set set;
-			computeProductParallel(set, depth);
+			computeProduct(set, depth);
 			for (const auto a : set) {
 				std::cout << a << std::endl;
 			}
