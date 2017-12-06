@@ -34,14 +34,9 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	// does not require as much optimization. We can walk through digit level
 	// by digit level (even if the digit does not contribute too much to the
 	// overall process!).
-	innerBody32<inner>(sum + 2, product * 2, index + (2 * next)); // 2
-	innerBody32<inner>(sum + 3, product * 3, index + (3 * next)); // 3
-	innerBody32<inner>(sum + 4, product * 4, index + (4 * next)); // 4
-	innerBody32<inner>(sum + 5, product * 5, index + (5 * next)); // 5
-	innerBody32<inner>(sum + 6, product * 6, index + (6 * next)); // 6
-	innerBody32<inner>(sum + 7, product * 7, index + (7 * next)); // 7
-	innerBody32<inner>(sum + 8, product * 8, index + (8 * next)); // 8
-	innerBody32<inner>(sum + 9, product * 9, index + (9 * next)); // 9
+	for (auto i = 2; i < 10; ++i) {
+		innerBody32<inner>(sum + i, product * i, index + (i * next));
+	}
 }
 
 template<u32 length>
@@ -56,8 +51,8 @@ void innerBody32(u32 sum, u32 product, u32 index) noexcept {
 template<>
 void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 	// perform the check in the case that length == 0
-	if (isQuodigious(index, sum, product)) {
-		std::cout << index << std::endl;
+	if ((index % product == 0) && (index % sum == 0)) {
+		std::cout << index << '\n';
 	}
 }
 // 64-bit tweakables
@@ -136,56 +131,21 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
-		// hand unrolled loop bodies
 		// we use the stack to keep track of sums, products, and current indexes
 		// instead of starting with a whole number and breaking it apart.
 		// Walking down the call graph will cause another sum, product, and index
 		// part to be added to the provided sum, product, and index.
 		//
-		// The upside of the break apart approach is that it is simple to understand
-		// but is harder to improve performance for. When you're operating on the
-		// digits of a number instead, the digits are already broken apart and the
-		// need to use divides and modulus operations are minimized (although
-		// a compiler could technically factor divides and mods into bit shifting)
-		if (length == 1) {
-			// through observational evidence, I found that the least significant
-			// digits are all even. Even if it turns out that this isn't the case
-			// I can always perform the odd digit checks later on at a significant
-			// reduction in speed cost!
-			//
-			//
-			// The upside is that compilation time is reduced :D
-			// it will also eliminate prime numbers :D
-			// innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
-			// innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next)); // 4
-			// innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next)); // 6
-			// innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
-			for (auto i = 2; i < 10; i+=2) {
-				innerBody<inner>(stream, sum + i, product * i, index + (i * next)); // 2
-			}
-		} else {
-			// this of this as a for loop from 2 to 10 skipping 5. Each
-			// call in this block is as though the current digit is 2,
-			// 3, 4, 6, 7, 8, or 9. We use addition only since multiplication
-			// adds overhead and isn't really needed.
-			// These are the sum, product, and index incrementations that
-			// take place inbetween each call.
-			//
-			// Five is skipped except when length = 1, this will only invoke if
-			// you actually pass one to this (which is impossible) since passing
-			// 1 into the program will cause the 32-bit integer paths to be used
-			// instead.
-			//innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
-			//innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next)); // 3
-			//innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next)); // 4
-			//innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next)); // 6
-			//innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next)); // 7
-			//innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
-			//innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next)); // 9
-			for (u64 i = 2; i < 10; ++i) {
-				if (i != 5) {
-					innerBody<inner>(stream, sum + i, product * i, index + (i * next));
-				}
+		// through observational evidence, I found that the least significant
+		// digits are all even. Even if it turns out that this isn't the case
+		// I can always perform the odd digit checks later on at a significant
+		// reduction in speed cost!
+		constexpr auto incr = (length == 1) ? 2 : 1;
+		// see if we can't just make the compiler handle the incrementation
+		// instead of us thus, the code is cleaner too :D
+		for (auto i = 2; i < 10; i += incr) {
+			if (i != 5) {
+				innerBody<inner>(stream, sum + i, product * i, index + (i * next));
 			}
 		}
 	}
@@ -233,7 +193,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) 
 }
 
 //#include "Specialization2Digits.cc"
-#include "Specialization3Digits.cc"
+//#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
 //#include "Specialization6Digits.cc"
