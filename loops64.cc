@@ -17,7 +17,7 @@
 //  3. This notice may not be removed or altered from any source distribution.
 
 // Perform numeric quodigious checks
-
+#define EXACT_COMPUTATION
 #include "qlib.h"
 #include <future>
 
@@ -35,13 +35,6 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	// does not require as much optimization. We can walk through digit level
 	// by digit level (even if the digit does not contribute too much to the
 	// overall process!).
-	//for (int i = 2; i < 10; ++i) {
-	//    innerBody32<inner>(sum, product, index);
-	//    ++sum;
-	//    product += baseProduct;
-	//    index += next;
-	//}
-	// force an unroll here
 	innerBody32<inner>(sum + 2, product * 2, index + (2 * next)); // 2
 	innerBody32<inner>(sum + 3, product * 3, index + (3 * next)); // 3
 	innerBody32<inner>(sum + 4, product * 4, index + (4 * next)); // 4
@@ -71,7 +64,6 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
-
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -98,20 +90,15 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto lowerHalf = std::async(std::launch::async, [](auto sum, auto product, auto index, auto depth) noexcept {
-				std::ostringstream stream;
-                innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next), depth);
-                innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth);
-                innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth);
-				return stream.str();
-				}, sum, product, index, depth);
-		auto upperHalf = std::async(std::launch::async, [](auto sum, auto product, auto index, auto depth) noexcept {
-				std::ostringstream stream;
-                innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next), depth);
-                innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth);
-                innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next), depth);
-				return stream.str();
-				}, sum, product, index, depth);
+        auto fn = [](auto sum, auto product, auto index, auto depth, auto p0, auto p1, auto p2) noexcept {
+            std::ostringstream stream;
+            innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next), depth);
+            innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next), depth);
+            innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next), depth);
+			return stream.str();
+        };
+		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, depth, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, depth, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
