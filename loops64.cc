@@ -120,13 +120,13 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-        auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
-            std::ostringstream stream;
-            innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
-            innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
-            innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
+		auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
+			std::ostringstream stream;
+			innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
+			innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
+			innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
 			return stream.str();
-        };
+		};
 		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, 3, 4, 6);
 		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
@@ -160,9 +160,9 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			// innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next)); // 4
 			// innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next)); // 6
 			// innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
-            for (auto i = 2; i < 10; i+=2) {
-			    innerBody<inner>(stream, sum + i, product * i, index + (i * next)); // 2
-            }
+			for (auto i = 2; i < 10; i+=2) {
+				innerBody<inner>(stream, sum + i, product * i, index + (i * next)); // 2
+			}
 		} else {
 			// this of this as a for loop from 2 to 10 skipping 5. Each
 			// call in this block is as though the current digit is 2,
@@ -182,11 +182,11 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			//innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next)); // 7
 			//innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
 			//innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next)); // 9
-            for (u64 i = 2; i < 10; ++i) {
-                if (i != 5) {
-                    innerBody<inner>(stream, sum + i, product * i, index + (i * next));
-                }
-            }
+			for (u64 i = 2; i < 10; ++i) {
+				if (i != 5) {
+					innerBody<inner>(stream, sum + i, product * i, index + (i * next));
+				}
+			}
 		}
 	}
 }
@@ -202,34 +202,34 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noe
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
-    // specialization
+	// specialization
 	if (!expensiveChecks) {
-        if (approximationCheckFailed(sum)) {
-            return;
-        }
+		if (approximationCheckFailed(sum)) {
+			return;
+		}
 		if (exact) {
-            if (index % product != 0) {
-                return;
-            }
-            if (index % sum == 0) {
-                stream << index << '\n';
-            }
-        } else {
-            if (index % product == 0) {
-                stream << index << '\n';
-            }
-        }
-    } else {
+			if (index % product != 0) {
+				return;
+			}
+			if (index % sum == 0) {
+				stream << index << '\n';
+			}
+		} else {
+			if (index % product == 0) {
+				stream << index << '\n';
+			}
+		}
+	} else {
 		if (exact) {
-            if ((index % product == 0) && (index % sum == 0)) {
-                stream << index << '\n';
-            }
-        } else {
-            if (index % product == 0) {
-                stream << index << '\n';
-            }
-        }
-    }
+			if ((index % product == 0) && (index % sum == 0)) {
+				stream << index << '\n';
+			}
+		} else {
+			if (index % product == 0) {
+				stream << index << '\n';
+			}
+		}
+	}
 }
 
 //#include "Specialization2Digits.cc"
