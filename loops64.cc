@@ -17,7 +17,6 @@
 //  3. This notice may not be removed or altered from any source distribution.
 
 // Perform numeric quodigious checks
-#define EXACT_COMPUTATION
 #include "qlib.h"
 #include <future>
 
@@ -63,9 +62,9 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
 template<u64 length>
-inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
+inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -90,20 +89,20 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-        auto fn = [](auto sum, auto product, auto index, auto depth, auto p0, auto p1, auto p2) noexcept {
+        auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
             std::ostringstream stream;
-            innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next), depth);
-            innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next), depth);
-            innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next), depth);
+            innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
+            innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
+            innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
 			return stream.str();
         };
-		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, depth, 3, 4, 6);
-		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, depth, 7, 8, 9);
+		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
 		// thread that spawned the children is reused below.
-		innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
+		innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
 		// hand unrolled loop bodies
@@ -126,12 +125,12 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			//
 			// The upside is that compilation time is reduced :D
 			// it will also eliminate prime numbers :D
-			// innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
-			// innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
-			// innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
-			// innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
+			// innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
+			// innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next)); // 4
+			// innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next)); // 6
+			// innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
             for (auto i = 2; i < 10; i+=2) {
-			    innerBody<inner>(stream, sum + i, product * i, index + (i * next), depth); // 2
+			    innerBody<inner>(stream, sum + i, product * i, index + (i * next)); // 2
             }
 		} else {
 			// this of this as a for loop from 2 to 10 skipping 5. Each
@@ -145,16 +144,16 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 			// you actually pass one to this (which is impossible) since passing
 			// 1 into the program will cause the 32-bit integer paths to be used
 			// instead.
-			//innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next), depth); // 2
-			//innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next), depth); // 3
-			//innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next), depth); // 4
-			//innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next), depth); // 6
-			//innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next), depth); // 7
-			//innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next), depth); // 8
-			//innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next), depth); // 9
+			//innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
+			//innerBody<inner>(stream, sum + 3, product * 3, index + (3 * next)); // 3
+			//innerBody<inner>(stream, sum + 4, product * 4, index + (4 * next)); // 4
+			//innerBody<inner>(stream, sum + 6, product * 6, index + (6 * next)); // 6
+			//innerBody<inner>(stream, sum + 7, product * 7, index + (7 * next)); // 7
+			//innerBody<inner>(stream, sum + 8, product * 8, index + (8 * next)); // 8
+			//innerBody<inner>(stream, sum + 9, product * 9, index + (9 * next)); // 9
             for (u64 i = 2; i < 10; ++i) {
                 if (i != 5) {
-                    innerBody<inner>(stream, sum + i, product * i, index + (i * next), depth);
+                    innerBody<inner>(stream, sum + i, product * i, index + (i * next));
                 }
             }
 		}
@@ -163,38 +162,88 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
 	// instiantiating. we can then also perform specialization on length zero
-	body<length>(stream, sum, product, index, depth + 1);
+	body<length>(stream, sum, product, index);
 }
 #define EXACT
-#define NO_HACKS
-template<>
-inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
-	// specialization
-//#ifndef NO_HACKS
-    if (sum % 3 != 0) {
-		return;
-	}
-//#endif
+//#define EXPENSIVE
+/*
+ * This will greatly improve speed but omit all sums which are not divisible by
+ * three, thus it won't be 100% accurate
+ */
+#define ODD_APPROX
+
+/*
+ * Enabling this option will force all odd sums (mod3) to be discarded (so the other half of the computation space).
+ * This option has lower priority than ODD_APPROX
+ */
+//#define EVEN_APPROX
+constexpr bool performExpensiveCheck() noexcept {
+#ifndef EXPENSIVE
+    return false;
+#else
+    return true;
+#endif // end EXPENSIVE
+}
+constexpr bool approximationCheckFailed(u64 sum) noexcept {
+    if (performExpensiveCheck()) {
+        return false;
+    } else {
+#ifdef ODD_APPROX
+    return sum % 3 != 0;
+#else // !ODD_APPROX
+#ifdef EVEN_APPROX
+    return sum % 2 != 0;
+#else // !EVEN_APPROX
+    return (sum % 3 != 0) && (sum % 2 != 0);
+#endif // end EVEN_APPROX
+#endif // end ODD_APPROX
+    }
+}
+constexpr bool performExactCheck() noexcept {
 #ifdef EXACT
-	if (index % product != 0) {
-		return;
-	}
-	if (index % sum == 0) {
-		stream << index << '\n';
-	}
-#else // !defined(EXACT)
-	if (index % product == 0) {
-		stream << index << '\n';
-	}
-#endif // end !defined(EXACT)
+    return true;
+#else
+    return false;
+#endif
+}
+template<>
+inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+    // specialization
+    if (!performExpensiveCheck()) {
+        if (approximationCheckFailed(sum)) {
+            return;
+        }
+        if (performExactCheck()) {
+            if (index % product != 0) {
+                return;
+            }
+            if (index % sum == 0) {
+                stream << index << '\n';
+            }
+        } else {
+            if (index % product == 0) {
+                stream << index << '\n';
+            }
+        }
+    } else {
+        if (performExactCheck()) {
+            if ((index % product == 0) && (index % sum == 0)) {
+                stream << index << '\n';
+            }
+        } else {
+            if (index % product == 0) {
+                stream << index << '\n';
+            }
+        }
+    }
 }
 
-//#include "Specialization2Digits.cc"
+#include "Specialization2Digits.cc"
 //#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
