@@ -28,7 +28,7 @@ constexpr auto exact = true;
 /*
  * Don't do sum checks, only product checks
  */
-constexpr auto expensiveChecks = true;
+constexpr auto expensiveChecks = false;
 /*
  * This will greatly improve speed but omit all sums which are not divisible by
  * three, thus it won't be 100% accurate
@@ -89,15 +89,15 @@ inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noe
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto fn = [](FrequencyTable table, auto index, auto p0, auto p1, auto p2) noexcept {
+		auto fn = [&table, index](auto p0, auto p1, auto p2) noexcept {
 			std::ostringstream stream;
 			innerBody<inner>(stream, table, index + (p0 * next), p0);
 			innerBody<inner>(stream, table, index + (p1 * next), p1);
 			innerBody<inner>(stream, table, index + (p2 * next), p2);
 			return stream.str();
 		};
-		auto lowerHalf = std::async(std::launch::async, fn, table, index, 3, 4, 6);
-		auto upperHalf = std::async(std::launch::async, fn, table, index, 7, 8, 9);
+		auto lowerHalf = std::async(std::launch::async, fn, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
@@ -123,13 +123,12 @@ inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u6
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
 	// instiantiating. we can then also perform specialization on length zero
-    table.addToTable(digit);
-	body<length>(stream, table, index);
-    table.removeFromTable(digit);
+    auto copy = table;
+    copy.addToTable(digit);
+	body<length>(stream, copy, index);
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
-    //static FrequencyCache cache;
 	//// specialization
 	if (!expensiveChecks) {
         auto sum = table.computeSum() + digit;

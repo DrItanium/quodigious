@@ -28,18 +28,15 @@ class FrequencyTable {
         FrequencyTable();
         FrequencyTable(const FrequencyTable&);
         ~FrequencyTable();
-        u32 getUniqueId() const noexcept;
+        u64 getUniqueId() const noexcept;
         void addToTable(u64 digit) noexcept;
         void removeFromTable(u64 digit) noexcept;
         u64 computeSum() const noexcept;
         u64 computeProduct() const noexcept;
     private:
-        byte num2;
-        byte num3;
-        byte num4;
-        byte num6;
-        byte num7;
-        byte num8;
-        byte num9;
+        union {
+            byte _numbers[sizeof(uint64_t)];
+            uint64_t _value;
+        };
 };
 #endif

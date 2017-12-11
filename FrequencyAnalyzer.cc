@@ -16,45 +16,15 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 #include "FrequencyAnalyzer.h"
-FrequencyTable::FrequencyTable() : num2(0), num3(0), num4(0), num6(0), num7(0), num8(0), num9(0) { }
-FrequencyTable::FrequencyTable(const FrequencyTable& t) : num2(t.num2), num3(t.num3), num4(t.num4), num6(t.num6), num7(t.num7), num8(t.num8), num9(t.num9) { }
+FrequencyTable::FrequencyTable() : _value(0) { }
+FrequencyTable::FrequencyTable(const FrequencyTable& t) : _value(t._value) { }
 FrequencyTable::~FrequencyTable() { }
-u32 FrequencyTable::getUniqueId() const noexcept {
-    return (num9 * fastPow10<6>) +
-           (num8 * fastPow10<5>) +
-           (num7 * fastPow10<4>) +
-           (num6 * fastPow10<3>) +
-           (num4 * fastPow10<2>) +
-           (num3 * fastPow10<1>) +
-           num2;
+u64 FrequencyTable::getUniqueId() const noexcept {
+    return _value;
 }
 
 void FrequencyTable::addToTable(u64 value) noexcept {
-    switch(value) {
-        case 2:
-            ++num2;
-            break;
-        case 3:
-            ++num3;
-            break;
-        case 4:
-            ++num4;
-            break;
-        case 6:
-            ++num6;
-            break;
-        case 7:
-            ++num7;
-            break;
-        case 8:
-            ++num8;
-            break;
-        case 9:
-            ++num9;
-            break;
-        default:
-            throw "Illegal value provided!"; // this is intentional and should call terminate
-    }
+    ++_numbers[value - 2];
 }
 
 template<u64 width, u64 length>
@@ -88,13 +58,13 @@ inline u64 computeSumPart(byte times) noexcept {
     return sums[times];
 }
 u64 FrequencyTable::computeSum() const noexcept {
-    return computeSumPart<2>(num2) +
-           computeSumPart<3>(num3) +
-           computeSumPart<4>(num4) +
-           computeSumPart<6>(num6) +
-           computeSumPart<7>(num7) +
-           computeSumPart<8>(num8) +
-           computeSumPart<9>(num9);
+    return computeSumPart<2>(_numbers[0]) +
+           computeSumPart<3>(_numbers[1]) +
+           computeSumPart<4>(_numbers[2]) +
+           computeSumPart<6>(_numbers[4]) +
+           computeSumPart<7>(_numbers[5]) +
+           computeSumPart<8>(_numbers[6]) +
+           computeSumPart<9>(_numbers[7]);
 }
 template<u64 value, u64 length>
 struct QuickPow {
@@ -150,39 +120,15 @@ inline u64 computeProductPart(byte times) noexcept {
     return products[times];
 }
 u64 FrequencyTable::computeProduct() const noexcept {
-    return computeProductPart<2>(num2) *
-           computeProductPart<3>(num3) *
-           computeProductPart<4>(num4) *
-           computeProductPart<6>(num6) *
-           computeProductPart<7>(num7) *
-           computeProductPart<8>(num8) *
-           computeProductPart<9>(num9);
+    return computeProductPart<2>(_numbers[0]) *
+           computeProductPart<3>(_numbers[1]) *
+           computeProductPart<4>(_numbers[2]) *
+           computeProductPart<6>(_numbers[4]) *
+           computeProductPart<7>(_numbers[5]) *
+           computeProductPart<8>(_numbers[6]) *
+           computeProductPart<9>(_numbers[7]);
 }
 
 void FrequencyTable::removeFromTable(u64 value) noexcept {
-    switch(value) {
-        case 2:
-            --num2;
-            break;
-        case 3:
-            --num3;
-            break;
-        case 4:
-            --num4;
-            break;
-        case 6:
-            --num6;
-            break;
-        case 7:
-            --num7;
-            break;
-        case 8:
-            --num8;
-            break;
-        case 9:
-            --num9;
-            break;
-        default:
-            throw "Illegal value provided!"; // this is intentional and should call terminate
-    }
+    --_numbers[value - 2];
 }
