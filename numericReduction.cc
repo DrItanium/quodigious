@@ -76,44 +76,23 @@ inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noe
 	// I got the idea from strength reduction in compiler optimization theory
 	// we don't include the digits zero or 1 so just skip them by adding two
 	// or the equivalent for the corresponding thing
-	if (length >= 11) {
-		// when we are greater than 10 digit numbers, it is a smart idea to
-		// perform divide and conquer at each level above 10 digits. The number of
-		// threads used for computation is equal to: 2^(width - 10).
-		auto fn = [](FrequencyTable base, auto index, auto p0, auto p1, auto p2) noexcept {
-			std::ostringstream stream;
-			innerBody<inner>(stream, base, index + (p0 * next), p0);
-			innerBody<inner>(stream, base, index + (p1 * next), p1);
-			innerBody<inner>(stream, base, index + (p2 * next), p2);
-			return stream.str();
-		};
-		auto lowerHalf = std::async(std::launch::async, fn, table, index, 3, 4, 6);
-		auto upperHalf = std::async(std::launch::async, fn, table, index, 7, 8, 9);
-		// perform computation on this primary thread because we want to be able
-		// to maximize how much work we do and make the amount of work in each
-		// thread even. The same number of threads are spawned but the primary
-		// thread that spawned the children is reused below.
-		innerBody<inner>(stream, table, index + (2 * next), 2); // 2
-		stream << lowerHalf.get() << upperHalf.get();
-	} else {
-		// we use the stack to keep track of sums, products, and current indexes
-		// instead of starting with a whole number and breaking it apart.
-		// Walking down the call graph will cause another sum, product, and index
-		// part to be added to the provided sum, product, and index.
-		//
-		// through observational evidence, I found that the least significant
-		// digits are all even. Even if it turns out that this isn't the case
-		// I can always perform the odd digit checks later on at a significant
-		// reduction in speed cost!
-		constexpr auto incr = (length == 1) ? 2 : 1;
-		// see if we can't just make the compiler handle the incrementation
-		// instead of us thus, the code is cleaner too :D
-		for (auto i = 2; i < 10; i += incr) {
-			if (i != 5) {
-				innerBody<inner>(stream, table, index + (i * next), i);
-			}
-		}
-	}
+    // we use the stack to keep track of sums, products, and current indexes
+    // instead of starting with a whole number and breaking it apart.
+    // Walking down the call graph will cause another sum, product, and index
+    // part to be added to the provided sum, product, and index.
+    //
+    // through observational evidence, I found that the least significant
+    // digits are all even. Even if it turns out that this isn't the case
+    // I can always perform the odd digit checks later on at a significant
+    // reduction in speed cost!
+    constexpr auto incr = (length == 1) ? 2 : 1;
+    // see if we can't just make the compiler handle the incrementation
+    // instead of us thus, the code is cleaner too :D
+    for (auto i = 2; i < 10; i += incr) {
+        if (i != 5) {
+            innerBody<inner>(stream, table, index + (i * next), i);
+        }
+    }
 }
 
 
@@ -129,13 +108,14 @@ inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u6
 }
 template<>
 inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
-	// specialization
-    auto sum = table.computeSum() + digit;
-    auto product = table.computeProduct() * digit;
+    //static FrequencyCache cache;
+	//// specialization
 	if (!expensiveChecks) {
+        auto sum = table.computeSum() + digit;
 		if (approximationCheckFailed(sum)) {
 			return;
 		}
+        auto product = table.computeProduct() * digit;
 		if (exact) {
 			if (index % product != 0) {
 				return;
@@ -149,10 +129,14 @@ inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index,
 			}
 		}
 	} else {
+        auto product = table.computeProduct() * digit;
 		if (exact) {
-			if ((index % product == 0) && (index % sum == 0)) {
-				stream << index << '\n';
-			}
+            if (index % product == 0) {
+                auto sum = table.computeSum() + digit;
+                if (index % sum == 0) {
+                    stream << index << '\n';
+                }
+            }
 		} else {
 			if (index % product == 0) {
 				stream << index << '\n';
@@ -161,23 +145,26 @@ inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index,
 	}
 }
 
-//#include "Specialization2Digits.cc"
-//#include "Specialization3Digits.cc"
-//#include "Specialization4Digits.cc"
-//#include "Specialization5Digits.cc"
-//#include "Specialization6Digits.cc"
-//#include "Specialization7Digits.cc"
-//#include "Specialization8Digits.cc"
-//#include "Specialization9Digits.cc"
-//#include "Specialization10Digits.cc"
-//
-
 template<u64 index>
 inline void initialBody() noexcept {
 	// we don't want main aware of any details of how computation is performed.
 	// This allows the decoupling of details from main and the computation body itself
-    FrequencyTable table;
-	body<index>(std::cout, table);
+    constexpr auto inner = index - 1;
+    auto fn = [](auto digit) noexcept {
+        std::ostringstream stream;
+        FrequencyTable table;
+        table.addToTable(digit);
+        body<inner>(stream, table, digit * (fastPow10<inner>));
+        return stream.str();
+    };
+    auto t0 = std::async(std::launch::async, fn, 3);
+    auto t1 = std::async(std::launch::async, fn, 4);
+    auto t2 = std::async(std::launch::async, fn, 6);
+    std::cout << fn(2) << t0.get() << t1.get() << t2.get();
+    auto t3 = std::async(std::launch::async, fn, 7);
+    auto t4 = std::async(std::launch::async, fn, 8);
+    auto t5 = std::async(std::launch::async, fn, 8);
+    std::cout << t3.get() << t4.get() << t5.get();
 }
 
 int main() {

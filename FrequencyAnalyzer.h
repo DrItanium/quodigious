@@ -18,7 +18,6 @@
 #ifndef FREQUENCY_ANALYZER_H__
 #define FREQUENCY_ANALYZER_H__
 #include "qlib.h"
-#include <map>
 
 // A class for constructing a unique key from a given number as well as computing product and sum
 // This class is meant to heavily reduce recomputation while being very cheap to copy
@@ -43,8 +42,4 @@ class FrequencyTable {
         byte num8;
         byte num9;
 };
-using SumProductEntry = std::tuple<u64, u64>;
-
-using FrequencyCache = std::map<u32, SumProductEntry>;
-
 #endif
