@@ -56,3 +56,72 @@ void FrequencyTable::addToTable(u64 value) noexcept {
             throw "Illegal value provided!";
     }
 }
+template<byte width>
+inline u64 computeSumPart(byte times) noexcept {
+    switch(times) {
+        case 0:
+            return 0;
+        case 1:
+            return width;
+        case 2:
+            return width << 1;
+        case 3:
+            return (width << 1) + width;
+        case 4:
+            return width << 2;
+        case 5:
+            return (width << 2) + width;
+        case 6:
+            return (width << 2) + (width << 1);
+        case 7:
+            return (width << 2) + (width << 1) + width;
+        case 8:
+            return (width << 3);
+    }
+    auto sum = 0;
+    for (byte i = 0; i < times; ++i) {
+        sum += width;
+    }
+    return sum;
+}
+void FrequencyTable::computeSum() const noexcept {
+    return computeSumPart<2>(num2) +
+           computeSumPart<3>(num3) +
+           computeSumPart<4>(num4) +
+           computeSumPart<6>(num6) +
+           computeSumPart<7>(num7) +
+           computeSumPart<8>(num8) +
+           computeSumPart<9>(num9);
+}
+
+template<byte width>
+inline u64 computeProductPart(byte times) noexcept {
+    switch(times) {
+        case 0:
+            return 1;
+        case 1:
+            return width;
+        case 2:
+            return width * width;
+        case 3:
+            return width * width * width;
+        case 4:
+            return width * width * width * width;
+        case 5:
+            return width * width * width * width * width;
+    }
+    auto product = 1;
+    for (byte i = 0; i < times; ++i) {
+        product *= width;
+    }
+    return sum;
+}
+void FrequencyTable::computeProduct() const noexcept {
+    return computeProductPart<2>(num2) *
+           computeProductPart<3>(num3) *
+           computeProductPart<4>(num4) *
+           computeProductPart<6>(num6) *
+           computeProductPart<7>(num7) *
+           computeProductPart<8>(num8) *
+           computeProductPart<9>(num9);
+}
