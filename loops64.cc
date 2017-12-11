@@ -56,7 +56,7 @@ void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 	}
 }
 // 64-bit tweakables
-/* 
+/*
  * Perform exact computation (sum and product checks) instead of approximations
  */
 constexpr auto exact = true;
