@@ -128,7 +128,3 @@ u64 FrequencyTable::computeProduct() const noexcept {
            computeProductPart<8>(_numbers[6]) *
            computeProductPart<9>(_numbers[7]);
 }
-
-void FrequencyTable::removeFromTable(u64 value) noexcept {
-    --_numbers[value - 2];
-}

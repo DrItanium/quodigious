@@ -53,9 +53,9 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept;
+inline void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept;
 template<u64 length>
-inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noexcept {
+inline void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -118,7 +118,7 @@ inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noe
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
+inline void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
@@ -128,7 +128,7 @@ inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u6
 	body<length>(stream, copy, index);
 }
 template<>
-inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
+inline void innerBody<0>(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
 	//// specialization
 	if (!expensiveChecks) {
         auto sum = table.computeSum() + digit;

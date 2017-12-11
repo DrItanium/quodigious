@@ -30,7 +30,6 @@ class FrequencyTable {
         ~FrequencyTable();
         u64 getUniqueId() const noexcept;
         void addToTable(u64 digit) noexcept;
-        void removeFromTable(u64 digit) noexcept;
         u64 computeSum() const noexcept;
         u64 computeProduct() const noexcept;
     private:
