@@ -30,13 +30,14 @@ class FrequencyTable {
         ~FrequencyTable();
         u64 getUniqueId() const noexcept;
         void addToTable(u64 digit) noexcept;
-        u64 computeSum() const noexcept;
-        u64 computeProduct() const noexcept;
+        u64 computeSum() const noexcept { return _sum; }
+        u64 computeProduct() const noexcept { return _product; }
     private:
         union {
             byte _numbers[sizeof(uint64_t)];
             uint64_t _value;
         };
         uint64_t _product;
+        uint64_t _sum;
 };
 #endif
