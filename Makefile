@@ -64,3 +64,4 @@ clean:
 
 loops64.o: qlib.h Specialization8Digits.cc
 numericReduction.o: qlib.h FrequencyAnalyzer.h
+FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h

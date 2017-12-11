@@ -16,8 +16,8 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 #include "FrequencyAnalyzer.h"
-FrequencyTable::FrequencyTable() : _value(0) { }
-FrequencyTable::FrequencyTable(const FrequencyTable& t) : _value(t._value) { }
+FrequencyTable::FrequencyTable() : _value(0), _product(1) { }
+FrequencyTable::FrequencyTable(const FrequencyTable& t) : _value(t._value), _product(t._product) { }
 FrequencyTable::~FrequencyTable() { }
 u64 FrequencyTable::getUniqueId() const noexcept {
     return _value;
@@ -25,6 +25,7 @@ u64 FrequencyTable::getUniqueId() const noexcept {
 
 void FrequencyTable::addToTable(u64 value) noexcept {
     ++_numbers[value - 2];
+    _product *= value;
 }
 
 template<u64 width, u64 length>
@@ -120,11 +121,5 @@ inline u64 computeProductPart(byte times) noexcept {
     return products[times];
 }
 u64 FrequencyTable::computeProduct() const noexcept {
-    return computeProductPart<2>(_numbers[0]) *
-           computeProductPart<3>(_numbers[1]) *
-           computeProductPart<4>(_numbers[2]) *
-           computeProductPart<6>(_numbers[4]) *
-           computeProductPart<7>(_numbers[5]) *
-           computeProductPart<8>(_numbers[6]) *
-           computeProductPart<9>(_numbers[7]);
+    return _product;
 }

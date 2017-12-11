@@ -37,5 +37,6 @@ class FrequencyTable {
             byte _numbers[sizeof(uint64_t)];
             uint64_t _value;
         };
+        uint64_t _product;
 };
 #endif
