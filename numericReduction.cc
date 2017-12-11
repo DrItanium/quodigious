@@ -163,7 +163,7 @@ inline void initialBody() noexcept {
     std::cout << fn(2) << t0.get() << t1.get() << t2.get();
     auto t3 = std::async(std::launch::async, fn, 7);
     auto t4 = std::async(std::launch::async, fn, 8);
-    auto t5 = std::async(std::launch::async, fn, 8);
+    auto t5 = std::async(std::launch::async, fn, 9);
     std::cout << t3.get() << t4.get() << t5.get();
 }
 
