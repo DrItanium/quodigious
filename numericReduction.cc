@@ -28,7 +28,7 @@ constexpr auto exact = true;
 /*
  * Don't do sum checks, only product checks
  */
-constexpr auto expensiveChecks = false;
+constexpr auto expensiveChecks = true;
 /*
  * This will greatly improve speed but omit all sums which are not divisible by
  * three, thus it won't be 100% accurate
@@ -85,12 +85,33 @@ inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noe
     // digits are all even. Even if it turns out that this isn't the case
     // I can always perform the odd digit checks later on at a significant
     // reduction in speed cost!
-    constexpr auto incr = (length == 1) ? 2 : 1;
-    // see if we can't just make the compiler handle the incrementation
-    // instead of us thus, the code is cleaner too :D
-    for (auto i = 2; i < 10; i += incr) {
-        if (i != 5) {
-            innerBody<inner>(stream, table, index + (i * next), i);
+    if (length >= 11) {
+		// when we are greater than 10 digit numbers, it is a smart idea to
+		// perform divide and conquer at each level above 10 digits. The number of
+		// threads used for computation is equal to: 2^(width - 10).
+		auto fn = [](FrequencyTable table, auto index, auto p0, auto p1, auto p2) noexcept {
+			std::ostringstream stream;
+			innerBody<inner>(stream, table, index + (p0 * next), p0);
+			innerBody<inner>(stream, table, index + (p1 * next), p1);
+			innerBody<inner>(stream, table, index + (p2 * next), p2);
+			return stream.str();
+		};
+		auto lowerHalf = std::async(std::launch::async, fn, table, index, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, table, index, 7, 8, 9);
+		// perform computation on this primary thread because we want to be able
+		// to maximize how much work we do and make the amount of work in each
+		// thread even. The same number of threads are spawned but the primary
+		// thread that spawned the children is reused below.
+		innerBody<inner>(stream, table, index + (2 * next), 2); // 2
+		stream << lowerHalf.get() << upperHalf.get();
+    } else {
+        constexpr auto incr = (length == 1) ? 2 : 1;
+        // see if we can't just make the compiler handle the incrementation
+        // instead of us thus, the code is cleaner too :D
+        for (auto i = 2; i < 10; i += incr) {
+            if (i != 5) {
+                innerBody<inner>(stream, table, index + (i * next), i);
+            }
         }
     }
 }
@@ -149,22 +170,8 @@ template<u64 index>
 inline void initialBody() noexcept {
 	// we don't want main aware of any details of how computation is performed.
 	// This allows the decoupling of details from main and the computation body itself
-    constexpr auto inner = index - 1;
-    auto fn = [](auto digit) noexcept {
-        std::ostringstream stream;
-        FrequencyTable table;
-        table.addToTable(digit);
-        body<inner>(stream, table, digit * (fastPow10<inner>));
-        return stream.str();
-    };
-    auto t0 = std::async(std::launch::async, fn, 3);
-    auto t1 = std::async(std::launch::async, fn, 4);
-    auto t2 = std::async(std::launch::async, fn, 6);
-    std::cout << fn(2) << t0.get() << t1.get() << t2.get();
-    auto t3 = std::async(std::launch::async, fn, 7);
-    auto t4 = std::async(std::launch::async, fn, 8);
-    auto t5 = std::async(std::launch::async, fn, 9);
-    std::cout << t3.get() << t4.get() << t5.get();
+    FrequencyTable table;
+    body<index>(std::cout, table);
 }
 
 int main() {
