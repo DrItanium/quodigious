@@ -85,7 +85,7 @@ inline u64 computeSumPart(byte times) noexcept {
         quickSum<width, 18>(),
         quickSum<width, 19>(),
     };
-    return sums[width];
+    return sums[times];
 }
 u64 FrequencyTable::computeSum() const noexcept {
     return computeSumPart<2>(num2) +
