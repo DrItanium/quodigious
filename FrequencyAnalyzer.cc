@@ -16,7 +16,7 @@
 //     misrepresented as being the original software.
 //  3. This notice may not be removed or altered from any source distribution.
 #include "FrequencyAnalyzer.h"
-FrequencyTable::FrequencyTable() : num2(0), num3(0), num4(0), num5(0), num6(0), num7(0), num8(0), num9(0) { }
+FrequencyTable::FrequencyTable() : num2(0), num3(0), num4(0), num6(0), num7(0), num8(0), num9(0) { }
 FrequencyTable::FrequencyTable(const FrequencyTable& t) : num2(t.num2), num3(t.num3), num4(t.num4), num6(t.num6), num7(t.num7), num8(t.num8), num9(t.num9) { }
 FrequencyTable::~FrequencyTable() { }
 u32 FrequencyTable::getUniqueId() const noexcept {
@@ -53,7 +53,7 @@ void FrequencyTable::addToTable(u64 value) noexcept {
             ++num9;
             break;
         default:
-            throw "Illegal value provided!";
+            throw "Illegal value provided!"; // this is intentional and should call terminate
     }
 }
 template<byte width>
@@ -84,7 +84,7 @@ inline u64 computeSumPart(byte times) noexcept {
     }
     return sum;
 }
-void FrequencyTable::computeSum() const noexcept {
+u64 FrequencyTable::computeSum() const noexcept {
     return computeSumPart<2>(num2) +
            computeSumPart<3>(num3) +
            computeSumPart<4>(num4) +
@@ -114,9 +114,9 @@ inline u64 computeProductPart(byte times) noexcept {
     for (byte i = 0; i < times; ++i) {
         product *= width;
     }
-    return sum;
+    return product;
 }
-void FrequencyTable::computeProduct() const noexcept {
+u64 FrequencyTable::computeProduct() const noexcept {
     return computeProductPart<2>(num2) *
            computeProductPart<3>(num3) *
            computeProductPart<4>(num4) *
