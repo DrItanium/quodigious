@@ -56,33 +56,36 @@ void FrequencyTable::addToTable(u64 value) noexcept {
             throw "Illegal value provided!"; // this is intentional and should call terminate
     }
 }
+
+template<u64 width, u64 length>
+constexpr u64 quickSum() noexcept {
+    return width * length;
+}
 template<byte width>
 inline u64 computeSumPart(byte times) noexcept {
-    switch(times) {
-        case 0:
-            return 0;
-        case 1:
-            return width;
-        case 2:
-            return width << 1;
-        case 3:
-            return (width << 1) + width;
-        case 4:
-            return width << 2;
-        case 5:
-            return (width << 2) + width;
-        case 6:
-            return (width << 2) + (width << 1);
-        case 7:
-            return (width << 2) + (width << 1) + width;
-        case 8:
-            return (width << 3);
-    }
-    auto sum = 0;
-    for (byte i = 0; i < times; ++i) {
-        sum += width;
-    }
-    return sum;
+    static constexpr u64 sums[] = {
+        quickSum<width, 0>(),
+        quickSum<width, 1>(),
+        quickSum<width, 2>(),
+        quickSum<width, 3>(),
+        quickSum<width, 4>(),
+        quickSum<width, 5>(),
+        quickSum<width, 6>(),
+        quickSum<width, 7>(),
+        quickSum<width, 8>(),
+        quickSum<width, 9>(),
+        quickSum<width, 10>(),
+        quickSum<width, 11>(),
+        quickSum<width, 12>(),
+        quickSum<width, 13>(),
+        quickSum<width, 14>(),
+        quickSum<width, 15>(),
+        quickSum<width, 16>(),
+        quickSum<width, 17>(),
+        quickSum<width, 18>(),
+        quickSum<width, 19>(),
+    };
+    return sums[width];
 }
 u64 FrequencyTable::computeSum() const noexcept {
     return computeSumPart<2>(num2) +
@@ -93,28 +96,58 @@ u64 FrequencyTable::computeSum() const noexcept {
            computeSumPart<8>(num8) +
            computeSumPart<9>(num9);
 }
+template<u64 value, u64 length>
+struct QuickPow {
+    static constexpr u64 op() noexcept {
+        return QuickPow<value, length - 1>::op() * value;
+    }
+    QuickPow() = delete;
+    ~QuickPow() = delete;
+    QuickPow(const QuickPow&) = delete;
+    QuickPow(QuickPow&&) = delete;
+};
+
+template<u64 value>
+struct QuickPow<value, 0> {
+    static constexpr u64 op() noexcept {
+        return 1;
+    }
+    QuickPow() = delete;
+    ~QuickPow() = delete;
+    QuickPow(const QuickPow&) = delete;
+    QuickPow(QuickPow&&) = delete;
+};
+
+template<u64 value, u64 length>
+constexpr u64 quickPow() noexcept {
+    return QuickPow<value, length>::op();
+}
 
 template<byte width>
 inline u64 computeProductPart(byte times) noexcept {
-    switch(times) {
-        case 0:
-            return 1;
-        case 1:
-            return width;
-        case 2:
-            return width * width;
-        case 3:
-            return width * width * width;
-        case 4:
-            return width * width * width * width;
-        case 5:
-            return width * width * width * width * width;
-    }
-    auto product = 1;
-    for (byte i = 0; i < times; ++i) {
-        product *= width;
-    }
-    return product;
+    static constexpr u64 products[] = {
+        quickPow<width, 0>(),
+        quickPow<width, 1>(),
+        quickPow<width, 2>(),
+        quickPow<width, 3>(),
+        quickPow<width, 4>(),
+        quickPow<width, 5>(),
+        quickPow<width, 6>(),
+        quickPow<width, 7>(),
+        quickPow<width, 8>(),
+        quickPow<width, 9>(),
+        quickPow<width, 10>(),
+        quickPow<width, 11>(),
+        quickPow<width, 12>(),
+        quickPow<width, 13>(),
+        quickPow<width, 14>(),
+        quickPow<width, 15>(),
+        quickPow<width, 16>(),
+        quickPow<width, 17>(),
+        quickPow<width, 18>(),
+        quickPow<width, 19>(),
+    };
+    return products[times];
 }
 u64 FrequencyTable::computeProduct() const noexcept {
     return computeProductPart<2>(num2) *
@@ -124,4 +157,32 @@ u64 FrequencyTable::computeProduct() const noexcept {
            computeProductPart<7>(num7) *
            computeProductPart<8>(num8) *
            computeProductPart<9>(num9);
+}
+
+void FrequencyTable::removeFromTable(u64 value) noexcept {
+    switch(value) {
+        case 2:
+            --num2;
+            break;
+        case 3:
+            --num3;
+            break;
+        case 4:
+            --num4;
+            break;
+        case 6:
+            --num6;
+            break;
+        case 7:
+            --num7;
+            break;
+        case 8:
+            --num8;
+            break;
+        case 9:
+            --num9;
+            break;
+        default:
+            throw "Illegal value provided!"; // this is intentional and should call terminate
+    }
 }

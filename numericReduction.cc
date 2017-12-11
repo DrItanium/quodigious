@@ -20,7 +20,6 @@
 #include "qlib.h"
 #include "FrequencyAnalyzer.h"
 #include <future>
-
 // 64-bit tweakables
 /*
  * Perform exact computation (sum and product checks) instead of approximations
@@ -54,9 +53,9 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
+inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept;
 template<u64 length>
-inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+inline void body(std::ostream& stream, FrequencyTable& table, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -81,20 +80,20 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
+		auto fn = [](FrequencyTable base, auto index, auto p0, auto p1, auto p2) noexcept {
 			std::ostringstream stream;
-			innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
-			innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
-			innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
+			innerBody<inner>(stream, base, index + (p0 * next), p0);
+			innerBody<inner>(stream, base, index + (p1 * next), p1);
+			innerBody<inner>(stream, base, index + (p2 * next), p2);
 			return stream.str();
 		};
-		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, 3, 4, 6);
-		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, 7, 8, 9);
+		auto lowerHalf = std::async(std::launch::async, fn, table, index, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, table, index, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
 		// thread that spawned the children is reused below.
-		innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
+		innerBody<inner>(stream, table, index + (2 * next), 2); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
 		// we use the stack to keep track of sums, products, and current indexes
@@ -111,7 +110,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// instead of us thus, the code is cleaner too :D
 		for (auto i = 2; i < 10; i += incr) {
 			if (i != 5) {
-				innerBody<inner>(stream, sum + i, product * i, index + (i * next));
+				innerBody<inner>(stream, table, index + (i * next), i);
 			}
 		}
 	}
@@ -119,16 +118,20 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
 	// instiantiating. we can then also perform specialization on length zero
-	body<length>(stream, sum, product, index);
+    table.addToTable(digit);
+	body<length>(stream, table, index);
+    table.removeFromTable(digit);
 }
 template<>
-inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
+inline void innerBody<0>(std::ostream& stream, FrequencyTable& table, u64 index, u64 digit) noexcept {
 	// specialization
+    auto sum = table.computeSum() + digit;
+    auto product = table.computeProduct() * digit;
 	if (!expensiveChecks) {
 		if (approximationCheckFailed(sum)) {
 			return;
@@ -158,7 +161,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) 
 	}
 }
 
-#include "Specialization2Digits.cc"
+//#include "Specialization2Digits.cc"
 //#include "Specialization3Digits.cc"
 //#include "Specialization4Digits.cc"
 //#include "Specialization5Digits.cc"
@@ -173,7 +176,8 @@ template<u64 index>
 inline void initialBody() noexcept {
 	// we don't want main aware of any details of how computation is performed.
 	// This allows the decoupling of details from main and the computation body itself
-	body<index>(std::cout);
+    FrequencyTable table;
+	body<index>(std::cout, table);
 }
 
 int main() {
