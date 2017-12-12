@@ -89,21 +89,27 @@ inline void body(std::ostream& stream, const FrequencyTable& table, u64 index = 
         // when we are greater than 10 digit numbers, it is a smart idea to
         // perform divide and conquer at each level above 10 digits. The number of
         // threads used for computation is equal to: 2^(width - 10).
-        auto fn = [&table, index](auto p0, auto p1, auto p2) noexcept {
+        auto fn = [&table, index](auto p0, auto p1) noexcept {
+            std::ostringstream stream;
+            innerBody<inner>(stream, table, index + (p0 * next), p0);
+            innerBody<inner>(stream, table, index + (p1 * next), p1);
+            return stream.str();
+        };
+        auto fn2 = [&table, index](auto p0, auto p1, auto p2) noexcept {
             std::ostringstream stream;
             innerBody<inner>(stream, table, index + (p0 * next), p0);
             innerBody<inner>(stream, table, index + (p1 * next), p1);
             innerBody<inner>(stream, table, index + (p2 * next), p2);
             return stream.str();
         };
-        auto lowerHalf = std::async(std::launch::async, fn, 3, 4, 6);
-        auto upperHalf = std::async(std::launch::async, fn, 7, 8, 9);
+        auto lowerHalf = std::async(std::launch::async, fn2, 2, 3, 4);
+		auto middle = std::async(std::launch::async, fn, 6, 7);
+        auto upperHalf = std::async(std::launch::async, fn, 8, 9);
         // perform computation on this primary thread because we want to be able
         // to maximize how much work we do and make the amount of work in each
         // thread even. The same number of threads are spawned but the primary
         // thread that spawned the children is reused below.
-        innerBody<inner>(stream, table, index + (2 * next), 2); // 2
-        stream << lowerHalf.get() << upperHalf.get();
+        stream << lowerHalf.get() << middle.get() << upperHalf.get();
     } else {
         constexpr auto incr = (length == 1) ? 2 : 1;
         // see if we can't just make the compiler handle the incrementation
