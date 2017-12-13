@@ -40,6 +40,11 @@ constexpr auto oddApprox = true;
  * This option has lower priority than ODD_APPROX
  */
 constexpr auto evenApprox = false;
+
+/**
+ * Maximum number length
+ */
+constexpr auto maxWidth = 19;
 constexpr bool approximationCheckFailed(u64 sum) noexcept {
     if (expensiveChecks) {
         return false;
@@ -53,10 +58,10 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
 }
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept;
+void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept;
 template<u64 length>
-inline void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noexcept {
-    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noexcept {
+    static_assert(length <= maxWidth, "Provided length is too large!");
     static_assert(length != 0, "Can't have length of zero!");
     // start at the most significant digit and move inward, that way we don't need
     // to keep multiple template parameters around.
@@ -86,30 +91,20 @@ inline void body(std::ostream& stream, const FrequencyTable& table, u64 index = 
     // I can always perform the odd digit checks later on at a significant
     // reduction in speed cost!
     if (length >= 11) {
-        // when we are greater than 10 digit numbers, it is a smart idea to
-        // perform divide and conquer at each level above 10 digits. The number of
-        // threads used for computation is equal to: 2^(width - 10).
-        auto fn = [&table, index](auto p0, auto p1) noexcept {
-            std::ostringstream stream;
-            innerBody<inner>(stream, table, index + (p0 * next), p0);
-            innerBody<inner>(stream, table, index + (p1 * next), p1);
-            return stream.str();
-        };
-        auto fn2 = [&table, index](auto p0, auto p1, auto p2) noexcept {
-            std::ostringstream stream;
-            innerBody<inner>(stream, table, index + (p0 * next), p0);
-            innerBody<inner>(stream, table, index + (p1 * next), p1);
-            innerBody<inner>(stream, table, index + (p2 * next), p2);
-            return stream.str();
-        };
-        auto lowerHalf = std::async(std::launch::async, fn2, 2, 3, 4);
-		auto middle = std::async(std::launch::async, fn, 6, 7);
-        auto upperHalf = std::async(std::launch::async, fn, 8, 9);
-        // perform computation on this primary thread because we want to be able
-        // to maximize how much work we do and make the amount of work in each
-        // thread even. The same number of threads are spawned but the primary
-        // thread that spawned the children is reused below.
-        stream << lowerHalf.get() << middle.get() << upperHalf.get();
+          auto fn = [&table, index](auto start, auto end) noexcept {
+                std::ostringstream stream;
+                for (auto i = start; i < end; ++i) {
+                    if (i != 5) {
+                        innerBody<inner>(stream, table, index + (i * next), i);
+                    }
+                }
+                return stream.str();
+          };
+          std::ostringstream stream2;
+          auto middle = std::async(std::launch::async, fn, 4, 7);
+          auto upper = std::async(std::launch::async, fn, 7, 10);
+          fn(2, 4);
+          stream << middle.get() << upper.get();
     } else {
         constexpr auto incr = (length == 1) ? 2 : 1;
         // see if we can't just make the compiler handle the incrementation
@@ -124,7 +119,7 @@ inline void body(std::ostream& stream, const FrequencyTable& table, u64 index = 
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
+void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
     // this double template instantiation is done to make sure that the compiler
     // does not attempt to instantiate infinitely, if this code was in place
     // of the call to innerbody in body then the compiler would not stop
@@ -134,7 +129,7 @@ inline void innerBody(std::ostream& stream, const FrequencyTable& table, u64 ind
     body<length>(stream, copy, index);
 }
 template<>
-inline void innerBody<0>(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
+void innerBody<0>(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
     if (!expensiveChecks) {
         auto sum = table.computeSum() + digit;
         if (approximationCheckFailed(sum)) {
@@ -199,9 +194,6 @@ int main() {
                 case 14: initialBody<14>(); break;
                 case 15: initialBody<15>(); break;
                 case 16: initialBody<16>(); break;
-                case 17: initialBody<17>(); break;
-                case 18: initialBody<18>(); break;
-                case 19: initialBody<19>(); break;
                 default:
                          std::cerr << "Illegal index " << currentIndex << std::endl;
                          return 1;
