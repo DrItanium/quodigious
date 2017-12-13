@@ -17,12 +17,9 @@
 //  3. This notice may not be removed or altered from any source distribution.
 
 // Perform numeric quodigious checks
-
 #include "qlib.h"
 #include <future>
-#define COMPUTE19
 
-#ifndef COMPUTE19
 template<u32 length>
 inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
 
@@ -32,51 +29,14 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	static_assert(length != 0, "Can't have length of zero!");
 	constexpr auto inner = length - 1;
 	constexpr auto next = fastPow10<inner>;
-	auto baseProduct = product;
-	sum += 2;
-	product <<= 1;
-	index += (next << 1);
 	// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
 	// numbers (this code is not used when you request 64-bit numbers!)
 	// does not require as much optimization. We can walk through digit level
 	// by digit level (even if the digit does not contribute too much to the
 	// overall process!).
-	//for (int i = 2; i < 10; ++i) {
-	//    innerBody32<inner>(sum, product, index);
-	//    ++sum;
-	//    product += baseProduct;
-	//    index += next;
-	//}
-	// force an unroll here
-	innerBody32<inner>(sum, product, index); // 2
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 3
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 4
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 5
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 6
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 7
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 8
-	++sum;
-	product += baseProduct;
-	index += next;
-	innerBody32<inner>(sum, product, index); // 9
+	for (auto i = 2; i < 10; ++i) {
+		innerBody32<inner>(sum + i, product * i, index + (i * next));
+	}
 }
 
 template<u32 length>
@@ -91,17 +51,46 @@ void innerBody32(u32 sum, u32 product, u32 index) noexcept {
 template<>
 void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
 	// perform the check in the case that length == 0
-	if (isQuodigious(index, sum, product)) {
-		std::cout << index << std::endl;
+	if ((index % product == 0) && (index % sum == 0)) {
+		std::cout << index << '\n';
 	}
 }
-#endif // end ndef COMPUTE19
+// 64-bit tweakables
+/*
+ * Perform exact computation (sum and product checks) instead of approximations
+ */
+constexpr auto exact = true;
+/*
+ * Don't do sum checks, only product checks
+ */
+constexpr auto expensiveChecks = false;
+/*
+ * This will greatly improve speed but omit all sums which are not divisible by
+ * three, thus it won't be 100% accurate
+ */
+constexpr auto oddApprox = true;
+
+/*
+ * Enabling this option will force all odd sums (mod3) to be discarded (so the other half of the computation space).
+ * This option has lower priority than ODD_APPROX
+ */
+constexpr auto evenApprox = false;
+constexpr bool approximationCheckFailed(u64 sum) noexcept {
+	if (expensiveChecks) {
+		return false;
+	} else if (oddApprox && !evenApprox) {
+		return sum % 3 != 0;
+	} else if (evenApprox && !oddApprox) {
+		return sum % 2 != 0;
+	} else {
+		return (sum % 3 != 0) && (sum % 2 != 0);
+	}
+}
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept;
-
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
 template<u64 length>
-inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
+inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
 	// start at the most significant digit and move inward, that way we don't need
@@ -120,180 +109,87 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	// Thus we can keep updating the product after each computation.
 	//
 	// I got the idea from strength reduction in compiler optimization theory
-	auto baseProduct = product;
 	// we don't include the digits zero or 1 so just skip them by adding two
 	// or the equivalent for the corresponding thing
-	sum += 2;
-	product <<= 1;
-	index += (next << 1);
 	if (length >= 11) {
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto lowerHalf = std::async(std::launch::async, [baseProduct, depth](auto sum, auto product, auto index) noexcept {
-				std::ostringstream stream;
-				++sum;
-				product += baseProduct;
-				index += next;
-				innerBody<inner>(stream, sum, product, index, depth); // 3
-				++sum;
-				product += baseProduct;
-				index += next;
-				innerBody<inner>(stream, sum, product, index, depth); // 4
-				sum += 2;
-				product += (baseProduct << 1);
-				index += (next << 1);
-				innerBody<inner>(stream, sum, product, index, depth); // 6
-				return stream.str();
-				}, sum, product, index);
-		auto upperHalf = std::async(std::launch::async, [baseProduct, depth](auto sum, auto product, auto index) noexcept {
-				std::ostringstream stream;
-				sum += 5;
-				product += ((baseProduct << 2) + baseProduct);
-				index += ((next << 2) + next);
-				innerBody<inner>(stream, sum, product, index, depth); // 7
-				++sum;
-				product += baseProduct;
-				index += next;
-				innerBody<inner>(stream, sum, product, index, depth); // 8
-				++sum;
-				product += baseProduct;
-				index += next;
-				innerBody<inner>(stream, sum, product, index, depth); // 9
-				return stream.str();
-				}, sum, product, index);
+		auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
+			std::ostringstream stream;
+			innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
+			innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
+			innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
+			return stream.str();
+		};
+		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, 3, 4, 6);
+		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, 7, 8, 9);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
 		// thread that spawned the children is reused below.
-		innerBody<inner>(stream, sum, product, index, depth); // 2
+		innerBody<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
 		stream << lowerHalf.get() << upperHalf.get();
 	} else {
-		// hand unrolled loop bodies
 		// we use the stack to keep track of sums, products, and current indexes
 		// instead of starting with a whole number and breaking it apart.
 		// Walking down the call graph will cause another sum, product, and index
 		// part to be added to the provided sum, product, and index.
 		//
-		// The upside of the break apart approach is that it is simple to understand
-		// but is harder to improve performance for. When you're operating on the
-		// digits of a number instead, the digits are already broken apart and the
-		// need to use divides and modulus operations are minimized (although
-		// a compiler could technically factor divides and mods into bit shifting)
-		if (length == 1) {
-			// through observational evidence, I found that the least significant
-			// digits are all even. Even if it turns out that this isn't the case
-			// I can always perform the odd digit checks later on at a significant
-			// reduction in speed cost!
-			//
-			//
-			// The upside is that compilation time is reduced :D
-			// it will also eliminate prime numbers :D
-			innerBody<inner>(stream, sum, product, index, depth); // 2
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 4
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 6
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 8
-		} else {
-			// this of this as a for loop from 2 to 10 skipping 5. Each
-			// call in this block is as though the current digit is 2,
-			// 3, 4, 6, 7, 8, or 9. We use addition only since multiplication
-			// adds overhead and isn't really needed.
-			// These are the sum, product, and index incrementations that
-			// take place inbetween each call.
-			//
-			// Five is skipped except when length = 1, this will only invoke if
-			// you actually pass one to this (which is impossible) since passing
-			// 1 into the program will cause the 32-bit integer paths to be used
-			// instead.
-			innerBody<inner>(stream, sum, product, index, depth); // 2
-			++sum;
-			product += baseProduct;
-			index += next;
-			innerBody<inner>(stream, sum, product, index, depth); // 3
-			++sum;
-			product += baseProduct;
-			index += next;
-			innerBody<inner>(stream, sum, product, index, depth); // 4
-			sum += 2;
-			product += (baseProduct << 1);
-			index += (next << 1);
-			innerBody<inner>(stream, sum, product, index, depth); // 6
-			++sum;
-			product += baseProduct;
-			index += next;
-			innerBody<inner>(stream, sum, product, index, depth); // 7
-			++sum;
-			product += baseProduct;
-			index += next;
-			innerBody<inner>(stream, sum, product, index, depth); // 8
-			++sum;
-			product += baseProduct;
-			index += next;
-			innerBody<inner>(stream, sum, product, index, depth); // 9
+		// through observational evidence, I found that the least significant
+		// digits are all even. Even if it turns out that this isn't the case
+		// I can always perform the odd digit checks later on at a significant
+		// reduction in speed cost!
+		constexpr auto incr = (length == 1) ? 2 : 1;
+		// see if we can't just make the compiler handle the incrementation
+		// instead of us thus, the code is cleaner too :D
+		for (auto i = 2; i < 10; i += incr) {
+			if (i != 5) {
+				innerBody<inner>(stream, sum + i, product * i, index + (i * next));
+			}
 		}
 	}
 }
 
 
 template<u64 length>
-inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// this double template instantiation is done to make sure that the compiler
 	// does not attempt to instantiate infinitely, if this code was in place
 	// of the call to innerbody in body then the compiler would not stop
 	// instiantiating. we can then also perform specialization on length zero
-	body<length>(stream, sum, product, index, depth + 1);
+	body<length>(stream, sum, product, index);
 }
-#define EXACT
 template<>
-inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index, u64 depth) noexcept {
+inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// specialization
-	// mod three can be changed from an expensive divide (which uses the
-	// fpu interestingly enough and is not pipelined [at least on my
-	// haswell era chips]) to multiply by one third which does not use the 
-	// fpu divide functionality and is pretty fast. It is much rarer for
-	// the product to be divisible by the original number than the sum as
-	// the sum will be in the range (at most of 38 to 171 [(* 2 19) - (* 9
-	// 19)] which means there is quite a bit of overlap. Through
-	// observation I noticed that nearly all of the digit sums were
-	// divisible by three (there is one case in 10 digits where this is not
-	// the case and it is divisible by 2 instead [very easy to rectify])
-	// which contributed to the set of quodigious numbers (this is true
-	// even earlier in 32 bit digits as well, the only number to include 5
-	// is 735 which is divisible by three (7 + 3 + 5 -> 15 -> 1 + 5 -> 6 /
-	// 3 = 2 or 15 / 3 = 5 :D). 
-	//
-	// The objective of the non exact version is to only find the numbers
-	// which are divisible by three and divisible by the product, this will
-	// greatly reduce the set to check for sum divisibility which can be
-	// done with much slower methods as needed (the classic div 10, mod 10
-	// method as the solution set is tiny). Holes can be easily computed
-	// around by adding the div 2 check and recomputing, it will slow
-	// things down because it adds more computation time but can include
-	// more options
-	if ((sum % 3 != 0) && (sum % 2 != 0)) {
-		return;
+	if (!expensiveChecks) {
+		if (approximationCheckFailed(sum)) {
+			return;
+		}
+		if (exact) {
+			if (index % product != 0) {
+				return;
+			}
+			if (index % sum == 0) {
+				stream << index << '\n';
+			}
+		} else {
+			if (index % product == 0) {
+				stream << index << '\n';
+			}
+		}
+	} else {
+		if (exact) {
+			if ((index % product == 0) && (index % sum == 0)) {
+				stream << index << '\n';
+			}
+		} else {
+			if (index % product == 0) {
+				stream << index << '\n';
+			}
+		}
 	}
-#ifdef EXACT
-	if (index % product != 0) {
-		return;
-	}
-	if (index % sum == 0) {
-		stream << index << '\n';
-	}
-#else // !defined(EXACT)
-	if (index % product == 0) {
-		stream << index << '\n';
-	}
-#endif // end !defined(EXACT)
 }
 
 //#include "Specialization2Digits.cc"
@@ -314,15 +210,12 @@ inline void initialBody() noexcept {
 	body<index>(std::cout);
 }
 
-
-
 int main() {
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-#ifndef COMPUTE19
 				case 1: body32<1>(); break;
 				case 2: body32<2>(); break;
 				case 3: body32<3>(); break;
@@ -341,7 +234,6 @@ int main() {
 				case 16: initialBody<16>(); break;
 				case 17: initialBody<17>(); break;
 				case 18: initialBody<18>(); break;
-#endif // end ndef COMPUTE19
 				case 19: initialBody<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;

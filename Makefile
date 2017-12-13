@@ -25,19 +25,31 @@ CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 LXXFLAGS = -O3 -flto -fwhole-program -march=native
 
+PRODUCT_COMPUTATION = product-compute
+SUM_COMPUTATION = sum-compute
 QLOOPS_PROG64 = quodigious64
-PROGS = ${QLOOPS_PROG} ${QLOOPS_PROG64} 
+FREQUENCY_ANALYSIS = fanalysis
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS}
 all: ${PROGS}
-
-help:
-	@echo "available options: "
-	@echo "  - all : builds the quodigious programs "
-	@echo "  - ${QLOOPS_PROG64}: program to compute 64-bit quodigious values"
-	@echo "  - clean : cleans the program artifacts"
 
 ${QLOOPS_PROG64}: loops64.o
 	@echo -n "Building 64-bit number quodigious computer ..."
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
+	@echo done.
+
+${FREQUENCY_ANALYSIS}: numericReduction.o FrequencyAnalyzer.o
+	@echo -n "Building 64-bit number quodigious computer with frequency analyzer..."
+	@${CXX} -lpthread ${LXXFLAGS} -o ${FREQUENCY_ANALYSIS} numericReduction.o FrequencyAnalyzer.o
+	@echo done.
+
+${PRODUCT_COMPUTATION}: product-compute.o
+	@echo -n "Building unique product computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
+	@echo done.
+
+${SUM_COMPUTATION}: sum-compute.o
+	@echo -n "Building unique sum computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
 	@echo done.
 
 %.o: %.cc
@@ -51,3 +63,5 @@ clean:
 	@echo done.
 
 loops64.o: qlib.h Specialization8Digits.cc
+numericReduction.o: qlib.h FrequencyAnalyzer.h
+FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h
