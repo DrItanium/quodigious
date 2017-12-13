@@ -31,18 +31,39 @@ using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;
 
-template<u64 length>
-constexpr u64 quickPow10() noexcept {
-	return quickPow10<length - 1>() * 10;
-}
-template<>
-constexpr u64 quickPow10<0>() noexcept {
-	return 1;
+template<u64 base, u64 exponent>
+struct CompileTimeExponentiation final {
+    CompileTimeExponentiation() = delete;
+    CompileTimeExponentiation(const CompileTimeExponentiation&) = delete;
+    CompileTimeExponentiation(CompileTimeExponentiation&&) = delete;
+    ~CompileTimeExponentiation() = delete;
+    static constexpr u64 operation() noexcept {
+        return base * CompileTimeExponentiation<base, exponent - 1>::operation();
+    }
+};
+
+template<u64 base>
+struct CompileTimeExponentiation<base, 0> final {
+    CompileTimeExponentiation() = delete;
+    CompileTimeExponentiation(const CompileTimeExponentiation&) = delete;
+    CompileTimeExponentiation(CompileTimeExponentiation&&) = delete;
+    ~CompileTimeExponentiation() = delete;
+    static constexpr u64 operation() noexcept {
+        return 1;
+    }
+};
+
+
+template<u64 base, u64 exponent>
+constexpr u64 compileTimePow() noexcept {
+    return CompileTimeExponentiation<base, exponent>::operation();
 }
 
-template<u64 length>
-constexpr auto fastPow10 = quickPow10<length>();
+template<u64 base, u64 exponent>
+constexpr auto fastPow = compileTimePow<base, exponent>();
 
+template<u64 length>
+constexpr auto fastPow10 = fastPow<10, length>;
 
 template<typename T>
 constexpr bool componentQuodigious(T value, T compare) noexcept {
