@@ -27,6 +27,7 @@ class FrequencyTable {
     public:
         FrequencyTable();
         FrequencyTable(const FrequencyTable&);
+        FrequencyTable(FrequencyTable&&) = delete;
         ~FrequencyTable();
         u64 getUniqueId() const noexcept;
         void addToTable(u64 digit) noexcept;

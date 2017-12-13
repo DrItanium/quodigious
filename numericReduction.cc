@@ -58,8 +58,6 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
 }
 
 template<u64 length>
-void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept;
-template<u64 length>
 void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noexcept {
     static_assert(length <= maxWidth, "Provided length is too large!");
     static_assert(length != 0, "Can't have length of zero!");
@@ -95,7 +93,9 @@ void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noex
                 std::ostringstream stream;
                 for (auto i = start; i < end; ++i) {
                     if (i != 5) {
-                        innerBody<inner>(stream, table, index + (i * next), i);
+                        auto copy = table;
+                        copy.addToTable(i);
+                        body<inner>(stream, copy, index + (i * next));
                     }
                 }
                 return stream.str();
@@ -111,63 +111,47 @@ void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noex
         // instead of us thus, the code is cleaner too :D
         for (auto i = 2; i < 10; i += incr) {
             if (i != 5) {
-                innerBody<inner>(stream, table, index + (i * next), i);
+                auto copy = table;
+                copy.addToTable(i);
+                body<inner>(stream, copy, index + (i * next));
             }
         }
     }
 }
 
 
-template<u64 length>
-void innerBody(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
-    // this double template instantiation is done to make sure that the compiler
-    // does not attempt to instantiate infinitely, if this code was in place
-    // of the call to innerbody in body then the compiler would not stop
-    // instiantiating. we can then also perform specialization on length zero
-    auto copy = table;
-    copy.addToTable(digit);
-    body<length>(stream, copy, index);
-}
 template<>
-void innerBody<0>(std::ostream& stream, const FrequencyTable& table, u64 index, u64 digit) noexcept {
+void body<0>(std::ostream& stream, const FrequencyTable& table, u64 index) noexcept {
     if (!expensiveChecks) {
-        auto sum = table.computeSum() + digit;
+        auto sum = table.computeSum();
         if (approximationCheckFailed(sum)) {
             return;
         }
-        auto product = table.computeProduct() * digit;
+        auto product = table.computeProduct();
         if (exact) {
             if (index % product != 0) {
                 return;
             }
             if (index % sum == 0) {
-                auto copy = table;
-                copy.addToTable(digit);
-                stream << std::dec << index << "\t(" << std::hex << copy.getUniqueId() << ")\n";
+                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
             }
         } else {
             if (index % product == 0) {
-                auto copy = table;
-                copy.addToTable(digit);
-                stream << std::dec << index << "\t(" << std::hex << copy.getUniqueId() << ")\n";
+                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
             }
         }
     } else {
-        auto product = table.computeProduct() * digit;
+        auto product = table.computeProduct();
         if (exact) {
             if (index % product == 0) {
-                auto sum = table.computeSum() + digit;
+                auto sum = table.computeSum();
                 if (index % sum == 0) {
-                    auto copy = table;
-                    copy.addToTable(digit);
-                    stream << std::dec << index << "\t(" << std::hex << copy.getUniqueId() << ")\n";
+                    stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
                 }
             }
         } else {
             if (index % product == 0) {
-                auto copy = table;
-                copy.addToTable(digit);
-                stream << std::dec << index << "\t(" << std::hex << copy.getUniqueId() << ")\n";
+                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
             }
         }
     }
