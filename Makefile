@@ -44,12 +44,12 @@ ${FREQUENCY_ANALYSIS}: numericReduction.o FrequencyAnalyzer.o
 
 ${PRODUCT_COMPUTATION}: product-compute.o
 	@echo -n "Building unique product computer ... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
+	@${CXX} ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
 	@echo done.
 
 ${SUM_COMPUTATION}: sum-compute.o
 	@echo -n "Building unique sum computer ... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
+	@${CXX} ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
 	@echo done.
 
 %.o: %.cc

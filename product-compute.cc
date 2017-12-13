@@ -1,7 +1,6 @@
 #include <cstdint>
 #include <iostream>
 #include <unordered_set>
-#include <future>
 #include <sstream>
 using u64 = std::uint64_t;
 using u8 = std::uint8_t;
@@ -25,7 +24,7 @@ void computeProduct(unique_set& set, u8 depth) noexcept {
 			for (int i = 2; i < 10; ++i) {
 				if (i == 5) {
 					continue;
-				} 
+				}
 				set.emplace(p * i);
 			}
 		}

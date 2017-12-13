@@ -9,4 +9,4 @@ addons:
 compiler:
     - gcc
 
-script: CC=gcc-5 CXX=g++-5 make
+script: CC=gcc-5 CXX=g++-5 make sum-compute product-compute
