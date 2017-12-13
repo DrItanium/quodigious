@@ -21,9 +21,6 @@
 #include <future>
 
 template<u32 length>
-inline void innerBody32(u32 sum, u32 product, u32 index) noexcept;
-
-template<u32 length>
 void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
 	static_assert(length != 0, "Can't have length of zero!");
@@ -35,26 +32,17 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	// by digit level (even if the digit does not contribute too much to the
 	// overall process!).
 	for (auto i = 2; i < 10; ++i) {
-		innerBody32<inner>(sum + i, product * i, index + (i * next));
+        body32<inner>(sum + i, product * i, index + (i * next));
 	}
-}
-
-template<u32 length>
-void innerBody32(u32 sum, u32 product, u32 index) noexcept {
-	// this double template instantiation is done to make sure that the compiler
-	// does not attempt to instantiate infinitely, if this code was in place
-	// of the call to innerbody32 in body32 then the compiler would not stop
-	// instiantiating. we can then also perform specialization on length zero
-	body32<length>(sum, product, index);
 }
 
 template<>
-void innerBody32<0>(u32 sum, u32 product, u32 index) noexcept {
-	// perform the check in the case that length == 0
-	if ((index % product == 0) && (index % sum == 0)) {
-		std::cout << index << '\n';
-	}
+void body32<0>(u32 sum, u32 product, u32 index) noexcept {
+    if ((index % product == 0) && (index % sum == 0)) {
+        std::cout << index << '\n';
+    }
 }
+
 // 64-bit tweakables
 /*
  * Perform exact computation (sum and product checks) instead of approximations
