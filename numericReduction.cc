@@ -58,7 +58,7 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
     }
 }
 
-using Matches = std::list<std::tuple<u64, u64>>;
+using Matches = std::list<std::tuple<u64, u64, u64>>;
 
 template<u64 length>
 void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept {
@@ -97,11 +97,11 @@ void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept 
                   if (i != 5) {
                       auto copy = table;
                       copy.addToTable(i);
+                      copy.addToOrderHash<inner>(i);
                       body<inner>(stream, copy, index + (i * next));
                   }
               }
           };
-          std::ostringstream stream2;
           Matches c0, c1;
           auto middle = std::async(std::launch::async, fn, std::ref(c0), 4, 7);
           auto upper = std::async(std::launch::async, fn,  std::ref(c1), 7, 10);
@@ -122,6 +122,7 @@ void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept 
             if (i != 5) {
                 auto copy = table;
                 copy.addToTable(i);
+                copy.addToOrderHash<inner>(i);
                 body<inner>(stream, copy, index + (i * next));
             }
         }
@@ -142,11 +143,13 @@ void body<0>(Matches& stream, const FrequencyTable& table, u64 index) noexcept {
                 return;
             }
             if (index % sum == 0) {
-                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                //stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                    stream.emplace_back(index, table.getUniqueId(), table.getOrderHash());
             }
         } else {
             if (index % product == 0) {
-                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                //stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                    stream.emplace_back(index, table.getUniqueId(), table.getOrderHash());
             }
         }
     } else {
@@ -155,12 +158,14 @@ void body<0>(Matches& stream, const FrequencyTable& table, u64 index) noexcept {
             if (index % product == 0) {
                 auto sum = table.computeSum();
                 if (index % sum == 0) {
-                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                    stream.emplace_back(index, table.getUniqueId(), table.getOrderHash());
+                    //stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
                 }
             }
         } else {
             if (index % product == 0) {
-                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
+                    stream.emplace_back(index, table.getUniqueId(), table.getOrderHash());
+                //stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
             }
         }
     }
@@ -174,7 +179,7 @@ inline void initialBody() noexcept {
     Matches elements;
     body<index>(elements, table);
     for (auto const v : elements) {
-        std::cout << std::dec << std::get<0>(v) << "\t(" << std::hex << std::get<1>(v) << ")\n";
+        std::cout << std::dec << std::get<0>(v) << "\t(" << std::hex << std::get<1>(v) << ")\t(" << std::hex << std::get<2>(v) << ")\n";
     }
 }
 
@@ -200,3 +205,5 @@ int main() {
     }
     return 0;
 }
+
+

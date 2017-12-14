@@ -22,14 +22,18 @@
 // A class for constructing a unique key from a given number as well as computing product and sum
 // This class is meant to heavily reduce recomputation while being very cheap to copy
 //
-
 class FrequencyTable {
     public:
         FrequencyTable();
         FrequencyTable(const FrequencyTable&);
         FrequencyTable(FrequencyTable&&) = delete;
         ~FrequencyTable();
-        u64 getUniqueId() const noexcept;
+        template<u64 index>
+        u64 addToOrderHash(u64 digit) noexcept {
+            _orderHash = encodeDigitIntoOrderHash<index>(_orderHash, digit);
+        }
+        u64 getOrderHash() const noexcept { return _orderHash; }
+        u64 getUniqueId() const noexcept { return _value; }
         void addToTable(u64 digit) noexcept;
         u64 computeSum() const noexcept { return _sum; }
         u64 computeProduct() const noexcept { return _product; }
@@ -40,5 +44,6 @@ class FrequencyTable {
         };
         uint64_t _product;
         uint64_t _sum;
+        uint64_t _orderHash;
 };
 #endif
