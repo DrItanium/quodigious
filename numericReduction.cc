@@ -179,7 +179,7 @@ inline void initialBody() noexcept {
     Matches elements;
     body<index>(elements, table);
     for (auto const v : elements) {
-        std::cout << std::dec << std::get<0>(v) << "\t(" << std::hex << std::get<1>(v) << ")\t(" << std::hex << std::get<2>(v) << ")\n";
+        std::cout << std::dec << std::get<0>(v) << "\t(" << std::hex << std::get<1>(v) << ")\t(" << std::oct << std::get<2>(v) << " -> " << std::dec << std::get<2>(v) << ")\n";
     }
 }
 
