@@ -104,52 +104,17 @@ constexpr bool isQuodigious(u32 value, u32 sum, u32 product) noexcept {
  * more complex though.
  */
 
-template<typename T, typename F, T bitmask, T shiftcount>
-constexpr T encodeBits(T input, F value) noexcept {
-    auto valueToInject = static_cast<T>(value);
-    auto maskedValue = input & ~bitmask;
-    if (shiftcount != 0) {
-        valueToInject <<= shiftcount;
-    }
-    valueToInject &= bitmask;
-    return static_cast<T>(maskedValue | valueToInject);
-}
-
-constexpr u64 encodeOrderBit(u64 digit) noexcept {
-    return digit - 2;
-}
-
-template<u64 position>
-constexpr u64 encodeOctalBit(u64 input, u64 value) noexcept {
-    return encodeBits<u64, u64, 0x7ul << (position * 3), position * 3>(input, encodeOrderBit(value));
-}
-
-
 template<u64 index>
 constexpr u64 encodeDigitIntoOrderHash(u64 value, u64 digit) noexcept {
     static_assert(index < 19, "Provided index is too large, range is 0->18");
-    switch(index) {
-        case 0: return encodeOctalBit<0>(value, digit);
-        case 1: return encodeOctalBit<1>(value, digit);
-        case 2: return encodeOctalBit<2>(value, digit);
-        case 3: return encodeOctalBit<3>(value, digit);
-        case 4: return encodeOctalBit<4>(value, digit);
-        case 5: return encodeOctalBit<5>(value, digit);
-        case 6: return encodeOctalBit<6>(value, digit);
-        case 7: return encodeOctalBit<7>(value, digit);
-        case 8: return encodeOctalBit<8>(value, digit);
-        case 9: return encodeOctalBit<9>(value, digit);
-        case 10: return encodeOctalBit<10>(value, digit);
-        case 11: return encodeOctalBit<11>(value, digit);
-        case 12: return encodeOctalBit<12>(value, digit);
-        case 13: return encodeOctalBit<13>(value, digit);
-        case 14: return encodeOctalBit<14>(value, digit);
-        case 15: return encodeOctalBit<15>(value, digit);
-        case 16: return encodeOctalBit<16>(value, digit);
-        case 17: return encodeOctalBit<17>(value, digit);
-        case 18: return encodeOctalBit<18>(value, digit);
-        default: return 0;
-    }
+    constexpr auto shiftcount = index * 3;
+    constexpr auto bitmask = 0x7ul << shiftcount;
+    auto valueToInject = digit - 2;
+    auto maskedValue = value & ~bitmask;
+    valueToInject <<= shiftcount;
+    valueToInject &= bitmask;
+    return maskedValue | valueToInject;
 }
+
 
 #endif // end QLIB_H__
