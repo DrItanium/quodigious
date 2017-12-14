@@ -20,6 +20,7 @@
 #include "qlib.h"
 #include "FrequencyAnalyzer.h"
 #include <future>
+#include <list>
 // 64-bit tweakables
 /*
  * Perform exact computation (sum and product checks) instead of approximations
@@ -57,8 +58,10 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
     }
 }
 
+using Matches = std::list<std::tuple<u64, u64>>;
+
 template<u64 length>
-void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noexcept {
+void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept {
     static_assert(length <= maxWidth, "Provided length is too large!");
     static_assert(length != 0, "Can't have length of zero!");
     // start at the most significant digit and move inward, that way we don't need
@@ -89,22 +92,28 @@ void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noex
     // I can always perform the odd digit checks later on at a significant
     // reduction in speed cost!
     if (length >= 11) {
-          auto fn = [&table, index](auto start, auto end) noexcept {
-                std::ostringstream stream;
-                for (auto i = start; i < end; ++i) {
-                    if (i != 5) {
-                        auto copy = table;
-                        copy.addToTable(i);
-                        body<inner>(stream, copy, index + (i * next));
-                    }
-                }
-                return stream.str();
+          auto fn = [&table, index](Matches& stream, auto start, auto end) noexcept {
+              for (auto i = start; i < end; ++i) {
+                  if (i != 5) {
+                      auto copy = table;
+                      copy.addToTable(i);
+                      body<inner>(stream, copy, index + (i * next));
+                  }
+              }
           };
           std::ostringstream stream2;
-          auto middle = std::async(std::launch::async, fn, 4, 7);
-          auto upper = std::async(std::launch::async, fn, 7, 10);
-          fn(2, 4);
-          stream << middle.get() << upper.get();
+          Matches c0, c1;
+          auto middle = std::async(std::launch::async, fn, std::ref(c0), 4, 7);
+          auto upper = std::async(std::launch::async, fn,  std::ref(c1), 7, 10);
+          fn(stream, 2, 4);
+          middle.get();
+          for (auto const v : c0) {
+              stream.emplace_back(v);
+          }
+          upper.get();
+          for (auto const v : c1) {
+              stream.emplace_back(v);
+          }
     } else {
         constexpr auto incr = (length == 1) ? 2 : 1;
         // see if we can't just make the compiler handle the incrementation
@@ -121,7 +130,7 @@ void body(std::ostream& stream, const FrequencyTable& table, u64 index = 0) noex
 
 
 template<>
-void body<0>(std::ostream& stream, const FrequencyTable& table, u64 index) noexcept {
+void body<0>(Matches& stream, const FrequencyTable& table, u64 index) noexcept {
     if (!expensiveChecks) {
         auto sum = table.computeSum();
         if (approximationCheckFailed(sum)) {
@@ -133,11 +142,11 @@ void body<0>(std::ostream& stream, const FrequencyTable& table, u64 index) noexc
                 return;
             }
             if (index % sum == 0) {
-                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
+                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
             }
         } else {
             if (index % product == 0) {
-                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
+                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
             }
         }
     } else {
@@ -146,12 +155,12 @@ void body<0>(std::ostream& stream, const FrequencyTable& table, u64 index) noexc
             if (index % product == 0) {
                 auto sum = table.computeSum();
                 if (index % sum == 0) {
-                    stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
+                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
                 }
             }
         } else {
             if (index % product == 0) {
-                stream << std::dec << index << "\t(" << std::hex << table.getUniqueId() << ")\n";
+                stream.emplace_back(std::make_tuple(index, table.getUniqueId()));
             }
         }
     }
@@ -162,7 +171,11 @@ inline void initialBody() noexcept {
     // we don't want main aware of any details of how computation is performed.
     // This allows the decoupling of details from main and the computation body itself
     FrequencyTable table;
-    body<index>(std::cout, table);
+    Matches elements;
+    body<index>(elements, table);
+    for (auto const v : elements) {
+        std::cout << std::dec << std::get<0>(v) << "\t(" << std::hex << std::get<1>(v) << ")\n";
+    }
 }
 
 int main() {
