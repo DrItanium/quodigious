@@ -40,9 +40,14 @@ constexpr u64 extractDigit(u64 value) noexcept {
 }
 template<u64 position, u64 length>
 struct SpecialWalker {
+	SpecialWalker() = delete;
+	~SpecialWalker() = delete;
+	SpecialWalker(SpecialWalker&&) = delete;
+	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
+		
 		for (auto i = 2; i < 10; ++i) {
 			if (length > 4 && i == 5) { 
 				continue;
@@ -64,6 +69,10 @@ constexpr u64 convertNumber<1>(u64 value) noexcept {
 
 template<u64 length>
 struct SpecialWalker<length, length> {
+	SpecialWalker() = delete;
+	~SpecialWalker() = delete;
+	SpecialWalker(SpecialWalker&&) = delete;
+	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		if (length > 4) {
 			auto lastDigit = index & 0b111;
