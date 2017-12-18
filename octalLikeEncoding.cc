@@ -26,7 +26,6 @@
 // in the encoding so it is perfect for this design.
 // decimal would be
 #include "qlib.h"
-#include <future>
 
 template<u64 position>
 constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
@@ -44,16 +43,11 @@ struct SpecialWalker {
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
-		if (length > 9) {
-			for (auto i = 2; i < 10; ++i) {
-				if (i != 5) {
-					SpecialWalker<position - 1, length>::body(sum + i, product * i, encodeDigit<position - 1>(index, (i - 2)));
-				}
+		for (auto i = 2; i < 10; ++i) {
+			if (length > 9 && i == 5) { 
+				continue;
 			}
-		} else {
-			for (auto i = 2; i < 10; ++i) {
-				SpecialWalker<position - 1, length>::body(sum + i, product * i, encodeDigit<position - 1>(index, (i - 2)));
-			}
+			SpecialWalker<position - 1, length>::body(sum + i, product * i, encodeDigit<position - 1>(index, (i - 2)));
 		}
 	}
 };
