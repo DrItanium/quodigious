@@ -29,7 +29,8 @@ PRODUCT_COMPUTATION = product-compute
 SUM_COMPUTATION = sum-compute
 QLOOPS_PROG64 = quodigious64
 FREQUENCY_ANALYSIS = fanalysis
-PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS}
+ENCODING = ocEncoding 
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING}
 all: ${PROGS}
 
 ${QLOOPS_PROG64}: loops64.o
@@ -45,6 +46,11 @@ ${FREQUENCY_ANALYSIS}: numericReduction.o FrequencyAnalyzer.o
 ${PRODUCT_COMPUTATION}: product-compute.o
 	@echo -n "Building unique product computer ... "
 	@${CXX} ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
+	@echo done.
+
+${ENCODING}: octalLikeEncoding.o
+	@echo -n "Building special octal computer ... "
+	@${CXX} ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
 	@echo done.
 
 ${SUM_COMPUTATION}: sum-compute.o
@@ -65,3 +71,4 @@ clean:
 loops64.o: qlib.h Specialization8Digits.cc
 numericReduction.o: qlib.h FrequencyAnalyzer.h
 FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h
+octalLikeEncoding.o: qlib.h
