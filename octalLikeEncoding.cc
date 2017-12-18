@@ -29,15 +29,18 @@
 
 template<u64 position>
 constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
+	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
 	constexpr auto shift = position * 3;
-	constexpr auto mask = 0b111 << shift;
+	constexpr auto mask = 0b111ul << shift;
 	return (value & ~mask) | (digit << shift);
 }
 template<u64 position>
 constexpr u64 extractDigit(u64 value) noexcept {
+	static_assert(position <= 19, "Cannot extract digit of position 20 or more!");
 	constexpr auto shift = position * 3;
 	return (value >> shift) & 0b111;
 }
+
 template<u64 position, u64 length>
 struct SpecialWalker {
 	SpecialWalker() = delete;
@@ -48,7 +51,8 @@ struct SpecialWalker {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
 		
-		for (auto i = 2; i < 10; ++i) {
+		SpecialWalker<position + 1, length>::body(sum + 2, product * 2, index);
+		for (auto i = 3; i < 10; ++i) {
 			if (length > 4 && i == 5) { 
 				continue;
 			}
@@ -108,6 +112,8 @@ int main() {
 				case 8: initialBody<8>(); break;
 				case 9: initialBody<9>(); break;
 				case 10: initialBody<10>(); break;
+				case 11: initialBody<11>(); break;
+				case 12: initialBody<12>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
