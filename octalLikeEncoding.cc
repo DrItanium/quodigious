@@ -37,34 +37,32 @@ constexpr u32 encodeDigit(u32 value, u32 digit) noexcept {
 template<u32 position>
 constexpr u32 extractDigit(u32 value) noexcept {
 	constexpr auto shift = position * 3;
-	constexpr auto mask = 0b111 << shift;
-	return (value & mask) >> shift;
+	return (value >> shift) & 0b111;
 }
 template<u32 position, u32 length>
 struct SpecialWalker {
 	static void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 		static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
-		constexpr auto inner = position - 1;
-		constexpr auto next = fastPow10<position>;
 		// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
 		// numbers (this code is not used when you request 64-bit numbers!)
 		// does not require as much optimization. We can walk through digit level
 		// by digit level (even if the digit does not contribute too much to the
 		// overall process!).
 		for (auto i = 0; i < 8; ++i) {
-			SpecialWalker<inner, length>::body32(sum + i, product * i, encodeDigit<inner>(index, i));
+			auto mod = i + 2;
+			SpecialWalker<position - 1, length>::body32(sum + mod, product * mod, encodeDigit<position - 1>(index, i));
 		}
 	}
 };
 
 template<u32 position>
 constexpr u32 convertNumber(u32 value) noexcept {
-	return convertNumber<position - 1>(value) * (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2));
+	return convertNumber<position - 1>(value) + (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2));
 }
 template<>
 constexpr u32 convertNumber<0>(u32 value) noexcept { 
-	return 1; 
+	return 0; 
 }
 
 template<u32 length>
