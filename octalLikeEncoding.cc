@@ -28,46 +28,55 @@
 #include "qlib.h"
 #include <future>
 
-template<u32 position>
-constexpr u32 encodeDigit(u32 value, u32 digit) noexcept {
+template<u64 position>
+constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
 	constexpr auto shift = position * 3;
 	constexpr auto mask = 0b111 << shift;
-	return (value & ~mask) | (mask & (digit << shift));
+	return (value & ~mask) | (digit << shift);
 }
-template<u32 position>
-constexpr u32 extractDigit(u32 value) noexcept {
+template<u64 position>
+constexpr u64 extractDigit(u64 value) noexcept {
 	constexpr auto shift = position * 3;
 	return (value >> shift) & 0b111;
 }
-template<u32 position, u32 length>
+template<u64 position, u64 length>
 struct SpecialWalker {
-	static void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
-		static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
+	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
-		// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
-		// numbers (this code is not used when you request 64-bit numbers!)
-		// does not require as much optimization. We can walk through digit level
-		// by digit level (even if the digit does not contribute too much to the
-		// overall process!).
-		for (auto i = 0; i < 8; ++i) {
-			auto mod = i + 2;
-			SpecialWalker<position - 1, length>::body32(sum + mod, product * mod, encodeDigit<position - 1>(index, i));
+		if (length > 9) {
+			for (auto i = 2; i < 10; ++i) {
+				if (i != 5) {
+					SpecialWalker<position - 1, length>::body(sum + i, product * i, encodeDigit<position - 1>(index, (i - 2)));
+				}
+			}
+		} else {
+			for (auto i = 2; i < 10; ++i) {
+				SpecialWalker<position - 1, length>::body(sum + i, product * i, encodeDigit<position - 1>(index, (i - 2)));
+			}
 		}
 	}
 };
 
-template<u32 position>
-constexpr u32 convertNumber(u32 value) noexcept {
-	return convertNumber<position - 1>(value) + (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2));
-}
-template<>
-constexpr u32 convertNumber<0>(u32 value) noexcept { 
-	return 0; 
+template<u64 position>
+constexpr u64 convertNumber(u64 value) noexcept {
+	return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
 }
 
-template<u32 length>
+template<>
+constexpr u64 convertNumber<1>(u64 value) noexcept { 
+	return ((value & 0b111) + 2);
+}
+
+template<u64 length>
 struct SpecialWalker<0, length> {
-	static void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
+	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+		if (length > 9) {
+			auto lastDigit = index & 0b111;
+			if (lastDigit % 2 != 0) {
+				return;
+			}
+		}
 		auto conv = convertNumber<length>(index);
 		if ((conv % product == 0) && (conv % sum == 0)) {
 			std::cout << conv << '\n';
@@ -75,9 +84,9 @@ struct SpecialWalker<0, length> {
 	}
 };
 
-template<u32 width>
-void initialBody32() noexcept {
-	SpecialWalker<width, width>::body32();
+template<u64 width>
+void initialBody() noexcept {
+	SpecialWalker<width, width>::body();
 }
 
 int main() {
@@ -86,15 +95,16 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-				case 1: initialBody32<1>(); break;
-				case 2: initialBody32<2>(); break;
-				case 3: initialBody32<3>(); break;
-				case 4: initialBody32<4>(); break;
-				case 5: initialBody32<5>(); break;
-				case 6: initialBody32<6>(); break;
-				case 7: initialBody32<7>(); break;
-				case 8: initialBody32<8>(); break;
-				case 9: initialBody32<9>(); break;
+				case 1: initialBody<1>(); break;
+				case 2: initialBody<2>(); break;
+				case 3: initialBody<3>(); break;
+				case 4: initialBody<4>(); break;
+				case 5: initialBody<5>(); break;
+				case 6: initialBody<6>(); break;
+				case 7: initialBody<7>(); break;
+				case 8: initialBody<8>(); break;
+				case 9: initialBody<9>(); break;
+				case 10: initialBody<10>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
