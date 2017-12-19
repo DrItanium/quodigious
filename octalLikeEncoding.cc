@@ -50,7 +50,6 @@ struct SpecialWalker {
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
-		
 		SpecialWalker<position + 1, length>::body(sum + 2, product * 2, index);
 		for (auto i = 3; i < 10; ++i) {
 			if (length > 4 && i == 5) { 
@@ -78,12 +77,12 @@ struct SpecialWalker<length, length> {
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		if (length > 4) {
-			auto lastDigit = index & 0b111;
-			if (lastDigit % 2 != 0) {
-				return;
-			}
-		}
+		//if (length > 4) {
+		//	auto lastDigit = index & 0b111;
+		//	if (lastDigit % 2 != 0) {
+		//		return;
+		//	}
+		//}
 		auto conv = convertNumber<length>(index);
 		if ((conv % product == 0) && (conv % sum == 0)) {
 			std::cout << conv << '\n';
@@ -93,7 +92,13 @@ struct SpecialWalker<length, length> {
 
 template<u64 width>
 void initialBody() noexcept {
-	SpecialWalker<0, width>::body();
+	if (width > 4) {
+		for (auto i = 2; i < 10; i += 2) {
+			SpecialWalker<1, width>::body(i, i, i - 2);
+		}
+	} else {
+		SpecialWalker<0, width>::body();
+	}
 }
 
 int main() {
