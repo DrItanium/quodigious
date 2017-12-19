@@ -18,12 +18,12 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++14
-CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
+CXXFLAGS += -O3 -fwhole-program -march=native
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -O3 -flto -fwhole-program -march=native
+LXXFLAGS = -O3 -fwhole-program -march=native 
 
 PRODUCT_COMPUTATION = product-compute
 SUM_COMPUTATION = sum-compute

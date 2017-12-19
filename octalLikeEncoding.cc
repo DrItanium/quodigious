@@ -87,7 +87,6 @@ struct SpecialWalker<length, length> {
 		auto conv = convertNumber<length>(index);
 		if ((conv % product == 0) && (conv % sum == 0)) {
 			stream.emplace_back(conv);
-			//std::cout << conv << '\n';
 		}
 	}
 };
