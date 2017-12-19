@@ -218,7 +218,60 @@ struct SpecialWalker<length, length> {
 		} \
 	} \
 	}
-DefFourAway(15);
+#define DefFiveAway(width) \
+	template<> \
+	struct SpecialWalker< width - 5, width > { \
+	SpecialWalker() = delete; \
+	~SpecialWalker() = delete; \
+	SpecialWalker(SpecialWalker&&) = delete; \
+	SpecialWalker(const SpecialWalker&) = delete; \
+	static void body(MatchList& stream, u64 sum, u64 product, u64 index) noexcept { \
+	auto conv = convertNumber<width - 5>(index); \
+		for (auto b = 2; b < 10; ++b) { \
+			if (b == 5) { continue; } \
+			auto cb = (fastPow10<width - 5> * a) + conv; \
+			auto sb = sum + b; \
+			auto pb = product * b; \
+		for (auto a = 2; a < 10; ++a) { \
+			if (a == 5) { continue; } \
+			auto ca = (fastPow10<width - 4> * a) + cb; \
+			auto sa = sb + a; \
+			auto pa = pb * a; \
+			for (auto j = 2; j < 10; ++j) { \
+				if (j == 5) {  \
+					continue; \
+				} \
+				auto cj = (fastPow10<width - 3> * j) + ca; \
+				auto sj = sa + j; \
+				auto pj = pa * j; \
+				for (auto i = 2; i < 10; ++i) { \
+					if (i == 5) {  \
+						continue; \
+					} \
+					auto ci = (fastPow10<width - 2> * i) + cj; \
+					auto so = sj + i; \
+					auto po = pj * i; \
+					for (auto k = 2; k < 10; ++k) { \
+						if (k == 5) {  \
+							continue; \
+						} \
+						auto si = so + k; \
+						if (width > 10) { \
+							if (si % 3 != 0) { \
+								continue; \
+							} \
+						} \
+						auto num = (fastPow10<width - 1> * k) + ci; \
+						if (((num % (po * k)) == 0) && (num % si == 0)) { \
+							stream.emplace_back(num); \
+						} \
+					} \
+				} \
+			} \
+		} \
+	} \
+	}
+DefFiveAway(15);
 DefFourAway(14);
 DefThreeAway(13);
 DefTwoAway(12);
@@ -227,6 +280,7 @@ DefTwoAway(10);
 #undef DefThreeAway
 #undef DefTwoAway
 #undef DefFourAway
+#undef DefFiveAway 
 
 template<u64 width>
 void initialBody() noexcept {
