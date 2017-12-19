@@ -18,12 +18,12 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++14
-CXXFLAGS += -O3 -fwhole-program -march=native
+CXXFLAGS += -O2 -fwhole-program -march=native
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -O3 -march=native 
+LXXFLAGS = -O2 -march=native 
 
 PRODUCT_COMPUTATION = product-compute
 SUM_COMPUTATION = sum-compute
@@ -57,7 +57,7 @@ ${SUM_COMPUTATION}: sum-compute.o
 
 
 ${ENCODING}: octalLikeEncoding.o
-	@echo -n "Building special octal computer with profile ... "
+	@echo -n "Building special octal computer ... "
 	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
 	@echo done.
 
