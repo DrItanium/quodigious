@@ -229,7 +229,7 @@ struct SpecialWalker<length, length> {
 	auto conv = convertNumber<width - 5>(index); \
 		for (auto b = 2; b < 10; ++b) { \
 			if (b == 5) { continue; } \
-			auto cb = (fastPow10<width - 5> * a) + conv; \
+			auto cb = (fastPow10<width - 5> * b) + conv; \
 			auto sb = sum + b; \
 			auto pb = product * b; \
 		for (auto a = 2; a < 10; ++a) { \
