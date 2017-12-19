@@ -50,8 +50,7 @@ struct SpecialWalker {
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
-		SpecialWalker<position + 1, length>::body(sum + 2, product * 2, index);
-		for (auto i = 3; i < 10; ++i) {
+		for (auto i = 2; i < 10; ++i) {
 			if (length > 4 && i == 5) { 
 				continue;
 			}
