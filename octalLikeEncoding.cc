@@ -54,8 +54,10 @@ struct SpecialWalker {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
 		for (auto i = 2; i < 10; ++i) {
-			if (length > 4 && i == 5) { 
-				continue;
+			if (length > 4) {
+				if (i == 5) {
+					continue;
+				}
 			}
 			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
 		}
