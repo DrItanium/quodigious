@@ -49,14 +49,16 @@ ${PRODUCT_COMPUTATION}: product-compute.o
 	@${CXX} ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
 	@echo done.
 
-${ENCODING}: octalLikeEncoding.o
-	@echo -n "Building special octal computer ... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
-	@echo done.
 
 ${SUM_COMPUTATION}: sum-compute.o
 	@echo -n "Building unique sum computer ... "
 	@${CXX} ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
+	@echo done.
+
+
+${ENCODING}: octalLikeEncoding.o
+	@echo -n "Building special octal computer with profile ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
 	@echo done.
 
 %.o: %.cc
