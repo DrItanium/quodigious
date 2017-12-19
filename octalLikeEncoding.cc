@@ -270,6 +270,7 @@ struct SpecialWalker<length, length> {
 			} \
 		} \
 	} \
+	} \
 	}
 DefFiveAway(15);
 DefFourAway(14);
