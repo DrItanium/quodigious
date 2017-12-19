@@ -26,7 +26,10 @@
 // in the encoding so it is perfect for this design.
 // decimal would be
 #include "qlib.h"
+#include <future>
+#include <list>
 
+using MatchList = std::list<u64>;
 template<u64 position>
 constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
 	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
@@ -47,14 +50,14 @@ struct SpecialWalker {
 	~SpecialWalker() = delete;
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
 		for (auto i = 2; i < 10; ++i) {
 			if (length > 4 && i == 5) { 
 				continue;
 			}
-			SpecialWalker<position + 1, length>::body(sum + i, product * i, encodeDigit<position>(index, (i - 2)));
+			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
 		}
 	}
 };
@@ -75,24 +78,75 @@ struct SpecialWalker<length, length> {
 	~SpecialWalker() = delete;
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+		if (length > 10) {
+			if (sum % 3 != 0) {
+				return;
+			}
+		}
 		auto conv = convertNumber<length>(index);
 		if ((conv % product == 0) && (conv % sum == 0)) {
-			std::cout << conv << '\n';
+			stream.emplace_back(conv);
+			//std::cout << conv << '\n';
 		}
 	}
 };
 
 template<u64 width>
 void initialBody() noexcept {
-	if (width == 1) {
-		std::cout << "2\n3\n4\n5\n6\n7\n8\n9" << std::endl;
-	} else if (width > 4) {
-		for (auto i = 2; i < 10; i += 2) {
-			SpecialWalker<1, width>::body(i, i, i - 2);
+	if (width > 4) {
+		MatchList c0, c1, c2, c3;
+		auto body = [](auto base) {
+			MatchList list;
+			auto sum = base;
+			auto product = base;
+			auto index = (base - 2) << 3;
+			// using the frequency analysis I did before for loops64.cc I found
+			// that on even digits that 4 and 8 are used while odd digits use 2
+			// and 6. This is a frequency analysis job only :D
+			if (base % 2 == 0) {
+				SpecialWalker<2, width>::body(list, sum + 4, product * 4, index + 2);
+				SpecialWalker<2, width>::body(list, sum + 8, product * 8, index + 6);
+			} else {
+				SpecialWalker<2, width>::body(list, sum + 2, product * 2, index);
+				SpecialWalker<2, width>::body(list, sum + 6, product * 6, index + 4);
+			}
+			return list;
+		};
+		auto t0 = std::async(std::launch::async, body, 2);
+		auto t1 = std::async(std::launch::async, body, 3);
+		auto t2 = std::async(std::launch::async, body, 4);
+		auto t3 = std::async(std::launch::async, body, 6);
+		auto t4 = std::async(std::launch::async, body, 7);
+		auto t5 = std::async(std::launch::async, body, 8);
+		auto t6 = std::async(std::launch::async, body, 9);
+		for (const auto k : t0.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t1.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t2.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t3.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t4.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t5.get()) {
+			std::cout << k << std::endl;
+		}
+		for (const auto k : t6.get()) {
+			std::cout << k << std::endl;
 		}
 	} else {
-		SpecialWalker<0, width>::body();
+		MatchList collection;
+		SpecialWalker<0, width>::body(collection);
+		for (const auto k : collection) {
+			std::cout << k << std::endl;
+		}
 	}
 }
 
@@ -102,7 +156,9 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-				case 1: initialBody<1>(); break;
+				case 1:
+					std::cout << "2\n3\n4\n5\n6\n7\n8\n9" << std::endl;
+					break;
 				case 2: initialBody<2>(); break;
 				case 3: initialBody<3>(); break;
 				case 4: initialBody<4>(); break;

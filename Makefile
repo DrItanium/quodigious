@@ -50,7 +50,7 @@ ${PRODUCT_COMPUTATION}: product-compute.o
 
 ${ENCODING}: octalLikeEncoding.o
 	@echo -n "Building special octal computer ... "
-	@${CXX} ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
+	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
 	@echo done.
 
 ${SUM_COMPUTATION}: sum-compute.o
