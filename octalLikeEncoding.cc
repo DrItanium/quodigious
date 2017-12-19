@@ -77,12 +77,6 @@ struct SpecialWalker<length, length> {
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		//if (length > 4) {
-		//	auto lastDigit = index & 0b111;
-		//	if (lastDigit % 2 != 0) {
-		//		return;
-		//	}
-		//}
 		auto conv = convertNumber<length>(index);
 		if ((conv % product == 0) && (conv % sum == 0)) {
 			std::cout << conv << '\n';
@@ -92,7 +86,9 @@ struct SpecialWalker<length, length> {
 
 template<u64 width>
 void initialBody() noexcept {
-	if (width > 4) {
+	if (width == 1) {
+		std::cout << "2\n3\n4\n5\n6\n7\n8\n9" << std::endl;
+	} else if (width > 4) {
 		for (auto i = 2; i < 10; i += 2) {
 			SpecialWalker<1, width>::body(i, i, i - 2);
 		}
@@ -119,6 +115,13 @@ int main() {
 				case 10: initialBody<10>(); break;
 				case 11: initialBody<11>(); break;
 				case 12: initialBody<12>(); break;
+				case 13: initialBody<13>(); break;
+				case 14: initialBody<14>(); break;
+				case 15: initialBody<15>(); break;
+				case 16: initialBody<16>(); break;
+				case 17: initialBody<17>(); break;
+				case 18: initialBody<18>(); break;
+				case 19: initialBody<19>(); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
