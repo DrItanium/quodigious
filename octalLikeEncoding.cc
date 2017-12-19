@@ -94,22 +94,20 @@ struct SpecialWalker<length, length> {
 
 template<u64 width>
 void initialBody() noexcept {
-	if (width > 4) {
-		MatchList c0, c1, c2, c3;
+	auto outputToConsole = [](const auto& list) noexcept {
+		for(const auto& v : list) {
+			std::cout << v << std::endl;
+		}
+	};
+	if (width > 10) {
 		auto body = [](auto base) {
 			MatchList list;
-			auto sum = base;
-			auto product = base;
 			auto index = (base - 2) << 3;
 			// using the frequency analysis I did before for loops64.cc I found
 			// that on even digits that 4 and 8 are used while odd digits use 2
 			// and 6. This is a frequency analysis job only :D
-			if (base % 2 == 0) {
-				SpecialWalker<2, width>::body(list, sum + 4, product * 4, index + 2);
-				SpecialWalker<2, width>::body(list, sum + 8, product * 8, index + 6);
-			} else {
-				SpecialWalker<2, width>::body(list, sum + 2, product * 2, index);
-				SpecialWalker<2, width>::body(list, sum + 6, product * 6, index + 4);
+			for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
+				SpecialWalker<2, width>::body(list, base + i, base * i, index + (i - 2));
 			}
 			return list;
 		};
@@ -120,33 +118,17 @@ void initialBody() noexcept {
 		auto t4 = std::async(std::launch::async, body, 7);
 		auto t5 = std::async(std::launch::async, body, 8);
 		auto t6 = std::async(std::launch::async, body, 9);
-		for (const auto k : t0.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t1.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t2.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t3.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t4.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t5.get()) {
-			std::cout << k << std::endl;
-		}
-		for (const auto k : t6.get()) {
-			std::cout << k << std::endl;
-		}
+		outputToConsole(t0.get());
+		outputToConsole(t1.get());
+		outputToConsole(t2.get());
+		outputToConsole(t3.get());
+		outputToConsole(t4.get());
+		outputToConsole(t5.get());
+		outputToConsole(t6.get());
 	} else {
 		MatchList collection;
 		SpecialWalker<0, width>::body(collection);
-		for (const auto k : collection) {
-			std::cout << k << std::endl;
-		}
+		outputToConsole(collection);
 	}
 }
 
