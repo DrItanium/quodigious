@@ -226,7 +226,7 @@ struct SpecialWalker<length, length> {
 	SpecialWalker(SpecialWalker&&) = delete; \
 	SpecialWalker(const SpecialWalker&) = delete; \
 	static void body(MatchList& stream, u64 sum, u64 product, u64 index) noexcept { \
-		auto conv = convertNumber<width - 5>(index); \
+	auto conv = convertNumber<width - 5>(index); \
 		for (auto b = 2; b < 10; ++b) { \
 			if (b == 5) { continue; } \
 			auto cb = (fastPow10<width - 5> * b) + conv; \
