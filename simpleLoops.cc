@@ -30,19 +30,6 @@
 #include <list>
 
 using MatchList = std::list<u64>;
-template<u64 position>
-constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
-	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
-	constexpr auto shift = position * 3;
-	constexpr auto mask = 0b111ul << shift;
-	return (value & ~mask) | (digit << shift);
-}
-template<u64 position>
-constexpr u64 extractDigit(u64 value) noexcept {
-	static_assert(position <= 19, "Cannot extract digit of position 20 or more!");
-	constexpr auto shift = position * 3;
-	return (value >> shift) & 0b111;
-}
 
 template<u64 position, u64 length>
 struct SpecialWalker {
@@ -59,20 +46,10 @@ struct SpecialWalker {
 					continue;
 				}
 			}
-			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
+			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, index + (fastPow10<position> * i));
 		}
 	}
 };
-
-template<u64 position>
-constexpr u64 convertNumber(u64 value) noexcept {
-	return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
-}
-
-template<>
-constexpr u64 convertNumber<1>(u64 value) noexcept { 
-	return ((value & 0b111) + 2);
-}
 
 template<u64 length>
 struct SpecialWalker<length, length> {
@@ -86,9 +63,8 @@ struct SpecialWalker<length, length> {
 				return;
 			}
 		}
-		auto conv = convertNumber<length>(index);
-		if ((conv % product == 0) && (conv % sum == 0)) {
-			stream.emplace_back(conv);
+		if ((index % product == 0) && (index % sum == 0)) {
+			stream.emplace_back(index);
 		}
 	}
 };
@@ -103,12 +79,12 @@ void initialBody() noexcept {
 	if (width > 10) {
 		auto body = [](auto base) {
 			MatchList list;
-			auto index = (base - 2) << 3;
+			auto index = (base * 10);
 			// using the frequency analysis I did before for loops64.cc I found
 			// that on even digits that 4 and 8 are used while odd digits use 2
 			// and 6. This is a frequency analysis job only :D
 			for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-				SpecialWalker<2, width>::body(list, base + i, base * i, index + (i - 2));
+				SpecialWalker<2, width>::body(list, base + i, base * i, index + i);
 			}
 			return list;
 		};
