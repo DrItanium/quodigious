@@ -93,6 +93,92 @@ struct SpecialWalker<length, length> {
 	}
 };
 
+#define SevenDigitLoop(name) \
+	for (int name = 2; name < 10; ++ name )
+#define SkipFive(name) \
+		if ( name == 5 ) { continue; }
+
+template<u64 width>
+inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+	auto conv = convertNumber<width - 1>(index);
+	SevenDigitLoop(i) {
+		SkipFive(i);
+		auto s = sum + i;
+		if (s % 3 != 0) {
+			continue;
+		}
+		auto v = conv + (i * fastPow10<width - 1>);
+		if ((v % (product * i)) != 0) {
+			continue;
+		}
+		if ((v % s) == 0) {
+			stream.emplace_back(v);
+		}
+	}
+}
+
+template<u64 width>
+inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+	auto conv = convertNumber<width - 2>(index);
+	SevenDigitLoop(a) {
+		SkipFive(a);
+		auto ca = conv + (fastPow10<width - 2> * a);
+		auto sa = sum + a;
+		auto pa = product * a;
+		SevenDigitLoop(i) {
+			SkipFive(i);
+			auto si = sa + i;
+			if (si % 3 != 0) {
+				continue;
+			}
+			auto ci = ca + (i * fastPow10<width - 1>);
+			if ((ci % (pa * i)) != 0) {
+				continue;
+			}
+			if ((ci % si) == 0) {
+				stream.emplace_back(ci);
+			}
+		}
+	}
+}
+
+
+#define SingleBody(width) \
+	template<> \
+	struct SpecialWalker<width - 1, width > { \
+	SpecialWalker() = delete; \
+	~SpecialWalker() = delete; \
+	SpecialWalker(SpecialWalker&&) = delete; \
+	SpecialWalker(const SpecialWalker&) = delete; \
+	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept { \
+		doubleBody<width>(stream, sum, product, index); \
+	} \
+}
+
+#define DoubleBody(width) \
+	template<> \
+	struct SpecialWalker<width - 2, width > { \
+	SpecialWalker() = delete; \
+	~SpecialWalker() = delete; \
+	SpecialWalker(SpecialWalker&&) = delete; \
+	SpecialWalker(const SpecialWalker&) = delete; \
+	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept { \
+		doubleBody<width>(stream, sum, product, index); \
+	} \
+}
+
+DoubleBody(11);
+DoubleBody(12);
+DoubleBody(13);
+DoubleBody(14);
+DoubleBody(15);
+DoubleBody(16);
+#undef SkipFive
+#undef SevenDigitLoop
+#undef SingleBody
+#undef DoubleBody
+
+
 template<u64 width>
 void initialBody() noexcept {
 	auto outputToConsole = [](const auto& list) noexcept {
