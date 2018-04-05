@@ -144,7 +144,7 @@ struct Walker {
 	}
 };
 
-template<auto base, auto width>
+template<auto width, auto base>
 MatchList parallelBody() {
     MatchList list;
     constexpr auto index = (base - 2) << 3;
@@ -164,13 +164,13 @@ void initialBody() noexcept {
 		}
 	};
 	if constexpr (width > 10) {
-		auto t0 = std::async(std::launch::async, parallelBody<2, width>);
-		auto t1 = std::async(std::launch::async, parallelBody<3, width>);
-		auto t2 = std::async(std::launch::async, parallelBody<4, width>);
-		auto t3 = std::async(std::launch::async, parallelBody<6, width>);
-		auto t4 = std::async(std::launch::async, parallelBody<7, width>);
-		auto t5 = std::async(std::launch::async, parallelBody<8, width>);
-		auto t6 = std::async(std::launch::async, parallelBody<9, width>);
+		auto t0 = std::async(std::launch::async, parallelBody<width, 2>);
+		auto t1 = std::async(std::launch::async, parallelBody<width, 3>);
+		auto t2 = std::async(std::launch::async, parallelBody<width, 4>);
+		auto t3 = std::async(std::launch::async, parallelBody<width, 6>);
+		auto t4 = std::async(std::launch::async, parallelBody<width, 7>);
+		auto t5 = std::async(std::launch::async, parallelBody<width, 8>);
+		auto t6 = std::async(std::launch::async, parallelBody<width, 9>);
 		outputToConsole(t0.get());
 		outputToConsole(t1.get());
 		outputToConsole(t2.get());

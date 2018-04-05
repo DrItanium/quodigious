@@ -33,41 +33,46 @@ using MatchList = std::list<u64>;
 
 template<u64 position, u64 length>
 struct SpecialWalker {
+    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+    static_assert(length != 0, "Can't have length of zero!");
 	SpecialWalker() = delete;
 	~SpecialWalker() = delete;
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-		static_assert(length != 0, "Can't have length of zero!");
-		for (auto i = 2; i < 10; ++i) {
-			if (length > 4) {
-				if (i == 5) {
-					continue;
-				}
-			}
-			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, index + (fastPow10<position> * i));
-		}
+        if constexpr (position == length) {
+            if constexpr (length > 10) {
+                if (sum % 3 != 0) {
+                    return;
+                }
+            }
+            if ((index % product == 0) && (index % sum == 0)) {
+                list.emplace_back(index);
+            }
+        } else {
+            for (auto i = 2; i < 10; ++i) {
+                if constexpr (length > 4) {
+                    if (i == 5) {
+                        continue;
+                    }
+                }
+                SpecialWalker<position + 1, length>::body(list, sum + i, product * i, index + (fastPow10<position> * i));
+            }
+        }
 	}
 };
-
-template<u64 length>
-struct SpecialWalker<length, length> {
-	SpecialWalker() = delete;
-	~SpecialWalker() = delete;
-	SpecialWalker(SpecialWalker&&) = delete;
-	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		if (length > 10) {
-			if (sum % 3 != 0) {
-				return;
-			}
-		}
-		if ((index % product == 0) && (index % sum == 0)) {
-			stream.emplace_back(index);
-		}
-	}
-};
+template<auto width, auto base>
+MatchList parallelBody() noexcept {
+    MatchList list;
+    constexpr auto index = (base * 10);
+    // using the frequency analysis I did before for loops64.cc I found
+    // that on even digits that 4 and 8 are used while odd digits use 2
+    // and 6. This is a frequency analysis job only :D
+    for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
+        SpecialWalker<2, width>::body(list, base + i, base * i, index + i);
+    }
+    return list;
+}
 
 template<u64 width>
 void initialBody() noexcept {
@@ -76,25 +81,14 @@ void initialBody() noexcept {
 			std::cout << v << std::endl;
 		}
 	};
-	if (width > 10) {
-		auto body = [](auto base) {
-			MatchList list;
-			auto index = (base * 10);
-			// using the frequency analysis I did before for loops64.cc I found
-			// that on even digits that 4 and 8 are used while odd digits use 2
-			// and 6. This is a frequency analysis job only :D
-			for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-				SpecialWalker<2, width>::body(list, base + i, base * i, index + i);
-			}
-			return list;
-		};
-		auto t0 = std::async(std::launch::async, body, 2);
-		auto t1 = std::async(std::launch::async, body, 3);
-		auto t2 = std::async(std::launch::async, body, 4);
-		auto t3 = std::async(std::launch::async, body, 6);
-		auto t4 = std::async(std::launch::async, body, 7);
-		auto t5 = std::async(std::launch::async, body, 8);
-		auto t6 = std::async(std::launch::async, body, 9);
+	if constexpr (width > 10) {
+		auto t0 = std::async(std::launch::async, parallelBody<width, 2>);
+		auto t1 = std::async(std::launch::async, parallelBody<width, 3>);
+		auto t2 = std::async(std::launch::async, parallelBody<width, 4>);
+		auto t3 = std::async(std::launch::async, parallelBody<width, 6>);
+		auto t4 = std::async(std::launch::async, parallelBody<width, 7>);
+		auto t5 = std::async(std::launch::async, parallelBody<width, 8>);
+		auto t6 = std::async(std::launch::async, parallelBody<width, 9>);
 		outputToConsole(t0.get());
 		outputToConsole(t1.get());
 		outputToConsole(t2.get());
