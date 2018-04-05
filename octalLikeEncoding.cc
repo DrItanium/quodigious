@@ -52,97 +52,93 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
-template<u64 position, u64 length>
-struct Walker {
-	Walker() = delete;
-	~Walker() = delete;
-	Walker(Walker&&) = delete;
-	Walker(const Walker&) = delete;
-    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-    static_assert(length != 0, "Can't have length of zero!");
-    template<auto compare, auto ... rest>
-    static constexpr bool doDoubleBody() noexcept {
-        if constexpr ((position == (length - 2)) && (length == compare)) {
-            return true;
-        } else if constexpr (sizeof...(rest) > 0) {
-            return doDoubleBody<rest...>();
-        } else {
-            return false;
+template<u64 position, u64 length, auto compare, auto ... rest>
+constexpr bool doDoubleBody() noexcept {
+    if constexpr ((position == (length - 2)) && (length == compare)) {
+        return true;
+    } else if constexpr (sizeof...(rest) > 0) {
+        return doDoubleBody<position, length, rest...>();
+    } else {
+        return false;
+    }
+}
+template<u64 position, u64 length, auto compare, auto ... rest>
+constexpr bool doSingleBody() noexcept {
+    if constexpr ((position == (length - 1)) && (length == compare)) {
+        return true;
+    } else if constexpr (sizeof...(rest) > 0) {
+        return doSingleBody<position, length, rest...>();
+    } else {
+        return false;
+    }
+}
+template<u64 length>
+inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+    auto conv = convertNumber<length - 1>(index);
+	for (int i = 2; i < 10; ++ i ) {
+        if ( i == 5 ) {
+            continue;
+        }
+        auto s = sum + i;
+        if (auto s = sum + 1 ; s % 3 != 0) {
+            continue;
+        } else if (auto v = conv + (i * fastPow10<length - 1>); (v % (product * i)) != 0) {
+            continue;
+        } else if ((v % s) == 0) {
+            stream.emplace_back(v);
         }
     }
-    template<auto compare, auto ... rest>
-    static constexpr bool doSingleBody() noexcept {
-        if constexpr ((position == (length - 1)) && (length == compare)) {
-            return true;
-        } else if constexpr (sizeof...(rest) > 0) {
-            return doSingleBody<rest...>();
-        } else {
-            return false;
+}
+template<u64 length>
+inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+    auto conv = convertNumber<length - 2>(index);
+    for (int a = 2; a < 10; ++ a ) {
+        if ( a == 5 ) {
+            continue;
         }
-    }
-    static inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-        auto conv = convertNumber<length - 1>(index);
-    	for (int i = 2; i < 10; ++ i ) {
+        auto ca = conv + (fastPow10<length - 2> * a);
+        auto sa = sum + a;
+        auto pa = product * a;
+        for (int i = 2; i < 10; ++ i ) {
             if ( i == 5 ) {
                 continue;
             }
-            auto s = sum + i;
-            if (auto s = sum + 1 ; s % 3 != 0) {
+            if (auto si = sa + i ; si % 3 != 0) {
                 continue;
-            } else if (auto v = conv + (i * fastPow10<length - 1>); (v % (product * i)) != 0) {
+            } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
                 continue;
-            } else if ((v % s) == 0) {
-                stream.emplace_back(v);
+            } else if ((ci % si) == 0) {
+                stream.emplace_back(ci);
             }
         }
     }
-    static inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-        auto conv = convertNumber<length - 2>(index);
-        for (int a = 2; a < 10; ++ a ) {
-            if ( a == 5 ) {
-                continue;
+}
+template<u64 position, u64 length>
+void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+    static_assert(length != 0, "Can't have length of zero!");
+    if constexpr (position == length) {
+        if constexpr (length > 10) {
+            if (sum % 3 != 0) {
+                return;
             }
-            auto ca = conv + (fastPow10<length - 2> * a);
-            auto sa = sum + a;
-            auto pa = product * a;
-            for (int i = 2; i < 10; ++ i ) {
-                if ( i == 5 ) {
+        }
+        if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
+            list.emplace_back(conv);
+        }
+    } else if constexpr (doDoubleBody<11, 12, 13, 14, 15, 16>()) {
+        doubleBody<length>(list, sum, product, index);
+    } else {
+        for (auto i = 2; i < 10; ++i) {
+            if constexpr (length > 4) {
+                if (i == 5) {
                     continue;
                 }
-                if (auto si = sa + i ; si % 3 != 0) {
-                    continue;
-                } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
-                    continue;
-                } else if ((ci % si) == 0) {
-                    stream.emplace_back(ci);
-                }
             }
+            body<position + 1, length>(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
         }
     }
-	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-        if constexpr (position == length) {
-            if constexpr (length > 10) {
-                if (sum % 3 != 0) {
-                    return;
-                }
-            }
-            if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
-                list.emplace_back(conv);
-            }
-        } else if constexpr (doDoubleBody<11, 12, 13, 14, 15, 16>()) {
-            doubleBody(list, sum, product, index);
-        } else {
-            for (auto i = 2; i < 10; ++i) {
-                if constexpr (length > 4) {
-                    if (i == 5) {
-                        continue;
-                    }
-                }
-                Walker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
-            }
-        }
-	}
-};
+}
 
 template<auto width, auto base>
 MatchList parallelBody() {
@@ -152,7 +148,8 @@ MatchList parallelBody() {
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
     for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-        Walker<2, width>::body(list, base + i, base * i, index + (i - 2));
+        //Walker<2, width>::body(list, base + i, base * i, index + (i - 2));
+        body<2, width>(list, base + i, base * i, index + (i - 2));
     }
     return list;
 }
@@ -180,7 +177,7 @@ void initialBody() noexcept {
 		outputToConsole(t6.get());
 	} else {
 		MatchList collection;
-		Walker<0, width>::body(collection);
+		body<0, width>(collection);
 		outputToConsole(collection);
 	}
 }
