@@ -23,23 +23,21 @@
 template<u32 length>
 void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 	static_assert(length <= 9, "Can't have numbers over 9 digits on 32-bit numbers!");
-	static_assert(length != 0, "Can't have length of zero!");
-	constexpr auto inner = length - 1;
-	constexpr auto next = fastPow10<inner>;
-	// unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
-	// numbers (this code is not used when you request 64-bit numbers!)
-	// does not require as much optimization. We can walk through digit level
-	// by digit level (even if the digit does not contribute too much to the
-	// overall process!).
-	for (auto i = 2; i < 10; ++i) {
-        body32<inner>(sum + i, product * i, index + (i * next));
-	}
-}
-
-template<>
-void body32<0>(u32 sum, u32 product, u32 index) noexcept {
-    if ((index % product == 0) && (index % sum == 0)) {
-        std::cout << index << '\n';
+    if constexpr (length == 0) {
+        if ((index % product == 0) && (index % sum == 0)) {
+            std::cout << index << '\n';
+        }
+    } else {
+	    constexpr auto inner = length - 1;
+	    constexpr auto next = fastPow10<inner>;
+	    // unlike the 64-bit version of this code, doing the 32-bit ints for 9 digit
+	    // numbers (this code is not used when you request 64-bit numbers!)
+	    // does not require as much optimization. We can walk through digit level
+	    // by digit level (even if the digit does not contribute too much to the
+	    // overall process!).
+	    for (auto i = 2; i < 10; ++i) {
+            body32<inner>(sum + i, product * i, index + (i * next));
+	    }
     }
 }
 
