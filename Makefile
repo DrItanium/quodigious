@@ -17,7 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS = -std=c++14
+CXXFLAGS = -std=c++17
 CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
 
 # enable debugging

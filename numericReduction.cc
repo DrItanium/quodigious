@@ -47,14 +47,14 @@ constexpr auto evenApprox = false;
  */
 constexpr auto maxWidth = 19;
 constexpr bool approximationCheckFailed(u64 sum) noexcept {
-    if (expensiveChecks) {
+    if constexpr (expensiveChecks) {
         return false;
-    } else if (oddApprox && !evenApprox) {
+    } else if constexpr (oddApprox && !evenApprox) {
         return sum % 3 != 0;
-    } else if (evenApprox && !oddApprox) {
-        return sum % 2 != 0;
+    } else if constexpr (evenApprox && !oddApprox) {
+        return sum & 1 != 0;
     } else {
-        return (sum % 3 != 0) && (sum % 2 != 0);
+        return (sum % 3 != 0) && (sum & 1 != 0);
     }
 }
 
@@ -91,7 +91,7 @@ void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept 
     // digits are all even. Even if it turns out that this isn't the case
     // I can always perform the odd digit checks later on at a significant
     // reduction in speed cost!
-    if (length >= 11) {
+    if constexpr (length >= 11) {
           auto fn = [&table, index](Matches& stream, auto start, auto end) noexcept {
               for (auto i = start; i < end; ++i) {
                   if (i != 5) {
@@ -132,13 +132,13 @@ void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept 
 
 template<>
 void body<0>(Matches& stream, const FrequencyTable& table, u64 index) noexcept {
-    if (!expensiveChecks) {
+    if constexpr (!expensiveChecks) {
         auto sum = table.computeSum();
         if (approximationCheckFailed(sum)) {
             return;
         }
         auto product = table.computeProduct();
-        if (exact) {
+        if constexpr (exact) {
             if (index % product != 0) {
                 return;
             }
@@ -154,7 +154,7 @@ void body<0>(Matches& stream, const FrequencyTable& table, u64 index) noexcept {
         }
     } else {
         auto product = table.computeProduct();
-        if (exact) {
+        if constexpr (exact) {
             if (index % product == 0) {
                 auto sum = table.computeSum();
                 if (index % sum == 0) {
