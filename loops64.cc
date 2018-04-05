@@ -63,17 +63,6 @@ constexpr auto oddApprox = true;
  * This option has lower priority than ODD_APPROX
  */
 constexpr auto evenApprox = false;
-constexpr bool approximationCheckFailed(u64 sum) noexcept {
-	if constexpr (expensiveChecks) {
-		return false;
-	} else if constexpr (oddApprox && !evenApprox) {
-		return sum % 3 != 0;
-	} else if constexpr (evenApprox && !oddApprox) {
-		return sum & 1 != 0;
-	} else {
-		return (sum % 3 != 0) && (sum & 1 != 0);
-	}
-}
 
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
@@ -82,9 +71,18 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
         // specialization
         bool outputToStream = false;
         if constexpr (!expensiveChecks) {
-            if (approximationCheckFailed(sum)) {
-                // if we want to terminate early then this makes sense
-                return;
+            if constexpr (oddApprox && !evenApprox) {
+                if (sum % 3 != 0) {
+                    return;
+                }
+            } else if constexpr (evenApprox && !oddApprox) {
+                if (sum & 1 != 0) {
+                    return;
+                }
+            } else {
+                if ((sum % 3 != 0) && (sum & 1 != 0)) {
+                    return;
+                }
             }
         }
         if constexpr (exact) {
