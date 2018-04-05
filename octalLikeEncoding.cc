@@ -43,27 +43,6 @@ constexpr u64 extractDigit(u64 value) noexcept {
 	constexpr auto shift = position * 3;
 	return (value >> shift) & 0b111;
 }
-
-template<u64 position, u64 length>
-struct SpecialWalker {
-	SpecialWalker() = delete;
-	~SpecialWalker() = delete;
-	SpecialWalker(SpecialWalker&&) = delete;
-	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-		static_assert(length != 0, "Can't have length of zero!");
-		for (auto i = 2; i < 10; ++i) {
-			if constexpr (length > 4) {
-				if (i == 5) {
-					continue;
-				}
-			}
-			SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
-		}
-	}
-};
-
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
@@ -72,26 +51,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
 	    return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
     }
 }
-
-template<u64 length>
-struct SpecialWalker<length, length> {
-	SpecialWalker() = delete;
-	~SpecialWalker() = delete;
-	SpecialWalker(SpecialWalker&&) = delete;
-	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		if constexpr (length > 10) {
-			if (sum % 3 != 0) {
-				return;
-			}
-		}
-		if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
-			stream.emplace_back(conv);
-		}
-	}
-};
-
-
 template<u64 width>
 inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
     auto conv = convertNumber<width - 1>(index);
@@ -134,41 +93,60 @@ inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexc
         }
 	}
 }
-
-
-#define SingleBody(width) \
-	template<> \
-	struct SpecialWalker<width - 1, width > { \
-	SpecialWalker() = delete; \
-	~SpecialWalker() = delete; \
-	SpecialWalker(SpecialWalker&&) = delete; \
-	SpecialWalker(const SpecialWalker&) = delete; \
-	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept { \
-		singleBody<width>(stream, sum, product, index); \
-	} \
+template<auto position, auto length, auto compare, auto ... rest>
+constexpr bool doDoubleBody() noexcept {
+    if constexpr ((position == (length - 2)) && (length == compare)) {
+        return true;
+    } else if constexpr (sizeof...(rest) > 0) {
+        return doDoubleBody<position, length, rest...>();
+    } else {
+        return false;
+    }
 }
-
-#define DoubleBody(width) \
-	template<> \
-	struct SpecialWalker<width - 2, width > { \
-	SpecialWalker() = delete; \
-	~SpecialWalker() = delete; \
-	SpecialWalker(SpecialWalker&&) = delete; \
-	SpecialWalker(const SpecialWalker&) = delete; \
-	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept { \
-		doubleBody<width>(stream, sum, product, index); \
-	} \
+/*
+template<auto position, auto length, auto compare, auto ... rest>
+constexpr bool doSingleBody() noexcept {
+    if constexpr ((position == (length - 1)) && (length == compare)) {
+        return true;
+    } else if constexpr (sizeof...(rest) > 0) {
+        return doDoubleBody<position, length, rest...>();
+    } else {
+        return false;
+    }
 }
-
-DoubleBody(11);
-DoubleBody(12);
-DoubleBody(13);
-DoubleBody(14);
-DoubleBody(15);
-DoubleBody(16);
-#undef SingleBody
-#undef DoubleBody
-
+*/
+template<u64 position, u64 length>
+struct SpecialWalker {
+	SpecialWalker() = delete;
+	~SpecialWalker() = delete;
+	SpecialWalker(SpecialWalker&&) = delete;
+	SpecialWalker(const SpecialWalker&) = delete;
+	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+		static_assert(length != 0, "Can't have length of zero!");
+        if constexpr (position == length) {
+            if constexpr (length > 10) {
+                if (sum % 3 != 0) {
+                    return;
+                }
+            }
+            if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
+                list.emplace_back(conv);
+            }
+        } else if constexpr (doDoubleBody<position, length, 11, 12, 13, 14, 15, 16>()) {
+            doubleBody<length>(list, sum, product, index);
+        } else {
+            for (auto i = 2; i < 10; ++i) {
+                if constexpr (length > 4) {
+                    if (i == 5) {
+                        continue;
+                    }
+                }
+                SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
+            }
+        }
+	}
+};
 
 template<auto base, auto width>
 MatchList parallelBody() {
