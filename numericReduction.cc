@@ -46,17 +46,6 @@ constexpr auto evenApprox = false;
  * Maximum number length
  */
 constexpr auto maxWidth = 19;
-constexpr bool approximationCheckFailed(u64 sum) noexcept {
-    if constexpr (expensiveChecks) {
-        return false;
-    } else if constexpr (oddApprox && !evenApprox) {
-        return sum % 3 != 0;
-    } else if constexpr (evenApprox && !oddApprox) {
-        return sum & 1 != 0;
-    } else {
-        return (sum % 3 != 0) && (sum & 1 != 0);
-    }
-}
 
 using Matches = std::list<std::tuple<u64, u64, u64>>;
 
@@ -67,8 +56,18 @@ void body(Matches& stream, const FrequencyTable& table, u64 index = 0) noexcept 
     if constexpr (length == 0) {
         if constexpr (!expensiveChecks) {
             auto sum = table.computeSum();
-            if (approximationCheckFailed(sum)) {
-                return;
+            if constexpr (oddApprox && !evenApprox) {
+                if (sum % 3 != 0) {
+                    return;
+                }
+            } else if constexpr (evenApprox && !oddApprox) {
+                if (sum & 1 != 0) {
+                    return;
+                }
+            } else {
+                if ((sum % 3 != 0) && (sum & 1 != 0)) {
+                    return;
+                }
             }
             auto product = table.computeProduct();
             if constexpr (exact) {
