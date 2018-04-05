@@ -51,69 +51,8 @@ constexpr u64 convertNumber(u64 value) noexcept {
 	    return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
     }
 }
-template<u64 width>
-inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-    auto conv = convertNumber<width - 1>(index);
-	for (int i = 2; i < 10; ++ i ) {
-        if ( i == 5 ) {
-            continue;
-        }
-        auto s = sum + i;
-        if (auto s = sum + 1 ; s % 3 != 0) {
-            continue;
-        } else if (auto v = conv + (i * fastPow10<width - 1>); (v % (product * i)) != 0) {
-            continue;
-        } else if ((v % s) == 0) {
-            stream.emplace_back(v);
-        }
-    }
-}
 
-template<u64 width>
-inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-	auto conv = convertNumber<width - 2>(index);
-	for (int a = 2; a < 10; ++ a ) {
-        if ( a == 5 ) {
-            continue;
-        }
-		auto ca = conv + (fastPow10<width - 2> * a);
-		auto sa = sum + a;
-		auto pa = product * a;
-	    for (int i = 2; i < 10; ++ i ) {
-            if ( i == 5 ) {
-                continue;
-            }
-			if (auto si = sa + i ; si % 3 != 0) {
-				continue;
-            } else if (auto ci = ca + (i * fastPow10<width - 1>); (ci % (pa * i)) != 0) {
-                continue;
-            } else if ((ci % si) == 0) {
-                stream.emplace_back(ci);
-            }
-        }
-	}
-}
-template<auto position, auto length, auto compare, auto ... rest>
-constexpr bool doDoubleBody() noexcept {
-    if constexpr ((position == (length - 2)) && (length == compare)) {
-        return true;
-    } else if constexpr (sizeof...(rest) > 0) {
-        return doDoubleBody<position, length, rest...>();
-    } else {
-        return false;
-    }
-}
 /*
-template<auto position, auto length, auto compare, auto ... rest>
-constexpr bool doSingleBody() noexcept {
-    if constexpr ((position == (length - 1)) && (length == compare)) {
-        return true;
-    } else if constexpr (sizeof...(rest) > 0) {
-        return doDoubleBody<position, length, rest...>();
-    } else {
-        return false;
-    }
-}
 */
 template<u64 position, u64 length>
 struct SpecialWalker {
@@ -121,9 +60,68 @@ struct SpecialWalker {
 	~SpecialWalker() = delete;
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
+    static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+    static_assert(length != 0, "Can't have length of zero!");
+    template<auto compare, auto ... rest>
+    static constexpr bool doDoubleBody() noexcept {
+        if constexpr ((position == (length - 2)) && (length == compare)) {
+            return true;
+        } else if constexpr (sizeof...(rest) > 0) {
+            return doDoubleBody<rest...>();
+        } else {
+            return false;
+        }
+    }
+    template<auto compare, auto ... rest>
+    static constexpr bool doSingleBody() noexcept {
+        if constexpr ((position == (length - 1)) && (length == compare)) {
+            return true;
+        } else if constexpr (sizeof...(rest) > 0) {
+            return doSingleBody<rest...>();
+        } else {
+            return false;
+        }
+    }
+    static inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+        auto conv = convertNumber<length - 1>(index);
+    	for (int i = 2; i < 10; ++ i ) {
+            if ( i == 5 ) {
+                continue;
+            }
+            auto s = sum + i;
+            if (auto s = sum + 1 ; s % 3 != 0) {
+                continue;
+            } else if (auto v = conv + (i * fastPow10<length - 1>); (v % (product * i)) != 0) {
+                continue;
+            } else if ((v % s) == 0) {
+                stream.emplace_back(v);
+            }
+        }
+    }
+    static inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
+        auto conv = convertNumber<length - 2>(index);
+        for (int a = 2; a < 10; ++ a ) {
+            if ( a == 5 ) {
+                continue;
+            }
+            auto ca = conv + (fastPow10<length - 2> * a);
+            auto sa = sum + a;
+            auto pa = product * a;
+            for (int i = 2; i < 10; ++ i ) {
+                if ( i == 5 ) {
+                    continue;
+                }
+                if (auto si = sa + i ; si % 3 != 0) {
+                    continue;
+                } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
+                    continue;
+                } else if ((ci % si) == 0) {
+                    stream.emplace_back(ci);
+                }
+            }
+        }
+    }
 	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-		static_assert(length != 0, "Can't have length of zero!");
         if constexpr (position == length) {
             if constexpr (length > 10) {
                 if (sum % 3 != 0) {
@@ -133,8 +131,8 @@ struct SpecialWalker {
             if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
                 list.emplace_back(conv);
             }
-        } else if constexpr (doDoubleBody<position, length, 11, 12, 13, 14, 15, 16>()) {
-            doubleBody<length>(list, sum, product, index);
+        } else if constexpr (doDoubleBody<11, 12, 13, 14, 15, 16>()) {
+            doubleBody(list, sum, product, index);
         } else {
             for (auto i = 2; i < 10; ++i) {
                 if constexpr (length > 4) {
@@ -167,7 +165,7 @@ void initialBody() noexcept {
 			std::cout << v << std::endl;
 		}
 	};
-	if (width > 10) {
+	if constexpr (width > 10) {
 		auto t0 = std::async(std::launch::async, parallelBody<2, width>);
 		auto t1 = std::async(std::launch::async, parallelBody<3, width>);
 		auto t2 = std::async(std::launch::async, parallelBody<4, width>);
