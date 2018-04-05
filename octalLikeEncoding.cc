@@ -54,7 +54,7 @@ struct SpecialWalker {
 		static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 		static_assert(length != 0, "Can't have length of zero!");
 		for (auto i = 2; i < 10; ++i) {
-			if (length > 4) {
+			if constexpr (length > 4) {
 				if (i == 5) {
 					continue;
 				}
@@ -66,12 +66,11 @@ struct SpecialWalker {
 
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
-	return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
-}
-
-template<>
-constexpr u64 convertNumber<1>(u64 value) noexcept { 
-	return ((value & 0b111) + 2);
+    if constexpr (position == 1) {
+        return ((value & 0b111) + 2);
+    } else {
+	    return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
+    }
 }
 
 template<u64 length>
@@ -81,13 +80,12 @@ struct SpecialWalker<length, length> {
 	SpecialWalker(SpecialWalker&&) = delete;
 	SpecialWalker(const SpecialWalker&) = delete;
 	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-		if (length > 10) {
+		if constexpr (length > 10) {
 			if (sum % 3 != 0) {
 				return;
 			}
 		}
-		auto conv = convertNumber<length>(index);
-		if ((conv % product == 0) && (conv % sum == 0)) {
+		if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
 			stream.emplace_back(conv);
 		}
 	}
@@ -100,21 +98,18 @@ struct SpecialWalker<length, length> {
 
 template<u64 width>
 inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-	auto conv = convertNumber<width - 1>(index);
-	SevenDigitLoop(i) {
-		SkipFive(i);
-		auto s = sum + i;
-		if (s % 3 != 0) {
-			continue;
-		}
-		auto v = conv + (i * fastPow10<width - 1>);
-		if ((v % (product * i)) != 0) {
-			continue;
-		}
-		if ((v % s) == 0) {
-			stream.emplace_back(v);
-		}
-	}
+    auto conv = convertNumber<width - 1>(index);
+    SevenDigitLoop(i) {
+        SkipFive(i);
+        auto s = sum + i;
+        if (auto s = sum + 1 ; s % 3 != 0) {
+            continue;
+        } else if (auto v = conv + (i * fastPow10<width - 1>); (v % (product * i)) != 0) {
+            continue;
+        } else if ((v % s) == 0) {
+            stream.emplace_back(v);
+        }
+    }
 }
 
 template<u64 width>
@@ -127,18 +122,14 @@ inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexc
 		auto pa = product * a;
 		SevenDigitLoop(i) {
 			SkipFive(i);
-			auto si = sa + i;
-			if (si % 3 != 0) {
+			if (auto si = sa + i ; si % 3 != 0) {
 				continue;
-			}
-			auto ci = ca + (i * fastPow10<width - 1>);
-			if ((ci % (pa * i)) != 0) {
-				continue;
-			}
-			if ((ci % si) == 0) {
-				stream.emplace_back(ci);
-			}
-		}
+            } else if (auto ci = ca + (i * fastPow10<width - 1>); (ci % (pa * i)) != 0) {
+                continue;
+            } else if ((ci % si) == 0) {
+                stream.emplace_back(ci);
+            }
+        }
 	}
 }
 
@@ -179,6 +170,18 @@ DoubleBody(16);
 #undef DoubleBody
 
 
+template<auto base, auto width>
+MatchList parallelBody() {
+    MatchList list;
+    constexpr auto index = (base - 2) << 3;
+    // using the frequency analysis I did before for loops64.cc I found
+    // that on even digits that 4 and 8 are used while odd digits use 2
+    // and 6. This is a frequency analysis job only :D
+    for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
+        SpecialWalker<2, width>::body(list, base + i, base * i, index + (i - 2));
+    }
+    return list;
+}
 template<u64 width>
 void initialBody() noexcept {
 	auto outputToConsole = [](const auto& list) noexcept {
@@ -187,24 +190,13 @@ void initialBody() noexcept {
 		}
 	};
 	if (width > 10) {
-		auto body = [](auto base) {
-			MatchList list;
-			auto index = (base - 2) << 3;
-			// using the frequency analysis I did before for loops64.cc I found
-			// that on even digits that 4 and 8 are used while odd digits use 2
-			// and 6. This is a frequency analysis job only :D
-			for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-				SpecialWalker<2, width>::body(list, base + i, base * i, index + (i - 2));
-			}
-			return list;
-		};
-		auto t0 = std::async(std::launch::async, body, 2);
-		auto t1 = std::async(std::launch::async, body, 3);
-		auto t2 = std::async(std::launch::async, body, 4);
-		auto t3 = std::async(std::launch::async, body, 6);
-		auto t4 = std::async(std::launch::async, body, 7);
-		auto t5 = std::async(std::launch::async, body, 8);
-		auto t6 = std::async(std::launch::async, body, 9);
+		auto t0 = std::async(std::launch::async, parallelBody<2, width>);
+		auto t1 = std::async(std::launch::async, parallelBody<3, width>);
+		auto t2 = std::async(std::launch::async, parallelBody<4, width>);
+		auto t3 = std::async(std::launch::async, parallelBody<6, width>);
+		auto t4 = std::async(std::launch::async, parallelBody<7, width>);
+		auto t5 = std::async(std::launch::async, parallelBody<8, width>);
+		auto t6 = std::async(std::launch::async, parallelBody<9, width>);
 		outputToConsole(t0.get());
 		outputToConsole(t1.get());
 		outputToConsole(t2.get());
