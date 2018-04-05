@@ -128,14 +128,18 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// digits are all even. Even if it turns out that this isn't the case
 		// I can always perform the odd digit checks later on at a significant
 		// reduction in speed cost!
-		constexpr auto incr = (length == 1) ? 2 : 1;
-		// see if we can't just make the compiler handle the incrementation
-		// instead of us thus, the code is cleaner too :D
-		for (auto i = 2; i < 10; i += incr) {
-			if (i != 5) {
-				innerBody<inner>(stream, sum + i, product * i, index + (i * next));
-			}
-		}
+        if constexpr (length == 1) {
+            innerBody<inner>(stream, sum + 2, product * 2, index + 2);
+            innerBody<inner>(stream, sum + 4, product * 4, index + 4);
+            innerBody<inner>(stream, sum + 6, product * 6, index + 6);
+            innerBody<inner>(stream, sum + 8, product * 8, index + 8);
+        } else {
+		    for (auto i = 2; i < 10; ++i) {
+		    	if (i != 5) {
+		    		innerBody<inner>(stream, sum + i, product * i, index + (i * next));
+		    	}
+		    }
+        }
 	}
 }
 
