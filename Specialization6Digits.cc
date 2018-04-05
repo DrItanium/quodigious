@@ -1,5 +1,3 @@
-template<>
-inline void innerBody<6>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 innerBody<0>(stream, sum+ 2 + 7 + 2 + 2 + 2 + 2, product* 2 * 7 * 2 * 2 * 2 * 2, index + 222272);
 innerBody<0>(stream, sum+ 6 + 3 + 3 + 2 + 2 + 2, product* 6 * 3 * 3 * 2 * 2 * 2, index + 222336);
 innerBody<0>(stream, sum+ 4 + 6 + 4 + 2 + 2 + 2, product* 4 * 6 * 4 * 2 * 2 * 2, index + 222464);
@@ -1666,4 +1664,3 @@ innerBody<0>(stream, sum+ 6 + 7 + 9 + 8 + 9 + 9, product* 6 * 7 * 9 * 8 * 9 * 9,
 innerBody<0>(stream, sum+ 2 + 3 + 2 + 9 + 9 + 9, product* 2 * 3 * 2 * 9 * 9 * 9, index + 999232);
 innerBody<0>(stream, sum+ 4 + 2 + 4 + 9 + 9 + 9, product* 4 * 2 * 4 * 9 * 9 * 9, index + 999424);
 innerBody<0>(stream, sum+ 6 + 3 + 9 + 9 + 9 + 9, product* 6 * 3 * 9 * 9 * 9 * 9, index + 999936);
-}

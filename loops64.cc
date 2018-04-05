@@ -43,6 +43,10 @@ void body32(u32 sum = 0, u32 product = 1, u32 index = 0) noexcept {
 
 // 64-bit tweakables
 /*
+ * Should enable the use of futures
+ */
+constexpr auto useFutures = true;
+/*
  * Perform exact computation (sum and product checks) instead of approximations
  */
 constexpr auto exact = true;
@@ -61,6 +65,12 @@ constexpr auto oddApprox = true;
  * This option has lower priority than ODD_APPROX
  */
 constexpr auto evenApprox = false;
+
+/*
+ * The depth at which to perform a hack to speed up computation using observed
+ * behavior
+ */
+constexpr auto observedSpecializationDepth = 2; // don't use it at all
 
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
@@ -111,7 +121,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	    // I got the idea from strength reduction in compiler optimization theory
 	    // we don't include the digits zero or 1 so just skip them by adding two
 	    // or the equivalent for the corresponding thing
-	    if constexpr (length >= 11) {
+	    if constexpr (useFutures && length >= 11) {
 	    	// when we are greater than 10 digit numbers, it is a smart idea to
 	    	// perform divide and conquer at each level above 10 digits. The number of
 	    	// threads used for computation is equal to: 2^(width - 10).
@@ -130,6 +140,24 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	    	// thread that spawned the children is reused below.
 	    	body<inner>(stream, sum + 2, product * 2, index + (2 * next)); // 2
 	    	stream << lowerHalf.get() << upperHalf.get();
+        } else if constexpr (observedSpecializationDepth == length && length == 2) {
+#include "Specialization2Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 3) {
+#include "Specialization3Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 4) {
+#include "Specialization4Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 5) {
+#include "Specialization5Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 6) {
+#include "Specialization6Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 7) {
+#include "Specialization7Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 8) {
+#include "Specialization8Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 9) {
+#include "Specialization9Digits.cc"
+        } else if constexpr (observedSpecializationDepth == length && length == 10) {
+#include "Specialization10Digits.cc"
 	    } else {
 	    	// we use the stack to keep track of sums, products, and current indexes
 	    	// instead of starting with a whole number and breaking it apart.
