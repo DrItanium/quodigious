@@ -52,14 +52,12 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
-/*
-*/
 template<u64 position, u64 length>
-struct SpecialWalker {
-	SpecialWalker() = delete;
-	~SpecialWalker() = delete;
-	SpecialWalker(SpecialWalker&&) = delete;
-	SpecialWalker(const SpecialWalker&) = delete;
+struct Walker {
+	Walker() = delete;
+	~Walker() = delete;
+	Walker(Walker&&) = delete;
+	Walker(const Walker&) = delete;
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     template<auto compare, auto ... rest>
@@ -140,7 +138,7 @@ struct SpecialWalker {
                         continue;
                     }
                 }
-                SpecialWalker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
+                Walker<position + 1, length>::body(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
             }
         }
 	}
@@ -154,7 +152,7 @@ MatchList parallelBody() {
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
     for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-        SpecialWalker<2, width>::body(list, base + i, base * i, index + (i - 2));
+        Walker<2, width>::body(list, base + i, base * i, index + (i - 2));
     }
     return list;
 }
@@ -182,7 +180,7 @@ void initialBody() noexcept {
 		outputToConsole(t6.get());
 	} else {
 		MatchList collection;
-		SpecialWalker<0, width>::body(collection);
+		Walker<0, width>::body(collection);
 		outputToConsole(collection);
 	}
 }

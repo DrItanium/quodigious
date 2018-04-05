@@ -32,31 +32,12 @@ using u64 = uint64_t;
 using u32 = uint32_t;
 
 template<u64 base, u64 exponent>
-struct CompileTimeExponentiation final {
-    CompileTimeExponentiation() = delete;
-    CompileTimeExponentiation(const CompileTimeExponentiation&) = delete;
-    CompileTimeExponentiation(CompileTimeExponentiation&&) = delete;
-    ~CompileTimeExponentiation() = delete;
-    static constexpr u64 operation() noexcept {
-        return base * CompileTimeExponentiation<base, exponent - 1>::operation();
-    }
-};
-
-template<u64 base>
-struct CompileTimeExponentiation<base, 0> final {
-    CompileTimeExponentiation() = delete;
-    CompileTimeExponentiation(const CompileTimeExponentiation&) = delete;
-    CompileTimeExponentiation(CompileTimeExponentiation&&) = delete;
-    ~CompileTimeExponentiation() = delete;
-    static constexpr u64 operation() noexcept {
-        return 1;
-    }
-};
-
-
-template<u64 base, u64 exponent>
 constexpr u64 compileTimePow() noexcept {
-    return CompileTimeExponentiation<base, exponent>::operation();
+    if constexpr (exponent == 0) {
+        return 1;
+    } else {
+        return base * compileTimePow<base, exponent - 1>();
+    }
 }
 
 template<u64 base, u64 exponent>
