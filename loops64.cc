@@ -70,7 +70,7 @@ constexpr auto evenApprox = false;
  * The depth at which to perform a hack to speed up computation using observed
  * behavior
  */
-constexpr auto observedSpecializationDepth = 2; // don't use it at all
+constexpr auto observedSpecializationDepth = 0; // don't use it at all
 
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
