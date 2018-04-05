@@ -32,35 +32,29 @@
 using MatchList = std::list<u64>;
 
 template<u64 position, u64 length>
-struct SpecialWalker {
+void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
-	SpecialWalker() = delete;
-	~SpecialWalker() = delete;
-	SpecialWalker(SpecialWalker&&) = delete;
-	SpecialWalker(const SpecialWalker&) = delete;
-	static void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
-        if constexpr (position == length) {
-            if constexpr (length > 10) {
-                if (sum % 3 != 0) {
-                    return;
-                }
-            }
-            if ((index % product == 0) && (index % sum == 0)) {
-                list.emplace_back(index);
-            }
-        } else {
-            for (auto i = 2; i < 10; ++i) {
-                if constexpr (length > 4) {
-                    if (i == 5) {
-                        continue;
-                    }
-                }
-                SpecialWalker<position + 1, length>::body(list, sum + i, product * i, index + (fastPow10<position> * i));
+    if constexpr (position == length) {
+        if constexpr (length > 10) {
+            if (sum % 3 != 0) {
+                return;
             }
         }
-	}
-};
+        if ((index % product == 0) && (index % sum == 0)) {
+            list.emplace_back(index);
+        }
+    } else {
+        for (auto i = 2; i < 10; ++i) {
+            if constexpr (length > 4) {
+                if (i == 5) {
+                    continue;
+                }
+            }
+            body<position + 1, length>(list, sum + i, product * i, index + (fastPow10<position> * i));
+        }
+    }
+}
 template<auto width, auto base>
 MatchList parallelBody() noexcept {
     MatchList list;
@@ -69,7 +63,7 @@ MatchList parallelBody() noexcept {
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
     for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-        SpecialWalker<2, width>::body(list, base + i, base * i, index + i);
+        body<2, width>(list, base + i, base * i, index + i);
     }
     return list;
 }
@@ -98,7 +92,7 @@ void initialBody() noexcept {
 		outputToConsole(t6.get());
 	} else {
 		MatchList collection;
-		SpecialWalker<0, width>::body(collection);
+		body<0, width>(collection);
 		outputToConsole(collection);
 	}
 }
