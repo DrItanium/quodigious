@@ -64,14 +64,14 @@ constexpr auto oddApprox = true;
  */
 constexpr auto evenApprox = false;
 constexpr bool approximationCheckFailed(u64 sum) noexcept {
-	if (expensiveChecks) {
+	if constexpr (expensiveChecks) {
 		return false;
-	} else if (oddApprox && !evenApprox) {
+	} else if constexpr (oddApprox && !evenApprox) {
 		return sum % 3 != 0;
-	} else if (evenApprox && !oddApprox) {
-		return sum % 2 != 0;
+	} else if constexpr (evenApprox && !oddApprox) {
+		return sum & 1 != 0;
 	} else {
-		return (sum % 3 != 0) && (sum % 2 != 0);
+		return (sum % 3 != 0) && (sum & 1 != 0);
 	}
 }
 
@@ -99,7 +99,7 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 	// I got the idea from strength reduction in compiler optimization theory
 	// we don't include the digits zero or 1 so just skip them by adding two
 	// or the equivalent for the corresponding thing
-	if (length >= 11) {
+	if constexpr (length >= 11) {
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
@@ -151,11 +151,11 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noe
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// specialization
-	if (!expensiveChecks) {
+	if constexpr (!expensiveChecks) {
 		if (approximationCheckFailed(sum)) {
 			return;
 		}
-		if (exact) {
+		if constexpr (exact) {
 			if (index % product != 0) {
 				return;
 			}
@@ -168,7 +168,7 @@ inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) 
 			}
 		}
 	} else {
-		if (exact) {
+		if constexpr (exact) {
 			if ((index % product == 0) && (index % sum == 0)) {
 				stream << index << '\n';
 			}
