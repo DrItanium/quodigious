@@ -91,13 +91,11 @@ struct SpecialWalker<length, length> {
 	}
 };
 
-#define SevenDigitLoop(name) \
-	for (int name = 2; name < 10; ++ name )
 
 template<u64 width>
 inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
     auto conv = convertNumber<width - 1>(index);
-    SevenDigitLoop(i) {
+	for (int i = 2; i < 10; ++ i ) {
         if ( i == 5 ) {
             continue;
         }
@@ -115,14 +113,14 @@ inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexc
 template<u64 width>
 inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
 	auto conv = convertNumber<width - 2>(index);
-	SevenDigitLoop(a) {
+	for (int a = 2; a < 10; ++ a ) {
         if ( a == 5 ) {
             continue;
         }
 		auto ca = conv + (fastPow10<width - 2> * a);
 		auto sa = sum + a;
 		auto pa = product * a;
-		SevenDigitLoop(i) {
+	    for (int i = 2; i < 10; ++ i ) {
             if ( i == 5 ) {
                 continue;
             }
@@ -146,7 +144,7 @@ inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexc
 	SpecialWalker(SpecialWalker&&) = delete; \
 	SpecialWalker(const SpecialWalker&) = delete; \
 	static void body(MatchList& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept { \
-		doubleBody<width>(stream, sum, product, index); \
+		singleBody<width>(stream, sum, product, index); \
 	} \
 }
 
@@ -168,7 +166,6 @@ DoubleBody(13);
 DoubleBody(14);
 DoubleBody(15);
 DoubleBody(16);
-#undef SevenDigitLoop
 #undef SingleBody
 #undef DoubleBody
 
