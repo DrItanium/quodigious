@@ -18,38 +18,53 @@
 
 # Makefile for the quodigious application
 CXXFLAGS = -std=c++17
-CXXFLAGS += -O3 -march=native -ftemplate-backtrace-limit=0
+CXXFLAGS += -O3 -fwhole-program -march=native
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -O3 -flto -fwhole-program -march=native
+LXXFLAGS = -O3 -march=native 
 
 PRODUCT_COMPUTATION = product-compute
 SUM_COMPUTATION = sum-compute
 QLOOPS_PROG64 = quodigious64
 FREQUENCY_ANALYSIS = fanalysis
-PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS}
+ENCODING = ocEncoding 
+SIMPLE_LOOPS = simpleLoops 
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS}
 all: ${PROGS}
+
+${FREQUENCY_ANALYSIS}:
+	@echo -n "Building 64-bit number quodigious computer with frequency analyzer..."
+	@${CXX} -lpthread -flto ${LXXFLAGS} -o ${FREQUENCY_ANALYSIS} numericReduction.cc FrequencyAnalyzer.cc
+	@echo done.
 
 ${QLOOPS_PROG64}: loops64.o
 	@echo -n "Building 64-bit number quodigious computer ..."
 	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
 	@echo done.
 
-${FREQUENCY_ANALYSIS}: numericReduction.o FrequencyAnalyzer.o
-	@echo -n "Building 64-bit number quodigious computer with frequency analyzer..."
-	@${CXX} -lpthread ${LXXFLAGS} -o ${FREQUENCY_ANALYSIS} numericReduction.o FrequencyAnalyzer.o
-	@echo done.
 
 ${PRODUCT_COMPUTATION}: product-compute.o
 	@echo -n "Building unique product computer ... "
 	@${CXX} ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
 	@echo done.
 
+
 ${SUM_COMPUTATION}: sum-compute.o
 	@echo -n "Building unique sum computer ... "
 	@${CXX} ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
+	@echo done.
+
+
+${ENCODING}: octalLikeEncoding.o
+	@echo -n "Building special octal computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
+	@echo done.
+
+${SIMPLE_LOOPS}: simpleLoops.o
+	@echo -n "Building special simple loops computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${SIMPLE_LOOPS} simpleLoops.o
 	@echo done.
 
 %.o: %.cc
@@ -65,3 +80,4 @@ clean:
 loops64.o: qlib.h Specialization8Digits.cc
 numericReduction.o: qlib.h FrequencyAnalyzer.h
 FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h
+octalLikeEncoding.o: qlib.h
