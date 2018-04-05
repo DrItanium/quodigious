@@ -77,6 +77,14 @@ constexpr bool approximationCheckFailed(u64 sum) noexcept {
 
 template<u64 length>
 inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept;
+template<u64 inner, u64 next, auto p0, auto p1, auto p2>
+std::string doHalf(u64 sum, u64 product, u64 index) noexcept {
+    std::ostringstream stream;
+    innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
+    innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
+    innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
+    return stream.str();
+}
 template<u64 length>
 inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -103,15 +111,9 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// when we are greater than 10 digit numbers, it is a smart idea to
 		// perform divide and conquer at each level above 10 digits. The number of
 		// threads used for computation is equal to: 2^(width - 10).
-		auto fn = [](auto sum, auto product, auto index, auto p0, auto p1, auto p2) noexcept {
-			std::ostringstream stream;
-			innerBody<inner>(stream, sum + p0, product * p0, index + (p0 * next));
-			innerBody<inner>(stream, sum + p1, product * p1, index + (p1 * next));
-			innerBody<inner>(stream, sum + p2, product * p2, index + (p2 * next));
-			return stream.str();
-		};
-		auto lowerHalf = std::async(std::launch::async, fn, sum, product, index, 3, 4, 6);
-		auto upperHalf = std::async(std::launch::async, fn, sum, product, index, 7, 8, 9);
+        
+		auto lowerHalf = std::async(std::launch::async, doHalf<inner, next, 3, 4, 6>, sum, product, index);
+		auto upperHalf = std::async(std::launch::async, doHalf<inner, next, 7, 8, 9>, sum, product, index);
 		// perform computation on this primary thread because we want to be able
 		// to maximize how much work we do and make the amount of work in each
 		// thread even. The same number of threads are spawned but the primary
@@ -128,17 +130,11 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 		// digits are all even. Even if it turns out that this isn't the case
 		// I can always perform the odd digit checks later on at a significant
 		// reduction in speed cost!
-        if constexpr (length == 1) {
-            innerBody<inner>(stream, sum + 2, product * 2, index + 2);
-            innerBody<inner>(stream, sum + 4, product * 4, index + 4);
-            innerBody<inner>(stream, sum + 6, product * 6, index + 6);
-            innerBody<inner>(stream, sum + 8, product * 8, index + 8);
-        } else {
-		    for (auto i = 2; i < 10; ++i) {
-		    	if (i != 5) {
-		    		innerBody<inner>(stream, sum + i, product * i, index + (i * next));
-		    	}
-		    }
+        static constexpr auto incr = (length == 1) ? 2 : 1 ;
+        for (auto i = 2; i < 10; i += incr) {
+            if ( i != 5) {
+                innerBody<inner>(stream, sum + i, product * i, index + (i * next));
+            }
         }
 	}
 }
@@ -155,33 +151,21 @@ inline void innerBody(std::ostream& stream, u64 sum, u64 product, u64 index) noe
 template<>
 inline void innerBody<0>(std::ostream& stream, u64 sum, u64 product, u64 index) noexcept {
 	// specialization
-	if constexpr (!expensiveChecks) {
-		if (approximationCheckFailed(sum)) {
-			return;
-		}
-		if constexpr (exact) {
-			if (index % product != 0) {
-				return;
-			}
-			if (index % sum == 0) {
-				stream << index << '\n';
-			}
-		} else {
-			if (index % product == 0) {
-				stream << index << '\n';
-			}
-		}
-	} else {
-		if constexpr (exact) {
-			if ((index % product == 0) && (index % sum == 0)) {
-				stream << index << '\n';
-			}
-		} else {
-			if (index % product == 0) {
-				stream << index << '\n';
-			}
-		}
-	}
+    bool outputToStream = false;
+    if constexpr (!expensiveChecks) {
+        if (approximationCheckFailed(sum)) {
+            // if we want to terminate early then this makes sense
+            return;
+        }
+    }
+    if constexpr (exact) {
+        outputToStream = ((index % product == 0) && (index % sum == 0));
+    } else {
+        outputToStream = (index % product == 0);
+    }
+    if (outputToStream) {
+        stream << index << '\n';
+    }
 }
 
 //#include "Specialization2Digits.cc"
