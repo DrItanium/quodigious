@@ -93,14 +93,14 @@ struct SpecialWalker<length, length> {
 
 #define SevenDigitLoop(name) \
 	for (int name = 2; name < 10; ++ name )
-#define SkipFive(name) \
-		if ( name == 5 ) { continue; }
 
 template<u64 width>
 inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
     auto conv = convertNumber<width - 1>(index);
     SevenDigitLoop(i) {
-        SkipFive(i);
+        if ( i == 5 ) {
+            continue;
+        }
         auto s = sum + i;
         if (auto s = sum + 1 ; s % 3 != 0) {
             continue;
@@ -116,12 +116,16 @@ template<u64 width>
 inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
 	auto conv = convertNumber<width - 2>(index);
 	SevenDigitLoop(a) {
-		SkipFive(a);
+        if ( a == 5 ) {
+            continue;
+        }
 		auto ca = conv + (fastPow10<width - 2> * a);
 		auto sa = sum + a;
 		auto pa = product * a;
 		SevenDigitLoop(i) {
-			SkipFive(i);
+            if ( i == 5 ) {
+                continue;
+            }
 			if (auto si = sa + i ; si % 3 != 0) {
 				continue;
             } else if (auto ci = ca + (i * fastPow10<width - 1>); (ci % (pa * i)) != 0) {
@@ -164,7 +168,6 @@ DoubleBody(13);
 DoubleBody(14);
 DoubleBody(15);
 DoubleBody(16);
-#undef SkipFive
 #undef SevenDigitLoop
 #undef SingleBody
 #undef DoubleBody
