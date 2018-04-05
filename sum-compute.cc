@@ -22,8 +22,10 @@ void computeSum(unique_set& set, u8 depth) noexcept {
 		computeSum(inner, depth - 1);
 		for (auto const p : inner) {
 			for (int i = 2; i < 10; ++i) {
-				if (i == 5) {
-					continue;
+				if constexpr (skipFive) {
+                    if (i == 5) {
+					    continue;
+                    }
 				}
 				set.emplace(p + i);
 			}
