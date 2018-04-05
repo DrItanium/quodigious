@@ -76,16 +76,15 @@ template<u64 length>
 inline void singleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
     auto conv = convertNumber<length - 1>(index);
 	for (int i = 2; i < 10; ++ i ) {
-        if ( i == 5 ) {
-            continue;
-        }
-        auto s = sum + i;
-        if (auto s = sum + 1 ; s % 3 != 0) {
-            continue;
-        } else if (auto v = conv + (i * fastPow10<length - 1>); (v % (product * i)) != 0) {
-            continue;
-        } else if ((v % s) == 0) {
-            stream.emplace_back(v);
+        if ( i != 5 ) {
+            auto s = sum + i;
+            if (auto s = sum + 1 ; s % 3 != 0) {
+                continue;
+            } else if (auto v = conv + (i * fastPow10<length - 1>); (v % (product * i)) != 0) {
+                continue;
+            } else if ((v % s) == 0) {
+                stream.emplace_back(v);
+            }
         }
     }
 }
@@ -93,22 +92,20 @@ template<u64 length>
 inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
     auto conv = convertNumber<length - 2>(index);
     for (int a = 2; a < 10; ++ a ) {
-        if ( a == 5 ) {
-            continue;
-        }
-        auto ca = conv + (fastPow10<length - 2> * a);
-        auto sa = sum + a;
-        auto pa = product * a;
-        for (int i = 2; i < 10; ++ i ) {
-            if ( i == 5 ) {
-                continue;
-            }
-            if (auto si = sa + i ; si % 3 != 0) {
-                continue;
-            } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
-                continue;
-            } else if ((ci % si) == 0) {
-                stream.emplace_back(ci);
+        if ( a != 5 ) {
+            auto ca = conv + (fastPow10<length - 2> * a);
+            auto sa = sum + a;
+            auto pa = product * a;
+            for (int i = 2; i < 10; ++ i ) {
+                if ( i != 5 ) {
+                    if (auto si = sa + i ; si % 3 != 0) {
+                        continue;
+                    } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
+                        continue;
+                    } else if ((ci % si) == 0) {
+                        stream.emplace_back(ci);
+                    }
+                }
             }
         }
     }
