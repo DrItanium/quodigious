@@ -163,13 +163,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 //#include "Specialization10Digits.cc"
 //
 
-template<u64 index>
-inline void initialBody() noexcept {
-	// we don't want main aware of any details of how computation is performed.
-	// This allows the decoupling of details from main and the computation body itself
-	body<index>(std::cout);
-}
-
 int main() {
 	while(std::cin.good()) {
 		u64 currentIndex = 0;
@@ -185,16 +178,16 @@ int main() {
 				case 7: body32<7>(); break;
 				case 8: body32<8>(); break;
 				case 9: body32<9>(); break;
-				case 10: initialBody<10>(); break;
-				case 11: initialBody<11>(); break;
-				case 12: initialBody<12>(); break;
-				case 13: initialBody<13>(); break;
-				case 14: initialBody<14>(); break;
-				case 15: initialBody<15>(); break;
-				case 16: initialBody<16>(); break;
-				case 17: initialBody<17>(); break;
-				case 18: initialBody<18>(); break;
-				case 19: initialBody<19>(); break;
+                case 10: body<10>(std::cout); break;
+				case 11: body<11>(std::cout); break;
+				case 12: body<12>(std::cout); break;
+				case 13: body<13>(std::cout); break;
+				case 14: body<14>(std::cout); break;
+				case 15: body<15>(std::cout); break;
+				case 16: body<16>(std::cout); break;
+				case 17: body<17>(std::cout); break;
+				case 18: body<18>(std::cout); break;
+				case 19: body<19>(std::cout); break;
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
