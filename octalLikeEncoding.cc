@@ -62,7 +62,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
             case 0b111000: intermediate = 90; break;
         }
         return intermediate + convertNumber<1>(value);
-        //return (10 * (((value & 0b111000) >> 3) + 2)) + convertNumber<1>(value);
     } else if constexpr (position == 3) {
         return (100 * (((value & 0b111000000) >> 6) + 2)) + convertNumber<2>(value);
     } else {
