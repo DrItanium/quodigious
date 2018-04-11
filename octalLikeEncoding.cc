@@ -39,13 +39,6 @@ constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
 }
 
 template<u64 position>
-constexpr u64 extractDigit(u64 value) noexcept {
-	static_assert(position <= 19, "Cannot extract digit of position 20 or more!");
-	constexpr auto shift = position * 3;
-	return (value >> shift) & 0b111;
-}
-
-template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
@@ -64,9 +57,14 @@ constexpr u64 convertNumber(u64 value) noexcept {
         return intermediate + convertNumber<1>(value);
     } else if constexpr (position == 3) {
         return (100 * (((value & 0b111000000) >> 6) + 2)) + convertNumber<2>(value);
+    } else if constexpr (position == 4) {
+        return (1000 * (((value & 0b111000000000) >> 9) + 2)) + convertNumber<3>(value);
     } else {
-        constexpr auto nextPos = position - 1;
-	    return (fastPow10<nextPos> * (extractDigit<nextPos>(value) + 2)) + convertNumber<nextPos>(value);
+        constexpr u64 nextPos = position - 1;
+        constexpr u64 digitMask = 0b111;
+        constexpr u64 shift = (nextPos * 3);
+        constexpr u64 mask = digitMask << shift; 
+        return (fastPow10<nextPos> * (((value & mask) >> shift) + 2)) + convertNumber<nextPos>(value);
     }
 }
 
