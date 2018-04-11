@@ -83,13 +83,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else {
-        for (auto i = 2; i < 10; ++i) {
+        constexpr auto shift = (position * 3);
+        //constexpr auto mask = 0b111ul << shift;
+        for (auto i = 2ul; i < 10ul; ++i) {
             if constexpr (length > 4) {
-                if (i == 5) {
+                if (i == 5ul) {
                     continue;
                 }
             }
-            body<position + 1, length>(list, sum + i, product * i, encodeDigit<position>(index, (i - 2)));
+            body<position + 1, length>(list, sum + i, product * i, index + ((i - 2) << shift));
         }
     }
 }
