@@ -31,17 +31,10 @@
 
 using MatchList = std::list<u64>;
 template<u64 position>
-constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
-	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
-	constexpr auto shift = position * 3;
-	constexpr auto mask = 0b111ul << shift;
-	return (value & ~mask) | (digit << shift);
-}
-template<u64 position>
 constexpr u64 decodeDigit(u64 value) noexcept {
-    constexpr u64 digitMask = 0b111;
-    constexpr u64 shift = (position * 3);
-    constexpr u64 mask = digitMask << shift; 
+    constexpr auto digitMask = 0b111ul;
+    constexpr auto shift = (position * 3);
+    constexpr auto mask = digitMask << shift; 
     return (((value & mask) >> shift) + 2) * fastPow10<position>;
 }
 template<u64 position>
@@ -67,45 +60,20 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
-template<u64 position, u64 length, auto compare, auto ... rest>
-constexpr bool doDoubleBody() noexcept {
-    if constexpr ((position == (length - 2)) && (length == compare)) {
-        return true;
-    } else if constexpr (sizeof...(rest) > 0) {
-        return doDoubleBody<position, length, rest...>();
-    } else {
-        return false;
-    }
+template<u64 position>
+constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
+	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
+	constexpr auto shift = position * 3;
+	constexpr auto mask = 0b111ul << shift;
+	return (value & ~mask) | (digit << shift);
 }
 
-template<u64 length>
-inline void doubleBody(MatchList& stream, u64 sum, u64 product, u64 index) noexcept {
-    auto conv = convertNumber<length - 2>(index);
-    for (int a = 2; a < 10; ++ a ) {
-        if (a == 5) {
-            continue;
-        }
-        auto ca = conv + (fastPow10<length - 2> * a);
-        auto sa = sum + a;
-        auto pa = product * a;
-        for (int i = 2; i < 10; ++ i ) {
-            if (i == 5) {
-                continue;
-            } else if (auto si = sa + i ; si % 3 != 0) {
-                continue;
-            } else if (auto ci = ca + (i * fastPow10<length - 1>); (ci % (pa * i)) != 0) {
-                continue;
-            } else if ((ci % si) == 0) {
-                stream.emplace_back(ci);
-            }
-        }
-    }
-}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
+
         if constexpr (length > 10) {
             if (sum % 3 != 0) {
                 return;
@@ -114,8 +82,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-    } else if constexpr (doDoubleBody<11, 12, 13, 14, 15, 16>()) {
-        doubleBody<length>(list, sum, product, index);
     } else {
         for (auto i = 2; i < 10; ++i) {
             if constexpr (length > 4) {
