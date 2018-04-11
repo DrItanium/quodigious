@@ -60,14 +60,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
-template<u64 position>
-constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
-	static_assert(position <= 19, "Cannot encode digit at position 20 or more!");
-	constexpr auto shift = position * 3;
-	constexpr auto mask = 0b111ul << shift;
-	return (value & ~mask) | (digit << shift);
-}
-
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
