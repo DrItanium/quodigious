@@ -47,8 +47,13 @@ template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
+    } else if constexpr (position == 2) {
+        return (10 * (((value & 0b111000) >> 3) + 2)) + convertNumber<1>(value);
+    } else if constexpr (position == 3) {
+        return (100 * (((value & 0b111000000) >> 6) + 2)) + convertNumber<2>(value);
     } else {
-	    return (fastPow10<position - 1> * (extractDigit<position - 1>(value) + 2)) + convertNumber<position - 1>(value);
+        constexpr auto nextPos = position - 1;
+	    return (fastPow10<nextPos> * (extractDigit<nextPos>(value) + 2)) + convertNumber<nextPos>(value);
     }
 }
 
