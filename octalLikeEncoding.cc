@@ -61,10 +61,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
             case 0b111000: intermediate = 92; break;
         }
         return intermediate + (value & 0b111);
-    } else if constexpr (position == 3) {
-        return decodeDigit<2>(value) + convertNumber<2>(value);
-    } else if constexpr (position == 4) {
-        return decodeDigit<3>(value) + convertNumber<3>(value);
     } else {
         constexpr u64 nextPos = position - 1;
         return decodeDigit<nextPos>(value) + convertNumber<nextPos>(value);
