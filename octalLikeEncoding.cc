@@ -37,7 +37,10 @@ constexpr u64 encodeDigit(u64 value, u64 digit) noexcept {
 	constexpr auto mask = 0b111ul << shift;
 	return (value & ~mask) | (digit << shift);
 }
-
+template<u64 position>
+constexpr u64 decodeDigit(u64 value, u64 mask, u64 shift) noexcept {
+    return (((value & mask) >> shift) + 2) * fastPow10<position>;
+}
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
@@ -56,7 +59,7 @@ constexpr u64 convertNumber(u64 value) noexcept {
         }
         return intermediate + convertNumber<1>(value);
     } else if constexpr (position == 3) {
-        return (100 * (((value & 0b111000000) >> 6) + 2)) + convertNumber<2>(value);
+        return decodeDigit<2>(value, 0b111000000, 6) + convertNumber<2>(value);
     } else if constexpr (position == 4) {
         return (1000 * (((value & 0b111000000000) >> 9) + 2)) + convertNumber<3>(value);
     } else {
@@ -64,7 +67,7 @@ constexpr u64 convertNumber(u64 value) noexcept {
         constexpr u64 digitMask = 0b111;
         constexpr u64 shift = (nextPos * 3);
         constexpr u64 mask = digitMask << shift; 
-        return (fastPow10<nextPos> * (((value & mask) >> shift) + 2)) + convertNumber<nextPos>(value);
+        return decodeDigit<nextPos>(value, mask, shift) + convertNumber<nextPos>(value);
     }
 }
 
