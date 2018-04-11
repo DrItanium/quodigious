@@ -50,7 +50,19 @@ constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
     } else if constexpr (position == 2) {
-        return (10 * (((value & 0b111000) >> 3) + 2)) + convertNumber<1>(value);
+        auto intermediate = 0;
+        switch (value & 0b111000) {
+            case 0b000000: intermediate = 20; break;
+            case 0b001000: intermediate = 30; break;
+            case 0b010000: intermediate = 40; break;
+            case 0b011000: intermediate = 50; break;
+            case 0b100000: intermediate = 60; break;
+            case 0b101000: intermediate = 70; break;
+            case 0b110000: intermediate = 80; break;
+            case 0b111000: intermediate = 90; break;
+        }
+        return intermediate + convertNumber<1>(value);
+        //return (10 * (((value & 0b111000) >> 3) + 2)) + convertNumber<1>(value);
     } else if constexpr (position == 3) {
         return (100 * (((value & 0b111000000) >> 6) + 2)) + convertNumber<2>(value);
     } else {
