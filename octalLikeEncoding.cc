@@ -30,13 +30,7 @@
 #include <list>
 
 using MatchList = std::list<u64>;
-template<u64 position>
-constexpr u64 decodeDigit(u64 value) noexcept {
-    constexpr auto digitMask = 0b111ul;
-    constexpr auto shift = (position * 3);
-    constexpr auto mask = digitMask << shift; 
-    return (((value & mask) >> shift) + 2) * fastPow10<position>;
-}
+
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
@@ -55,8 +49,10 @@ constexpr u64 convertNumber(u64 value) noexcept {
         }
         return intermediate + (value & 0b111);
     } else {
-        constexpr u64 nextPos = position - 1;
-        return decodeDigit<nextPos>(value) + convertNumber<nextPos>(value);
+        constexpr auto nextPos = position - 1;
+        constexpr auto shift = (nextPos * 3);
+        constexpr auto mask = 0b111ul << shift; 
+        return ((((value & mask) >> shift) + 2) * fastPow10<nextPos>) + convertNumber<nextPos>(value);
     }
 }
 
@@ -65,7 +61,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
-
+        sum += (length * 2);
         if constexpr (length > 10) {
             if (sum % 3 != 0) {
                 return;
@@ -75,15 +71,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else {
-        constexpr auto shift = (position * 3);
-        //constexpr auto mask = 0b111ul << shift;
-        for (auto i = 2ul; i < 10ul; ++i) {
+        static constexpr auto shift = (position * 3);
+        for (auto i = 0ul; i < 8ul; ++i) {
             if constexpr (length > 4) {
-                if (i == 5ul) {
+                if (i == 3ul) {
                     continue;
                 }
             }
-            body<position + 1, length>(list, sum + i, product * i, index + ((i - 2) << shift));
+
+            body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shift));
         }
     }
 }
@@ -97,7 +93,7 @@ MatchList parallelBody() {
     // and 6. This is a frequency analysis job only :D
     for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
         //Walker<2, width>::body(list, base + i, base * i, index + (i - 2));
-        body<2, width>(list, base + i, base * i, index + (i - 2));
+        body<2, width>(list, (base - 2) + (i - 2), base * i, index + (i - 2));
     }
     return list;
 }
