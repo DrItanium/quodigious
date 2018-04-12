@@ -30,14 +30,16 @@
 #include <list>
 
 using MatchList = std::list<u64>;
-
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
+    constexpr auto nextPos = position - 1;
+    constexpr auto shift = (nextPos * 3);
+    constexpr auto mask = 0b111ul << shift; 
+    constexpr auto factor = fastPow10<nextPos>;
+    auto significand = (value & mask) >> shift;
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
     } else if constexpr (position == 2) {
-        auto masked = value & 0b111000;
-#ifdef USE_REVERSED_FORMULA
         // I figured this out via a lot of pencil and paper and CLIPS. Basically
         // the algorithm was derived via reverse engineering from the initial encoded
         // octal value to the resultant decimal value.
@@ -48,26 +50,34 @@ constexpr u64 convertNumber(u64 value) noexcept {
         // fractional parts. However, conceptually that is the idea. 
         // We want to divide by eight and then multiply by 2. This will make sure
         // that we compute the correct thing.
-        auto intermediate = masked + ((masked >> 3) << 1) + 22;
-#else 
+        // auto masked = value & 0b111000;
+        // auto significand = masked >> 3;
+        // auto intermediate = masked + (significand << 1) + 22; 
         auto intermediate = 0;
-        switch (masked) {
-            case 0b000000: intermediate = 22; break;
-            case 0b001000: intermediate = 32; break;
-            case 0b010000: intermediate = 42; break;
-            case 0b011000: intermediate = 52; break;
-            case 0b100000: intermediate = 62; break;
-            case 0b101000: intermediate = 72; break;
-            case 0b110000: intermediate = 82; break;
-            case 0b111000: intermediate = 92; break;
+        switch (significand) {
+            case 0b000: intermediate = 22; break;
+            case 0b001: intermediate = 32; break;
+            case 0b010: intermediate = 42; break;
+            case 0b011: intermediate = 52; break;
+            case 0b100: intermediate = 62; break;
+            case 0b101: intermediate = 72; break;
+            case 0b110: intermediate = 82; break;
+            case 0b111: intermediate = 92; break;
         }
-#endif 
         return intermediate + (value & 0b111);
     } else {
-        constexpr auto nextPos = position - 1;
-        constexpr auto shift = (nextPos * 3);
-        constexpr auto mask = 0b111ul << shift; 
-        return ((((value & mask) >> shift) + 2) * fastPow10<nextPos>) + convertNumber<nextPos>(value);
+        auto intermediate = 0ul;
+        switch(significand) {
+            case 0b000: intermediate = (2ul * factor); break;
+            case 0b001: intermediate = (3ul * factor); break;
+            case 0b010: intermediate = (4ul * factor); break;
+            case 0b011: intermediate = (5ul * factor); break;
+            case 0b100: intermediate = (6ul * factor); break;
+            case 0b101: intermediate = (7ul * factor); break;
+            case 0b110: intermediate = (8ul * factor); break;
+            case 0b111: intermediate = (9ul * factor); break;
+        }
+        return intermediate + convertNumber<nextPos>(value);
     }
 }
 
@@ -100,7 +110,7 @@ template<auto width>
 void innerParallelBody(MatchList& list, u64 base) noexcept {
     auto start = (base - 2ul);
     auto index = start << 3;
-    constexpr auto addon = width * 2;
+    static constexpr auto addon = width * 2;
     // using the frequency analysis I did before for loops64.cc I found
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
