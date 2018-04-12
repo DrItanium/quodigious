@@ -105,13 +105,16 @@ void initialBody() noexcept {
 		}
 	};
 	if constexpr (width > 10) {
-		auto t0 = std::async(std::launch::async, parallelBody<width>, 2);
-		auto t1 = std::async(std::launch::async, parallelBody<width>, 3);
-		auto t2 = std::async(std::launch::async, parallelBody<width>, 4);
-		auto t3 = std::async(std::launch::async, parallelBody<width>, 6);
-		auto t4 = std::async(std::launch::async, parallelBody<width>, 7);
-		auto t5 = std::async(std::launch::async, parallelBody<width>, 8);
-		auto t6 = std::async(std::launch::async, parallelBody<width>, 9);
+        auto mkfuture = [](auto base) {
+            return std::async(std::launch::async, parallelBody<width>, base);
+        };
+		auto t0 = mkfuture(2);
+		auto t1 = mkfuture(3);
+		auto t2 = mkfuture(4);
+		auto t3 = mkfuture(6);
+		auto t4 = mkfuture(7);
+		auto t5 = mkfuture(8);
+		auto t6 = mkfuture(9);
 		outputToConsole(t0.get());
 		outputToConsole(t1.get());
 		outputToConsole(t2.get());
