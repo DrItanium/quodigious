@@ -74,7 +74,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-    static_assert(length >= 13, "Can't have numbers less than 13 digits in this implementation!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
         //sum += (length * 2);
@@ -117,23 +116,29 @@ void initialBody() noexcept {
 			std::cout << v << std::endl;
 		}
 	};
-    auto mkfuture = [](auto base) {
-        return std::async(std::launch::async, parallelBody<width>, base);
-    };
-    auto t0 = mkfuture(2);
-    auto t1 = mkfuture(3);
-    auto t2 = mkfuture(4);
-    auto t3 = mkfuture(6);
-    auto t4 = mkfuture(7);
-    auto t5 = mkfuture(8);
-    auto t6 = mkfuture(9);
-    outputToConsole(t0.get());
-    outputToConsole(t1.get());
-    outputToConsole(t2.get());
-    outputToConsole(t3.get());
-    outputToConsole(t4.get());
-    outputToConsole(t5.get());
-    outputToConsole(t6.get());
+    if constexpr (width > 10) {
+        auto mkfuture = [](auto base) {
+            return std::async(std::launch::async, parallelBody<width>, base);
+        };
+        auto t0 = mkfuture(2);
+        auto t1 = mkfuture(3);
+        auto t2 = mkfuture(4);
+        auto t3 = mkfuture(6);
+        auto t4 = mkfuture(7);
+        auto t5 = mkfuture(8);
+        auto t6 = mkfuture(9);
+        outputToConsole(t0.get());
+        outputToConsole(t1.get());
+        outputToConsole(t2.get());
+        outputToConsole(t3.get());
+        outputToConsole(t4.get());
+        outputToConsole(t5.get());
+        outputToConsole(t6.get());
+    } else {
+        MatchList list;
+        body<0, width>(list);
+        outputToConsole(list);
+    }
 }
 
 int main() {
@@ -142,6 +147,18 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
+                case 1: initialBody<1>(); break;
+                case 2: initialBody<2>(); break;
+                case 3: initialBody<3>(); break;
+                case 4: initialBody<4>(); break;
+                case 5: initialBody<5>(); break;
+                case 6: initialBody<6>(); break;
+                case 7: initialBody<7>(); break;
+                case 8: initialBody<8>(); break;
+                case 9: initialBody<9>(); break;
+                case 10: initialBody<10>(); break;
+                case 11: initialBody<11>(); break;
+                case 12: initialBody<12>(); break;
 				case 13: initialBody<13>(); break;
 				case 14: initialBody<14>(); break;
 				case 15: initialBody<15>(); break;
