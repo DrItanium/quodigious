@@ -59,13 +59,12 @@ constexpr u64 convertNumber(u64 value) noexcept {
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
+    static_assert(length >= 13, "Can't have numbers less than 13 digits in this implementation!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
         //sum += (length * 2);
-        if constexpr (length > 10) {
-            if (sum % 3 != 0) {
-                return;
-            }
+        if (sum % 3 != 0) {
+            return;
         }
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
@@ -73,10 +72,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     } else {
         static constexpr auto shift = (position * 3);
         for (auto i = 0ul; i < 8ul; ++i) {
-            if constexpr (length > 4) {
-                if (i == 3ul) {
-                    continue;
-                }
+            if (i == 3ul) {
+                continue;
             }
             body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shift));
         }
@@ -105,29 +102,23 @@ void initialBody() noexcept {
 			std::cout << v << std::endl;
 		}
 	};
-	if constexpr (width > 10) {
-        auto mkfuture = [](auto base) {
-            return std::async(std::launch::async, parallelBody<width>, base);
-        };
-		auto t0 = mkfuture(2);
-		auto t1 = mkfuture(3);
-		auto t2 = mkfuture(4);
-		auto t3 = mkfuture(6);
-		auto t4 = mkfuture(7);
-		auto t5 = mkfuture(8);
-		auto t6 = mkfuture(9);
-		outputToConsole(t0.get());
-		outputToConsole(t1.get());
-		outputToConsole(t2.get());
-		outputToConsole(t3.get());
-		outputToConsole(t4.get());
-		outputToConsole(t5.get());
-		outputToConsole(t6.get());
-	} else {
-		MatchList collection;
-		body<0, width>(collection);
-		outputToConsole(collection);
-	}
+    auto mkfuture = [](auto base) {
+        return std::async(std::launch::async, parallelBody<width>, base);
+    };
+    auto t0 = mkfuture(2);
+    auto t1 = mkfuture(3);
+    auto t2 = mkfuture(4);
+    auto t3 = mkfuture(6);
+    auto t4 = mkfuture(7);
+    auto t5 = mkfuture(8);
+    auto t6 = mkfuture(9);
+    outputToConsole(t0.get());
+    outputToConsole(t1.get());
+    outputToConsole(t2.get());
+    outputToConsole(t3.get());
+    outputToConsole(t4.get());
+    outputToConsole(t5.get());
+    outputToConsole(t6.get());
 }
 
 int main() {
