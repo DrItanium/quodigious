@@ -39,32 +39,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
     auto significand = (value & mask) >> shift;
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
-    } else if constexpr (position == 2) {
-        // I figured this out via a lot of pencil and paper and CLIPS. Basically
-        // the algorithm was derived via reverse engineering from the initial encoded
-        // octal value to the resultant decimal value.
-        //
-        // By combining the masked value with 22 we have just combined the offset
-        // we then have to add (mask / 8) and then mask / 8 again. This is _not_
-        // the same as mask / 4 as we get different results due to 
-        // fractional parts. However, conceptually that is the idea. 
-        // We want to divide by eight and then multiply by 2. This will make sure
-        // that we compute the correct thing.
-        // auto masked = value & 0b111000;
-        // auto significand = masked >> 3;
-        // auto intermediate = masked + (significand << 1) + 22; 
-        auto intermediate = 0;
-        switch (significand) {
-            case 0b000: intermediate = 22; break;
-            case 0b001: intermediate = 32; break;
-            case 0b010: intermediate = 42; break;
-            case 0b011: intermediate = 52; break;
-            case 0b100: intermediate = 62; break;
-            case 0b101: intermediate = 72; break;
-            case 0b110: intermediate = 82; break;
-            case 0b111: intermediate = 92; break;
-        }
-        return intermediate + (value & 0b111);
     } else {
         auto intermediate = 0ul;
         switch(significand) {
