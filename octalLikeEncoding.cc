@@ -110,6 +110,7 @@ MatchList parallelBody(u64 base) {
         auto j = i - 2ul;
         body<2, width>(list, start + j + addon, base * i, index + j);
     }
+    list.sort();
     return list;
 }
 template<u64 width>
@@ -140,6 +141,7 @@ void initialBody() noexcept {
     } else {
         MatchList list;
         body<0, width>(list, width * 2);
+        list.sort();
         outputToConsole(list);
     }
 }
