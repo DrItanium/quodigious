@@ -96,10 +96,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     }
 }
-
 template<auto width>
-MatchList parallelBody(u64 base) {
-    MatchList list;
+void innerParallelBody(MatchList& list, u64 base) {
     auto start = (base - 2ul);
     auto index = start << 3;
     constexpr auto addon = width * 2;
@@ -110,6 +108,11 @@ MatchList parallelBody(u64 base) {
         auto j = i - 2ul;
         body<2, width>(list, start + j + addon, base * i, index + j);
     }
+}
+template<auto width>
+MatchList parallelBody(u64 base) {
+    MatchList list;
+    innerParallelBody<width>(list, base);
     list.sort();
     return list;
 }
@@ -138,6 +141,30 @@ void initialBody() noexcept {
         outputToConsole(t4.get());
         outputToConsole(t5.get());
         outputToConsole(t6.get());
+    } else if constexpr (width == 10) {
+         auto p0 = std::async(std::launch::async, [](){
+                   MatchList list;
+                   innerParallelBody<width>(list, 2);
+                   innerParallelBody<width>(list, 3);
+                   innerParallelBody<width>(list, 4);
+                   list.sort();
+                   return list;
+                 });
+         auto p1 = std::async(std::launch::async, [](){
+                   MatchList list;
+                   innerParallelBody<width>(list, 6);
+                   innerParallelBody<width>(list, 7);
+                   innerParallelBody<width>(list, 8);
+                   innerParallelBody<width>(list, 9);
+                   list.sort();
+                   return list;
+                 });
+         outputToConsole(p0.get());
+         outputToConsole(p1.get());
+    } else if constexpr (width == 1) {
+        for (int i = 2; i < 10; ++i) {
+            std::cout << i << std::endl;
+        }
     } else {
         MatchList list;
         body<0, width>(list, width * 2);
