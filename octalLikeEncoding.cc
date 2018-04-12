@@ -144,27 +144,23 @@ void initialBody() noexcept {
     } else if constexpr (width == 10) {
          auto p0 = std::async(std::launch::async, [](){
                    MatchList list;
-                   innerParallelBody<width>(list, 2);
                    innerParallelBody<width>(list, 3);
                    innerParallelBody<width>(list, 4);
+                   innerParallelBody<width>(list, 6);
                    list.sort();
                    return list;
                  });
          auto p1 = std::async(std::launch::async, [](){
                    MatchList list;
-                   innerParallelBody<width>(list, 6);
                    innerParallelBody<width>(list, 7);
                    innerParallelBody<width>(list, 8);
                    innerParallelBody<width>(list, 9);
                    list.sort();
                    return list;
                  });
+         outputToConsole(parallelBody<width>(2));
          outputToConsole(p0.get());
          outputToConsole(p1.get());
-    } else if constexpr (width == 1) {
-        for (int i = 2; i < 10; ++i) {
-            std::cout << i << std::endl;
-        }
     } else {
         MatchList list;
         body<0, width>(list, width * 2);
