@@ -36,8 +36,8 @@ constexpr u64 convertNumber(u64 value) noexcept {
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
     } else if constexpr (position == 2) {
+        auto masked = value & 0b111000;
 #ifdef USE_REVERSED_FORMULA
-        auto mask = value & 0b111000;
         // I figured this out via a lot of pencil and paper and CLIPS. Basically
         // the algorithm was derived via reverse engineering from the initial encoded
         // octal value to the resultant decimal value.
@@ -48,10 +48,10 @@ constexpr u64 convertNumber(u64 value) noexcept {
         // fractional parts. However, conceptually that is the idea. 
         // We want to divide by eight and then multiply by 2. This will make sure
         // that we compute the correct thing.
-        auto intermediate = mask + ((mask >> 3) << 1) + 22;
+        auto intermediate = masked + ((masked >> 3) << 1) + 22;
 #else 
         auto intermediate = 0;
-        switch (value & 0b111000) {
+        switch (masked) {
             case 0b000000: intermediate = 22; break;
             case 0b001000: intermediate = 32; break;
             case 0b010000: intermediate = 42; break;
