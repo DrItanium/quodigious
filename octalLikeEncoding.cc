@@ -61,7 +61,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
-        sum += (length * 2);
+        //sum += (length * 2);
         if constexpr (length > 10) {
             if (sum % 3 != 0) {
                 return;
@@ -88,12 +88,13 @@ MatchList parallelBody(u64 base) {
     MatchList list;
     auto start = (base - 2ul);
     auto index = start << 3;
+    constexpr auto addon = width * 2;
     // using the frequency analysis I did before for loops64.cc I found
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
     for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
         auto j = i - 2ul;
-        body<2, width>(list, start + j, base * i, index + j);
+        body<2, width>(list, start + j + addon, base * i, index + j);
     }
     return list;
 }
