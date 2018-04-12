@@ -123,7 +123,7 @@ void initialBody() noexcept {
 			std::cout << v << std::endl;
 		}
 	};
-    if constexpr (width > 10) {
+    if constexpr (width >= 10) {
         auto mkfuture = [](auto base) {
             return std::async(std::launch::async, parallelBody<width>, base);
         };
@@ -141,26 +141,6 @@ void initialBody() noexcept {
         outputToConsole(t4.get());
         outputToConsole(t5.get());
         outputToConsole(t6.get());
-    } else if constexpr (width == 10) {
-         auto p0 = std::async(std::launch::async, [](){
-                   MatchList list;
-                   innerParallelBody<width>(list, 3);
-                   innerParallelBody<width>(list, 4);
-                   innerParallelBody<width>(list, 6);
-                   list.sort();
-                   return list;
-                 });
-         auto p1 = std::async(std::launch::async, [](){
-                   MatchList list;
-                   innerParallelBody<width>(list, 7);
-                   innerParallelBody<width>(list, 8);
-                   innerParallelBody<width>(list, 9);
-                   list.sort();
-                   return list;
-                 });
-         outputToConsole(parallelBody<width>(2));
-         outputToConsole(p0.get());
-         outputToConsole(p1.get());
     } else {
         MatchList list;
         body<0, width>(list, width * 2);
