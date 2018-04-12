@@ -17,12 +17,12 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-CXXFLAGS += -std=c++17 -O3 -fwhole-program -march=native
+CXXFLAGS += -std=c++17 -Ofast -fwhole-program -march=native
 
 # enable debugging
 #CXXFLAGS += -DDEBUG -g3
 
-LXXFLAGS = -O3 -march=native -std=c++17
+LXXFLAGS = -Ofast -march=native -std=c++17
 
 PRODUCT_COMPUTATION = product-compute
 SUM_COMPUTATION = sum-compute
