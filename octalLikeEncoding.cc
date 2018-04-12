@@ -78,22 +78,22 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     continue;
                 }
             }
-
             body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shift));
         }
     }
 }
 
-template<auto width, auto base>
-MatchList parallelBody() {
+template<auto width>
+MatchList parallelBody(u64 base) {
     MatchList list;
-    constexpr auto index = (base - 2) << 3;
+    auto start = (base - 2ul);
+    auto index = start << 3;
     // using the frequency analysis I did before for loops64.cc I found
     // that on even digits that 4 and 8 are used while odd digits use 2
     // and 6. This is a frequency analysis job only :D
-    for (auto i = ((base % 2 == 0) ? 4 : 2); i < 10; i += 4) {
-        //Walker<2, width>::body(list, base + i, base * i, index + (i - 2));
-        body<2, width>(list, (base - 2) + (i - 2), base * i, index + (i - 2));
+    for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
+        auto j = i - 2ul;
+        body<2, width>(list, start + j, base * i, index + j);
     }
     return list;
 }
@@ -105,13 +105,13 @@ void initialBody() noexcept {
 		}
 	};
 	if constexpr (width > 10) {
-		auto t0 = std::async(std::launch::async, parallelBody<width, 2>);
-		auto t1 = std::async(std::launch::async, parallelBody<width, 3>);
-		auto t2 = std::async(std::launch::async, parallelBody<width, 4>);
-		auto t3 = std::async(std::launch::async, parallelBody<width, 6>);
-		auto t4 = std::async(std::launch::async, parallelBody<width, 7>);
-		auto t5 = std::async(std::launch::async, parallelBody<width, 8>);
-		auto t6 = std::async(std::launch::async, parallelBody<width, 9>);
+		auto t0 = std::async(std::launch::async, parallelBody<width>, 2);
+		auto t1 = std::async(std::launch::async, parallelBody<width>, 3);
+		auto t2 = std::async(std::launch::async, parallelBody<width>, 4);
+		auto t3 = std::async(std::launch::async, parallelBody<width>, 6);
+		auto t4 = std::async(std::launch::async, parallelBody<width>, 7);
+		auto t5 = std::async(std::launch::async, parallelBody<width>, 8);
+		auto t6 = std::async(std::launch::async, parallelBody<width>, 9);
 		outputToConsole(t0.get());
 		outputToConsole(t1.get());
 		outputToConsole(t2.get());
