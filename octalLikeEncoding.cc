@@ -136,20 +136,6 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-#ifdef LOWER_NUMBER_RANGE
-				case 1: std::cout << "2\n3\n4\n5\n6\n7\n8\n9" << std::endl; break;
-				case 2: initialBody<2>(); break;
-				case 3: initialBody<3>(); break;
-				case 4: initialBody<4>(); break;
-				case 5: initialBody<5>(); break;
-				case 6: initialBody<6>(); break;
-				case 7: initialBody<7>(); break;
-				case 8: initialBody<8>(); break;
-				case 9: initialBody<9>(); break;
-				case 10: initialBody<10>(); break;
-#endif // end LOWER_NUMBER_RANGE
-				case 11: initialBody<11>(); break;
-				case 12: initialBody<12>(); break;
 				case 13: initialBody<13>(); break;
 				case 14: initialBody<14>(); break;
 				case 15: initialBody<15>(); break;
