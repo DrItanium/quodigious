@@ -76,9 +76,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
     if constexpr (position == length) {
-        //sum += (length * 2);
-        if (sum % 3 != 0) {
-            return;
+        if constexpr (length > 10) {
+            if (sum % 3 != 0) {
+                return;
+            }
         }
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
@@ -86,8 +87,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     } else {
         static constexpr auto shift = (position * 3);
         for (auto i = 0ul; i < 8ul; ++i) {
-            if (i == 3ul) {
-                continue;
+            if constexpr (length > 4) {
+                if (i == 3ul) {
+                    continue;
+                }
             }
             body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shift));
         }
@@ -136,7 +139,7 @@ void initialBody() noexcept {
         outputToConsole(t6.get());
     } else {
         MatchList list;
-        body<0, width>(list);
+        body<0, width>(list, width * 2);
         outputToConsole(list);
     }
 }
