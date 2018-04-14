@@ -82,16 +82,16 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 }
 template<auto width>
 void innerParallelBody(MatchList& list, u64 base) noexcept {
-    auto start = (base - 2ul);
-    auto index = start << 3;
-    static constexpr auto addon = width * 2;
-    // using the frequency analysis I did before for loops64.cc I found
-    // that on even digits that 4 and 8 are used while odd digits use 2
-    // and 6. This is a frequency analysis job only :D
-    for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
-        auto j = i - 2ul;
-        body<2, width>(list, start + j + addon, base * i, index + j);
-    }
+	auto start = (base - 2ul);
+	auto index = start << 3;
+	static constexpr auto addon = width * 2;
+	// using the frequency analysis I did before for loops64.cc I found
+	// that on even digits that 4 and 8 are used while odd digits use 2
+	// and 6. This is a frequency analysis job only :D
+	for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
+		auto j = i - 2ul;
+		body<2, width>(list, start + j + addon, base * i, index + j);
+	}
 }
 template<auto width>
 MatchList parallelBody(u64 base) {
