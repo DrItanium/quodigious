@@ -81,8 +81,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     }
 }
+
 template<auto width>
-void innerParallelBody(MatchList& list, u64 base) noexcept {
+MatchList parallelBody(u64 base) noexcept {
+    MatchList list;
 	auto start = (base - 2ul);
 	auto index = start << 3;
 	static constexpr auto addon = width << 1;
@@ -93,12 +95,6 @@ void innerParallelBody(MatchList& list, u64 base) noexcept {
 		auto j = i - 2ul;
 		body<2, width>(list, start + j + addon, base * i, index + j);
 	}
-}
-
-template<auto width>
-MatchList parallelBody(u64 base) noexcept {
-    MatchList list;
-    innerParallelBody<width>(list, base);
     list.sort();
     return list;
 }
