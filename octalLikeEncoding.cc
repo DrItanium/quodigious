@@ -32,25 +32,27 @@
 using MatchList = std::list<u64>;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
+template<u64 base, u64 pos>
+constexpr auto computeFactor = base * fastPow10<pos>;
 template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
+    static_assert(position > 0, "Can't access position 0!");
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
     } else {
 		constexpr auto nextPos = position - 1;
 		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
-		constexpr auto factor = fastPow10<nextPos>;
 		auto significand = (value & mask) >> shiftAmount<nextPos>;
         auto intermediate = 0ul;
         switch(significand) {
-            case 0b000: intermediate = (2ul * factor); break;
-            case 0b001: intermediate = (3ul * factor); break;
-            case 0b010: intermediate = (4ul * factor); break;
-            case 0b011: intermediate = (5ul * factor); break;
-            case 0b100: intermediate = (6ul * factor); break;
-            case 0b101: intermediate = (7ul * factor); break;
-            case 0b110: intermediate = (8ul * factor); break;
-            case 0b111: intermediate = (9ul * factor); break;
+            case 0b000: intermediate = computeFactor<2ul, nextPos>; break;
+            case 0b001: intermediate = computeFactor<3ul, nextPos>; break;
+            case 0b010: intermediate = computeFactor<4ul, nextPos>; break;
+            case 0b011: intermediate = computeFactor<5ul, nextPos>; break;
+            case 0b100: intermediate = computeFactor<6ul, nextPos>; break;
+            case 0b101: intermediate = computeFactor<7ul, nextPos>; break;
+            case 0b110: intermediate = computeFactor<8ul, nextPos>; break;
+            case 0b111: intermediate = computeFactor<9ul, nextPos>; break;
         }
         return intermediate + convertNumber<nextPos>(value);
     }
@@ -107,7 +109,6 @@ MatchList parallelBody(u64 base) noexcept {
 		auto j = i - 2ul;
 		body<2, width>(list, start + j + addon, base * i, index + j);
 	}
-    list.sort();
     return list;
 }
 
