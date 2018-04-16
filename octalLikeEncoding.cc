@@ -30,6 +30,7 @@
 #include <list>
 
 using MatchList = std::list<u64>;
+constexpr bool unpackLoops = true;
 constexpr bool doNotStoreConvertedNumbers = false;
 constexpr bool enableDivideAndConquerParallelism = false;
 template<u64 position>
@@ -63,6 +64,7 @@ template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length != 0, "Can't have length of zero!");
+    static_assert(length >= position, "Position is out of bounds!");
     if constexpr (position == length) {
         if constexpr (length > 10) {
             if (sum % 3 != 0) {
@@ -78,10 +80,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     } else {
         if constexpr (enableDivideAndConquerParallelism && ((length - position) > 9)) {
-            auto fn = [sum, product, index](auto start, auto end) noexcept {
+            auto fn = [sum, product, index, dprod = (product << 1)](auto start, auto end) noexcept {
                 MatchList l;
                 for (auto i = start; i < end; ++i) {
-                    body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
+                    body<position + 1, length>(l, sum + i, dprod + (product * i), index + (i << shiftAmount<position>));
                 }
                 return l;
             };
@@ -92,13 +94,24 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             auto l1 = upperHalf.get();
             list.splice(list.cbegin(), l1);
         } else {
+            auto dprod = product << 1;
+            constexpr u64 indexAddon[] = {
+                0,
+                1ul << shiftAmount<position>,
+                2ul << shiftAmount<position>,
+                3ul << shiftAmount<position>,
+                4ul << shiftAmount<position>,
+                5ul << shiftAmount<position>,
+                6ul << shiftAmount<position>,
+                7ul << shiftAmount<position>,
+            };
             for (auto i = 0ul; i < 8ul; ++i) {
                 if constexpr (length > 4) {
                     if (i == 3ul) {
                         continue;
                     }
                 }
-                body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
+                body<position + 1, length>(list, sum + i, dprod + (product * i), index + indexAddon[i]);
             }
         }
     }
