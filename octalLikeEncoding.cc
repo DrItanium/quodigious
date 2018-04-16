@@ -74,24 +74,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else {
-        constexpr u64 indexAddon[] = {
-            0,
-            1ul << shiftAmount<position>,
-            2ul << shiftAmount<position>,
-            3ul << shiftAmount<position>,
-            4ul << shiftAmount<position>,
-            5ul << shiftAmount<position>,
-            6ul << shiftAmount<position>,
-            7ul << shiftAmount<position>,
-        };
         auto dprod = product << 1;
-        for (auto i = 0ul; i < 8ul; ++i, ++sum) {
+        constexpr auto indexIncr = 1ul << shiftAmount<position>;
+        for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             if constexpr (length > 4) {
                 if (i == 3ul) {
                     continue;
                 }
             }
-            body<position + 1, length>(list, sum, dprod + (product * i), index + indexAddon[i]);
+            body<position + 1, length>(list, sum, dprod + (product * i), index);
         }
     }
 }
