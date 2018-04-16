@@ -137,7 +137,15 @@ void initialBody() noexcept {
     } 
 	list.sort();
 	for (const auto& v : list) {
-		std::cout << v << std::endl;
+        if constexpr ( doNotStoreConvertedNumbers) {
+            constexpr auto mask = 0b111ul << shiftAmount<width >;
+            for (int i = width - 1; i >= 0; --i) {
+                std::cout << ((v & (0b111ul << (3 * i))) >> (3 * i));
+            }
+            std::cout << std::endl;
+        } else {
+            std::cout << v << std::endl;
+        }
 	}
 }
 
