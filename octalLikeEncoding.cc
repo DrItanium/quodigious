@@ -106,7 +106,9 @@ MatchList parallelBody(u64 base) noexcept {
 template<u64 width>
 void initialBody() noexcept {
 	MatchList list;
-    if constexpr (width >= 10) {
+	if constexpr (width < 10) {
+        body<0, width>(list, width * 2);
+	} else {
         auto mkfuture = [](auto base) {
             return std::async(std::launch::async, parallelBody<width>, base);
         };
@@ -131,9 +133,7 @@ void initialBody() noexcept {
 		list.splice(list.cbegin(), r5);
 		auto r6 = t6.get();
 		list.splice(list.cbegin(), r6);
-    } else {
-        body<0, width>(list, width * 2);
-    }
+    } 
 	list.sort();
 	for (const auto& v : list) {
 		std::cout << v << std::endl;
