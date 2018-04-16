@@ -96,7 +96,7 @@ void innerParallelBody(MatchList& list, u64 base) noexcept {
 }
 
 template<auto width>
-MatchList parallelBody(u64 base) {
+MatchList parallelBody(u64 base) noexcept {
     MatchList list;
     innerParallelBody<width>(list, base);
     list.sort();
