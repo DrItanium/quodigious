@@ -78,20 +78,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     } else {
         if constexpr (enableDivideAndConquerParallelism && ((length - position) > 9)) {
-            auto lowerHalf = std::async(std::launch::async, [sum, product, index]() {
-                            MatchList l;
-                            for (auto i = 0ul; i < 3ul; ++i) {
-                                body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
-                            }
-                            return l;
-                    });
-            auto upperHalf = std::async(std::launch::async, [sum, product, index]() {
-                            MatchList l;
-                            for (auto i = 4ul; i < 8ul; ++i) {
-                                body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
-                            }
-                            return l;
-                    });
+            auto fn = [sum, product, index](auto start, auto end) noexcept {
+                MatchList l;
+                for (auto i = start; i < end; ++i) {
+                    body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
+                }
+                return l;
+            };
+            auto lowerHalf = std::async(std::launch::async, fn, 0ul, 3ul);
+            auto upperHalf = std::async(std::launch::async, fn, 4ul, 8ul);
             auto l0 = lowerHalf.get();
             list.splice(list.cbegin(), l0);
             auto l1 = upperHalf.get();
