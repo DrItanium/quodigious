@@ -30,6 +30,7 @@
 #include <list>
 
 using MatchList = std::list<u64>;
+constexpr bool doNotStoreConvertedNumbers = false;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 position>
@@ -68,7 +69,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
         }
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
-            list.emplace_back(conv);
+			if constexpr (doNotStoreConvertedNumbers) {
+				list.emplace_back(index);
+			} else {
+            	list.emplace_back(conv);
+			}
         }
     } else {
         for (auto i = 0ul; i < 8ul; ++i) {
