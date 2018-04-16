@@ -31,6 +31,7 @@
 
 using MatchList = std::list<u64>;
 constexpr bool doNotStoreConvertedNumbers = false;
+constexpr bool enableDivideAndConquerParallelism = false;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 position>
@@ -76,13 +77,34 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			}
         }
     } else {
-        for (auto i = 0ul; i < 8ul; ++i) {
-            if constexpr (length > 4) {
-                if (i == 3ul) {
-                    continue;
+        if constexpr (enableDivideAndConquerParallelism && ((length - position) > 9)) {
+            auto lowerHalf = std::async(std::launch::async, [sum, product, index]() {
+                            MatchList l;
+                            for (auto i = 0ul; i < 3ul; ++i) {
+                                body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
+                            }
+                            return l;
+                    });
+            auto upperHalf = std::async(std::launch::async, [sum, product, index]() {
+                            MatchList l;
+                            for (auto i = 4ul; i < 8ul; ++i) {
+                                body<position + 1, length>(l, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
+                            }
+                            return l;
+                    });
+            auto l0 = lowerHalf.get();
+            list.splice(list.cbegin(), l0);
+            auto l1 = upperHalf.get();
+            list.splice(list.cbegin(), l1);
+        } else {
+            for (auto i = 0ul; i < 8ul; ++i) {
+                if constexpr (length > 4) {
+                    if (i == 3ul) {
+                        continue;
+                    }
                 }
+                body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
             }
-            body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
         }
     }
 }
