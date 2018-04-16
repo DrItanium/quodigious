@@ -31,15 +31,16 @@
 
 using MatchList = std::list<u64>;
 template<u64 position>
+constexpr auto shiftAmount = position * 3;
+template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
-    constexpr auto nextPos = position - 1;
-    constexpr auto shift = (nextPos * 3);
-    constexpr auto mask = 0b111ul << shift; 
-    constexpr auto factor = fastPow10<nextPos>;
-    auto significand = (value & mask) >> shift;
     if constexpr (position == 1) {
         return ((value & 0b111) + 2);
     } else {
+		constexpr auto nextPos = position - 1;
+		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
+		constexpr auto factor = fastPow10<nextPos>;
+		auto significand = (value & mask) >> shiftAmount<nextPos>;
         auto intermediate = 0ul;
         switch(significand) {
             case 0b000: intermediate = (2ul * factor); break;
@@ -55,6 +56,7 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
+
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -69,14 +71,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else {
-        static constexpr auto shift = (position * 3);
         for (auto i = 0ul; i < 8ul; ++i) {
             if constexpr (length > 4) {
                 if (i == 3ul) {
                     continue;
                 }
             }
-            body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shift));
+            body<position + 1, length>(list, sum + i, (product << 1) + (product * i), index + (i << shiftAmount<position>));
         }
     }
 }
@@ -84,7 +85,7 @@ template<auto width>
 void innerParallelBody(MatchList& list, u64 base) noexcept {
 	auto start = (base - 2ul);
 	auto index = start << 3;
-	static constexpr auto addon = width * 2;
+	static constexpr auto addon = width << 1;
 	// using the frequency analysis I did before for loops64.cc I found
 	// that on even digits that 4 and 8 are used while odd digits use 2
 	// and 6. This is a frequency analysis job only :D
@@ -93,6 +94,7 @@ void innerParallelBody(MatchList& list, u64 base) noexcept {
 		body<2, width>(list, start + j + addon, base * i, index + j);
 	}
 }
+
 template<auto width>
 MatchList parallelBody(u64 base) {
     MatchList list;
@@ -100,13 +102,10 @@ MatchList parallelBody(u64 base) {
     list.sort();
     return list;
 }
+
 template<u64 width>
 void initialBody() noexcept {
-	auto outputToConsole = [](const auto& list) noexcept {
-		for(const auto& v : list) {
-			std::cout << v << std::endl;
-		}
-	};
+	MatchList list;
     if constexpr (width >= 10) {
         auto mkfuture = [](auto base) {
             return std::async(std::launch::async, parallelBody<width>, base);
@@ -118,19 +117,27 @@ void initialBody() noexcept {
         auto t4 = mkfuture(7);
         auto t5 = mkfuture(8);
         auto t6 = mkfuture(9);
-        outputToConsole(t0.get());
-        outputToConsole(t1.get());
-        outputToConsole(t2.get());
-        outputToConsole(t3.get());
-        outputToConsole(t4.get());
-        outputToConsole(t5.get());
-        outputToConsole(t6.get());
+		auto r0 = t0.get();
+		list.splice(list.cbegin(), r0);
+		auto r1 = t1.get();
+		list.splice(list.cbegin(), r1);
+		auto r2 = t2.get();
+		list.splice(list.cbegin(), r2);
+		auto r3 = t3.get();
+		list.splice(list.cbegin(), r3);
+		auto r4 = t4.get();
+		list.splice(list.cbegin(), r4);
+		auto r5 = t5.get();
+		list.splice(list.cbegin(), r5);
+		auto r6 = t6.get();
+		list.splice(list.cbegin(), r6);
     } else {
-        MatchList list;
         body<0, width>(list, width * 2);
-        list.sort();
-        outputToConsole(list);
     }
+	list.sort();
+	for (const auto& v : list) {
+		std::cout << v << std::endl;
+	}
 }
 
 int main() {
