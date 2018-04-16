@@ -30,9 +30,6 @@
 #include <list>
 
 using MatchList = std::list<u64>;
-constexpr bool unpackLoops = true;
-constexpr bool doNotStoreConvertedNumbers = false;
-constexpr bool enableDivideAndConquerParallelism = false;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 position>
@@ -72,47 +69,27 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
         }
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
-			if constexpr (doNotStoreConvertedNumbers) {
-				list.emplace_back(index);
-			} else {
-            	list.emplace_back(conv);
-			}
+            list.emplace_back(conv);
         }
     } else {
-        if constexpr (enableDivideAndConquerParallelism && ((length - position) > 9)) {
-            auto fn = [sum, product, index, dprod = (product << 1)](auto start, auto end) noexcept {
-                MatchList l;
-                for (auto i = start; i < end; ++i) {
-                    body<position + 1, length>(l, sum + i, dprod + (product * i), index + (i << shiftAmount<position>));
+        constexpr u64 indexAddon[] = {
+            0,
+            1ul << shiftAmount<position>,
+            2ul << shiftAmount<position>,
+            3ul << shiftAmount<position>,
+            4ul << shiftAmount<position>,
+            5ul << shiftAmount<position>,
+            6ul << shiftAmount<position>,
+            7ul << shiftAmount<position>,
+        };
+        auto dprod = product << 1;
+        for (auto i = 0ul; i < 8ul; ++i, ++sum) {
+            if constexpr (length > 4) {
+                if (i == 3ul) {
+                    continue;
                 }
-                return l;
-            };
-            auto lowerHalf = std::async(std::launch::async, fn, 0ul, 3ul);
-            auto upperHalf = std::async(std::launch::async, fn, 4ul, 8ul);
-            auto l0 = lowerHalf.get();
-            list.splice(list.cbegin(), l0);
-            auto l1 = upperHalf.get();
-            list.splice(list.cbegin(), l1);
-        } else {
-            auto dprod = product << 1;
-            constexpr u64 indexAddon[] = {
-                0,
-                1ul << shiftAmount<position>,
-                2ul << shiftAmount<position>,
-                3ul << shiftAmount<position>,
-                4ul << shiftAmount<position>,
-                5ul << shiftAmount<position>,
-                6ul << shiftAmount<position>,
-                7ul << shiftAmount<position>,
-            };
-            for (auto i = 0ul; i < 8ul; ++i) {
-                if constexpr (length > 4) {
-                    if (i == 3ul) {
-                        continue;
-                    }
-                }
-                body<position + 1, length>(list, sum + i, dprod + (product * i), index + indexAddon[i]);
             }
+            body<position + 1, length>(list, sum, dprod + (product * i), index + indexAddon[i]);
         }
     }
 }
@@ -140,6 +117,10 @@ void initialBody() noexcept {
 	if constexpr (width < 10) {
         body<0, width>(list, width * 2);
 	} else {
+        auto getnsplice = [&list](auto& thing) {
+            auto r = thing.get();
+            list.splice(list.cbegin(), r);
+        };
         auto mkfuture = [](auto base) {
             return std::async(std::launch::async, parallelBody<width>, base);
         };
@@ -150,32 +131,17 @@ void initialBody() noexcept {
         auto t4 = mkfuture(7);
         auto t5 = mkfuture(8);
         auto t6 = mkfuture(9);
-		auto r0 = t0.get();
-		list.splice(list.cbegin(), r0);
-		auto r1 = t1.get();
-		list.splice(list.cbegin(), r1);
-		auto r2 = t2.get();
-		list.splice(list.cbegin(), r2);
-		auto r3 = t3.get();
-		list.splice(list.cbegin(), r3);
-		auto r4 = t4.get();
-		list.splice(list.cbegin(), r4);
-		auto r5 = t5.get();
-		list.splice(list.cbegin(), r5);
-		auto r6 = t6.get();
-		list.splice(list.cbegin(), r6);
+        getnsplice(t0);
+        getnsplice(t1);
+        getnsplice(t2);
+        getnsplice(t3);
+        getnsplice(t4);
+        getnsplice(t5);
+        getnsplice(t6);
     } 
 	list.sort();
 	for (const auto& v : list) {
-        if constexpr ( doNotStoreConvertedNumbers) {
-            constexpr auto mask = 0b111ul << shiftAmount<width >;
-            for (int i = width - 1; i >= 0; --i) {
-                std::cout << ((v & (0b111ul << (3 * i))) >> (3 * i));
-            }
-            std::cout << std::endl;
-        } else {
-            std::cout << v << std::endl;
-        }
+        std::cout << v << std::endl;
 	}
 }
 
