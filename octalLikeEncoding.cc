@@ -58,14 +58,14 @@ constexpr u64 convertNumber(u64 value) noexcept {
     }
 }
 
-
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
-    static_assert(length != 0, "Can't have length of zero!");
+    static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
     if constexpr (position == length) {
         if constexpr (length > 10) {
+            // if the number is not divisible by three then skip it
             if (sum % 3 != 0) {
                 return;
             }
@@ -75,9 +75,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     } else {
         auto dprod = product << 1;
-        constexpr auto indexIncr = 1ul << shiftAmount<position>;
+        static constexpr auto indexIncr = 1ul << shiftAmount<position>;
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             if constexpr (length > 4) {
+                // skip 5 digit
                 if (i == 3ul) {
                     continue;
                 }
