@@ -73,6 +73,31 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
+    } else if constexpr ((length - position) == 2)  {
+        for (auto i = 0ul; i < 8ul; ++i) {
+            if constexpr (length > 4) {
+                if (i == 3ul) {
+                    continue;
+                }
+            }
+            auto outerShiftI = i << shiftAmount<position>;
+            auto innerShiftI = i << shiftAmount<position + 1>;
+            auto os = sum + i;
+            auto op = product * (i + 2);
+            for (auto j = i; j < 8ul; ++j) {
+                if constexpr (length > 4) {
+                    if (j == 3ul) {
+                        continue;
+                    }
+                }
+                auto s = os + j;
+                auto p = op * (j + 2);
+                body<position + 2, length>(list, s, p, index + outerShiftI + (j << shiftAmount<position+1>));
+                if (i != j) {
+                    body<position + 2, length>(list, s, p, index + innerShiftI + (j << shiftAmount<position>));
+                }
+            }
+        }
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = 1ul << shiftAmount<position>;
