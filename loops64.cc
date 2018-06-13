@@ -80,15 +80,15 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
         bool outputToStream = false;
         if constexpr (!expensiveChecks) {
             if constexpr (oddApprox && !evenApprox) {
-                if (sum % 3 != 0) {
+                if ((sum % 3) != 0) {
                     return;
                 }
             } else if constexpr (evenApprox && !oddApprox) {
-                if (sum & 1 != 0) {
+                if ((sum & 1) != 0) {
                     return;
                 }
             } else {
-                if ((sum % 3 != 0) && (sum & 1 != 0)) {
+                if (((sum % 3) != 0) && ((sum & 1) != 0)) {
                     return;
                 }
             }
@@ -179,17 +179,6 @@ inline void body(std::ostream& stream, u64 sum = 0, u64 product = 1, u64 index =
 }
 
 
-
-//#include "Specialization2Digits.cc"
-//#include "Specialization3Digits.cc"
-//#include "Specialization4Digits.cc"
-//#include "Specialization5Digits.cc"
-//#include "Specialization6Digits.cc"
-//#include "Specialization7Digits.cc"
-//#include "Specialization8Digits.cc"
-//#include "Specialization9Digits.cc"
-//#include "Specialization10Digits.cc"
-//
 
 int main() {
 	while(std::cin.good()) {
