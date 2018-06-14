@@ -57,12 +57,16 @@ constexpr u64 convertNumber(u64 value) noexcept {
         return intermediate + convertNumber<nextPos>(value);
     }
 }
-
+template<u64 position>
+constexpr u64 getShiftedValue(u64 value) noexcept {
+    return value << shiftAmount<position>;
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
+    static constexpr auto difference = length - position;
     if constexpr (position == length) {
         if constexpr (length > 10) {
             // if the number is not divisible by three then skip it
@@ -73,45 +77,88 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-    } else if constexpr ((length - position) == 2)  {
+#define SKIP5s(x) \
+        if constexpr (length > 4) { \
+            if (x == 3ul) { \
+                continue; \
+            } \
+        }
+    } else if constexpr (difference == 3) {
         for (auto i = 0ul; i < 8ul; ++i) {
-            if constexpr (length > 4) {
-                if (i == 3ul) {
-                    continue;
-                }
-            }
-            auto outerShiftI = i << shiftAmount<position>;
-            auto innerShiftI = i << shiftAmount<position + 1>;
-            auto os = sum + i;
-            auto op = product * (i + 2);
+            SKIP5s(i);
+            auto i1 = index + getShiftedValue<position>(i);
+            auto i2 = index + getShiftedValue<position+1>(i);
+            auto i3 = index + getShiftedValue<position+2>(i);
+            auto is = sum + i;
+            auto ip = product * (i + 2);
             for (auto j = i; j < 8ul; ++j) {
-                if constexpr (length > 4) {
-                    if (j == 3ul) {
-                        continue;
+                SKIP5s(j);
+                auto j1 = getShiftedValue<position>(j);
+                auto j2 = getShiftedValue<position+1>(j);
+                auto j3 = getShiftedValue<position+2>(j);
+                auto js = is + j;
+                auto jp = ip * (j + 2);
+                auto ijsame = i == j;
+                for (auto k = j; k < 8ul; ++k) {
+                    SKIP5s(k);
+                    auto k1 = getShiftedValue<position>(k);
+                    auto k2 = getShiftedValue<position+1>(k);
+                    auto k3 = getShiftedValue<position+2>(k);
+                    auto ks = js + k;
+                    auto kp = jp * (k + 2);
+                    auto jksame = j == k;
+                    auto singleExecution = ijsame && jksame;
+                    // a b c
+                    // a c b
+                    // b a c
+                    // b c a
+                    // c a b
+                    // c b a
+                    body<position + 3, length>(list, ks, kp, i1 + j2 + k3);
+                    if (!singleExecution) {
+                        if (!jksame) {
+                            body<position + 3, length>(list, ks, kp, i1 + k2 + j3);
+                        }
+                        
+                        body<position + 3, length>(list, ks, kp, j1 + i2 + k3);
+                        body<position + 3, length>(list, ks, kp, j1 + i2 + k3);
+                        body<position + 3, length>(list, ks, kp, k1 + j2 + i3);
+                        body<position + 3, length>(list, ks, kp, k1 + j2 + i3);
                     }
                 }
+
+            }
+        }
+    } else if constexpr (difference == 2) {
+        // reduce the number of recomputations of sum and product by 28 out of 64
+        for (auto i = 0ul; i < 8ul; ++i) {
+            SKIP5s(i);
+            auto outerShiftI = index + getShiftedValue<position>(i);
+            auto innerShiftI = index + getShiftedValue<position + 1>(i);
+            auto os = sum + i;
+            auto op = product * (i + 2);
+            // start at I and work forward, if i and j are not the same then swap the digits and
+            // try the sum and product with these two digits swapped
+            for (auto j = i; j < 8ul; ++j) {
+                SKIP5s(j);
                 auto s = os + j;
                 auto p = op * (j + 2);
-                body<position + 2, length>(list, s, p, index + outerShiftI + (j << shiftAmount<position+1>));
+                body<position + 2, length>(list, s, p, outerShiftI + getShiftedValue<position+1>(j));
                 if (i != j) {
-                    body<position + 2, length>(list, s, p, index + innerShiftI + (j << shiftAmount<position>));
+                    body<position + 2, length>(list, s, p, innerShiftI + getShiftedValue<position>(j));
                 }
             }
         }
     } else {
         auto dprod = product << 1;
-        static constexpr auto indexIncr = 1ul << shiftAmount<position>;
+        static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
-            if constexpr (length > 4) {
-                // skip 5 digit
-                if (i == 3ul) {
-                    continue;
-                }
-            }
+            SKIP5s(i);
             body<position + 1, length>(list, sum, dprod + (product * i), index);
         }
     }
 }
+#undef SKIP5s
 
 template<auto width>
 MatchList parallelBody(u64 base) noexcept {
