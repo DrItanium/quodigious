@@ -83,7 +83,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 continue; \
             } \
         }
-    } else if constexpr (difference == 3) {
+#ifdef DATA_VALUE_MERGER
+    } else if constexpr (difference == 3 || difference == 6 || difference == 9 || difference == 12) {
         for (auto a = 0ul; a < 8ul; ++a) {
             SKIP5s(a);
             auto a1 = index + getShiftedValue<position>(a);
@@ -106,34 +107,17 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto c3 = getShiftedValue<position+2>(c);
                     auto cs = bs + c;
                     auto cp = bp * (c + 2);
-                    auto singleExecution = a == b && b == c;
-                    auto acdiff = a != c;
-                    auto bcdiff = b != c;
-                    // a b c
-                    // a c b
-                    // b a c
-                    // b c a
-                    // c a b
-                    // c b a
                     body<position + 3, length>(list, cs, cp, a1 + b2 + c3);
-                    if (!singleExecution) {
-                        if (abdiff && acdiff && bcdiff) {
+                    if (abdiff || (b != c)) {
+                        body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
+                        body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
+                        if ((a != c) && abdiff && (b != c)) {
                             body<position + 3, length>(list, cs, cp, a1 + c2 + b3);
                             body<position + 3, length>(list, cs, cp, b1 + a2 + c3);
-                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
                             body<position + 3, length>(list, cs, cp, c1 + b2 + a3);
-                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
-                        } else if (!abdiff && acdiff && bcdiff) {
-                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
-                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
-                        } else if (abdiff && !acdiff && bcdiff) {
-                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
-                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
                         }
-                        // TODO: continue this
                     }
                 }
-
             }
         }
     } else if constexpr (difference == 2) {
@@ -156,6 +140,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 }
             }
         }
+#endif
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
