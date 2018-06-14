@@ -84,41 +84,53 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             } \
         }
     } else if constexpr (difference == 3) {
-        for (auto i = 0ul; i < 8ul; ++i) {
-            SKIP5s(i);
-            auto i1 = index + getShiftedValue<position>(i);
-            auto i2 = index + getShiftedValue<position+1>(i);
-            auto i3 = index + getShiftedValue<position+2>(i);
-            auto is = sum + i;
-            auto ip = product * (i + 2);
-            for (auto j = i; j < 8ul; ++j) {
-                SKIP5s(j);
-                auto j1 = getShiftedValue<position>(j);
-                auto j2 = getShiftedValue<position+1>(j);
-                auto j3 = getShiftedValue<position+2>(j);
-                auto js = is + j;
-                auto jp = ip * (j + 2);
-                for (auto k = j; k < 8ul; ++k) {
-                    SKIP5s(k);
-                    auto k1 = getShiftedValue<position>(k);
-                    auto k2 = getShiftedValue<position+1>(k);
-                    auto k3 = getShiftedValue<position+2>(k);
-                    auto ks = js + k;
-                    auto kp = jp * (k + 2);
-                    auto singleExecution = i == j && j == k;
+        for (auto a = 0ul; a < 8ul; ++a) {
+            SKIP5s(a);
+            auto a1 = index + getShiftedValue<position>(a);
+            auto a2 = index + getShiftedValue<position+1>(a);
+            auto a3 = index + getShiftedValue<position+2>(a);
+            auto as = sum + a;
+            auto ap = product * (a + 2);
+            for (auto b = a; b < 8ul; ++b) {
+                SKIP5s(b);
+                auto b1 = getShiftedValue<position>(b);
+                auto b2 = getShiftedValue<position+1>(b);
+                auto b3 = getShiftedValue<position+2>(b);
+                auto bs = as + b;
+                auto bp = ap * (b + 2);
+                auto abdiff = a != b;
+                for (auto c = b; c < 8ul; ++c) {
+                    SKIP5s(c);
+                    auto c1 = getShiftedValue<position>(c);
+                    auto c2 = getShiftedValue<position+1>(c);
+                    auto c3 = getShiftedValue<position+2>(c);
+                    auto cs = bs + c;
+                    auto cp = bp * (c + 2);
+                    auto singleExecution = a == b && b == c;
+                    auto acdiff = a != c;
+                    auto bcdiff = b != c;
                     // a b c
                     // a c b
                     // b a c
                     // b c a
                     // c a b
                     // c b a
-                    body<position + 3, length>(list, ks, kp, i1 + j2 + k3);
+                    body<position + 3, length>(list, cs, cp, a1 + b2 + c3);
                     if (!singleExecution) {
-                        body<position + 3, length>(list, ks, kp, i1 + k2 + j3);
-                        body<position + 3, length>(list, ks, kp, j1 + i2 + k3);
-                        body<position + 3, length>(list, ks, kp, j1 + k2 + i3);
-                        body<position + 3, length>(list, ks, kp, k1 + j2 + i3);
-                        body<position + 3, length>(list, ks, kp, k1 + i2 + j3);
+                        if (abdiff && acdiff && bcdiff) {
+                            body<position + 3, length>(list, cs, cp, a1 + c2 + b3);
+                            body<position + 3, length>(list, cs, cp, b1 + a2 + c3);
+                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
+                            body<position + 3, length>(list, cs, cp, c1 + b2 + a3);
+                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
+                        } else if (!abdiff && acdiff && bcdiff) {
+                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
+                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
+                        } else if (abdiff && !acdiff && bcdiff) {
+                            body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
+                            body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
+                        }
+                        // TODO: continue this
                     }
                 }
 
