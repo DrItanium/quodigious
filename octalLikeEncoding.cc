@@ -105,6 +105,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto k3 = getShiftedValue<position+2>(k);
                     auto ks = js + k;
                     auto kp = jp * (k + 2);
+                    auto singleExecution = i == j && j == k;
                     // a b c
                     // a c b
                     // b a c
@@ -112,11 +113,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     // c a b
                     // c b a
                     body<position + 3, length>(list, ks, kp, i1 + j2 + k3);
-                    body<position + 3, length>(list, ks, kp, i1 + k2 + j3);
-                    body<position + 3, length>(list, ks, kp, j1 + i2 + k3);
-                    body<position + 3, length>(list, ks, kp, j1 + k2 + i3);
-                    body<position + 3, length>(list, ks, kp, k1 + j2 + i3);
-                    body<position + 3, length>(list, ks, kp, k1 + i2 + j3);
+                    if (!singleExecution) {
+                        body<position + 3, length>(list, ks, kp, i1 + k2 + j3);
+                        body<position + 3, length>(list, ks, kp, j1 + i2 + k3);
+                        body<position + 3, length>(list, ks, kp, j1 + k2 + i3);
+                        body<position + 3, length>(list, ks, kp, k1 + j2 + i3);
+                        body<position + 3, length>(list, ks, kp, k1 + i2 + j3);
+                    }
                 }
 
             }
