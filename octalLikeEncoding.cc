@@ -104,10 +104,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             for (auto j = i; j < 8ul; ++j) {
                 SKIP5s(j);
                 auto s = os + j;
-                auto p = op * (j + 2);
                 if (s % 3 != 0) {
                     continue;
                 }
+                auto p = op * (j + 2);
                 if (auto n0 = outerShiftI + (j * p10b); (n0 % p == 0) && (n0 % s == 0)) {
                     list.emplace_back(n0);
                 }
