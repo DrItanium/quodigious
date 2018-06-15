@@ -92,9 +92,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // in this model).
         auto outerConverted = convertNumber<length>(index);
         for (auto i = 0ul; i < 8ul; ++i) {
-            if (i == 3) {
-                continue;
-            }
+            SKIP5s(i);
             auto outerShiftI = outerConverted + (i * fastPow10<position>);
             auto innerShiftI = outerConverted + (i * fastPow10<position + 1>);
             auto os = sum + i;
@@ -102,9 +100,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             // start at I and work forward, if i and j are not the same then swap the digits and
             // try the sum and product with these two digits swapped
             for (auto j = i; j < 8ul; ++j) {
-                if (j == 3) {
-                    continue;
-                }
+                SKIP5s(j);
                 auto s = os + j;
                 auto p = op * (j + 2);
                 if (s % 3 != 0) {
