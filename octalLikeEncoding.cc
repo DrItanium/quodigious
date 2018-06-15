@@ -84,6 +84,35 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
+    } else if constexpr (length > 10 && position == 2) {
+        // setup a series of operations to execute in parallel on two separate threads
+        // of execution
+        std::list<std::tuple<u64, u64, u64>> lower, upper;
+        auto dprod = product << 1;
+        static constexpr auto indexIncr = getShiftedValue<position>(1ul);
+        for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
+            SKIP5s(i);
+            auto tup = std::make_tuple(sum, dprod + (i * product), index);
+            if (i < 3) {
+                lower.emplace_back(tup);
+            } else {
+                upper.emplace_back(tup);
+            }
+            //body<position + 1, length>(list, sum, dprod + (i * product), index);
+        }
+        auto halveIt = [](std::list<std::tuple<u64, u64, u64>> & collection) {
+            MatchList l;
+            for(auto& a : collection) {
+                body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a));
+            }
+            return l;
+        };
+        auto t0 = std::async(std::launch::async, halveIt, std::ref(lower));
+        auto t1 = std::async(std::launch::async, halveIt, std::ref(upper));
+        auto l0 = t0.get();
+        list.splice(list.cbegin(), l0);
+        auto l1 = t1.get();
+        list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && difference == 3) {
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
