@@ -68,7 +68,6 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
                 continue; \
             } \
         }
-#define onPosOrDiff(n) (position == n || difference == n)
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -86,8 +85,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else if constexpr (length > 10 && difference == 2) {
+        // this will generate a partial number but reduce the number of conversions
+        // required greatly!
+        // The last two digits are handled in a base 10 fashion without the +2 added
+        // This will make the partial converison correct (remember that a 0 becomes a 2
+        // in this model).
         auto outerConverted = convertNumber<length>(index);
-        // this will generate a partial number!
         for (auto i = 0ul; i < 8ul; ++i) {
             if (i == 3) {
                 continue;
@@ -117,25 +120,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 }
             }
         }
-    } else if constexpr (length > 10 && (position == 2 || onPosOrDiff(4) || onPosOrDiff(6))) {
-        for (auto i = 0ul; i < 8ul; ++i) {
-            SKIP5s(i);
-            auto outerShiftI = index + getShiftedValue<position>(i);
-            auto innerShiftI = index + getShiftedValue<position + 1>(i);
-            auto os = sum + i;
-            auto op = product * (i + 2);
-            // start at I and work forward, if i and j are not the same then swap the digits and
-            // try the sum and product with these two digits swapped
-            for (auto j = i; j < 8ul; ++j) {
-                SKIP5s(j);
-                auto s = os + j;
-                auto p = op * (j + 2);
-                body<position + 2, length>(list, s, p, outerShiftI + getShiftedValue<position+1>(j));
-                if (i != j) {
-                    body<position + 2, length>(list, s, p, innerShiftI + getShiftedValue<position>(j));
-                }
-            }
-        }
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
@@ -145,7 +129,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     }
 }
-#undef onPosOrDiff
 #undef SKIP5s
 
 template<auto width>
