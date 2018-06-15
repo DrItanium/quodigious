@@ -84,7 +84,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 continue; \
             } \
         }
-    } else if constexpr (length > 10 && (position == 2 || position == 4 || difference == 2)) {
+#define onPosOrDiff(n) (position == n || difference == n)
+    } else if constexpr (length > 10 && (onPosOrDiff(2) || onPosOrDiff(4) || onPosOrDiff(6))) {
         // reduce the number of recomputations of sum and product by 28 out of 64
         auto prod = product << 1;
         for (auto i = 0ul; i < 8ul; ++i) {
@@ -114,6 +115,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
     }
 }
+#undef onPosOrDiff
 #undef SKIP5s
 
 template<auto width>
