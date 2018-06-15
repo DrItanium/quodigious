@@ -85,15 +85,45 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-    } else if constexpr (length > 10 && (onPosOrDiff(2) || onPosOrDiff(4) || onPosOrDiff(6))) {
-        // reduce the number of recomputations of sum and product by 28 out of 64
-        auto prod = product << 1;
+    } else if constexpr (length > 10 && difference == 2) {
+        auto outerConverted = convertNumber<length>(index);
+        // this will generate a partial number!
+        for (auto i = 0ul; i < 8ul; ++i) {
+            if (i == 3) {
+                continue;
+            }
+            auto outerShiftI = outerConverted + (i * fastPow10<position>);
+            auto innerShiftI = outerConverted + (i * fastPow10<position + 1>);
+            auto os = sum + i;
+            auto op = product * (i + 2);
+            // start at I and work forward, if i and j are not the same then swap the digits and
+            // try the sum and product with these two digits swapped
+            for (auto j = i; j < 8ul; ++j) {
+                if (j == 3) {
+                    continue;
+                }
+                auto s = os + j;
+                auto p = op * (j + 2);
+                if (s % 3 != 0) {
+                    continue;
+                }
+                if (auto n0 = outerShiftI + (j * fastPow10<position + 1>); (n0 % p == 0) && (n0 % s == 0)) {
+                    list.emplace_back(n0);
+                }
+                if (i != j) {
+                    if (auto n1 = innerShiftI + (j * fastPow10<position>); (n1 % p == 0) && (n1 % s == 0)) {
+                        list.emplace_back(n1);
+                    }
+                }
+            }
+        }
+    } else if constexpr (length > 10 && (position == 2 || onPosOrDiff(4) || onPosOrDiff(6))) {
         for (auto i = 0ul; i < 8ul; ++i) {
             SKIP5s(i);
             auto outerShiftI = index + getShiftedValue<position>(i);
             auto innerShiftI = index + getShiftedValue<position + 1>(i);
             auto os = sum + i;
-            auto op = prod + (product * i);
+            auto op = product * (i + 2);
             // start at I and work forward, if i and j are not the same then swap the digits and
             // try the sum and product with these two digits swapped
             for (auto j = i; j < 8ul; ++j) {
