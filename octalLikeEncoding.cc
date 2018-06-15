@@ -84,7 +84,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-    } else if constexpr (length > 10 && position == 2) {
+#define lenGreaterAndPos(len,pos) (length > len && position == pos)
+    } else if constexpr (lenGreaterAndPos(10, 2)) {
+#undef lenGreaterAndPos
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
         std::list<std::tuple<u64, u64, u64>> lower, upper;
