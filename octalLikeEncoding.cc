@@ -61,6 +61,7 @@ template<u64 position>
 constexpr u64 getShiftedValue(u64 value) noexcept {
     return value << shiftAmount<position>;
 }
+
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -83,51 +84,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 continue; \
             } \
         }
-#ifdef DATA_VALUE_MERGER
-    } else if constexpr (difference == 3 || difference == 6 || difference == 9 || difference == 12) {
-        for (auto a = 0ul; a < 8ul; ++a) {
-            SKIP5s(a);
-            auto a1 = index + getShiftedValue<position>(a);
-            auto a2 = index + getShiftedValue<position+1>(a);
-            auto a3 = index + getShiftedValue<position+2>(a);
-            auto as = sum + a;
-            auto ap = product * (a + 2);
-            for (auto b = a; b < 8ul; ++b) {
-                SKIP5s(b);
-                auto b1 = getShiftedValue<position>(b);
-                auto b2 = getShiftedValue<position+1>(b);
-                auto b3 = getShiftedValue<position+2>(b);
-                auto bs = as + b;
-                auto bp = ap * (b + 2);
-                auto abdiff = a != b;
-                for (auto c = b; c < 8ul; ++c) {
-                    SKIP5s(c);
-                    auto c1 = getShiftedValue<position>(c);
-                    auto c2 = getShiftedValue<position+1>(c);
-                    auto c3 = getShiftedValue<position+2>(c);
-                    auto cs = bs + c;
-                    auto cp = bp * (c + 2);
-                    body<position + 3, length>(list, cs, cp, a1 + b2 + c3);
-                    if (abdiff || (b != c)) {
-                        body<position + 3, length>(list, cs, cp, b1 + c2 + a3);
-                        body<position + 3, length>(list, cs, cp, c1 + a2 + b3);
-                        if ((a != c) && abdiff && (b != c)) {
-                            body<position + 3, length>(list, cs, cp, a1 + c2 + b3);
-                            body<position + 3, length>(list, cs, cp, b1 + a2 + c3);
-                            body<position + 3, length>(list, cs, cp, c1 + b2 + a3);
-                        }
-                    }
-                }
-            }
-        }
-    } else if constexpr (difference == 2) {
+    } else if constexpr (length > 10 && (position == 2 || position == 4 || difference == 2)) {
         // reduce the number of recomputations of sum and product by 28 out of 64
+        auto prod = product << 1;
         for (auto i = 0ul; i < 8ul; ++i) {
             SKIP5s(i);
             auto outerShiftI = index + getShiftedValue<position>(i);
             auto innerShiftI = index + getShiftedValue<position + 1>(i);
             auto os = sum + i;
-            auto op = product * (i + 2);
+            auto op = prod + (product * i);
             // start at I and work forward, if i and j are not the same then swap the digits and
             // try the sum and product with these two digits swapped
             for (auto j = i; j < 8ul; ++j) {
@@ -140,13 +105,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 }
             }
         }
-#endif
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
-            body<position + 1, length>(list, sum, dprod + (product * i), index);
+            body<position + 1, length>(list, sum, dprod + (i * product), index);
         }
     }
 }
