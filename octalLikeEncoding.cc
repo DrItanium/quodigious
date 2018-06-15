@@ -106,6 +106,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 auto abdiff = a != b;
                 for (auto c = b; c < 8ul; ++c) {
                     SKIP5s(c);
+                    auto c1 = c * p10a;
+                    auto c2 = c * p10b;
                     auto c3 = c * p10c;
                     auto cs = bs + c;
                     if (cs % 3 != 0) {
@@ -115,16 +117,18 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #define bcheck(x) ((x % cp == 0) && (x % cs == 0))
 #define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
                     ibody(a1,b2,c3);
-                    if (abdiff || (b != c)) {
-                        auto c1 = c * p10a;
-                        auto c2 = c * p10b;
+                    if (abdiff) {
+                       ibody(b1,c2,a3);
+                       ibody(c1,a2,b3);
+                       if (b != c && a != c) {
+                           ibody(a1,c2,b3);
+                           ibody(b1,a2,c3);
+                           ibody(c1,b2,a3);
+                       }
+                    } else if (b != c) {
+                      // a == b in this case if we get here
                         ibody(b1,c2,a3);
                         ibody(c1,a2,b3);
-                        if ((a != c) && abdiff && (b != c)) {
-                            ibody(a1,c2,b3);
-                            ibody(b1,a2,c3);
-                            ibody(c1,b2,a3);
-                        }
                     }
                 }
             }
