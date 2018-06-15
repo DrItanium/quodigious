@@ -114,8 +114,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                         continue;
                     }
                     auto cp = bp * (c + 2);
-                    auto abc = a1 + b2 + c3;
-#define bcheck(x) ((x % cp == 0) || (x % cs == 0))
+#define bcheck(x) ((x % cp == 0) && (x % cs == 0))
 #define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
                     ibody(a1,b2,c3);
                     if (abdiff || (b != c)) {
