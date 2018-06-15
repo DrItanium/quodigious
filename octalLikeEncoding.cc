@@ -85,6 +85,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
     } else if constexpr (length > 10 && difference == 3) {
+        // this will generate a partial number but reduce the number of conversions
+        // required greatly!
+        // The last two digits are handled in a base 10 fashion without the +2 added
+        // This will make the partial converison correct (remember that a 0 becomes a 2
+        // in this model).
         auto outerConverted = convertNumber<length>(index);
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
@@ -116,8 +121,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto cp = bp * (c + 2);
 #define bcheck(x) ((x % cp == 0) && (x % cs == 0))
 #define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
+                    // always do this one
                     ibody(a1,b2,c3);
                     if (abdiff) {
+                       // a != b thus we can execute these two safely
+                       //
                        ibody(b1,c2,a3);
                        ibody(c1,a2,b3);
                        if (b != c && a != c) {
@@ -126,7 +134,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                            ibody(c1,b2,a3);
                        }
                     } else if (b != c) {
-                      // a == b in this case if we get here
+                        // a == b && b != c -> a != c
+                        // a == b in this case if we get here
                         ibody(b1,c2,a3);
                         ibody(c1,a2,b3);
                     }
@@ -135,40 +144,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         }
 #undef bcheck
 #undef ibody
-    } else if constexpr (length > 10 && difference == 2) {
-        // this will generate a partial number but reduce the number of conversions
-        // required greatly!
-        // The last two digits are handled in a base 10 fashion without the +2 added
-        // This will make the partial converison correct (remember that a 0 becomes a 2
-        // in this model).
-        auto outerConverted = convertNumber<length>(index);
-        static constexpr auto p10a = fastPow10<position>;
-        static constexpr auto p10b = fastPow10<position+1>;
-        for (auto i = 0ul; i < 8ul; ++i) {
-            SKIP5s(i);
-            auto outerShiftI = outerConverted + (i * p10a);
-            auto innerShiftI = outerConverted + (i * p10b);
-            auto os = sum + i;
-            auto op = product * (i + 2);
-            // start at I and work forward, if i and j are not the same then swap the digits and
-            // try the sum and product with these two digits swapped
-            for (auto j = i; j < 8ul; ++j) {
-                SKIP5s(j);
-                auto s = os + j;
-                if (s % 3 != 0) {
-                    continue;
-                }
-                auto p = op * (j + 2);
-                if (auto n0 = outerShiftI + (j * p10b); (n0 % p == 0) && (n0 % s == 0)) {
-                    list.emplace_back(n0);
-                }
-                if (i != j) {
-                    if (auto n1 = innerShiftI + (j * p10a); (n1 % p == 0) && (n1 % s == 0)) {
-                        list.emplace_back(n1);
-                    }
-                }
-            }
-        }
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
