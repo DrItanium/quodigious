@@ -106,13 +106,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 auto abdiff = a != b;
                 for (auto c = b; c < 8ul; ++c) {
                     SKIP5s(c);
-                    auto c1 = c * p10a;
-                    auto c2 = c * p10b;
-                    auto c3 = c * p10c;
                     auto cs = bs + c;
                     if (cs % 3 != 0) {
                         continue;
                     }
+                    auto c1 = c * p10a;
+                    auto c2 = c * p10b;
+                    auto c3 = c * p10c;
                     auto cp = bp * (c + 2);
 #define bcheck(x) ((x % cp == 0) && (x % cs == 0))
 #define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
