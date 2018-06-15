@@ -91,10 +91,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // This will make the partial converison correct (remember that a 0 becomes a 2
         // in this model).
         auto outerConverted = convertNumber<length>(index);
+        static constexpr auto p10a = fastPow10<position>;
+        static constexpr auto p10b = fastPow10<position+1>;
         for (auto i = 0ul; i < 8ul; ++i) {
             SKIP5s(i);
-            auto outerShiftI = outerConverted + (i * fastPow10<position>);
-            auto innerShiftI = outerConverted + (i * fastPow10<position + 1>);
+            auto outerShiftI = outerConverted + (i * p10a);
+            auto innerShiftI = outerConverted + (i * p10b);
             auto os = sum + i;
             auto op = product * (i + 2);
             // start at I and work forward, if i and j are not the same then swap the digits and
@@ -106,11 +108,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 if (s % 3 != 0) {
                     continue;
                 }
-                if (auto n0 = outerShiftI + (j * fastPow10<position + 1>); (n0 % p == 0) && (n0 % s == 0)) {
+                if (auto n0 = outerShiftI + (j * p10b); (n0 % p == 0) && (n0 % s == 0)) {
                     list.emplace_back(n0);
                 }
                 if (i != j) {
-                    if (auto n1 = innerShiftI + (j * fastPow10<position>); (n1 % p == 0) && (n1 % s == 0)) {
+                    if (auto n1 = innerShiftI + (j * p10a); (n1 % p == 0) && (n1 % s == 0)) {
                         list.emplace_back(n1);
                     }
                 }
