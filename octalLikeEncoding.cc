@@ -62,6 +62,13 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
     return value << shiftAmount<position>;
 }
 
+#define SKIP5s(x) \
+        if constexpr (length > 4) { \
+            if (x == 3ul) { \
+                continue; \
+            } \
+        }
+#define onPosOrDiff(n) (position == n || difference == n)
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -78,13 +85,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-#define SKIP5s(x) \
-        if constexpr (length > 4) { \
-            if (x == 3ul) { \
-                continue; \
-            } \
-        }
-#define onPosOrDiff(n) (position == n || difference == n)
     } else if constexpr (length > 10 && (onPosOrDiff(2) || onPosOrDiff(4) || onPosOrDiff(6))) {
         // reduce the number of recomputations of sum and product by 28 out of 64
         auto prod = product << 1;
