@@ -125,7 +125,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 dept
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
         static constexpr auto p10c = fastPow10<position+2>;
-        for (auto a = depth; a < 8ul; ++a) {
+        for (auto a = 0ul; a < 8ul; ++a) {
             SKIP5s(a);
             auto a1 = outerConverted + (a * p10a);
             auto a2 = outerConverted + (a * p10b); 
@@ -178,7 +178,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 dept
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-        for (auto i = depth; i < 8ul; ++i, ++sum, index += indexIncr) {
+        for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
             body<position + 1, length>(list, sum, dprod + (i * product), index, i);
         }
