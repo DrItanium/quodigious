@@ -69,7 +69,7 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
             } \
         }
 template<u64 position, u64 length>
-void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
+void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
@@ -89,23 +89,23 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef lenGreaterAndPos
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
-        std::list<std::tuple<u64, u64, u64>> lower, upper;
+	using PackedData = std::tuple<u64, u64, u64, u64>; 
+        std::list<PackedData> lower, upper;
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-        for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
+        for (auto i = depth; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
-            auto tup = std::make_tuple(sum, dprod + (i * product), index);
+            auto tup = std::make_tuple(sum, dprod + (i * product), index, i);
             if (i < 3) {
                 lower.emplace_back(tup);
             } else {
                 upper.emplace_back(tup);
             }
-            //body<position + 1, length>(list, sum, dprod + (i * product), index);
         }
-        auto halveIt = [](std::list<std::tuple<u64, u64, u64>> & collection) {
+        auto halveIt = [](std::list<PackedData> & collection) {
             MatchList l;
             for(auto& a : collection) {
-                body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a));
+                body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a), std::get<3>(a));
             }
             return l;
         };
@@ -125,7 +125,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
         static constexpr auto p10c = fastPow10<position+2>;
-        for (auto a = 0ul; a < 8ul; ++a) {
+        for (auto a = depth; a < 8ul; ++a) {
             SKIP5s(a);
             auto a1 = outerConverted + (a * p10a);
             auto a2 = outerConverted + (a * p10b); 
@@ -178,9 +178,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-        for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
+        for (auto i = depth; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
-            body<position + 1, length>(list, sum, dprod + (i * product), index);
+            body<position + 1, length>(list, sum, dprod + (i * product), index, i);
         }
     }
 }
