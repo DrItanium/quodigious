@@ -85,7 +85,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             list.emplace_back(conv);
         }
 #define lenGreaterAndPos(len,pos) (length > len && position == pos)
-    } else if constexpr (lenGreaterAndPos(10, 2)) {
+    } else if constexpr (lenGreaterAndPos(10, 2) || lenGreaterAndPos(12, 3) || lenGreaterAndPos(13, 4) || lenGreaterAndPos(14, 5)) {
 #undef lenGreaterAndPos
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
