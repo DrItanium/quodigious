@@ -84,7 +84,67 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-    } else if constexpr (length > 10 && difference == 2) {
+    } else if constexpr (length > 10 && (length & 1 == 1) && difference == 3) {
+        // this will generate a partial number but reduce the number of conversions
+        // required greatly!
+        // The last two digits are handled in a base 10 fashion without the +2 added
+        // This will make the partial converison correct (remember that a 0 becomes a 2
+        // in this model).
+        auto outerConverted = convertNumber<length>(index);
+        static constexpr auto p10a = fastPow10<position>;
+        static constexpr auto p10b = fastPow10<position+1>;
+        static constexpr auto p10c = fastPow10<position+2>;
+        for (auto a = 0ul; a < 8ul; ++a) {
+            SKIP5s(a);
+            auto a1 = outerConverted + (a * p10a);
+            auto a2 = outerConverted + (a * p10b); 
+            auto a3 = outerConverted + (a * p10c); 
+            auto as = sum + a;
+            auto ap = product * (a + 2);
+            for (auto b = a; b < 8ul; ++b) {
+                SKIP5s(b);
+                auto b1 = b * p10a;
+                auto b2 = b * p10b;
+                auto b3 = b * p10c;
+                auto bs = as + b;
+                auto bp = ap * (b + 2);
+                auto abdiff = a != b;
+                for (auto c = b; c < 8ul; ++c) {
+                    SKIP5s(c);
+                    auto cs = bs + c;
+                    if (cs % 3 != 0) {
+                        continue;
+                    }
+                    auto c1 = c * p10a;
+                    auto c2 = c * p10b;
+                    auto c3 = c * p10c;
+                    auto cp = bp * (c + 2);
+#define bcheck(x) ((x % cp == 0) && (x % cs == 0))
+#define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
+                    // always do this one
+                    ibody(a1,b2,c3);
+                    if (abdiff) {
+                       // a != b thus we can execute these two safely
+                       //
+                       ibody(b1,c2,a3);
+                       ibody(c1,a2,b3);
+                       if (b != c && a != c) {
+                           ibody(a1,c2,b3);
+                           ibody(b1,a2,c3);
+                           ibody(c1,b2,a3);
+                       }
+                    } else if (b != c) {
+                        // a == b && b != c -> a != c
+                        // a == b in this case if we get here
+                        ibody(b1,c2,a3);
+                        ibody(c1,a2,b3);
+                    }
+                }
+            }
+        }
+#undef ibody
+#undef bcheck
+    } else if constexpr (length > 10 && ((length & 1) == 0) && difference == 2) {
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
         // The last two digits are handled in a base 10 fashion without the +2 added
