@@ -84,6 +84,28 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
+    } else if constexpr (length > 10 && position % 2 == 0 && difference > 3) {
+        // this will generate a partial number but reduce the number of conversions
+        // required greatly!
+        // The last two digits are handled in a base 10 fashion without the +2 added
+        // This will make the partial converison correct (remember that a 0 becomes a 2
+        // in this model).
+	for (auto b = 0; b < 8ul; ++b) {
+		SKIP5s(b);
+		auto b1 = index + (getShiftedValue<position>(b));
+		auto b2 = index + (getShiftedValue<position + 1>(b));
+		auto bs = sum + b;
+		auto bp = product * (b + 2);
+		for (auto c = b; c < 8ul; ++c) {
+			SKIP5s(c);
+			auto cs = bs + c;
+			auto cp = bp * (c + 2);
+			body<position+2, length>(list, cs, cp, b1 + (getShiftedValue<position +1>(c)));
+			if (b != c) {
+				body<position + 2, length>(list, cs, cp, b2 + (getShiftedValue<position>(c)));
+			}
+		}
+	}
     } else if constexpr (length > 10 && (length & 1 == 1) && difference == 3) {
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
@@ -190,22 +212,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 }
 #undef SKIP5s
 
-template<auto width>
-MatchList parallelBody(u64 base) noexcept {
-    MatchList list;
-	auto start = (base - 2ul);
-	auto index = start << 3;
-	static constexpr auto addon = width << 1;
-	// using the frequency analysis I did before for loops64.cc I found
-	// that on even digits that 4 and 8 are used while odd digits use 2
-	// and 6. This is a frequency analysis job only :D
-	for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
-		auto j = i - 2ul;
-		body<2, width>(list, start + j + addon, base * i, index + j);
-	}
-    return list;
-}
-
 template<u64 width>
 void initialBody() noexcept {
 	MatchList list;
@@ -217,7 +223,13 @@ void initialBody() noexcept {
             list.splice(list.cbegin(), r);
         };
         auto mkfuture = [](auto base) {
-            return std::async(std::launch::async, parallelBody<width>, base);
+	    auto action = []() {
+		    MatchList list;
+		    body<0, width>(list, 0, 1, 0);
+		    return list;
+	    };
+
+            return std::async(std::launch::async, action);
         };
         auto t0 = mkfuture(2);
         auto t1 = mkfuture(3);
@@ -225,14 +237,14 @@ void initialBody() noexcept {
         auto t3 = mkfuture(6);
         auto t4 = mkfuture(7);
         auto t5 = mkfuture(8);
-        //auto t6 = mkfuture(9);
+        auto t6 = mkfuture(9);
         getnsplice(t0);
         getnsplice(t1);
         getnsplice(t2);
         getnsplice(t3);
         getnsplice(t4);
         getnsplice(t5);
-        //getnsplice(t6);
+        getnsplice(t6);
     } 
 	list.sort();
 	for (const auto& v : list) {
