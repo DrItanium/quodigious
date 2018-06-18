@@ -69,7 +69,7 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
             } \
         }
 template<u64 position, u64 length>
-void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 depth = 0) noexcept {
+void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
@@ -84,38 +84,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 dept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-#define lenGreaterAndPos(len,pos) (length > len && position == pos)
-    } else if constexpr (lenGreaterAndPos(10, 2) || lenGreaterAndPos(11, 3) || lenGreaterAndPos(12, 4) || lenGreaterAndPos(13, 5)) {
-#undef lenGreaterAndPos
-        // setup a series of operations to execute in parallel on two separate threads
-        // of execution
-	using PackedData = std::tuple<u64, u64, u64, u64>; 
-        std::list<PackedData> lower, upper;
-        auto dprod = product << 1;
-        static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-        for (auto i = depth; i < 8ul; ++i, ++sum, index += indexIncr) {
-            SKIP5s(i);
-            auto tup = std::make_tuple(sum, dprod + (i * product), index, i);
-            if (i < 3) {
-                lower.emplace_back(tup);
-            } else {
-                upper.emplace_back(tup);
-            }
-        }
-        auto halveIt = [](std::list<PackedData> & collection) {
-            MatchList l;
-            for(auto& a : collection) {
-                body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a), std::get<3>(a));
-            }
-            return l;
-        };
-        auto t0 = std::async(std::launch::async, halveIt, std::ref(lower));
-        auto t1 = std::async(std::launch::async, halveIt, std::ref(upper));
-        auto l0 = t0.get();
-        list.splice(list.cbegin(), l0);
-        auto l1 = t1.get();
-        list.splice(list.cbegin(), l1);
-    } else if constexpr (length > 10 && difference == 3) {
+    } else if constexpr (length > 10 && difference == 2) {
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
         // The last two digits are handled in a base 10 fashion without the +2 added
@@ -124,55 +93,30 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 dept
         auto outerConverted = convertNumber<length>(index);
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
-        static constexpr auto p10c = fastPow10<position+2>;
-        for (auto a = 0ul; a < 8ul; ++a) {
-            SKIP5s(a);
-            auto a1 = outerConverted + (a * p10a);
-            auto a2 = outerConverted + (a * p10b); 
-            auto a3 = outerConverted + (a * p10c); 
-            auto as = sum + a;
-            auto ap = product * (a + 2);
-            for (auto b = a; b < 8ul; ++b) {
-                SKIP5s(b);
-                auto b1 = b * p10a;
-                auto b2 = b * p10b;
-                auto b3 = b * p10c;
-                auto bs = as + b;
-                auto bp = ap * (b + 2);
-                auto abdiff = a != b;
-                for (auto c = b; c < 8ul; ++c) {
-                    SKIP5s(c);
-                    auto cs = bs + c;
-                    if (cs % 3 != 0) {
-                        continue;
-                    }
-                    auto c1 = c * p10a;
-                    auto c2 = c * p10b;
-                    auto c3 = c * p10c;
-                    auto cp = bp * (c + 2);
+	for (auto b = 0; b < 8ul; ++b) {
+		SKIP5s(b);
+		auto b1 = outerConverted + (b * p10a);
+		auto b2 = outerConverted + (b * p10b);
+		auto bs = sum + b;
+		auto bp = product * (b + 2);
+		for (auto c = b; c < 8ul; ++c) {
+			SKIP5s(c);
+			auto cs = bs + c;
+			if (cs % 3 != 0) {
+				continue;
+			}
+			auto cp = bp * (c + 2);
+			auto c1 = c * p10a;
+			auto c2 = c * p10b;
 #define bcheck(x) ((x % cp == 0) && (x % cs == 0))
-#define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
-                    // always do this one
-                    ibody(a1,b2,c3);
-                    if (abdiff) {
-                       // a != b thus we can execute these two safely
-                       //
-                       ibody(b1,c2,a3);
-                       ibody(c1,a2,b3);
-                       if (b != c && a != c) {
-                           ibody(a1,c2,b3);
-                           ibody(b1,a2,c3);
-                           ibody(c1,b2,a3);
-                       }
-                    } else if (b != c) {
-                        // a == b && b != c -> a != c
-                        // a == b in this case if we get here
-                        ibody(b1,c2,a3);
-                        ibody(c1,a2,b3);
-                    }
-                }
-            }
-        }
+#define ibody(x,y) if (auto n = x + y; bcheck(n)) { list.emplace_back(n); }
+			// always do this one
+			ibody(b1,c2);
+			if (b != c) {
+				ibody(c1,b2);
+			}
+		}
+	}
 #undef bcheck
 #undef ibody
     } else {
@@ -180,7 +124,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0, u64 dept
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
-            body<position + 1, length>(list, sum, dprod + (i * product), index, i);
+            body<position + 1, length>(list, sum, dprod + (i * product), index);
         }
     }
 }
@@ -221,14 +165,14 @@ void initialBody() noexcept {
         auto t3 = mkfuture(6);
         auto t4 = mkfuture(7);
         auto t5 = mkfuture(8);
-        auto t6 = mkfuture(9);
+        //auto t6 = mkfuture(9);
         getnsplice(t0);
         getnsplice(t1);
         getnsplice(t2);
         getnsplice(t3);
         getnsplice(t4);
         getnsplice(t5);
-        getnsplice(t6);
+        //getnsplice(t6);
     } 
 	list.sort();
 	for (const auto& v : list) {
