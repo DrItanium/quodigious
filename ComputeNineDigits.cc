@@ -50,7 +50,17 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
                 }, sum, product, index);
         auto t3 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
                     std::list<u64> _values;
-                    for (auto i = 6; i < 10; ++i) {
+                    body<inner>(_values, s + 6, p * 6 , idx + (6 * next));
+                    return _values;
+                }, sum, product, index);
+        auto t4 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    body<inner>(_values, s + 7, p * 7 , idx + (7 * next));
+                    return _values;
+                }, sum, product, index);
+        auto t5 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    for (auto i = 8; i < 10; ++i) {
                         body<inner>(_values, s + i, p * i , idx + (i * next));
                     }
                     return _values;
@@ -63,6 +73,10 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
         values.splice(values.cbegin(), v2);
         auto v3 = t3.get();
         values.splice(values.cbegin(), v3);
+        auto v4 = t4.get();
+        values.splice(values.cbegin(), v4);
+        auto v5 = t5.get();
+        values.splice(values.cbegin(), v5);
     } else if constexpr(length >= 15) {
 	    constexpr auto inner = length - 1;
 	    constexpr auto next = fastPow10<inner>;
@@ -117,9 +131,14 @@ int main(int argc, char** argv) {
 		u64 currentSum = 0;
 		u64 currentProduct = 0;
 		std::cin >> currentSum;
+        if (!std::cin.good()) { break; }
 		std::cin >> currentProduct;
+        if (!std::cin.good()) { break; }
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
+            if (auto div = currentIndex % 10; div == 3 || div == 5 || div == 7 || div == 9) {
+                continue;
+            }
 			switch(currentWidth) {
 				case 11: body<11>(values, currentSum, currentProduct, currentIndex); break;
 				case 12: body<12>(values, currentSum, currentProduct, currentIndex); break;
