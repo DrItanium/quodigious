@@ -23,6 +23,7 @@
 #include <tuple>
 struct ComputationRequest {
     ComputationRequest(u64 w, u64 n, u64 s, u64 p) : _width(w), _number(n), _sum(s), _product(p) { };
+    ComputationRequest() : ComputationRequest(0,0,0,0) { };
     u64 getWidth() const noexcept { return _width; }
     u64 getNumber() const noexcept { return _number; }
     u64 getSum() const noexcept { return _sum; }
@@ -79,32 +80,22 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
 	    }
     }
 }
-void performComputation(std::list<u64>& values, const std::list<ComputationRequest>& requests) {
-    for (const auto a : requests) {
-        auto currentSum = a.getSum();
-        auto currentProduct = a.getProduct();
-        auto currentIndex = a.getNumber();
-        if (auto div = currentIndex % 10; div == 3 || div == 5 || div == 7 || div == 9) {
-            continue;
-        }
-        switch(a.getWidth()) {
-            case 11: body<11>(values, currentSum, currentProduct, currentIndex); break;
-            case 12: body<12>(values, currentSum, currentProduct, currentIndex); break;
-            case 13: body<13>(values, currentSum, currentProduct, currentIndex); break;
-            case 14: body<14>(values, currentSum, currentProduct, currentIndex); break;
-            case 15: body<15>(values, currentSum, currentProduct, currentIndex); break;
-            case 16: body<16>(values, currentSum, currentProduct, currentIndex); break;
-            case 17: body<17>(values, currentSum, currentProduct, currentIndex); break;
-            case 18: body<18>(values, currentSum, currentProduct, currentIndex); break;
-            case 19: body<19>(values, currentSum, currentProduct, currentIndex); break;
-            default:
-                     std::cerr << "Illegal index " << currentIndex << std::endl;
-                     throw 1;
-        }
+std::list<u64> performComputation(const ComputationRequest& r) {
+    std::list<u64> values;
+    switch(r.getWidth()) {
+        case 11: body<11>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 12: body<12>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 13: body<13>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 14: body<14>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 15: body<15>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 16: body<16>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 17: body<17>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        default:
+                 std::cerr << "Illegal index " << r.getNumber() << std::endl;
+                 break;
     }
+    return values;
 }
-
-
 int main(int argc, char** argv) {
     if (argc != 2) {
         return 1;
@@ -113,44 +104,84 @@ int main(int argc, char** argv) {
     std::string tmp(argv[1]);
     std::istringstream w(tmp);
     w >> currentWidth;
-    auto targetList = 0u;
-    std::list<ComputationRequest> _requests0, _requests1, _requests2, _requests3;
-    std::list<u64> values;
+    auto targetWorker = 0u;
+    ComputationRequest a, b, c, d;
 	while(std::cin.good()) {
-		u64 currentIndex = 0;
-		u64 currentSum = 0;
-		u64 currentProduct = 0;
-		std::cin >> currentSum;
-        if (!std::cin.good()) { break; }
-		std::cin >> currentProduct;
-        if (!std::cin.good()) { break; }
-		std::cin >> currentIndex;
-		if (!std::cin.good()) { break; }
-        switch(targetList % 4) {
-            case 0: _requests0.emplace_back(currentWidth, currentIndex, currentSum, currentProduct); break;
-            case 1: _requests1.emplace_back(currentWidth, currentIndex, currentSum, currentProduct); break;
-            case 2: _requests2.emplace_back(currentWidth, currentIndex, currentSum, currentProduct); break;
-            case 3: _requests3.emplace_back(currentWidth, currentIndex, currentSum, currentProduct); break;
-            default:
-                    throw "Illegal index!";
+        if (targetWorker == 4) {
+            auto t0 = std::async(std::launch::async, performComputation, std::ref(a));
+            auto t1 = std::async(std::launch::async, performComputation, std::ref(b));
+            auto t2 = std::async(std::launch::async, performComputation, std::ref(c));
+            auto t3 = std::async(std::launch::async, performComputation, std::ref(d));
+            auto v0 = t0.get();
+            for (auto v : v0) {
+                std::cout << v << std::endl;
+            }
+            auto v1 = t1.get();
+            for (auto v : v1) {
+                std::cout << v << std::endl;
+            }
+            auto v2 = t2.get();
+            for (auto v : v2) {
+                std::cout << v << std::endl;
+            }
+            auto v3 = t3.get();
+            for (auto v : v3) {
+                std::cout << v << std::endl;
+            }
+            targetWorker = 0;
+        } else {
+            u64 currentIndex = 0;
+            u64 currentSum = 0;
+            u64 currentProduct = 0;
+            std::cin >> currentSum;
+            if (!std::cin.good()) { break; }
+            std::cin >> currentProduct;
+            if (!std::cin.good()) { break; }
+            std::cin >> currentIndex;
+            if (!std::cin.good()) { break; }
+            switch(targetWorker) {
+                case 0:
+                    a = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+                    break;
+                case 1:
+                    b = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+                    break;
+                case 2:
+                    c = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+                    break;
+                case 3:
+                    d = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+                    break;
+                default:
+                    break;
+            }
+            ++targetWorker;
         }
-        ++targetList;
 	}
-    auto t0 = std::async(std::launch::async, [&_requests0]() { std::list<u64> values; performComputation(values, _requests0); return values; });
-    auto t1 = std::async(std::launch::async, [&_requests1]() { std::list<u64> values; performComputation(values, _requests1); return values; });
-    auto t2 = std::async(std::launch::async, [&_requests2]() { std::list<u64> values; performComputation(values, _requests2); return values; });
-    auto t3 = std::async(std::launch::async, [&_requests3]() { std::list<u64> values; performComputation(values, _requests3); return values; });
-    auto v0 = t0.get();
-    values.splice(values.cbegin(), v0);
-    auto v1 = t1.get();
-    values.splice(values.cbegin(), v1);
-    auto v2 = t2.get();
-    values.splice(values.cbegin(), v2);
-    auto v3 = t3.get();
-    values.splice(values.cbegin(), v3);
-    values.sort();
-    for (auto v : values) {
-        std::cout << v << std::endl;
+    if (targetWorker > 0) {
+        auto v0 = performComputation(a);
+        for (const auto v : v0) {
+            std::cout << v << std::endl;
+        }
+        if (targetWorker > 1) {
+            auto v1 = performComputation(b);
+            for (const auto v : v1) {
+                std::cout << v << std::endl;
+            }
+            if (targetWorker > 2) {
+                auto v2 = performComputation(c);
+                for (const auto v : v2) {
+                    std::cout << v << std::endl;
+                }
+                if (targetWorker > 3) {
+                    auto v3 = performComputation(d);
+                    for (const auto v : v3) {
+                        std::cout << v << std::endl;
+                    }
+                }
+
+            }
+        }
     }
 	return 0;
 }
