@@ -105,28 +105,21 @@ int main(int argc, char** argv) {
     std::istringstream w(tmp);
     w >> currentWidth;
     auto targetWorker = 0u;
-    ComputationRequest a, b, c, d;
+    static constexpr auto requestCapacity = 8u;
+    ComputationRequest requests[requestCapacity];
 	while(std::cin.good()) {
-        if (targetWorker == 4) {
-            auto t0 = std::async(std::launch::async, performComputation, std::ref(a));
-            auto t1 = std::async(std::launch::async, performComputation, std::ref(b));
-            auto t2 = std::async(std::launch::async, performComputation, std::ref(c));
-            auto t3 = std::async(std::launch::async, performComputation, std::ref(d));
-            auto v0 = t0.get();
-            for (auto v : v0) {
-                std::cout << v << std::endl;
+        if (targetWorker == requestCapacity) {
+            using AsyncRequest = decltype(std::async(std::launch::async, performComputation, std::ref(requests[0])));
+            AsyncRequest asyncs[requestCapacity];
+            for (auto i = 0; i < requestCapacity; ++i) {
+                asyncs[i] = std::async(std::launch::async, performComputation, std::ref(requests[i]));
             }
-            auto v1 = t1.get();
-            for (auto v : v1) {
-                std::cout << v << std::endl;
-            }
-            auto v2 = t2.get();
-            for (auto v : v2) {
-                std::cout << v << std::endl;
-            }
-            auto v3 = t3.get();
-            for (auto v : v3) {
-                std::cout << v << std::endl;
+            for (auto i = 0; i < requestCapacity; ++i) {
+                auto values = asyncs[i].get();
+                for (auto v : values) {
+                    std::cout << v << std::endl;
+                }
+
             }
             targetWorker = 0;
         } else {
@@ -139,48 +132,14 @@ int main(int argc, char** argv) {
             if (!std::cin.good()) { break; }
             std::cin >> currentIndex;
             if (!std::cin.good()) { break; }
-            switch(targetWorker) {
-                case 0:
-                    a = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
-                    break;
-                case 1:
-                    b = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
-                    break;
-                case 2:
-                    c = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
-                    break;
-                case 3:
-                    d = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
-                    break;
-                default:
-                    break;
-            }
+            requests[targetWorker] = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
             ++targetWorker;
         }
 	}
-    if (targetWorker > 0) {
-        auto v0 = performComputation(a);
+    for (auto i = 0; i < targetWorker; ++i) {
+        auto v0 = performComputation(requests[i]);
         for (const auto v : v0) {
             std::cout << v << std::endl;
-        }
-        if (targetWorker > 1) {
-            auto v1 = performComputation(b);
-            for (const auto v : v1) {
-                std::cout << v << std::endl;
-            }
-            if (targetWorker > 2) {
-                auto v2 = performComputation(c);
-                for (const auto v : v2) {
-                    std::cout << v << std::endl;
-                }
-                if (targetWorker > 3) {
-                    auto v3 = performComputation(d);
-                    for (const auto v : v3) {
-                        std::cout << v << std::endl;
-                    }
-                }
-
-            }
         }
     }
 	return 0;
