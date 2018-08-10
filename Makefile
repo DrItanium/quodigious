@@ -69,7 +69,7 @@ ${SIMPLE_LOOPS}: simpleLoops.o
 
 ${COMPUTE_NINE_DIGITS}: ComputeNineDigits.o
 	@echo -n "Building nine digit partial computer... "
-	@${CXX} ${LXXFLAGS} -o ${COMPUTE_NINE_DIGITS} ComputeNineDigits.o
+	@${CXX} -lpthread ${LXXFLAGS} -o ${COMPUTE_NINE_DIGITS} ComputeNineDigits.o
 	@echo done.
 
 %.o: %.cc
