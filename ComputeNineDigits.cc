@@ -24,10 +24,46 @@ template<u64 length>
 void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length >= 10, "Cannot go lower than 10 digits!");
     if constexpr (length == 10) {
+        if (sum % 3 != 0) {
+            return;
+        }
         if ((index % product == 0) && (index % sum == 0)) {
             values.emplace_back(index);
         }
-    } else if constexpr(length >= 16) {
+    } else if constexpr(length >= 18) {
+	    constexpr auto inner = length - 1;
+	    constexpr auto next = fastPow10<inner>;
+        auto t0 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    body<inner>(_values, s + 2, p * 2 , idx + (2 * next));
+                    return _values;
+                }, sum, product, index);
+        auto t1 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    body<inner>(_values, s + 3, p * 3 , idx + (3 * next));
+                    return _values;
+                }, sum, product, index);
+        auto t2 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    body<inner>(_values, s + 4, p * 4 , idx + (4 * next));
+                    return _values;
+                }, sum, product, index);
+        auto t3 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+                    std::list<u64> _values;
+                    for (auto i = 6; i < 10; ++i) {
+                        body<inner>(_values, s + i, p * i , idx + (i * next));
+                    }
+                    return _values;
+                }, sum, product, index);
+        auto v0 = t0.get();
+        values.splice(values.cbegin(), v0);
+        auto v1 = t1.get();
+        values.splice(values.cbegin(), v1);
+        auto v2 = t2.get();
+        values.splice(values.cbegin(), v2);
+        auto v3 = t3.get();
+        values.splice(values.cbegin(), v3);
+    } else if constexpr(length >= 15) {
 	    constexpr auto inner = length - 1;
 	    constexpr auto next = fastPow10<inner>;
         auto t0 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
