@@ -44,27 +44,27 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
         if ((index % product == 0) && (index % sum == 0)) {
             values.emplace_back(index);
         }
-    } else if constexpr(length >= 15) {
-	    constexpr auto inner = length - 1;
-	    constexpr auto next = fastPow10<inner>;
-        auto t0 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
-                    std::list<u64> _values;
-                    for (auto i = 2; i < 5; ++i) {
-                        body<inner>(_values, s + i, p * i , idx + (i * next));
-                    }
-                    return _values;
-                }, sum, product, index);
-        auto t1 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
-                    std::list<u64> _values;
-                    for (auto i = 6; i < 10; ++i) {
-                        body<inner>(_values, s + i, p * i , idx + (i * next));
-                    }
-                    return _values;
-                }, sum, product, index);
-        auto v0 = t0.get();
-        values.splice(values.cbegin(), v0);
-        auto v1 = t1.get();
-        values.splice(values.cbegin(), v1);
+    // } else if constexpr(length >= 15) {
+	//     constexpr auto inner = length - 1;
+	//     constexpr auto next = fastPow10<inner>;
+    //     auto t0 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+    //                 std::list<u64> _values;
+    //                 for (auto i = 2; i < 5; ++i) {
+    //                     body<inner>(_values, s + i, p * i , idx + (i * next));
+    //                 }
+    //                 return _values;
+    //             }, sum, product, index);
+    //     auto t1 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
+    //                 std::list<u64> _values;
+    //                 for (auto i = 6; i < 10; ++i) {
+    //                     body<inner>(_values, s + i, p * i , idx + (i * next));
+    //                 }
+    //                 return _values;
+    //             }, sum, product, index);
+    //     auto v0 = t0.get();
+    //     values.splice(values.cbegin(), v0);
+    //     auto v1 = t1.get();
+    //     values.splice(values.cbegin(), v1);
     } else {
 	    constexpr auto inner = length - 1;
 	    constexpr auto next = fastPow10<inner>;
@@ -97,20 +97,23 @@ std::list<u64> performComputation(const ComputationRequest& r) {
     return values;
 }
 int main(int argc, char** argv) {
-    if (argc != 2) {
+    if (argc != 3) {
         return 1;
     }
     u64 currentWidth = 0;
     std::string tmp(argv[1]);
     std::istringstream w(tmp);
     w >> currentWidth;
+    u64 requestCapacity = 1;
+    std::string tmp2(argv[2]);
+    std::istringstream w2(tmp2);
+    w2 >> requestCapacity;
     auto targetWorker = 0u;
-    static constexpr auto requestCapacity = 8u;
-    ComputationRequest requests[requestCapacity];
+    ComputationRequest* requests = new ComputationRequest[requestCapacity];
+    using AsyncRequest = decltype(std::async(std::launch::async, performComputation, std::ref(requests[0])));
+    AsyncRequest* asyncs = new AsyncRequest[requestCapacity];
 	while(std::cin.good()) {
         if (targetWorker == requestCapacity) {
-            using AsyncRequest = decltype(std::async(std::launch::async, performComputation, std::ref(requests[0])));
-            AsyncRequest asyncs[requestCapacity];
             for (auto i = 0; i < requestCapacity; ++i) {
                 asyncs[i] = std::async(std::launch::async, performComputation, std::ref(requests[i]));
             }
@@ -119,7 +122,6 @@ int main(int argc, char** argv) {
                 for (auto v : values) {
                     std::cout << v << std::endl;
                 }
-
             }
             targetWorker = 0;
         } else {
@@ -127,11 +129,17 @@ int main(int argc, char** argv) {
             u64 currentSum = 0;
             u64 currentProduct = 0;
             std::cin >> currentSum;
-            if (!std::cin.good()) { break; }
+            if (!std::cin.good()) { 
+                break; 
+            }
             std::cin >> currentProduct;
-            if (!std::cin.good()) { break; }
+            if (!std::cin.good()) { 
+                break; 
+            }
             std::cin >> currentIndex;
-            if (!std::cin.good()) { break; }
+            if (!std::cin.good()) { 
+                break; 
+            }
             requests[targetWorker] = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
             ++targetWorker;
         }
@@ -142,5 +150,7 @@ int main(int argc, char** argv) {
             std::cout << v << std::endl;
         }
     }
+    delete [] requests;
+    delete [] asyncs;
 	return 0;
 }
