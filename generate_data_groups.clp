@@ -12,14 +12,13 @@
                        ?prod
                        ?num)
                else
+               (bind ?factor
+                     (pow10 (- ?depth 1)))
                (loop-for-count (?i 2 9)
                                (if (<> ?i 5) then
-                                 (bind ?iv 
-                                       (+ ?num
-                                          (* (pow10 (- ?depth 1))
-                                             ?i)))
                                  (generate-numbers ?id
-                                                   ?iv
+                                                   (+ ?num
+                                                      (* ?factor ?i))
                                                    (+ ?sum ?i)
                                                    (* ?prod ?i)
                                                    (- ?depth 1))))))

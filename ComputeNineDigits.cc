@@ -42,13 +42,18 @@ void body(u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 
 
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        return 1;
+    }
+    u64 currentWidth = 0;
+    std::string tmp(argv[1]);
+    std::istringstream w(tmp);
+    w >> currentWidth;
 	while(std::cin.good()) {
-		u64 currentWidth = 0;
 		u64 currentIndex = 0;
 		u64 currentSum = 0;
 		u64 currentProduct = 0;
-		std::cin >> currentWidth;
 		std::cin >> currentSum;
 		std::cin >> currentProduct;
 		std::cin >> currentIndex;
