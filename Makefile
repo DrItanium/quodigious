@@ -30,7 +30,8 @@ QLOOPS_PROG64 = quodigious64
 FREQUENCY_ANALYSIS = fanalysis
 ENCODING = ocEncoding 
 SIMPLE_LOOPS = simpleLoops 
-PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS}
+COMPUTE_NINE_DIGITS = compute9digs
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS} ${COMPUTE_NINE_DIGITS}
 all: ${PROGS}
 
 ${FREQUENCY_ANALYSIS}:
@@ -66,6 +67,11 @@ ${SIMPLE_LOOPS}: simpleLoops.o
 	@${CXX} -lpthread ${LXXFLAGS} -o ${SIMPLE_LOOPS} simpleLoops.o
 	@echo done.
 
+${COMPUTE_NINE_DIGITS}: ComputeNineDigits.o
+	@echo -n "Building nine digit partial computer... "
+	@${CXX} ${LXXFLAGS} -o ${COMPUTE_NINE_DIGITS} ComputeNineDigits.o
+	@echo done.
+
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
 	@${CXX} ${CXXFLAGS} -c $< -o $@
@@ -80,3 +86,4 @@ loops64.o: qlib.h Specialization8Digits.cc
 numericReduction.o: qlib.h FrequencyAnalyzer.h
 FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h
 octalLikeEncoding.o: qlib.h
+ComputeNineDigits.o: qlib.h
