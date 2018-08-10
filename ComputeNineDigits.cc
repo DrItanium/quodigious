@@ -67,7 +67,6 @@ int main() {
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
 			}
-			std::cout << std::endl;
 		}
 	}
 	return 0;
