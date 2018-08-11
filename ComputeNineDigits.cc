@@ -44,27 +44,6 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
         if ((index % product == 0) && (index % sum == 0)) {
             values.emplace_back(index);
         }
-    // } else if constexpr(length >= 15) {
-	//     constexpr auto inner = length - 1;
-	//     constexpr auto next = fastPow10<inner>;
-    //     auto t0 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
-    //                 std::list<u64> _values;
-    //                 for (auto i = 2; i < 5; ++i) {
-    //                     body<inner>(_values, s + i, p * i , idx + (i * next));
-    //                 }
-    //                 return _values;
-    //             }, sum, product, index);
-    //     auto t1 = std::async(std::launch::async, [](auto s, auto p, auto idx) {
-    //                 std::list<u64> _values;
-    //                 for (auto i = 6; i < 10; ++i) {
-    //                     body<inner>(_values, s + i, p * i , idx + (i * next));
-    //                 }
-    //                 return _values;
-    //             }, sum, product, index);
-    //     auto v0 = t0.get();
-    //     values.splice(values.cbegin(), v0);
-    //     auto v1 = t1.get();
-    //     values.splice(values.cbegin(), v1);
     } else {
 	    constexpr auto inner = length - 1;
 	    constexpr auto next = fastPow10<inner>;
@@ -80,7 +59,7 @@ void body(std::list<u64>& values, u64 sum = 0, u64 product = 1, u64 index = 0) n
 	    }
     }
 }
-std::list<u64> performComputation(const ComputationRequest& r) {
+std::list<u64> performComputation(ComputationRequest r) {
     std::list<u64> values;
     switch(r.getWidth()) {
         case 11: body<11>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
@@ -90,8 +69,10 @@ std::list<u64> performComputation(const ComputationRequest& r) {
         case 15: body<15>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
         case 16: body<16>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
         case 17: body<17>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 18: body<18>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
+        case 19: body<19>(values, r.getSum(), r.getProduct(), r.getNumber()); break;
         default:
-                 std::cerr << "Illegal index " << r.getNumber() << std::endl;
+                 std::cerr << "Illegal index " << r.getWidth() << std::endl;
                  break;
     }
     return values;
@@ -109,14 +90,10 @@ int main(int argc, char** argv) {
     std::istringstream w2(tmp2);
     w2 >> requestCapacity;
     auto targetWorker = 0u;
-    ComputationRequest* requests = new ComputationRequest[requestCapacity];
-    using AsyncRequest = decltype(std::async(std::launch::async, performComputation, std::ref(requests[0])));
+    using AsyncRequest = decltype(std::async(std::launch::async, performComputation, ComputationRequest()));
     AsyncRequest* asyncs = new AsyncRequest[requestCapacity];
 	while(std::cin.good()) {
         if (targetWorker == requestCapacity) {
-            for (auto i = 0; i < requestCapacity; ++i) {
-                asyncs[i] = std::async(std::launch::async, performComputation, std::ref(requests[i]));
-            }
             for (auto i = 0; i < requestCapacity; ++i) {
                 auto values = asyncs[i].get();
                 for (auto v : values) {
@@ -140,17 +117,18 @@ int main(int argc, char** argv) {
             if (!std::cin.good()) { 
                 break; 
             }
-            requests[targetWorker] = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+            auto cr = ComputationRequest(currentWidth, currentIndex, currentSum, currentProduct);
+            // start it immediately
+            asyncs[targetWorker] = std::async(std::launch::async, performComputation, cr);
             ++targetWorker;
         }
 	}
     for (auto i = 0; i < targetWorker; ++i) {
-        auto v0 = performComputation(requests[i]);
+        auto v0 = asyncs[i].get();
         for (const auto v : v0) {
             std::cout << v << std::endl;
         }
     }
-    delete [] requests;
     delete [] asyncs;
 	return 0;
 }
