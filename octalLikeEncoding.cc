@@ -301,7 +301,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(a,c,d,b);
 								}
 								if (acsame) {
-									if (a != d && c != d) {
+									// a != b && b != c && a == c && c != d ->
+									// a != d
+									if (c != d) {
 										// a != b && b != c && a == c
 										// c == d || b == d || (c != d && b != d)
 										X(a,d,c,b);
