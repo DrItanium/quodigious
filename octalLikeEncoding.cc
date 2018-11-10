@@ -106,7 +106,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             } else {
                 upper.emplace_back(tup);
             }
-            //body<position + 1, length>(list, sum, dprod + (i * product), index);
         }
         auto halveIt = [](std::list<DataTriple> & collection) {
             MatchList l;
@@ -118,8 +117,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         auto t0 = std::async(std::launch::async, halveIt, std::ref(lower));
         auto t1 = std::async(std::launch::async, halveIt, std::ref(upper));
         auto l0 = t0.get();
-        list.splice(list.cbegin(), l0);
         auto l1 = t1.get();
+        list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && difference == 3) {
         // this will generate a partial number but reduce the number of conversions
@@ -146,6 +145,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 auto bs = as + b;
                 auto bp = ap * (b + 2);
                 auto abdiff = a != b;
+				auto ab12comb = a1 + b2;
                 for (auto c = b; c < 8ul; ++c) {
                     SKIP5s(c);
                     auto cs = bs + c;
@@ -176,6 +176,160 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                         ibody(b1,c2,a3);
                         ibody(c1,a2,b3);
                     }
+                }
+            }
+        }
+#undef bcheck
+#undef ibody
+    } else if constexpr (length > 10 && difference == 4) {
+        // this will generate a partial number but reduce the number of conversions
+        // required greatly!
+        // The last two digits are handled in a base 10 fashion without the +2 added
+        // This will make the partial converison correct (remember that a 0 becomes a 2
+        // in this model).
+        auto outerConverted = convertNumber<length>(index);
+        static constexpr auto p10a = fastPow10<position>;
+        static constexpr auto p10b = fastPow10<position+1>;
+        static constexpr auto p10c = fastPow10<position+2>;
+		static constexpr auto p10d = fastPow10<position+3>;
+        for (auto a = 0ul; a < 8ul; ++a) {
+            SKIP5s(a);
+            auto a1 = outerConverted + (a * p10a);
+            auto a2 = outerConverted + (a * p10b); 
+            auto a3 = outerConverted + (a * p10c); 
+			auto a4 = outerConverted + (a * p10d);
+            auto as = sum + a;
+            auto ap = product * (a + 2);
+            for (auto b = a; b < 8ul; ++b) {
+                SKIP5s(b);
+                auto b1 = b * p10a;
+                auto b2 = b * p10b;
+                auto b3 = b * p10c;
+				auto b4 = b * p10d;
+                auto bs = as + b;
+                auto bp = ap * (b + 2);
+                auto abdiff = a != b;
+				auto absame = a == b;
+				auto ab12comb = a1 + b2;
+                for (auto c = b; c < 8ul; ++c) {
+                    SKIP5s(c);
+                    auto cs = bs + c;
+                    auto c1 = c * p10a;
+                    auto c2 = c * p10b;
+                    auto c3 = c * p10c;
+					auto c4 = c * p10d;
+					auto acdiff = a != c;
+					auto bcdiff = b != c;
+					auto bcsame = b == c;
+                    auto cp = bp * (c + 2);
+					for (auto d = c; d < 8ul; ++d) {
+						SKIP5s(d);
+						auto ds = cs + d;
+						auto d1 = d * p10a;
+						auto d2 = d * p10b;
+						auto d3 = d * p10c;
+						auto d4 = d * p10d;
+						auto dp = cp * (d + 2);
+						if (ds % 3 != 0) {
+							continue;
+						}
+#define bcheck(x) ((x % dp == 0) && (x % ds == 0))
+#define ibody(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { list.emplace_back(n); }
+						// always do this one
+						// output all combinations first
+						ibody(a,b,c,d);
+						if (absame) {
+							if (bcsame) {
+								if (c != d) {
+									ibody(a,b,d,c);
+									ibody(a,d,b,c);
+									ibody(d,a,b,c);
+								}
+							} else {
+								if (c == d) {
+									ibody(a,c,b,d);
+									ibody(a,c,d,b);
+
+									ibody(c,a,b,d);
+									ibody(c,a,d,b);
+									ibody(c,d,a,b);
+								} else {
+									// a == b && b != c && c != d
+									// Thus a != c but a == d ?
+									if (a == d) {
+										ibody(a,b,d,c);
+										ibody(a,c,b,d);
+										ibody(c,a,b,d);
+									} else {
+										ibody(a,b,d,c);
+										ibody(a,c,b,d);
+										ibody(a,c,d,b);
+										ibody(a,d,c,b);
+										ibody(a,d,b,c);
+
+										ibody(c,a,b,d);
+										ibody(c,a,d,b);
+										ibody(c,d,a,b);
+
+										ibody(d,a,b,c);
+										ibody(d,a,c,b);
+										ibody(d,c,a,b);
+									}
+								}
+							}
+						} else {
+							if (bcsame) {
+								if (c == d) {
+									// therefore a != d
+									ibody(b,a,c,d);
+									ibody(b,c,a,d);
+									ibody(b,c,d,a);
+								} else {
+									ibody(a,b,d,c);
+									ibody(a,d,c,b);
+									ibody(a,d,b,c);
+
+									ibody(b,a,c,d);
+									ibody(b,a,d,c);
+									ibody(b,c,a,d);
+									ibody(b,c,d,a);
+									ibody(b,d,c,a);
+									ibody(b,d,a,c);
+
+									ibody(d,a,b,c);
+									ibody(d,b,a,c);
+									ibody(d,b,c,a);
+								}
+							} else {
+								ibody(a,b,d,c);
+								ibody(a,c,b,d);
+								ibody(a,c,d,b);
+								ibody(a,d,c,b);
+								ibody(a,d,b,c);
+
+								ibody(b,a,c,d);
+								ibody(b,a,d,c);
+								ibody(b,c,a,d);
+								ibody(b,c,d,a);
+								ibody(b,d,c,a);
+								ibody(b,d,a,c);
+
+								ibody(c,a,b,d);
+								ibody(c,a,d,b);
+								ibody(c,b,a,d);
+								ibody(c,b,d,a);
+								ibody(c,d,b,a);
+								ibody(c,d,a,b);
+
+								ibody(d,a,b,c);
+								ibody(d,a,c,b);
+								ibody(d,b,a,c);
+								ibody(d,b,c,a);
+								ibody(d,c,b,a);
+								ibody(d,c,a,b);
+							}
+						}
+					}
                 }
             }
         }
