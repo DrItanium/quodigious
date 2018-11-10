@@ -157,30 +157,30 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto c3 = c * p10c;
                     auto cp = bp * (c + 2);
 #define bcheck(x) ((x % cp == 0) && (x % cs == 0))
-#define ibody(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
+#define X(x,y,z) if (auto n = x + y + z ; bcheck(n)) { list.emplace_back(n); }
                     // always do this one
-                    ibody(a1,b2,c3);
+                    X(a1,b2,c3);
                     if (abdiff) {
                        // a != b thus we can execute these two safely
                        //
-                       ibody(b1,c2,a3);
-                       ibody(c1,a2,b3);
+                       X(b1,c2,a3);
+                       X(c1,a2,b3);
                        if (b != c && a != c) {
-                           ibody(a1,c2,b3);
-                           ibody(b1,a2,c3);
-                           ibody(c1,b2,a3);
+                           X(a1,c2,b3);
+                           X(b1,a2,c3);
+                           X(c1,b2,a3);
                        }
                     } else if (b != c) {
                         // a == b && b != c -> a != c
                         // a == b in this case if we get here
-                        ibody(b1,c2,a3);
-                        ibody(c1,a2,b3);
+                        X(b1,c2,a3);
+                        X(c1,a2,b3);
                     }
                 }
             }
         }
 #undef bcheck
-#undef ibody
+#undef X
     } else if constexpr (length > 10 && difference == 4) {
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
@@ -208,7 +208,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				auto b4 = b * p10d;
                 auto bs = as + b;
                 auto bp = ap * (b + 2);
-                auto abdiff = a != b;
 				auto absame = a == b;
 				auto ab12comb = a1 + b2;
                 for (auto c = b; c < 8ul; ++c) {
@@ -218,9 +217,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto c2 = c * p10b;
                     auto c3 = c * p10c;
 					auto c4 = c * p10d;
-					auto acdiff = a != c;
-					auto bcdiff = b != c;
 					auto bcsame = b == c;
+					auto acsame = a == c;
                     auto cp = bp * (c + 2);
 					for (auto d = c; d < 8ul; ++d) {
 						SKIP5s(d);
@@ -234,46 +232,46 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							continue;
 						}
 #define bcheck(x) ((x % dp == 0) && (x % ds == 0))
-#define ibody(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { list.emplace_back(n); }
+#define X(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { list.emplace_back(n); }
 						// always do this one
 						// output all combinations first
-						ibody(a,b,c,d);
+						X(a,b,c,d);
 						if (absame) {
 							if (bcsame) {
 								if (c != d) {
-									ibody(a,b,d,c);
-									ibody(a,d,b,c);
-									ibody(d,a,b,c);
+									X(a,b,d,c);
+									X(a,d,b,c);
+									X(d,a,b,c);
 								}
 							} else {
 								if (c == d) {
-									ibody(a,c,b,d);
-									ibody(a,c,d,b);
+									X(a,c,b,d);
+									X(a,c,d,b);
 
-									ibody(c,a,b,d);
-									ibody(c,a,d,b);
-									ibody(c,d,a,b);
+									X(c,a,b,d);
+									X(c,a,d,b);
+									X(c,d,a,b);
 								} else {
 									// a == b && b != c && c != d
 									// Thus a != c but a == d ?
 									if (a == d) {
-										ibody(a,b,d,c);
-										ibody(a,c,b,d);
-										ibody(c,a,b,d);
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(c,a,b,d);
 									} else {
-										ibody(a,b,d,c);
-										ibody(a,c,b,d);
-										ibody(a,c,d,b);
-										ibody(a,d,c,b);
-										ibody(a,d,b,c);
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
 
-										ibody(c,a,b,d);
-										ibody(c,a,d,b);
-										ibody(c,d,a,b);
+										X(c,a,b,d);
+										X(c,a,d,b);
+										X(c,d,a,b);
 
-										ibody(d,a,b,c);
-										ibody(d,a,c,b);
-										ibody(d,c,a,b);
+										X(d,a,b,c);
+										X(d,a,c,b);
+										X(d,c,a,b);
 									}
 								}
 							}
@@ -281,52 +279,155 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							if (bcsame) {
 								if (c == d) {
 									// therefore a != d
-									ibody(b,a,c,d);
-									ibody(b,c,a,d);
-									ibody(b,c,d,a);
+									X(b,a,c,d);
+									X(b,c,a,d);
+									X(b,c,d,a);
 								} else {
-									ibody(a,b,d,c);
-									ibody(a,d,c,b);
-									ibody(a,d,b,c);
+									if (a == d) {
+										X(a,b,d,c);
+										X(a,d,b,c);
 
-									ibody(b,a,c,d);
-									ibody(b,a,d,c);
-									ibody(b,c,a,d);
-									ibody(b,c,d,a);
-									ibody(b,d,c,a);
-									ibody(b,d,a,c);
+										X(b,a,d,c);
+										X(b,a,c,d);
+										X(b,c,a,d);
+									} else {
+										X(a,b,d,c);
+										X(a,d,c,b);
+										X(a,d,b,c);
 
-									ibody(d,a,b,c);
-									ibody(d,b,a,c);
-									ibody(d,b,c,a);
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,c,a);
+										X(b,d,a,c);
+
+										X(d,a,b,c);
+										X(d,b,a,c);
+										X(d,b,c,a);
+									}
 								}
 							} else {
-								ibody(a,b,d,c);
-								ibody(a,c,b,d);
-								ibody(a,c,d,b);
-								ibody(a,d,c,b);
-								ibody(a,d,b,c);
+								// a != b && b != c
+								if (acsame) {
+									if (a == d) {
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(b,a,c,d);
+									} else {
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
 
-								ibody(b,a,c,d);
-								ibody(b,a,d,c);
-								ibody(b,c,a,d);
-								ibody(b,c,d,a);
-								ibody(b,d,c,a);
-								ibody(b,d,a,c);
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,a,c);
 
-								ibody(c,a,b,d);
-								ibody(c,a,d,b);
-								ibody(c,b,a,d);
-								ibody(c,b,d,a);
-								ibody(c,d,b,a);
-								ibody(c,d,a,b);
+										X(d,a,b,c);
+										X(d,a,c,b);
+										X(d,b,a,c);
+									}
+								} else {
+									// a != b && b !=c && a != c
+									// therefore a == d || b == d || c == d ||
+									// a != d && b != d && c != d
+									if (a == d) {
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
 
-								ibody(d,a,b,c);
-								ibody(d,a,c,b);
-								ibody(d,b,a,c);
-								ibody(d,b,c,a);
-								ibody(d,c,b,a);
-								ibody(d,c,a,b);
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,c,a);
+										X(b,d,a,c);
+
+										X(c,a,b,d);
+										X(c,a,d,b);
+										X(c,b,a,d);
+										X(c,b,d,a);
+										X(c,d,b,a);
+										X(c,d,a,b);
+
+									} else if (b == d) {
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
+
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,c,a);
+										X(b,d,a,c);
+
+										X(c,a,b,d);
+										X(c,a,d,b);
+										X(c,b,a,d);
+										X(c,b,d,a);
+										X(c,d,b,a);
+										X(c,d,a,b);
+
+
+									} else if (c == d) {
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
+
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,c,a);
+										X(b,d,a,c);
+
+										X(c,a,b,d);
+										X(c,a,d,b);
+										X(c,b,a,d);
+										X(c,b,d,a);
+										X(c,d,b,a);
+										X(c,d,a,b);
+
+									} else {
+										X(a,b,d,c);
+										X(a,c,b,d);
+										X(a,c,d,b);
+										X(a,d,c,b);
+										X(a,d,b,c);
+
+										X(b,a,c,d);
+										X(b,a,d,c);
+										X(b,c,a,d);
+										X(b,c,d,a);
+										X(b,d,c,a);
+										X(b,d,a,c);
+
+										X(c,a,b,d);
+										X(c,a,d,b);
+										X(c,b,a,d);
+										X(c,b,d,a);
+										X(c,d,b,a);
+										X(c,d,a,b);
+
+										X(d,a,b,c);
+										X(d,a,c,b);
+										X(d,b,a,c);
+										X(d,b,c,a);
+										X(d,c,b,a);
+										X(d,c,a,b);
+									}
+								}
 							}
 						}
 					}
@@ -334,7 +435,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
         }
 #undef bcheck
-#undef ibody
+#undef X
     } else {
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
