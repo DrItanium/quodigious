@@ -330,45 +330,33 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(b,c,a,d);
 									X(c,a,b,d);
 									X(c,b,a,d);
+									if (c != d) {
+										X(a,b,d,c);
+										X(b,a,d,c);
+									}
+									if (b != d) {
+										X(c,a,d,b);
+									}
+									if (a != d) {
+										X(b,c,d,a);
+										X(c,b,d,a);
+									}
 									if (a == d) {
-										X(a,b,d,c);
 										X(a,d,c,b);
 										X(a,d,b,c);
-
-										X(b,a,d,c);
-
-										X(c,a,d,b);
 									} else if (b == d) {
-										X(a,b,d,c);
-
-										X(b,a,d,c);
-										X(b,c,d,a);
 										X(b,d,c,a);
 										X(b,d,a,c);
-
-										X(c,b,d,a);
 									} else if (c == d) {
-										X(b,c,d,a);
-										X(c,a,d,b);
-										X(c,b,d,a);
 										X(c,d,b,a);
 										X(c,d,a,b);
-
 									} else {
-										X(a,b,d,c);
 										X(a,d,c,b);
 										X(a,d,b,c);
-
-										X(b,a,d,c);
-										X(b,c,d,a);
 										X(b,d,c,a);
 										X(b,d,a,c);
-
-										X(c,a,d,b);
-										X(c,b,d,a);
 										X(c,d,b,a);
 										X(c,d,a,b);
-
 										X(d,a,b,c);
 										X(d,a,c,b);
 										X(d,b,a,c);
