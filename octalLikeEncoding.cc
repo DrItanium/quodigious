@@ -256,7 +256,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								X(a,d,b,c);
 							}
 							if (!bcsame) {
-								// a == b && b != c 
+								// a == b && b != c -> a != c
 								X(a,c,b,d);
 								X(c,a,b,d);
 								if (a != d) {
