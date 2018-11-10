@@ -68,11 +68,16 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
                 continue; \
             } \
         }
+template<u64 len, u64 pos>
+constexpr bool lenGreaterAndPos(u64 length, u64 position) noexcept {
+	return (length > len) && (position == pos);
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
+	using DataTriple = std::tuple<u64, u64, u64>;
     static constexpr auto difference = length - position;
     if constexpr (position == length) {
         if constexpr (length > 10) {
@@ -84,12 +89,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
             list.emplace_back(conv);
         }
-#define lenGreaterAndPos(len,pos) (length > len && position == pos)
-    } else if constexpr (lenGreaterAndPos(10, 2) || lenGreaterAndPos(11, 3) || lenGreaterAndPos(12, 4) || lenGreaterAndPos(13, 5)) {
-#undef lenGreaterAndPos
+    } else if constexpr (lenGreaterAndPos<10, 2>(length, position) || 
+			             lenGreaterAndPos<11, 3>(length, position) || 
+						 lenGreaterAndPos<12, 4>(length, position) || 
+						 lenGreaterAndPos<13, 5>(length, position)) {
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
-        std::list<std::tuple<u64, u64, u64>> lower, upper;
+        std::list<DataTriple> lower, upper;
         auto dprod = product << 1;
         static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
@@ -102,7 +108,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
             //body<position + 1, length>(list, sum, dprod + (i * product), index);
         }
-        auto halveIt = [](std::list<std::tuple<u64, u64, u64>> & collection) {
+        auto halveIt = [](std::list<DataTriple> & collection) {
             MatchList l;
             for(auto& a : collection) {
                 body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a));
