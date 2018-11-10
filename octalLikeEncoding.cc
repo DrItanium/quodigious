@@ -72,6 +72,17 @@ template<u64 len, u64 pos>
 constexpr bool lenGreaterAndPos(u64 length, u64 position) noexcept {
 	return (length > len) && (position == pos);
 }
+void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
+#ifdef DEBUG
+	if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
+		std::cout << "Duplicate value: " << value << std::endl;
+	} else {
+		l.emplace_back(value);
+	}
+#else
+		l.emplace_back(value);
+#endif
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -232,7 +243,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							continue;
 						}
 #define bcheck(x) ((x % dp == 0) && (x % ds == 0))
-#define X(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { list.emplace_back(n); }
+#define X(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { tryInsertIntoList(n, list); }
 						// always do this one
 						// output all combinations first
 						X(a,b,c,d);
@@ -279,7 +290,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(a,d,b,c);
 									X(b,a,d,c);
 									if (a != d) {
-										X(a,d,c,b);
 										X(b,d,c,a);
 										X(b,d,a,c);
 										X(d,a,b,c);
@@ -289,110 +299,72 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								}
 							} else {
 								// a != b && b != c
+								X(a,c,b,d);
+								X(b,a,c,d);
+								if (b != d) {
+									X(a,c,d,b);
+								}
 								if (acsame) {
-									if (a == d) {
-										X(a,c,b,d);
-										X(a,c,d,b);
-										X(b,a,c,d);
-									} else {
+									if (a != d) {
 										// a != b && b != c && a == c
 										// c == d || b == d || (c != d && b != d)
-										if (c == d) {
-											X(a,c,b,d);
-											X(a,c,d,b);
-											X(b,a,c,d);
-										} else if (b == d) {
-											X(a,b,d,c);
-											X(a,c,b,d);
-											X(a,d,c,b);
-
-											X(b,a,c,d);
+										if (c != d) {
 											X(b,a,d,c);
+											X(a,b,d,c);
+											X(a,d,c,b);
 											X(b,c,a,d);
 											X(b,c,d,a);
 											X(b,d,a,c);
-										} else {
-											X(a,b,d,c);
-											X(a,c,b,d);
-											X(a,c,d,b);
-											X(a,d,c,b);
-											X(a,d,b,c);
-
-											X(b,a,c,d);
-											X(b,a,d,c);
-											X(b,c,a,d);
-											X(b,c,d,a);
-											X(b,d,a,c);
-
-											X(d,a,b,c);
-											X(d,a,c,b);
-											X(d,b,a,c);
+											if (b != d) {
+												X(a,d,b,c);
+												X(d,a,b,c);
+												X(d,a,c,b);
+												X(d,b,a,c);
+											}
 										}
 									}
 								} else {
 									// a != b && b !=c && a != c
 									// therefore a == d || b == d || c == d ||
 									// a != d && b != d && c != d
+									X(b,c,a,d);
+									X(c,a,b,d);
+									X(c,b,a,d);
 									if (a == d) {
 										X(a,b,d,c);
-										X(a,c,b,d);
-										X(a,c,d,b);
 										X(a,d,c,b);
 										X(a,d,b,c);
 
-										X(b,a,c,d);
 										X(b,a,d,c);
-										X(b,c,a,d);
 
-										X(c,a,b,d);
 										X(c,a,d,b);
-										X(c,b,a,d);
 									} else if (b == d) {
 										X(a,b,d,c);
-										X(a,c,b,d);
 
-										X(b,a,c,d);
 										X(b,a,d,c);
-										X(b,c,a,d);
 										X(b,c,d,a);
 										X(b,d,c,a);
 										X(b,d,a,c);
 
-										X(c,a,b,d);
-										X(c,b,a,d);
 										X(c,b,d,a);
 									} else if (c == d) {
-										X(a,c,b,d);
-										X(a,c,d,b);
-
-										X(b,a,c,d);
-										X(b,c,a,d);
 										X(b,c,d,a);
-
-										X(c,a,b,d);
 										X(c,a,d,b);
-										X(c,b,a,d);
 										X(c,b,d,a);
 										X(c,d,b,a);
 										X(c,d,a,b);
 
 									} else {
 										X(a,b,d,c);
-										X(a,c,b,d);
-										X(a,c,d,b);
 										X(a,d,c,b);
 										X(a,d,b,c);
 
-										X(b,a,c,d);
 										X(b,a,d,c);
-										X(b,c,a,d);
 										X(b,c,d,a);
 										X(b,d,c,a);
 										X(b,d,a,c);
 
-										X(c,a,b,d);
 										X(c,a,d,b);
-										X(c,b,a,d);
 										X(c,b,d,a);
 										X(c,d,b,a);
 										X(c,d,a,b);
