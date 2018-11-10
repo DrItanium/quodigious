@@ -250,34 +250,37 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						if (c != d) {
 							X(a,b,d,c);
 						}
+						if (!bcsame) {
+							X(a,c,b,d);
+							if (!acsame) {
+								X(c,a,b,d);
+							}
+						}
 						if (absame) {
 							if (c != d) {
 								X(d,a,b,c);
 								X(a,d,b,c);
 							}
-							if (!bcsame) {
-								// a == b && b != c -> a != c
-								X(a,c,b,d);
-								X(c,a,b,d);
-								if (a != d) {
-									X(c,d,a,b);
-									X(a,c,d,b);
-									X(c,a,d,b);
-									if (c != d) {
-										// a == b && b != c && c != d
-										// Thus a != c but a == d ?
-										X(a,d,c,b);
-										X(d,a,c,b);
-										X(d,c,a,b);
-									}
+							if (!bcsame && a != d) {
+								X(c,d,a,b);
+								X(a,c,d,b);
+								X(c,a,d,b);
+								if (c != d) {
+									// a == b && b != c && c != d
+									// Thus a != c but a == d ?
+									X(a,d,c,b);
+									X(d,a,c,b);
+									X(d,c,a,b);
 								}
 							}
 						} else {
+							// a != b
 							X(b,a,c,d);
 							if (c != d) {
 								X(b,a,d,c);
 							}
 							if (bcsame) {
+								// a != b && b == c -> a != c
 								X(b,c,a,d);
 								if (a != d) {
 									X(b,c,d,a);
@@ -295,8 +298,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									}
 								}
 							} else {
-								// a != b && b != c
-								X(a,c,b,d);
+								// a != b && b != c 
 								if (b != d) {
 									X(a,c,d,b);
 								}
@@ -322,7 +324,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// therefore a == d || b == d || c == d ||
 									// a != d && b != d && c != d
 									X(b,c,a,d);
-									X(c,a,b,d);
 									X(c,b,a,d);
 									if (b != d) {
 										X(c,a,d,b);
