@@ -368,7 +368,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		}
 #undef bcheck
 #undef X
-	} else if constexpr (length > 10 && difference == 5) {
+	} else if constexpr (length > 11 && difference == 5) {
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
@@ -382,46 +382,40 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		static constexpr auto p10e = fastPow10<position+4>;
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
-			auto a1 = (a * p10a);
-			auto a2 = (a * p10b);
-			auto a3 = (a * p10c);
-			auto a4 = (a * p10d);
-			auto a5 = (a * p10e);
+			auto a1 = outerConverted + (a * p10a);
+			auto a2 = a * p10b;
+			auto a3 = a * p10c;
+			auto a4 = a * p10d;
+			auto a5 = a * p10e;
 			auto as = sum + a;
 			auto ap = product * (a + 2);
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
-				auto b1 = b * p10a;
+				auto b1 = outerConverted + (b * p10a);
 				auto b2 = b * p10b;
 				auto b3 = b * p10c;
 				auto b4 = b * p10d;
 				auto b5 = b * p10e;
 				auto bs = as + b;
 				auto bp = ap * (b + 2);
-				auto notab = a != b;
 				for (auto c = b; c < 8ul; ++c) {
 					SKIP5s(c);
 					auto cs = bs + c;
-					auto c1 = c * p10a;
+					auto c1 = outerConverted + (c * p10a);
 					auto c2 = c * p10b;
 					auto c3 = c * p10c;
 					auto c4 = c * p10d;
 					auto c5 = c * p10e;
-					auto notac = a != c;
-					auto notbc = b != c;
 					auto cp = bp * (c + 2);
 					for (auto d = c; d < 8ul; ++d) {
 						SKIP5s(d);
 						auto ds = cs + d;
 						auto dp = cp * (d + 2);
-						auto d1 = d * p10a;
+						auto d1 = outerConverted + (d * p10a);
 						auto d2 = d * p10b;
 						auto d3 = d * p10c;
 						auto d4 = d * p10d;
 						auto d5 = d * p10e;
-						auto notad = a != d;
-						auto notbd = b != d;
-						auto notcd = c != d;
 						for (auto e = d; e < 8ul; ++e) {
 							SKIP5s(e);
 							auto es = ds + e;
@@ -429,13 +423,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								continue;
 							}
 							auto ep = dp * (e + 2);
-							auto e1 = e * p10a;
+							auto e1 = outerConverted + (e * p10a);
 							auto e2 = e * p10b;
 							auto e3 = e * p10c;
 							auto e4 = e * p10d;
 							auto e5 = e * p10e;
 #define bcheck(x) ((x % ep == 0) && (x % es == 0))
-#define X(x,y,z,w,h) if (auto n = outerConverted + x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; bcheck(n)) { tryInsertIntoList(n, list); }
+#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; bcheck(n)) { tryInsertIntoList(n, list); }
 							if (a == b) {
 								if (b == c) {
 									if (c == d) {
@@ -481,26 +475,39 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 											X(b,b,e,d,d); X(b,b,d,e,d); X(b,b,d,d,e);
 										}
 									} else {
-										X(e,d,c,a,a); X(e,d,a,c,a); X(e,d,a,a,c);
-										X(e,c,d,a,a); X(e,c,a,d,a); X(e,c,a,a,d);
-										X(e,a,d,c,a); X(e,a,d,a,c); X(e,a,c,d,a);
-										X(e,a,c,a,d); X(e,a,a,d,c); X(e,a,a,c,d);
-										X(d,e,c,a,a); X(d,e,a,c,a); X(d,e,a,a,c);
-										X(d,c,e,a,a); X(d,c,a,e,a); X(d,c,a,a,e);
-										X(d,a,e,c,a); X(d,a,e,a,c); X(d,a,c,e,a);
-										X(d,a,c,a,e); X(d,a,a,e,c); X(d,a,a,c,e);
-										X(c,e,d,a,a); X(c,e,a,d,a); X(c,e,a,a,d);
-										X(c,d,e,a,a); X(c,d,a,e,a); X(c,d,a,a,e);
-										X(c,a,e,d,a); X(c,a,e,a,d); X(c,a,d,e,a);
-										X(c,a,d,a,e); X(c,a,a,e,d); X(c,a,a,d,e);
-										X(a,e,d,c,a); X(a,e,d,a,c); X(a,e,c,d,a);
-										X(a,e,c,a,d); X(a,e,a,d,c); X(a,e,a,c,d);
-										X(a,d,e,c,a); X(a,d,e,a,c); X(a,d,c,e,a);
-										X(a,d,c,a,e); X(a,d,a,e,c); X(a,d,a,c,e);
-										X(a,c,e,d,a); X(a,c,e,a,d); X(a,c,d,e,a);
-										X(a,c,d,a,e); X(a,c,a,e,d); X(a,c,a,d,e);
-										X(a,a,e,d,c); X(a,a,e,c,d); X(a,a,d,e,c);
-										X(a,a,d,c,e); X(a,a,c,e,d); X(a,a,c,d,e);
+										if (d == e) {
+											X(e,e,c,b,b); X(e,e,b,c,b); X(e,e,b,b,c);
+											X(e,c,e,b,b); X(e,c,b,e,b); X(e,c,b,b,e);
+											X(e,b,e,c,b); X(e,b,e,b,c); X(e,b,c,e,b);
+											X(e,b,c,b,e); X(e,b,b,e,c); X(e,b,b,c,e);
+											X(c,e,e,b,b); X(c,e,b,e,b); X(c,e,b,b,e);
+											X(c,b,e,e,b); X(c,b,e,b,e); X(c,b,b,e,e);
+											X(b,e,e,c,b); X(b,e,e,b,c); X(b,e,c,e,b);
+											X(b,e,c,b,e); X(b,e,b,e,c); X(b,e,b,c,e);
+											X(b,c,e,e,b); X(b,c,e,b,e); X(b,c,b,e,e);
+											X(b,b,e,e,c); X(b,b,e,c,e); X(b,b,c,e,e);
+										} else {
+											X(e,d,c,a,a); X(e,d,a,c,a); X(e,d,a,a,c);
+											X(e,c,d,a,a); X(e,c,a,d,a); X(e,c,a,a,d);
+											X(e,a,d,c,a); X(e,a,d,a,c); X(e,a,c,d,a);
+											X(e,a,c,a,d); X(e,a,a,d,c); X(e,a,a,c,d);
+											X(d,e,c,a,a); X(d,e,a,c,a); X(d,e,a,a,c);
+											X(d,c,e,a,a); X(d,c,a,e,a); X(d,c,a,a,e);
+											X(d,a,e,c,a); X(d,a,e,a,c); X(d,a,c,e,a);
+											X(d,a,c,a,e); X(d,a,a,e,c); X(d,a,a,c,e);
+											X(c,e,d,a,a); X(c,e,a,d,a); X(c,e,a,a,d);
+											X(c,d,e,a,a); X(c,d,a,e,a); X(c,d,a,a,e);
+											X(c,a,e,d,a); X(c,a,e,a,d); X(c,a,d,e,a);
+											X(c,a,d,a,e); X(c,a,a,e,d); X(c,a,a,d,e);
+											X(a,e,d,c,a); X(a,e,d,a,c); X(a,e,c,d,a);
+											X(a,e,c,a,d); X(a,e,a,d,c); X(a,e,a,c,d);
+											X(a,d,e,c,a); X(a,d,e,a,c); X(a,d,c,e,a);
+											X(a,d,c,a,e); X(a,d,a,e,c); X(a,d,a,c,e);
+											X(a,c,e,d,a); X(a,c,e,a,d); X(a,c,d,e,a);
+											X(a,c,d,a,e); X(a,c,a,e,d); X(a,c,a,d,e);
+											X(a,a,e,d,c); X(a,a,e,c,d); X(a,a,d,e,c);
+											X(a,a,d,c,e); X(a,a,c,e,d); X(a,a,c,d,e);
+										}
 									}
 								}
 							} else if (b == c) {
