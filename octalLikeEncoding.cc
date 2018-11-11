@@ -430,38 +430,38 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								if (bceq) {
 									if (cdeq) {
 										if (d != e) {
-											X(e,d,d,d,d); X(d,e,d,d,d); 
-											X(d,d,e,d,d); X(d,d,d,e,d); 
+											X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+											X(d,d,d,e,d); 
 										}
 									} else {
+										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
+										X(e,c,c,c,d); 
+
+										X(c,e,d,c,c); X(c,e,c,d,c); X(c,e,c,c,d); 
+										X(c,c,e,d,c); X(c,c,e,c,d); 
 										if (d == e) {
-											X(e,e,c,c,c); X(e,c,e,c,c); X(e,c,c,e,c);
-											X(e,c,c,c,e); X(c,e,e,c,c); X(c,e,c,e,c);
-											X(c,e,c,c,e); X(c,c,e,e,c); X(c,c,e,c,e);
+											//X(c,e,e,c,c); X(c,e,c,e,c); X(c,e,c,c,e); 
+											//X(c,c,e,e,c); X(c,c,e,c,e);
 										} else {
-											X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
-											X(e,c,c,c,d); X(d,e,c,c,c); X(d,c,e,c,c);
-											X(d,c,c,e,c); X(d,c,c,c,e); X(c,e,d,c,c);
-											X(c,e,c,d,c); X(c,e,c,c,d); X(c,d,e,c,c);
-											X(c,d,c,e,c); X(c,d,c,c,e); X(c,c,e,d,c);
-											X(c,c,e,c,d); X(c,c,d,e,c); X(c,c,d,c,e);
-											X(c,c,c,e,d); 
+											X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+											X(d,c,c,c,e); 
+
+											X(c,d,e,c,c); X(c,d,c,e,c); X(c,d,c,c,e); 
+											X(c,c,d,e,c); 
+											X(c,c,d,c,e); X(c,c,c,e,d); 
 										}
 									}
 								} else {
 									if (cdeq) {
-										if (d == e) {
-											X(e,e,e,b,b); X(e,e,b,e,b); X(e,e,b,b,e);
-											X(e,b,e,e,b); X(e,b,e,b,e); X(e,b,b,e,e);
-											X(b,e,e,e,b); X(b,e,e,b,e); X(b,e,b,e,e);
-										} else {
-											X(e,d,d,b,b); X(e,d,b,d,b); X(e,d,b,b,d);
-											X(e,b,d,d,b); X(e,b,d,b,d); X(e,b,b,d,d);
+										X(e,d,d,b,b); X(e,d,b,d,b); X(e,d,b,b,d);
+										X(e,b,d,d,b); X(e,b,d,b,d); X(e,b,b,d,d);
+										X(b,e,d,d,b); X(b,e,d,b,d); X(b,e,b,d,d);
+										if (d != e) {
 											X(d,e,d,b,b); X(d,e,b,d,b); X(d,e,b,b,d);
 											X(d,d,e,b,b); X(d,d,b,e,b); X(d,d,b,b,e);
 											X(d,b,e,d,b); X(d,b,e,b,d); X(d,b,d,e,b);
 											X(d,b,d,b,e); X(d,b,b,e,d); X(d,b,b,d,e);
-											X(b,e,d,d,b); X(b,e,d,b,d); X(b,e,b,d,d);
+
 											X(b,d,e,d,b); X(b,d,e,b,d); X(b,d,d,e,b);
 											X(b,d,d,b,e); X(b,d,b,e,d); X(b,d,b,d,e);
 											X(b,b,e,d,d); X(b,b,d,e,d); 
@@ -504,9 +504,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								}
 							} else if (bceq) {
 								if (cdeq) {
-									X(e,d,d,d,a); 
-									X(e,d,d,a,d); 
-									X(e,d,a,d,d); 
+									X(e,d,d,d,a); X(e,d,d,a,d); X(e,d,a,d,d);
 									X(e,a,d,d,d); 
 									if (d != e) {
 										X(d,e,d,d,a); X(d,e,d,a,d); X(d,e,a,d,d); 
@@ -516,11 +514,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										X(a,e,d,d,d); X(a,d,e,d,d); X(a,d,d,e,d); 
 									}
 								} else {
+									X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c);
+									X(e,c,d,c,a); X(e,c,d,a,c); X(e,c,c,d,a);
+									X(e,c,c,a,d); X(e,c,a,d,c); X(e,c,a,c,d);
+									X(e,a,d,c,c); X(e,a,c,d,c); X(e,a,c,c,d);
 									if (d == e) {
-										X(e,e,c,c,a); X(e,e,c,a,c); X(e,e,a,c,c);
-										X(e,c,e,c,a); X(e,c,e,a,c); X(e,c,c,e,a);
-										X(e,c,c,a,e); X(e,c,a,e,c); X(e,c,a,c,e);
-										X(e,a,e,c,c); X(e,a,c,e,c); X(e,a,c,c,e);
 										X(c,e,e,c,a); X(c,e,e,a,c); X(c,e,c,e,a);
 										X(c,e,c,a,e); X(c,e,a,e,c); X(c,e,a,c,e);
 										X(c,c,e,e,a); X(c,c,e,a,e); X(c,c,a,e,e);
@@ -528,10 +526,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										X(a,e,e,c,c); X(a,e,c,e,c); X(a,e,c,c,e);
 										X(a,c,e,e,c); X(a,c,e,c,e); 
 									} else {
-										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c);
-										X(e,c,d,c,a); X(e,c,d,a,c); X(e,c,c,d,a);
-										X(e,c,c,a,d); X(e,c,a,d,c); X(e,c,a,c,d);
-										X(e,a,d,c,c); X(e,a,c,d,c); X(e,a,c,c,d);
 										X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
 										X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
 										X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
@@ -551,19 +545,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									}
 								}
 							} else if (cdeq) {
+								X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
+								X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
+								X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
+								X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
 								if (d == e) {
-									X(e,e,e,b,a); X(e,e,e,a,b); X(e,e,b,e,a);
-									X(e,e,b,a,e); X(e,e,a,e,b); X(e,e,a,b,e);
-									X(e,b,e,e,a); X(e,b,e,a,e); X(e,b,a,e,e);
-									X(e,a,e,e,b); X(e,a,e,b,e); X(e,a,b,e,e);
 									X(b,e,e,e,a); X(b,e,e,a,e); X(b,e,a,e,e);
 									X(b,a,e,e,e); X(a,e,e,e,b); X(a,e,e,b,e);
 									X(a,e,b,e,e); 
 								} else {
-									X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
-									X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
-									X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
-									X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
 									X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
 									X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
 									X(d,d,e,b,a); X(d,d,e,a,b); X(d,d,b,e,a);
