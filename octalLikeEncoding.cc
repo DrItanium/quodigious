@@ -30,6 +30,9 @@
 #include <list>
 
 using MatchList = std::list<u64>;
+constexpr auto enableFiveDigits = true;
+constexpr auto enableThreeDigits = false;
+constexpr auto enableFourDigits = false;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 base, u64 pos>
@@ -136,7 +139,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		auto l1 = t1.get();
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
-	} else if constexpr (length > 10 && difference == 3) {
+	} else if constexpr (enableThreeDigits && length > 10 && difference == 3) {
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
@@ -194,7 +197,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		}
 #undef bcheck
 #undef X
-	} else if constexpr (length > 10 && difference == 4) {
+	} else if constexpr (enableFourDigits && length > 10 && difference == 4) {
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
@@ -366,7 +369,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		}
 #undef bcheck
 #undef X
-	} else if constexpr (length > 10 && difference == 5) {
+	} else if constexpr (enableFiveDigits && length > 10 && difference == 5) {
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
@@ -391,7 +394,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				auto b5 = b * p10e;
 				auto bs = as + b;
 				auto bp = ap * (b + 2);
-				auto abeq = a == b;
 				for (auto c = b; c < 8ul; ++c) {
 					SKIP5s(c);
 					auto cs = bs + c;
@@ -401,7 +403,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 					auto c4 = c * p10d;
 					auto c5 = c * p10e;
 					auto cp = bp * (c + 2);
-					auto bceq = b == c;
 					for (auto d = c; d < 8ul; ++d) {
 						SKIP5s(d);
 						auto ds = cs + d;
@@ -411,7 +412,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						auto d3 = d * p10c;
 						auto d4 = d * p10d;
 						auto d5 = d * p10e;
-						auto cdeq = c == d;
 						for (auto e = d; e < 8ul; ++e) {
 							SKIP5s(e);
 							auto es = ds + e;
@@ -427,8 +427,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 							X(a,b,c,d,e);
 							if (a == b) {
-								if (bceq) {
-									if (cdeq) {
+								if (b == c) {
+									if (c == d) {
 										if (d != e) {
 											X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
 											X(d,d,d,e,d); 
@@ -451,7 +451,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c);
 									X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
 									X(b,e,d,c,b); X(b,e,c,b,d); X(b,e,b,d,c); 
-									if (cdeq) {
+									if (c == d) {
 										if (d != e) {
 											X(d,e,d,b,b); X(d,e,b,d,b); X(d,e,b,b,d);
 											X(d,d,e,b,b); X(d,d,b,e,b); X(d,d,b,b,e);
@@ -490,10 +490,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 									}
 								}
-							} else if (bceq) {
+							} else if (b == c) {
 								X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c);
 								X(e,a,d,c,c); 
-								if (cdeq) {
+								if (c == d) {
 									if (d != e) {
 										X(d,e,d,d,a); X(d,e,d,a,d); X(d,e,a,d,d); 
 										X(d,d,e,d,a); X(d,d,e,a,d); X(d,d,d,e,a); 
@@ -530,7 +530,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										X(a,c,d,e,c); X(a,c,d,c,e); X(a,c,c,e,d); 
 									}
 								}
-							} else if (cdeq) {
+							} else if (c == d) {
 								X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 								X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
 								X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
