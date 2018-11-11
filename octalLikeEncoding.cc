@@ -558,52 +558,44 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(a,b,e,d,d); X(a,b,d,e,d); 
 								}
 							} else {
-								if (d == e) {
-									X(e,e,c,b,a); X(e,e,c,a,b); X(e,e,b,c,a);
-									X(e,e,b,a,c); X(e,e,a,c,b); X(e,e,a,b,c);
-									X(e,c,e,b,a); X(e,c,e,a,b); X(e,c,b,e,a);
-									X(e,c,b,a,e); X(e,c,a,e,b); X(e,c,a,b,e);
-									X(e,b,e,c,a); X(e,b,e,a,c); X(e,b,c,e,a);
-									X(e,b,c,a,e); X(e,b,a,e,c); X(e,b,a,c,e);
-									X(e,a,e,c,b); X(e,a,e,b,c); X(e,a,c,e,b);
-									X(e,a,c,b,e); X(e,a,b,e,c); X(e,a,b,c,e);
-									X(c,e,e,b,a); X(c,e,e,a,b); X(c,e,b,e,a);
-									X(c,e,b,a,e); X(c,e,a,e,b); X(c,e,a,b,e);
-									X(c,b,e,e,a); X(c,b,e,a,e); X(c,b,a,e,e);
-									X(c,a,e,e,b); X(c,a,e,b,e); X(c,a,b,e,e);
-									X(b,e,e,c,a); X(b,e,e,a,c); X(b,e,c,e,a);
-									X(b,e,c,a,e); X(b,e,a,e,c); X(b,e,a,c,e);
-									X(b,c,e,e,a); X(b,c,e,a,e); X(b,c,a,e,e);
-									X(b,a,e,e,c); X(b,a,e,c,e); X(b,a,c,e,e);
-									X(a,e,e,c,b); X(a,e,e,b,c); X(a,e,c,e,b);
-									X(a,e,c,b,e); X(a,e,b,e,c); X(a,e,b,c,e);
-									X(a,c,e,e,b); X(a,c,e,b,e); X(a,c,b,e,e);
-									X(a,b,e,e,c); X(a,b,e,c,e); 
-								} else {
-									X(a,b,c,e,d); X(a,b,d,c,e); X(a,b,d,e,c);
+								X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
+								X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
+								X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
+								X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
+								X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
+								X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
+								X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
+								X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
+
+								X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
+								X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
+								X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
+								X(a,b,d,c,e); X(a,b,d,e,c);
+
+								X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
+								X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
+								X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
+								X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
+								X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
+								X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
+								X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
+								X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
+								if (d != e) {
 									X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
-									X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
 									X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
 									X(a,d,b,e,c); X(a,d,c,b,e); X(a,d,c,e,b);
-									X(a,d,e,b,c); X(a,d,e,c,b); X(a,e,b,c,d);
-									X(a,e,b,d,c); X(a,e,c,b,d); X(a,e,c,d,b);
-									X(a,e,d,b,c); X(a,e,d,c,b); X(b,a,c,d,e);
-									X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
-									X(b,a,e,c,d); X(b,a,e,d,c); X(b,c,a,d,e);
-									X(b,c,a,e,d); X(b,c,d,a,e); X(b,c,d,e,a);
-									X(b,c,e,a,d); X(b,c,e,d,a); X(b,d,a,c,e);
-									X(b,d,a,e,c); X(b,d,c,a,e); X(b,d,c,e,a);
-									X(b,d,e,a,c); X(b,d,e,c,a); X(b,e,a,c,d);
-									X(b,e,a,d,c); X(b,e,c,a,d); X(b,e,c,d,a);
-									X(b,e,d,a,c); X(b,e,d,c,a); X(c,a,b,d,e);
-									X(c,a,b,e,d); X(c,a,d,b,e); X(c,a,d,e,b);
-									X(c,a,e,b,d); X(c,a,e,d,b); X(c,b,a,d,e);
-									X(c,b,a,e,d); X(c,b,d,a,e); X(c,b,d,e,a);
+									X(a,d,e,b,c); X(a,d,e,c,b); X(a,b,c,e,d); 
+
+									X(b,a,c,d,e); X(b,a,e,c,d); X(b,a,e,d,c); 
+									X(b,c,a,e,d); X(b,c,e,a,d); X(b,c,e,d,a); 
+									X(b,d,a,c,e); X(b,d,a,e,c); X(b,d,c,a,e); 
+									X(b,d,c,e,a); X(b,d,e,a,c); X(b,d,e,c,a); 
+
+									X(c,a,b,e,d); X(c,a,e,b,d); X(c,a,e,d,b); 
+									X(c,b,a,e,d); X(c,d,e,a,b); X(c,d,e,b,a); 
 									X(c,b,e,a,d); X(c,b,e,d,a); X(c,d,a,b,e);
 									X(c,d,a,e,b); X(c,d,b,a,e); X(c,d,b,e,a);
-									X(c,d,e,a,b); X(c,d,e,b,a); X(c,e,a,b,d);
-									X(c,e,a,d,b); X(c,e,b,a,d); X(c,e,b,d,a);
-									X(c,e,d,a,b); X(c,e,d,b,a); X(d,a,b,c,e);
+
 									X(d,a,b,e,c); X(d,a,c,b,e); X(d,a,c,e,b);
 									X(d,a,e,b,c); X(d,a,e,c,b); X(d,b,a,c,e);
 									X(d,b,a,e,c); X(d,b,c,a,e); X(d,b,c,e,a);
@@ -611,15 +603,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									X(d,c,a,e,b); X(d,c,b,a,e); X(d,c,b,e,a);
 									X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
 									X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
-									X(d,e,c,a,b); X(d,e,c,b,a); X(e,a,b,c,d);
-									X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
-									X(e,a,d,b,c); X(e,a,d,c,b); X(e,b,a,c,d);
-									X(e,b,a,d,c); X(e,b,c,a,d); X(e,b,c,d,a);
-									X(e,b,d,a,c); X(e,b,d,c,a); X(e,c,a,b,d);
-									X(e,c,a,d,b); X(e,c,b,a,d); X(e,c,b,d,a);
-									X(e,c,d,a,b); X(e,c,d,b,a); X(e,d,a,b,c);
-									X(e,d,a,c,b); X(e,d,b,a,c); X(e,d,b,c,a);
-									X(e,d,c,a,b); X(e,d,c,b,a); 
+									X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
+
 								}
 							}
 #undef X
