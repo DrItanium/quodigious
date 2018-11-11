@@ -382,11 +382,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		static constexpr auto p10e = fastPow10<position+4>;
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
-			auto a1 = outerConverted + (a * p10a);
-			auto a2 = outerConverted + (a * p10b);
-			auto a3 = outerConverted + (a * p10c);
-			auto a4 = outerConverted + (a * p10d);
-			auto a5 = outerConverted + (a * p10e);
+			auto a1 = (a * p10a);
+			auto a2 = (a * p10b);
+			auto a3 = (a * p10c);
+			auto a4 = (a * p10d);
+			auto a5 = (a * p10e);
 			auto as = sum + a;
 			auto ap = product * (a + 2);
 			for (auto b = a; b < 8ul; ++b) {
@@ -435,7 +435,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							auto e4 = e * p10d;
 							auto e5 = e * p10e;
 #define bcheck(x) ((x % ep == 0) && (x % es == 0))
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; bcheck(n)) { tryInsertIntoList(n, list); }
+#define X(x,y,z,w,h) if (auto n = outerConverted + x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; bcheck(n)) { tryInsertIntoList(n, list); }
 							X(a, b, c, d, e);
 							if (a == b) {
 								X(e,d,c,a,a);
