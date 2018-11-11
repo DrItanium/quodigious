@@ -246,13 +246,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						auto d2 = d * p10b;
 						auto d3 = d * p10c;
 						auto d4 = d * p10d;
-						auto diffcd = c != d;
 						auto diffad = a != d;
 						auto diffbd = b != d;
 						// always do this one
 						// output all combinations first
 						X(a,b,c,d);
-						if (diffcd) {
+						if (c != d) {
 							X(a,b,d,c);
 							X(a,d,b,c);
 							if (bcdiff) {
