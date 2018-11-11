@@ -651,7 +651,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								X(e, c, a, d, b); X(e, c, b, a, d); X(e, c, b, d, a);
 								X(e, c, d, a, b); X(e, c, d, b, a); X(e, d, a, b, c);
 								X(e, d, a, c, b); X(e, d, b, a, c); X(e, d, b, c, a);
-								X(e, d, c, a, b); X(e, d, c, b, a);
+								X(e, d, c, a, b); X(e, d, c, b, a); X(a, b, c, d, e);
 							}
 #undef bcheck
 #undef X
