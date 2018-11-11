@@ -229,7 +229,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     auto c3 = c * p10c;
 					auto c4 = c * p10d;
 					auto bcsame = b == c;
+					auto bcdiff = !bcsame;
 					auto acsame = a == c;
+					auto acdiff = !acsame;
                     auto cp = bp * (c + 2);
 					for (auto d = c; d < 8ul; ++d) {
 						SKIP5s(d);
@@ -239,35 +241,45 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						auto d3 = d * p10c;
 						auto d4 = d * p10d;
 						auto dp = cp * (d + 2);
+
 						if (ds % 3 != 0) {
 							continue;
 						}
 #define bcheck(x) ((x % dp == 0) && (x % ds == 0))
 #define X(x,y,z,w) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4; bcheck(n)) { tryInsertIntoList(n, list); }
+						auto diffcd = c != d;
+						auto diffad = a != d;
+						auto diffbd = b != d;
 						// always do this one
 						// output all combinations first
 						X(a,b,c,d);
-						if (c != d) {
+						if (diffcd) {
 							X(a,b,d,c);
 						}
-						if (!bcsame) {
+						if (bcdiff) {
 							X(a,c,b,d);
-							if (!acsame) {
+							X(c,a,d,b);
+							if (acdiff) {
 								X(c,a,b,d);
 							}
-						}
+							if (diffad) {
+								X(c,d,a,b);
+							}
+							if (diffbd) {
+								X(a,c,d,b);
+							}
+						} 
 						if (absame) {
-							if (c != d) {
+							if (diffcd) {
+								// a == b && c != d
 								X(d,a,b,c);
 								X(a,d,b,c);
-							}
-							if (!bcsame && a != d) {
-								X(c,d,a,b);
-								X(a,c,d,b);
-								X(c,a,d,b);
-								if (c != d) {
-									// a == b && b != c && c != d
-									// Thus a != c but a == d ?
+								if (bcdiff && diffad) {
+									// a == b && b != c && a != d -> b != d 
+									// a == b && b != c && a != d && b != d ->
+									//   c == d ?
+									// a == b && b != c && a != d && b != d 
+									// && c != d -> a != c
 									X(a,d,c,b);
 									X(d,a,c,b);
 									X(d,c,a,b);
@@ -276,44 +288,42 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						} else {
 							// a != b
 							X(b,a,c,d);
-							if (c != d) {
+							if (diffcd) {
 								X(b,a,d,c);
+								X(a,d,b,c);
+								if (diffad) {
+									X(b,d,a,c);
+								}
+							}
+							if (diffad) {
+								X(b,c,d,a);
 							}
 							if (bcsame) {
 								// a != b && b == c -> a != c
 								X(b,c,a,d);
-								if (a != d) {
-									X(b,c,d,a);
-								}
 								// a != b && b == c
-								if (c != d) {
+								if (diffcd && diffad) {
 									// a != b && b == c && c != d -> b != d
-									X(a,d,b,c);
-									if (a != d) {
-										X(b,d,c,a);
-										X(b,d,a,c);
-										X(d,a,b,c);
-										X(d,b,a,c);
-										X(d,b,c,a);
-									}
+									// a != b && b == c && c != d && a != d
+									// => a != c
+									X(b,d,c,a);
+									X(d,a,b,c);
+									X(d,b,a,c);
+									X(d,b,c,a);
 								}
 							} else {
 								// a != b && b != c 
-								if (b != d) {
-									X(a,c,d,b);
-								}
+								if (diffcd) {
+									X(a,d,c,b);
+								} 
 								if (acsame) {
 									// a != b && b != c && a == c && c != d ->
 									// a != d
-									if (c != d) {
+									if (diffcd) {
 										// a != b && b != c && a == c
 										// c == d || b == d || (c != d && b != d)
-										X(a,d,c,b);
 										X(b,c,a,d);
-										X(b,c,d,a);
-										X(b,d,a,c);
-										if (b != d) {
-											X(a,d,b,c);
+										if (diffbd) {
 											X(d,a,b,c);
 											X(d,a,c,b);
 											X(d,b,a,c);
@@ -325,29 +335,21 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// a != d && b != d && c != d
 									X(b,c,a,d);
 									X(c,b,a,d);
-									if (b != d) {
-										X(c,a,d,b);
-									}
-									if (a != d) {
-										X(b,c,d,a);
+									if (diffad) {
 										X(c,b,d,a);
 									}
 									if (a == d) {
-										X(a,d,c,b);
-										X(a,d,b,c);
+										// continue from here if you get to
+										// this point
 									} else if (b == d) {
+										// a != d
 										X(b,d,c,a);
-										X(b,d,a,c);
 									} else if (c == d) {
+										// a != d && b != d
 										X(c,d,b,a);
-										X(c,d,a,b);
 									} else {
-										X(a,d,c,b);
-										X(a,d,b,c);
 										X(b,d,c,a);
-										X(b,d,a,c);
 										X(c,d,b,a);
-										X(c,d,a,b);
 										X(d,a,b,c);
 										X(d,a,c,b);
 										X(d,b,a,c);
