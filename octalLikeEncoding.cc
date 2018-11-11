@@ -310,6 +310,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							X(c,a,d,b);
 							if (acdiff) {
 								X(c,a,b,d);
+								if (!absame) {
+									X(b,c,a,d);
+									X(c,b,a,d);
+								}
 							}
 							if (diffad) {
 								X(c,d,a,b);
@@ -317,25 +321,25 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							if (diffbd) {
 								X(a,c,d,b);
 							}
-						} 
+						} else {
+							if (!absame) {
+								// a != b && b == c -> a != c
+								// a != b && b == c
+								X(b,c,a,d);
+							}
+						}
 						if (!absame) {
 							// a != b
 							X(b,a,c,d);
 							if (diffad) {
 								X(b,c,d,a);
 							}
-							if (bcsame) {
-								// a != b && b == c -> a != c
-								// a != b && b == c
-								X(b,c,a,d);
-							} else {
+							if (bcdiff) {
 								// a != b && b != c 
 								if (acdiff) { 
 									// a != b && b !=c && a != c
 									// therefore a == d || b == d || c == d ||
 									// a != d && b != d && c != d
-									X(b,c,a,d);
-									X(c,b,a,d);
 									if (diffad) {
 										X(c,b,d,a);
 									}
