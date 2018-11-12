@@ -376,6 +376,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// This will make the partial converison correct (remember that a 0 becomes a 2
 		// in this model).
 		auto outerConverted = convertNumber<length>(index);
+#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
 			auto a1 = outerConverted + (a * p10a);
@@ -395,7 +396,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				auto bs = as + b;
 				auto bp = ap * (b + 2);
 				if (a == b) {
-
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
@@ -426,7 +426,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								auto e3 = e * p10c;
 								auto e4 = e * p10d;
 								auto e5 = e * p10e;
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 								X(a,b,c,d,e);
 								if (b == c) {
 									if (d != e) {
@@ -477,7 +476,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										X(b,b,e,d,c); X(b,b,e,c,d); 
 									}
 								}
-#undef X
 							}
 						}
 					}
@@ -501,55 +499,67 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								auto d3 = d * p10c;
 								auto d4 = d * p10d;
 								auto d5 = d * p10e;
-								for (auto e = d; e < 8ul; ++e) {
-									SKIP5s(e);
-									auto es = ds + e;
-									if (es % 3 != 0) {
-										continue;
-									}
-									auto ep = dp * (e + 2);
-									auto e1 = outerConverted + (e * p10a);
-									auto e2 = e * p10b;
-									auto e3 = e * p10c;
-									auto e4 = e * p10d;
-									auto e5 = e * p10e;
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
-									X(a,b,c,d,e);
-									X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c);
-									X(e,a,d,c,c); 
-									if (d != e) {
-										X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
-										X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
-										X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
-										X(a,c,c,e,d); 
-										X(c,a,d,e,c); 
-										X(c,a,d,c,e); 
-										if (c == d) {
+								if (c == d) {
+									for (auto e = d; e < 8ul; ++e) {
+										SKIP5s(e);
+										auto es = ds + e;
+										if (es % 3 != 0) {
+											continue;
+										}
+										auto ep = dp * (e + 2);
+										auto e1 = outerConverted + (e * p10a);
+										auto e2 = e * p10b;
+										auto e3 = e * p10c;
+										auto e4 = e * p10d;
+										auto e5 = e * p10e;
+										X(a,b,c,d,e); X(e,d,c,c,a); X(e,d,c,a,c); 
+										X(e,d,a,c,c); X(e,a,d,c,c); 
+										if (d != e) {
+											X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+											X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+											X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+											X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
 											X(d,a,e,d,d); X(a,e,d,d,d); X(a,d,e,d,d); 
-										} else {
+										}
+									}
+								} else {
+									for (auto e = d; e < 8ul; ++e) {
+										SKIP5s(e);
+										auto es = ds + e;
+										if (es % 3 != 0) {
+											continue;
+										}
+										auto ep = dp * (e + 2);
+										auto e1 = outerConverted + (e * p10a);
+										auto e2 = e * p10b;
+										auto e3 = e * p10c;
+										auto e4 = e * p10d;
+										auto e5 = e * p10e;
+										X(a,b,c,d,e); X(e,a,d,c,c); X(e,d,c,c,a); 
+										X(e,d,c,a,c); X(e,d,a,c,c); X(e,c,d,c,a); 
+										X(e,c,d,a,c); X(e,c,c,d,a); X(e,c,c,a,d); 
+										X(e,c,a,d,c); X(e,c,a,c,d); X(e,a,c,d,c); 
+										X(e,a,c,c,d); X(c,e,d,c,a); X(c,e,d,a,c); 
+										X(c,e,c,d,a); X(c,e,c,a,d); X(c,e,a,d,c); 
+										X(c,e,a,c,d); X(c,c,e,d,a); X(c,c,e,a,d); 
+										X(c,c,a,e,d); X(c,a,e,d,c); X(c,a,e,c,d); 
+										X(c,a,c,e,d); X(a,e,d,c,c); X(a,e,c,d,c); 
+										X(a,e,c,c,d); X(a,c,e,d,c); X(a,c,e,c,d); 
+										if (d != e) {
+											X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+											X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+											X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+											X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
 											X(d,a,e,c,c); X(d,a,c,e,c); X(d,a,c,c,e);
 											X(c,d,e,c,a); X(c,d,e,a,c); X(c,d,c,e,a);
 											X(c,d,c,a,e); X(c,d,a,e,c); X(c,d,a,c,e);
 											X(c,c,d,e,a); X(c,c,d,a,e); X(c,c,a,d,e);
-											X(c,a,c,d,e);
 											X(a,d,e,c,c); X(a,d,c,e,c); X(a,d,c,c,e);
-											X(a,c,d,e,c); X(a,c,d,c,e); 
+											X(a,c,d,e,c); X(a,c,d,c,e); X(c,a,c,d,e);
 										}
-									}
-									if (c != d) {
-										X(e,c,d,c,a); X(e,c,d,a,c); X(e,c,c,d,a);
-										X(e,c,c,a,d); X(e,c,a,d,c); X(e,c,a,c,d);
-										X(e,a,c,d,c); X(e,a,c,c,d);
-										X(c,e,d,c,a); X(c,e,d,a,c); X(c,e,c,d,a);
-										X(c,e,c,a,d); X(c,e,a,d,c); X(c,e,a,c,d);
-										X(c,c,e,d,a); X(c,c,e,a,d); X(c,c,a,e,d); 
-										X(c,a,e,d,c); X(c,a,e,c,d); X(c,a,c,e,d); 
-										X(a,e,d,c,c); X(a,e,c,d,c); X(a,e,c,c,d);
-										X(a,c,e,d,c); X(a,c,e,c,d); 
 									}
 								}
 							}
-#undef X
 						} else {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
@@ -573,8 +583,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										auto e3 = e * p10c;
 										auto e4 = e * p10d;
 										auto e5 = e * p10e;
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
-										X(a,b,c,d,e);
+										X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
+										X(a,e,b,d,d);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
 										X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
@@ -582,7 +592,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										X(b,e,d,d,a); X(b,e,d,a,d); X(b,e,a,d,d);
 										X(b,a,d,d,e);
 
-										X(a,e,d,d,b); X(a,e,d,b,d); X(a,e,b,d,d);
 										if (d != e) {
 											X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
 											X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
@@ -601,7 +610,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 											X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
 											X(a,b,e,d,d); X(a,b,d,e,d); 
 										}
-#undef X
 									}
 								} else {
 									for (auto e = d; e < 8ul; ++e) {
@@ -616,7 +624,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										auto e3 = e * p10c;
 										auto e4 = e * p10d;
 										auto e5 = e * p10e;
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 										X(a,b,c,d,e);
 										X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
 										X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
@@ -672,10 +679,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							}
 						}
 					}
-#undef X
 				}
 			}
 		}
+#undef X
 	} else {
 		auto dprod = product << 1;
 		static constexpr auto indexIncr = getShiftedValue<position>(1ul);
