@@ -68,10 +68,8 @@ constexpr u64 getShiftedValue(u64 value) noexcept {
 			continue; \
 		} \
 	}
-template<u64 len, u64 pos>
-constexpr bool lenGreaterAndPos(u64 length, u64 position) noexcept {
-	return (length > len) && (position == pos);
-}
+template<u64 len, u64 pos, u64 length, u64 position>
+constexpr auto lenGreaterAndPos = (length > len) && (position == pos);
 void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
 #ifdef DEBUG
 	if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
@@ -105,10 +103,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
 			list.emplace_back(conv);
 		}
-	} else if constexpr (lenGreaterAndPos<10, 2>(length, position) || 
-			lenGreaterAndPos<11, 3>(length, position) || 
-			lenGreaterAndPos<12, 4>(length, position) || 
-			lenGreaterAndPos<13, 5>(length, position)) {
+	} else if constexpr (lenGreaterAndPos<10, 2,length, position> || 
+			lenGreaterAndPos<11, 3, length, position> || 
+			lenGreaterAndPos<12, 4, length, position> || 
+			lenGreaterAndPos<13, 5, length, position>) {
 		// setup a series of operations to execute in parallel on two separate threads
 		// of execution
 		std::list<DataTriple> lower, upper;
@@ -137,11 +135,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
 	} else if constexpr (length > 10 && difference == 5) {
+        
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
 		// This will make the partial converison correct (remember that a 0 becomes a 2
 		// in this model).
+        //
+        // Thus we implicitly add the offsets for each position to this base10 2 value :D
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 		for (auto a = 0ul; a < 8ul; ++a) {
