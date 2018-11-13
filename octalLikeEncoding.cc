@@ -81,6 +81,17 @@ void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
 	l.emplace_back(value);
 #endif
 }
+
+template<typename T, typename ... Args>
+void tryInsertIntoList(MatchList& list, u64 sum, u64 product, T value, Args ... args) noexcept {
+    if ((value % product == 0) && (value % sum == 0)) {
+        list.emplace_back(value);
+    }
+    if constexpr (sizeof...(args) > 0) {
+        tryInsertIntoList<Args...>(list, sum, product, args...);
+    }
+}
+
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -145,6 +156,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // Thus we implicitly add the offsets for each position to this base10 2 value :D
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
+#define Y(x,y,z,w,h) x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
 			auto a1 = outerConverted + (a * p10a);
@@ -198,10 +210,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 											auto e2 = e * p10b;
 											auto e3 = e * p10c;
 											auto e4 = e * p10d;
-											X(e,d,d,d,d); 
-											X(d,e,c,c,c); 
-											X(d,c,e,c,c); 
-											X(d,c,c,e,c); 
+                                            tryInsertIntoList(list, es, ep,
+                                                    Y(e,d,d,d,d),
+                                                    Y(d,e,c,c,c), 
+                                                    Y(d,c,e,c,c), 
+                                                    Y(d,c,c,e,c));
 										}
 									}
 								} else {
@@ -213,31 +226,33 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,c,c); 
-										X(e,c,d,c,c); 
-										X(e,c,c,d,c);
-										X(e,c,c,c,d); 
 										auto e2 = e * p10b;
 										auto e3 = e * p10c;
 										auto e5 = e * p10e;
-										X(a,b,c,d,e);
-										X(c,e,d,c,c); 
-										X(c,e,c,d,c); 
-										X(c,e,c,c,d); 
-										X(c,c,e,d,c); 
-										X(c,c,e,c,d); 
+                                        tryInsertIntoList(list, es, ep,
+                                                Y(e,d,c,c,c), 
+                                                Y(e,c,d,c,c), 
+                                                Y(e,c,c,d,c),
+                                                Y(e,c,c,c,d), 
+                                                Y(a,b,c,d,e),
+                                                Y(c,e,d,c,c), 
+                                                Y(c,e,c,d,c), 
+                                                Y(c,e,c,c,d), 
+                                                Y(c,c,e,d,c), 
+                                                Y(c,c,e,c,d));
 										if (d != e) {
 											auto e4 = e * p10d;
-											X(d,e,c,c,c); 
-											X(d,c,e,c,c); 
-											X(d,c,c,e,c); 
-											X(d,c,c,c,e); 
-											X(c,d,e,c,c); 
-											X(c,d,c,e,c); 
-											X(c,d,c,c,e); 
-											X(c,c,d,e,c); 
-											X(c,c,d,c,e); 
-											X(c,c,c,e,d); 
+                                            tryInsertIntoList(list, es, ep,
+											Y(d,e,c,c,c), 
+											Y(d,c,e,c,c), 
+											Y(d,c,c,e,c), 
+											Y(d,c,c,c,e), 
+											Y(c,d,e,c,c), 
+											Y(c,d,c,e,c), 
+											Y(c,d,c,c,e), 
+											Y(c,c,d,e,c), 
+											Y(c,c,d,c,e), 
+											Y(c,c,c,e,d)) ;
 										}
 									}
 								}
