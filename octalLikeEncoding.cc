@@ -563,10 +563,6 @@ void initialBody() noexcept {
 	if constexpr (width < 10) {
 		body<0, width>(list, width * 2);
 	} else {
-		auto getnsplice = [&list](auto& thing) {
-			auto r = thing.get();
-			list.splice(list.cbegin(), r);
-		};
 		auto mkfuture = [](auto base) {
 			return std::async(std::launch::async, parallelBody<width>, base);
 		};
@@ -577,17 +573,39 @@ void initialBody() noexcept {
 		auto t4 = mkfuture(7);
 		auto t5 = mkfuture(8);
 		auto t6 = mkfuture(9);
-		getnsplice(t0);
-		getnsplice(t1);
-		getnsplice(t2);
-		getnsplice(t3);
-		getnsplice(t4);
-		getnsplice(t5);
-		getnsplice(t6);
+		if constexpr (width == 19) {
+			auto printSplice = [](auto& thing) {
+				auto r = thing.get();
+				for (const auto& v : r) {
+					std::cout << v << std::endl;
+				}
+			};
+			printSplice(t0);
+			printSplice(t1);
+			printSplice(t2);
+			printSplice(t3);
+			printSplice(t4);
+			printSplice(t5);
+			printSplice(t6);
+		} else {
+			auto getnsplice = [&list](auto& thing) {
+				auto r = thing.get();
+				list.splice(list.cbegin(), r);
+			};
+			getnsplice(t0);
+			getnsplice(t1);
+			getnsplice(t2);
+			getnsplice(t3);
+			getnsplice(t4);
+			getnsplice(t5);
+			getnsplice(t6);
+		}
 	} 
-	list.sort();
-	for (const auto& v : list) {
-		std::cout << v << std::endl;
+	if constexpr (width != 19) {
+		list.sort();
+		for (const auto& v : list) {
+			std::cout << v << std::endl;
+		}
 	}
 }
 
