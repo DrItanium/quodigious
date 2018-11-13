@@ -276,22 +276,24 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
-										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
 										auto e2 = e * p10b;
-										X(b,e,b,d,c); X(b,e,d,c,b); X(b,e,c,b,d); 
 										auto e5 = e * p10e;
-										X(a,b,c,d,e); 
+                                        tryInsertIntoList(list, es, ep,
+										Y(e,d,c,b,b), Y(e,d,b,c,b), Y(e,d,b,b,c), 
+										Y(e,b,b,d,c), Y(e,b,d,c,b), Y(e,b,d,b,c), 
+										Y(b,e,b,d,c), Y(b,e,d,c,b), Y(b,e,c,b,d), 
+										Y(a,b,c,d,e));
 										if (d != e) {
 											auto e3 = e * p10c;
 											auto e4 = e * p10d;
-											X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
-											X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
-											X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
-											X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
-											X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
-											X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
-											X(b,b,e,d,d); X(b,b,d,e,d); 
+                                            tryInsertIntoList(list, es, ep,
+                                                    Y(d,e,c,b,b), Y(d,e,b,c,b), Y(d,e,b,b,c),
+                                                    Y(d,c,e,b,b), Y(d,c,b,e,b), Y(d,c,b,b,e),
+                                                    Y(d,b,e,c,b), Y(d,b,e,b,c), Y(d,b,c,e,b),
+                                                    Y(d,b,c,b,e), Y(d,b,b,e,c), Y(d,b,b,c,e),
+                                                    Y(b,d,e,c,b), Y(b,d,e,b,c), Y(b,d,c,e,b),
+                                                    Y(b,d,c,b,e), Y(b,d,b,e,c), Y(b,d,b,c,e),
+                                                    Y(b,b,e,d,d), Y(b,b,d,e,d));
 										}
 									}
 								} else {
@@ -303,33 +305,35 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
-										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
-										X(e,c,d,b,b); X(e,c,b,d,b); X(e,c,b,b,d); 
-										X(e,b,c,d,b); X(e,b,c,b,d); X(e,b,b,c,d);
 										auto e2 = e * p10b;
 										auto e3 = e * p10c;
 										auto e4 = e * p10d;
 										auto e5 = e * p10e;
-										X(a,b,c,d,e); 
-										X(b,e,d,c,b); X(b,e,c,b,d); X(b,e,b,d,c); 
-										X(c,e,d,b,b); X(c,e,b,d,b); X(c,e,b,b,d);
-										X(c,b,e,d,b); X(c,b,e,b,d); X(c,b,b,d,e);
+                                        tryInsertIntoList(list, es, ep,
+										Y(e,d,c,b,b), Y(e,d,b,c,b), Y(e,d,b,b,c), 
+										Y(e,b,b,d,c), Y(e,b,d,c,b), Y(e,b,d,b,c), 
+										Y(e,c,d,b,b), Y(e,c,b,d,b), Y(e,c,b,b,d), 
+										Y(e,b,c,d,b), Y(e,b,c,b,d), Y(e,b,b,c,d),
+										Y(a,b,c,d,e), 
+										Y(b,e,d,c,b), Y(b,e,c,b,d), Y(b,e,b,d,c), 
+										Y(c,e,d,b,b), Y(c,e,b,d,b), Y(c,e,b,b,d),
+										Y(c,b,e,d,b), Y(c,b,e,b,d), Y(c,b,b,d,e),
 
-										X(b,e,d,b,c); X(b,e,c,d,b); X(b,e,b,c,d);
-										X(b,c,e,d,b); X(b,c,e,b,d); X(b,c,b,e,d); 
-										X(b,b,e,d,c); X(b,b,e,c,d); 
+										Y(b,e,d,b,c), Y(b,e,c,d,b), Y(b,e,b,c,d),
+										Y(b,c,e,d,b), Y(b,c,e,b,d), Y(b,c,b,e,d), 
+										Y(b,b,e,d,c), Y(b,b,e,c,d));
 										if (d != e) {
-											X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
-											X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
-											X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
-											X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
-											X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
-											X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
-											X(c,d,e,b,b); X(c,d,b,e,b); X(c,d,b,b,e);
-											X(c,b,d,e,b); X(c,b,d,b,e); X(c,b,b,e,d); 
-											X(b,c,d,e,b); X(b,c,d,b,e); X(b,c,b,d,e);
-											X(b,b,d,c,e); X(b,b,d,e,c); X(b,b,c,e,d); 
+                                            tryInsertIntoList(list, es, ep,
+											Y(d,e,c,b,b), Y(d,e,b,c,b), Y(d,e,b,b,c),
+											Y(d,c,e,b,b), Y(d,c,b,e,b), Y(d,c,b,b,e),
+											Y(d,b,e,c,b), Y(d,b,e,b,c), Y(d,b,c,e,b),
+											Y(d,b,c,b,e), Y(d,b,b,e,c), Y(d,b,b,c,e),
+											Y(b,d,e,c,b), Y(b,d,e,b,c), Y(b,d,c,e,b),
+											Y(b,d,c,b,e), Y(b,d,b,e,c), Y(b,d,b,c,e),
+											Y(c,d,e,b,b), Y(c,d,b,e,b), Y(c,d,b,b,e),
+											Y(c,b,d,e,b), Y(c,b,d,b,e), Y(c,b,b,e,d), 
+											Y(b,c,d,e,b), Y(b,c,d,b,e), Y(b,c,b,d,e),
+											Y(b,b,d,c,e), Y(b,b,d,e,c), Y(b,b,c,e,d));
 										}
 									}
 								}
@@ -365,19 +369,21 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
-										X(e,a,d,c,c); 
 										auto e5 = e * p10e;
-										X(a,b,c,d,e); 
+                                        tryInsertIntoList(list, es, ep,
+										Y(e,d,c,c,a), Y(e,d,c,a,c), Y(e,d,a,c,c), 
+										Y(e,a,d,c,c), 
+										Y(a,b,c,d,e));
 										if (d != e) {
 											auto e2 = e * p10b;
 											auto e3 = e * p10c;
 											auto e4 = e * p10d;
-											X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
-											X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
-											X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
-											X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
-											X(d,a,e,d,d); X(a,e,d,d,d); X(a,d,e,d,d); 
+                                            tryInsertIntoList(list, es, ep,
+                                                    Y(d,e,c,c,a), Y(d,e,c,a,c), Y(d,e,a,c,c),
+                                                    Y(d,c,e,c,a), Y(d,c,e,a,c), Y(d,c,c,e,a),
+                                                    Y(d,c,c,a,e), Y(d,c,a,e,c), Y(d,c,a,c,e),
+                                                    Y(a,c,c,e,d), Y(c,a,d,e,c), Y(c,a,d,c,e), 
+                                                    Y(d,a,e,d,d), Y(a,e,d,d,d), Y(a,d,e,d,d));
 										}
 									}
 								} else {
@@ -389,34 +395,36 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,a,d,c,c); X(e,d,c,c,a); 
-										X(e,d,c,a,c); X(e,d,a,c,c); X(e,c,d,c,a); 
-										X(e,c,d,a,c); X(e,c,c,d,a); X(e,c,c,a,d); 
-										X(e,c,a,d,c); X(e,c,a,c,d); X(e,a,c,d,c); 
-										X(e,a,c,c,d); 
 										auto e2 = e * p10b;
 										auto e3 = e * p10c;
 										auto e4 = e * p10d;
 										auto e5 = e * p10e;
+                                        tryInsertIntoList(list, es, ep,
+										Y(e,a,d,c,c), Y(e,d,c,c,a), 
+										Y(e,d,c,a,c), Y(e,d,a,c,c), Y(e,c,d,c,a), 
+										Y(e,c,d,a,c), Y(e,c,c,d,a), Y(e,c,c,a,d), 
+										Y(e,c,a,d,c), Y(e,c,a,c,d), Y(e,a,c,d,c), 
+										Y(e,a,c,c,d), 
 
-										X(a,b,c,d,e); 
-										X(c,e,d,c,a); X(c,e,d,a,c); 
-										X(c,e,c,d,a); X(c,e,c,a,d); X(c,e,a,d,c); 
-										X(c,e,a,c,d); X(c,c,e,d,a); X(c,c,e,a,d); 
-										X(c,c,a,e,d); X(c,a,e,d,c); X(c,a,e,c,d); 
-										X(c,a,c,e,d); X(a,e,d,c,c); X(a,e,c,d,c); 
-										X(a,e,c,c,d); X(a,c,e,d,c); X(a,c,e,c,d); 
+										Y(a,b,c,d,e), 
+										Y(c,e,d,c,a), Y(c,e,d,a,c), 
+										Y(c,e,c,d,a), Y(c,e,c,a,d), Y(c,e,a,d,c), 
+										Y(c,e,a,c,d), Y(c,c,e,d,a), Y(c,c,e,a,d), 
+										Y(c,c,a,e,d), Y(c,a,e,d,c), Y(c,a,e,c,d), 
+										Y(c,a,c,e,d), Y(a,e,d,c,c), Y(a,e,c,d,c), 
+										Y(a,e,c,c,d), Y(a,c,e,d,c), Y(a,c,e,c,d));
 										if (d != e) {
-											X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
-											X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
-											X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
-											X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
-											X(d,a,e,c,c); X(d,a,c,e,c); X(d,a,c,c,e);
-											X(c,d,e,c,a); X(c,d,e,a,c); X(c,d,c,e,a);
-											X(c,d,c,a,e); X(c,d,a,e,c); X(c,d,a,c,e);
-											X(c,c,d,e,a); X(c,c,d,a,e); X(c,c,a,d,e);
-											X(a,d,e,c,c); X(a,d,c,e,c); X(a,d,c,c,e);
-											X(a,c,d,e,c); X(a,c,d,c,e); X(c,a,c,d,e);
+                                            tryInsertIntoList(list, es, ep,
+											Y(d,e,c,c,a), Y(d,e,c,a,c), Y(d,e,a,c,c),
+											Y(d,c,e,c,a), Y(d,c,e,a,c), Y(d,c,c,e,a),
+											Y(d,c,c,a,e), Y(d,c,a,e,c), Y(d,c,a,c,e),
+											Y(a,c,c,e,d), Y(c,a,d,e,c), Y(c,a,d,c,e), 
+											Y(d,a,e,c,c), Y(d,a,c,e,c), Y(d,a,c,c,e),
+											Y(c,d,e,c,a), Y(c,d,e,a,c), Y(c,d,c,e,a),
+											Y(c,d,c,a,e), Y(c,d,a,e,c), Y(c,d,a,c,e),
+											Y(c,c,d,e,a), Y(c,c,d,a,e), Y(c,c,a,d,e),
+											Y(a,d,e,c,c), Y(a,d,c,e,c), Y(a,d,c,c,e),
+											Y(a,c,d,e,c), Y(a,c,d,c,e), Y(c,a,c,d,e));
 										}
 									}
 								}
