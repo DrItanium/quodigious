@@ -106,7 +106,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	} else if constexpr (lenGreaterAndPos<10, 2,length, position> || 
 			lenGreaterAndPos<11, 3, length, position> || 
 			lenGreaterAndPos<12, 4, length, position> || 
-			lenGreaterAndPos<13, 5, length, position>) {
+			lenGreaterAndPos<13, 5, length, position> || 
+			lenGreaterAndPos<14, 6, length, position>) {
 		// setup a series of operations to execute in parallel on two separate threads
 		// of execution
 		std::list<DataTriple> lower, upper;
