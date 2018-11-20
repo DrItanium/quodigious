@@ -136,3 +136,10 @@ sys	0m4.430s
 real	23m1.249s
 user	268m56.744s
 sys	0m31.878s
+
+ThreadRipper 12-Core:
+
+19 Digits:
+real    9597m57.273s
+user    230016m17.561s
+sys     5m23.138s
