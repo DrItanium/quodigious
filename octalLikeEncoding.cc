@@ -142,8 +142,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// The last two digits are handled in a base 10 fashion without the +2 added
 		// This will make the partial converison correct (remember that a 0 becomes a 2
 		// in this model).
-        //
-        // Thus we implicitly add the offsets for each position to this base10 2 value :D
+		//
+		// Thus we implicitly add the offsets for each position to this base10 2 value :D
+		
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 		for (auto a = 0ul; a < 8ul; ++a) {
