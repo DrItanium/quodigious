@@ -146,44 +146,35 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // Thus we implicitly add the offsets for each position to this base10 2 value :D
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
+#define GenVars(type) \
+	auto type ## 1 = outerConverted + ( type * p10a ); \
+	auto type ## 2 = type * p10b ; \
+	auto type ## 3 = type * p10c ; \
+	auto type ## 4 = type * p10d ; \
+	auto type ## 5 = type * p10e ;
+
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
-			auto a1 = outerConverted + (a * p10a);
-			auto a2 = a * p10b;
-			auto a3 = a * p10c;
-			auto a4 = a * p10d;
-			auto a5 = a * p10e;
+			GenVars(a);
 			auto as = sum + a;
 			auto ap = product * (a + 2);
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
-				auto b1 = outerConverted + (b * p10a);
-				auto b2 = b * p10b;
-				auto b3 = b * p10c;
-				auto b4 = b * p10d;
-				auto b5 = b * p10e;
+				GenVars(b);
 				auto bs = as + b;
 				auto bp = ap * (b + 2);
 				if (a == b) {
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
+						GenVars(c);
 						auto cs = bs + c;
-						auto c1 = outerConverted + (c * p10a);
-						auto c2 = c * p10b;
-						auto c3 = c * p10c;
-						auto c4 = c * p10d;
-						auto c5 = c * p10e;
 						auto cp = bp * (c + 2);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
+								GenVars(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -248,11 +239,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								GenVars(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -326,22 +313,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
-						auto c1 = outerConverted + (c * p10a);
-						auto c2 = c * p10b;
-						auto c3 = c * p10c;
-						auto c4 = c * p10d;
-						auto c5 = c * p10e;
 						auto cp = bp * (c + 2);
+						GenVars(c);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								GenVars(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -412,11 +391,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								GenVars(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -529,6 +504,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				}
 			}
 		}
+#undef GenVars
 #undef X
 	} else {
 		auto dprod = product << 1;
@@ -615,25 +591,12 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-				case 1: initialBody<1>(); break;
-				case 2: initialBody<2>(); break;
-				case 3: initialBody<3>(); break;
-				case 4: initialBody<4>(); break;
-				case 5: initialBody<5>(); break;
-				case 6: initialBody<6>(); break;
-				case 7: initialBody<7>(); break;
-				case 8: initialBody<8>(); break;
-				case 9: initialBody<9>(); break;
-				case 10: initialBody<10>(); break;
-				case 11: initialBody<11>(); break;
-				case 12: initialBody<12>(); break;
-				case 13: initialBody<13>(); break;
-				case 14: initialBody<14>(); break;
-				case 15: initialBody<15>(); break;
-				case 16: initialBody<16>(); break;
-				case 17: initialBody<17>(); break;
-				case 18: initialBody<18>(); break;
-				case 19: initialBody<19>(); break;
+#define X(ind) case ind : initialBody< ind > (); break;
+				X(1);  X(2);  X(3);  X(4);  X(5);
+				X(6);  X(7);  X(8);  X(9);  X(10);
+				X(11); X(12); X(13); X(14); X(15);
+				X(16); X(17); X(18); X(19); 
+#undef X
 				default:
 						 std::cerr << "Illegal index " << currentIndex << std::endl;
 						 return 1;
