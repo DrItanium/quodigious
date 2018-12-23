@@ -87,7 +87,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static_assert(length > 0, "Can't have length of zero!");
 	static_assert(length >= position, "Position is out of bounds!");
 	using DataTriple = std::tuple<u64, u64, u64>;
-	static constexpr auto difference = length - position;
 	static constexpr auto p10a = fastPow10<position>;
 	static constexpr auto p10b = fastPow10<position+1>;
 	static constexpr auto p10c = fastPow10<position+2>;
@@ -135,7 +134,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		auto l1 = t1.get();
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
-	} else if constexpr (length > 10 && difference == 5) {
+	} else if constexpr (length > 10 && (length - position) == 5) {
         
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
@@ -146,7 +145,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// Thus we implicitly add the offsets for each position to this base10 2 value :D
 		
 		auto outerConverted = convertNumber<length>(index);
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
+#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
 			auto a1 = outerConverted + (a * p10a);
@@ -194,16 +193,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e5 = e * p10e;
-										X(a,b,c,d,e);
+										X(d,d,d,d,e);
 										if (d != e) {
 											auto e1 = outerConverted + (e * p10a);
 											auto e2 = e * p10b;
 											auto e3 = e * p10c;
 											auto e4 = e * p10d;
-											X(e,d,d,d,d); 
-											X(d,e,c,c,c); 
-											X(d,c,e,c,c); 
-											X(d,c,c,e,c); 
+											X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+											X(d,d,d,e,d); 
 										}
 									}
 								} else {
@@ -215,30 +212,18 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,c,c); 
-										X(e,c,d,c,c); 
-										X(e,c,c,d,c);
+										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
 										X(e,c,c,c,d); 
 										auto e2 = e * p10b;
 										auto e3 = e * p10c;
 										auto e5 = e * p10e;
-										X(a,b,c,d,e);
-										X(c,e,d,c,c); 
-										X(c,e,c,d,c); 
-										X(c,e,c,c,d); 
-										X(c,c,e,d,c); 
-										X(c,c,e,c,d); 
+										X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
+										X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
 										if (d != e) {
 											auto e4 = e * p10d;
-											X(d,e,c,c,c); 
-											X(d,c,e,c,c); 
-											X(d,c,c,e,c); 
-											X(d,c,c,c,e); 
-											X(c,d,e,c,c); 
-											X(c,d,c,e,c); 
-											X(c,d,c,c,e); 
-											X(c,c,d,e,c); 
-											X(c,c,d,c,e); 
+											X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+											X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
+											X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
 											X(c,c,c,e,d); 
 										}
 									}
@@ -376,18 +361,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										}
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
-										X(e,a,d,c,c); X(e,d,c,c,a); 
-										X(e,d,c,a,c); X(e,d,a,c,c); X(e,c,d,c,a); 
-										X(e,c,d,a,c); X(e,c,c,d,a); X(e,c,c,a,d); 
-										X(e,c,a,d,c); X(e,c,a,c,d); X(e,a,c,d,c); 
-										X(e,a,c,c,d); 
+										X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
+										X(e,d,a,c,c); X(e,c,d,c,a); X(e,c,d,a,c); 
+										X(e,c,c,d,a); X(e,c,c,a,d); X(e,c,a,d,c); 
+										X(e,c,a,c,d); X(e,a,c,d,c); X(e,a,c,c,d); 
 										auto e2 = e * p10b;
 										auto e3 = e * p10c;
 										auto e4 = e * p10d;
 										auto e5 = e * p10e;
-
-										X(a,b,c,d,e); 
-										X(c,e,d,c,a); X(c,e,d,a,c); 
+										X(a,b,c,d,e); X(c,e,d,c,a); X(c,e,d,a,c); 
 										X(c,e,c,d,a); X(c,e,c,a,d); X(c,e,a,d,c); 
 										X(c,e,a,c,d); X(c,c,e,d,a); X(c,c,e,a,d); 
 										X(c,c,a,e,d); X(c,a,e,d,c); X(c,a,e,c,d); 
@@ -434,9 +416,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										auto e2 = e * p10b;
 										auto e5 = e * p10e;
 										X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
-										X(a,e,b,d,d);
-										X(b,e,d,d,a); X(b,e,d,a,d); X(b,e,a,d,d);
-										X(b,a,d,d,e);
+										X(a,e,b,d,d); X(b,e,d,d,a); X(b,e,d,a,d); 
+										X(b,e,a,d,d); X(b,a,d,d,e);
 
 										if (d != e) {
 											auto e3 = e * p10c;
@@ -581,24 +562,18 @@ void initialBody() noexcept {
 					std::cout << v << std::endl;
 				}
 			};
-			printSplice(t0);
-			printSplice(t1);
-			printSplice(t2);
-			printSplice(t3);
-			printSplice(t4);
-			printSplice(t5);
+			printSplice(t0); printSplice(t1);
+			printSplice(t2); printSplice(t3);
+			printSplice(t4); printSplice(t5);
 			printSplice(t6);
 		} else {
 			auto getnsplice = [&list](auto& thing) {
 				auto r = thing.get();
 				list.splice(list.cbegin(), r);
 			};
-			getnsplice(t0);
-			getnsplice(t1);
-			getnsplice(t2);
-			getnsplice(t3);
-			getnsplice(t4);
-			getnsplice(t5);
+			getnsplice(t0); getnsplice(t1);
+			getnsplice(t2); getnsplice(t3);
+			getnsplice(t4); getnsplice(t5);
 			getnsplice(t6);
 		}
 	} 
