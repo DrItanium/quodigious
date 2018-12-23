@@ -30,9 +30,10 @@ SUM_COMPUTATION = sum-compute
 QLOOPS_PROG64 = quodigious64
 FREQUENCY_ANALYSIS = fanalysis
 ENCODING = ocEncoding 
+INV_ENCODING = invOCEncoding
 SIMPLE_LOOPS = simpleLoops 
 COMPUTE_NINE_DIGITS = compute9digs
-PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS} ${COMPUTE_NINE_DIGITS}
+PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS} ${COMPUTE_NINE_DIGITS} ${INV_ENCODING}
 all: ${PROGS}
 
 ${FREQUENCY_ANALYSIS}:
@@ -61,6 +62,10 @@ ${SUM_COMPUTATION}: sum-compute.o
 ${ENCODING}: octalLikeEncoding.o
 	@echo -n "Building special octal computer ... "
 	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
+	@echo done.
+${INV_ENCODING}: invertedOctalLikeEncoding.o
+	@echo -n "Building inverted special octal computer ... "
+	@${CXX} -lpthread ${LXXFLAGS} -o ${INV_ENCODING} invertedOctalLikeEncoding.o
 	@echo done.
 
 ${SIMPLE_LOOPS}: simpleLoops.o
