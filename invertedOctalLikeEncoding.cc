@@ -1,4 +1,4 @@
-//  Copyright (c) 2017 Joshua Scoggins
+//  Copyright (c) 2018 Joshua Scoggins
 //
 //  This software is provided 'as-is', without any express or implied
 //  warranty. In no event will the authors be held liable for any damages
@@ -95,8 +95,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static constexpr auto p10e = fastPow10<position+4>;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
-			// if the number is not divisible by three then skip it
-			if (sum % 3 != 0) {
+			// if the number is divisible by three then skip it
+			if (sum % 3 == 0) {
 				return;
 			}
 		}
@@ -188,7 +188,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -209,7 +209,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -257,7 +257,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -284,7 +284,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -346,7 +346,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -370,7 +370,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -421,7 +421,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
@@ -462,7 +462,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
+										if (es % 3 == 0) {
 											continue;
 										}
 										auto ep = dp * (e + 2);
