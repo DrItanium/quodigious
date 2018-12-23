@@ -136,14 +136,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
 	} else if constexpr (length > 10 && difference == 5) {
-        
+
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
 		// This will make the partial converison correct (remember that a 0 becomes a 2
 		// in this model).
-        //
-        // Thus we implicitly add the offsets for each position to this base10 2 value :D
+		//
+		// Thus we implicitly add the offsets for each position to this base10 2 value :D
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { tryInsertIntoList(n, list); }
 		for (auto a = 0ul; a < 8ul; ++a) {
@@ -615,28 +615,15 @@ int main() {
 		std::cin >> currentIndex;
 		if (std::cin.good()) {
 			switch(currentIndex) {
-				case 1: initialBody<1>(); break;
-				case 2: initialBody<2>(); break;
-				case 3: initialBody<3>(); break;
-				case 4: initialBody<4>(); break;
-				case 5: initialBody<5>(); break;
-				case 6: initialBody<6>(); break;
-				case 7: initialBody<7>(); break;
-				case 8: initialBody<8>(); break;
-				case 9: initialBody<9>(); break;
-				case 10: initialBody<10>(); break;
-				case 11: initialBody<11>(); break;
-				case 12: initialBody<12>(); break;
-				case 13: initialBody<13>(); break;
-				case 14: initialBody<14>(); break;
-				case 15: initialBody<15>(); break;
-				case 16: initialBody<16>(); break;
-				case 17: initialBody<17>(); break;
-				case 18: initialBody<18>(); break;
-				case 19: initialBody<19>(); break;
+#define X(ind) case ind : initialBody< ind > (); break;
+				X(1);  X(2);  X(3);  X(4);  X(5);
+				X(6);  X(7);  X(8);  X(9);  X(10);
+				X(11); X(12); X(13); X(14); X(15);
+				X(16); X(17); X(18); X(19); 
+#undef X
 				default:
-						 std::cerr << "Illegal index " << currentIndex << std::endl;
-						 return 1;
+					 std::cerr << "Illegal index " << currentIndex << std::endl;
+					 return 1;
 			}
 			std::cout << std::endl;
 		}
