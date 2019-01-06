@@ -43,18 +43,19 @@ constexpr u64 convertNumber(u64 value) noexcept {
 		constexpr auto nextPos = position - 1;
 		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
 		auto significand = (value & mask) >> shiftAmount<nextPos>;
-		auto intermediate = 0ul;
-		switch(significand) {
-			case 0b000: intermediate = computeFactor<2ul, nextPos>; break;
-			case 0b001: intermediate = computeFactor<3ul, nextPos>; break;
-			case 0b010: intermediate = computeFactor<4ul, nextPos>; break;
-			case 0b011: intermediate = computeFactor<5ul, nextPos>; break;
-			case 0b100: intermediate = computeFactor<6ul, nextPos>; break;
-			case 0b101: intermediate = computeFactor<7ul, nextPos>; break;
-			case 0b110: intermediate = computeFactor<8ul, nextPos>; break;
-			case 0b111: intermediate = computeFactor<9ul, nextPos>; break;
-		}
-		return intermediate + convertNumber<nextPos>(value);
+		return [&significand]() -> u64 {
+			switch(significand) {
+				case 0b000: return computeFactor<2ul, nextPos>;
+				case 0b001: return computeFactor<3ul, nextPos>;
+				case 0b010: return computeFactor<4ul, nextPos>; 
+				case 0b011: return computeFactor<5ul, nextPos>; 
+				case 0b100: return computeFactor<6ul, nextPos>; 
+				case 0b101: return computeFactor<7ul, nextPos>; 
+				case 0b110: return computeFactor<8ul, nextPos>; 
+				case 0b111: return computeFactor<9ul, nextPos>; 
+			}
+			return 0;
+		}() + convertNumber<nextPos>(value);
 	}
 }
 template<u64 position>
