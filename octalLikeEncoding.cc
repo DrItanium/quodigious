@@ -94,6 +94,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static constexpr auto p10d = fastPow10<position+3>;
 	static constexpr auto p10e = fastPow10<position+4>;
 	static constexpr auto p10f = fastPow10<position+5>;
+	static constexpr auto enableSplit6 = false;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -475,7 +476,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef DECLARE_POSITION_VALUES
 #undef SUMCHECK
 #undef X
-	} else if constexpr (length > 10 && (length - position) == 6) {
+	} else if constexpr (enableSplit6 && length > 13 && (length - position) == 6) {
 
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
