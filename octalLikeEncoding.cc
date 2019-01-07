@@ -530,12 +530,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												auto es = ds + e;
 												SUMCHECK;
 												auto ep = dp * (e + 2);
-												DECLARE_POSITION_VALUES(e);
-												X(d,d,d,d,d,e); 
 												if (d != e) {
+													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,d,d,d); X(d,e,d,d,d,d); X(d,d,e,d,d,d); 
-													X(d,d,d,e,d,d); X(d,d,d,d,e,d); 
-												} 
+													X(d,d,d,e,d,d); X(d,d,d,d,e,d); X(d,d,d,d,d,e); 
+												} else {
+													X(d,d,d,d,d,d);
+												}
 											}
 										} else {
 											// c != d
@@ -544,19 +545,25 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												auto es = ds + e;
 												SUMCHECK;
 												auto ep = dp * (e + 2);
-												DECLARE_POSITION_VALUES(e);
-												X(e,d,c,c,c,c); X(e,c,d,c,c,c); X(e,c,c,d,c,c);
-												X(e,c,c,c,d,c); X(e,c,c,c,c,d); X(c,e,d,c,c,c); 
-												X(c,e,c,d,c,c); X(c,e,c,c,d,c); X(c,e,c,c,c,d); 
-												X(c,c,e,d,c,c); X(c,c,e,c,d,c); X(c,c,e,c,c,d);
-												X(c,c,c,e,d,c); X(c,c,c,e,c,d); X(c,c,c,c,e,d); 
 												if (d != e) {
-													X(d,e,c,c,c,c); X(d,c,c,c,c,e); X(d,c,e,c,c,c); 
-													X(d,c,c,e,c,c); X(d,c,c,c,e,c); X(c,d,e,c,c,c);
+													DECLARE_POSITION_VALUES(e);
+													X(e,d,c,c,c,c); X(e,c,d,c,c,c); X(e,c,c,d,c,c);
+													X(e,c,c,c,d,c); X(e,c,c,c,c,d); X(d,e,c,c,c,c);
+													X(d,c,e,c,c,c); X(d,c,c,e,c,c); X(d,c,c,c,e,c);
+													X(d,c,c,c,c,e); X(c,e,d,c,c,c); X(c,e,c,d,c,c);
+													X(c,e,c,c,d,c); X(c,e,c,c,c,d); X(c,d,e,c,c,c);
 													X(c,d,c,e,c,c); X(c,d,c,c,e,c); X(c,d,c,c,c,e);
+													X(c,c,e,d,c,c); X(c,c,e,c,d,c); X(c,c,e,c,c,d);
 													X(c,c,d,e,c,c); X(c,c,d,c,e,c); X(c,c,d,c,c,e);
-													X(c,c,c,d,e,c); X(c,c,c,d,c,e); X(c,c,c,c,d,e);
-												} 
+													X(c,c,c,e,d,c); X(c,c,c,e,c,d); X(c,c,c,d,e,c);
+													X(c,c,c,d,c,e); X(c,c,c,c,e,d); X(c,c,c,c,d,e);
+												} else {
+													X(d,d,c,c,c,c); X(d,c,d,c,c,c); X(d,c,c,d,c,c);
+													X(d,c,c,c,d,c); X(d,c,c,c,c,d); X(c,d,d,c,c,c);
+													X(c,d,c,d,c,c); X(c,d,c,c,d,c); X(c,d,c,c,c,d);
+													X(c,c,d,d,c,c); X(c,c,d,c,d,c); X(c,c,d,c,c,d);
+													X(c,c,c,d,d,c); X(c,c,c,d,c,d); X(c,c,c,c,d,d);
+												}
 											}
 										}
 									}
