@@ -87,12 +87,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length > 0, "Can't have length of zero!");
 	static_assert(length >= position, "Position is out of bounds!");
-	using DataTriple = std::tuple<u64, u64, u64>;
-	static constexpr auto p10a = fastPow10<position>;
-	static constexpr auto p10b = fastPow10<position+1>;
-	static constexpr auto p10c = fastPow10<position+2>;
-	static constexpr auto p10d = fastPow10<position+3>;
-	static constexpr auto p10e = fastPow10<position+4>;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -108,6 +102,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			lenGreaterAndPos<12, 4, length, position> || 
 			lenGreaterAndPos<13, 5, length, position> || 
 			lenGreaterAndPos<14, 6, length, position>) {
+		using DataTriple = std::tuple<u64, u64, u64>;
 		// setup a series of operations to execute in parallel on two separate threads
 		// of execution
 		std::list<DataTriple> lower, upper;
@@ -136,6 +131,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
 	} else if constexpr (length > 10 && (length - position) == 5) {
+		static constexpr auto p10a = fastPow10<position>;
+		static constexpr auto p10b = fastPow10<position+1>;
+		static constexpr auto p10c = fastPow10<position+2>;
+		static constexpr auto p10d = fastPow10<position+3>;
+		static constexpr auto p10e = fastPow10<position+4>;
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
