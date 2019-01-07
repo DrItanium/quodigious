@@ -148,44 +148,34 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
 #define SUMCHECK if (es % 3 != 0) { continue; }
+#define DECLARE_POSITION_VALUES(var) \
+		auto var ## 1 = outerConverted + ( var * p10a ); \
+		auto var ## 2 = var * p10b; \
+		auto var ## 3 = var * p10c; \
+		auto var ## 4 = var * p10d; \
+		auto var ## 5 = var * p10e
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
-			auto a1 = outerConverted + (a * p10a);
-			auto a2 = a * p10b;
-			auto a3 = a * p10c;
-			auto a4 = a * p10d;
-			auto a5 = a * p10e;
+			DECLARE_POSITION_VALUES(a);
 			auto as = sum + a;
 			auto ap = product * (a + 2);
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
-				auto b1 = outerConverted + (b * p10a);
-				auto b2 = b * p10b;
-				auto b3 = b * p10c;
-				auto b4 = b * p10d;
-				auto b5 = b * p10e;
+				DECLARE_POSITION_VALUES(b);
 				auto bs = as + b;
 				auto bp = ap * (b + 2);
 				if (a == b) {
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
-						auto c1 = outerConverted + (c * p10a);
-						auto c2 = c * p10b;
-						auto c3 = c * p10c;
-						auto c4 = c * p10d;
-						auto c5 = c * p10e;
 						auto cp = bp * (c + 2);
+						DECLARE_POSITION_VALUES(c);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -232,11 +222,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -306,22 +292,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
-						auto c1 = outerConverted + (c * p10a);
-						auto c2 = c * p10b;
-						auto c3 = c * p10c;
-						auto c4 = c * p10d;
-						auto c5 = c * p10e;
 						auto cp = bp * (c + 2);
+						DECLARE_POSITION_VALUES(c);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -385,11 +363,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
 								auto dp = cp * (d + 2);
-								auto d1 = outerConverted + (d * p10a);
-								auto d2 = d * p10b;
-								auto d3 = d * p10c;
-								auto d4 = d * p10d;
-								auto d5 = d * p10e;
+								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
@@ -497,6 +471,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				}
 			}
 		}
+#undef DECLARE_POSITION_VALUES
 #undef SUMCHECK
 #undef X
 	} else {
