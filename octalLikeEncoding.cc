@@ -147,6 +147,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
+#define SUMCHECK if (es % 3 != 0) { continue; }
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
 			auto a1 = outerConverted + (a * p10a);
@@ -189,9 +190,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e5 = e * p10e;
 										X(d,d,d,d,e);
@@ -208,9 +207,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
@@ -244,9 +241,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
@@ -271,9 +266,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
@@ -333,9 +326,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
@@ -357,9 +348,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
@@ -405,9 +394,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
@@ -445,9 +432,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										if (es % 3 != 0) {
-											continue;
-										}
+										SUMCHECK
 										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
@@ -512,6 +497,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				}
 			}
 		}
+#undef SUMCHECK
 #undef X
 	} else {
 		auto dprod = product << 1;
