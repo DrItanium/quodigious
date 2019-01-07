@@ -487,15 +487,27 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		//
 
 		auto outerConverted = convertNumber<length>(index);
+		static constexpr u64 PrecomputedVars[][6] = {
+#define X(factor) { factor * p10a, factor * p10b, factor * p10c, factor * p10d, factor * p10e, factor * p10f }
+			X(0),
+			X(1),
+			X(2),
+			X(3),
+			X(4),
+			X(5),
+			X(6),
+			X(7),
+#undef X
+		};
 #define X(x,y,z,w,h,q) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5 + q ## 6; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
 #define SUMCHECK if (es % 3 != 0) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
-		auto var ## 1 = outerConverted + ( var * p10a ); \
-		auto var ## 2 = var * p10b; \
-		auto var ## 3 = var * p10c; \
-		auto var ## 4 = var * p10d; \
-		auto var ## 5 = var * p10e; \
-		auto var ## 6 = var * p10f
+		auto var ## 1 = outerConverted + PrecomputedVars[var][0]; \
+		auto var ## 2 = PrecomputedVars[var][1]; \
+		auto var ## 3 = PrecomputedVars[var][2]; \
+		auto var ## 4 = PrecomputedVars[var][3]; \
+		auto var ## 5 = PrecomputedVars[var][4]; \
+		auto var ## 6 = PrecomputedVars[var][5]
 		for (auto f = 0ul; f < 8ul; ++f) {
 			SKIP5s(f);
 			DECLARE_POSITION_VALUES(f);
