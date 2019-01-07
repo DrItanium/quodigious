@@ -93,8 +93,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static constexpr auto p10c = fastPow10<position+2>;
 	static constexpr auto p10d = fastPow10<position+3>;
 	static constexpr auto p10e = fastPow10<position+4>;
-	static constexpr auto p10f = fastPow10<position+5>;
-	static constexpr auto enableSplit6 = true;
+	static constexpr auto enableSplit6 = false;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -148,7 +147,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// Thus we implicitly add the offsets for each position to this base10 2 value :D
 
 		auto outerConverted = convertNumber<length>(index);
-#define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
+		auto fn = [&list](auto n, auto ep, auto es) {
+			if ((n % ep == 0) && (n % es == 0)) { 
+				list.emplace_back(n); 
+			}
+		};
+#define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define SUMCHECK if (es % 3 != 0) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
 		auto var ## 1 = outerConverted + ( var * p10a ); \
@@ -478,6 +482,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef X
 	} else if constexpr (enableSplit6 && length > 13 && (length - position) == 6) {
 
+		static constexpr auto p10f = fastPow10<position+5>;
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
