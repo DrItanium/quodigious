@@ -93,6 +93,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static constexpr auto p10c = fastPow10<position+2>;
 	static constexpr auto p10d = fastPow10<position+3>;
 	static constexpr auto p10e = fastPow10<position+4>;
+	static constexpr auto p10f = fastPow10<position+5>;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -136,7 +137,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		list.splice(list.cbegin(), l0);
 		list.splice(list.cbegin(), l1);
 	} else if constexpr (length > 10 && (length - position) == 5) {
-        
+
 		// this will generate a partial number but reduce the number of conversions
 		// required greatly!
 		// The last two digits are handled in a base 10 fashion without the +2 added
@@ -144,7 +145,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// in this model).
 		//
 		// Thus we implicitly add the offsets for each position to this base10 2 value :D
-		
+
 		auto outerConverted = convertNumber<length>(index);
 #define X(x,y,z,w,h) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
 #define SUMCHECK if (es % 3 != 0) { continue; }
@@ -181,7 +182,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e5 = e * p10e;
 										X(d,d,d,d,e);
 										if (d != e) {
@@ -198,7 +199,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
 										X(e,c,c,c,d); 
@@ -228,7 +229,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
 										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
@@ -253,7 +254,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
 										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
@@ -305,7 +306,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
 										X(e,a,d,c,c); 
@@ -327,7 +328,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
 										X(e,d,a,c,c); X(e,c,d,c,a); X(e,c,d,a,c); 
@@ -369,7 +370,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
@@ -407,7 +408,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-										auto ep = dp * (e + 2);
+											auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
 										X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
@@ -474,6 +475,668 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef DECLARE_POSITION_VALUES
 #undef SUMCHECK
 #undef X
+	} else if constexpr (length > 10 && (length - position) == 6) {
+
+		// this will generate a partial number but reduce the number of conversions
+		// required greatly!
+		// The last two digits are handled in a base 10 fashion without the +2 added
+		// This will make the partial converison correct (remember that a 0 becomes a 2
+		// in this model).
+		//
+		// Thus we implicitly add the offsets for each position to this base10 2 value :D
+
+		auto outerConverted = convertNumber<length>(index);
+#define Y(x,y,z,w,h,q) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5 + q ## 6; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
+#define X(x,y,z,w,h) Y(x,y,z,w,h,f)
+#define SUMCHECK if (es % 3 != 0) { continue; }
+#define DECLARE_POSITION_VALUES(var) \
+		auto var ## 1 = outerConverted + ( var * p10a ); \
+		auto var ## 2 = var * p10b; \
+		auto var ## 3 = var * p10c; \
+		auto var ## 4 = var * p10d; \
+		auto var ## 5 = var * p10e; \
+		auto var ## 6 = var * p10f
+		for (auto f = 0ul; f < 8ul; ++f) {
+			SKIP5s(f);
+			DECLARE_POSITION_VALUES(f);
+			auto fs = sum + f;
+			auto fp = product * (f + 2);
+			for (auto a = f; a < 8ul; ++a) {
+				SKIP5s(a);
+				DECLARE_POSITION_VALUES(a);
+				auto as = fs + a;
+				auto ap = fp * (a + 2);
+				if (a == f) {
+					for (auto b = a; b < 8ul; ++b) {
+						SKIP5s(b);
+						DECLARE_POSITION_VALUES(b);
+						auto bs = as + b;
+						auto bp = ap * (b + 2);
+						if (a == b) {
+							for (auto c = b; c < 8ul; ++c) {
+								SKIP5s(c);
+								auto cs = bs + c;
+								auto cp = bp * (c + 2);
+								DECLARE_POSITION_VALUES(c);
+								if (b == c) {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e5 = e * p10e;
+												X(d,d,d,d,e);
+												if (d != e) {
+													auto e1 = outerConverted + (e * p10a);
+													auto e2 = e * p10b;
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+													X(d,d,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
+												X(e,c,c,c,d); 
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
+												X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
+												if (d != e) {
+													auto e4 = e * p10d;
+													X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+													X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
+													X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
+													X(c,c,c,e,d); 
+												}
+											}
+										}
+									}
+								} else {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
+												X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
+												auto e2 = e * p10b;
+												X(b,e,b,d,c); X(b,e,d,c,b); X(b,e,c,b,d); 
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												if (d != e) {
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
+													X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
+													X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
+													X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
+													X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
+													X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
+													X(b,b,e,d,d); X(b,b,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
+												X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
+												X(e,c,d,b,b); X(e,c,b,d,b); X(e,c,b,b,d); 
+												X(e,b,c,d,b); X(e,b,c,b,d); X(e,b,b,c,d);
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												X(b,e,d,c,b); X(b,e,c,b,d); X(b,e,b,d,c); 
+												X(c,e,d,b,b); X(c,e,b,d,b); X(c,e,b,b,d);
+												X(c,b,e,d,b); X(c,b,e,b,d); X(c,b,b,d,e);
+
+												X(b,e,d,b,c); X(b,e,c,d,b); X(b,e,b,c,d);
+												X(b,c,e,d,b); X(b,c,e,b,d); X(b,c,b,e,d); 
+												X(b,b,e,d,c); X(b,b,e,c,d); 
+												if (d != e) {
+													X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
+													X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
+													X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
+													X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
+													X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
+													X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
+													X(c,d,e,b,b); X(c,d,b,e,b); X(c,d,b,b,e);
+													X(c,b,d,e,b); X(c,b,d,b,e); X(c,b,b,e,d); 
+													X(b,c,d,e,b); X(b,c,d,b,e); X(b,c,b,d,e);
+													X(b,b,d,c,e); X(b,b,d,e,c); X(b,b,c,e,d); 
+												}
+											}
+										}
+									}
+								}
+							}
+						} else {
+							for (auto c = b; c < 8ul; ++c) {
+								SKIP5s(c);
+								auto cs = bs + c;
+								auto cp = bp * (c + 2);
+								DECLARE_POSITION_VALUES(c);
+								if (b == c) {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
+												X(e,a,d,c,c); 
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												if (d != e) {
+													auto e2 = e * p10b;
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+													X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+													X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+													X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
+													X(d,a,e,d,d); X(a,e,d,d,d); X(a,d,e,d,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
+												X(e,d,a,c,c); X(e,c,d,c,a); X(e,c,d,a,c); 
+												X(e,c,c,d,a); X(e,c,c,a,d); X(e,c,a,d,c); 
+												X(e,c,a,c,d); X(e,a,c,d,c); X(e,a,c,c,d); 
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(c,e,d,c,a); X(c,e,d,a,c); 
+												X(c,e,c,d,a); X(c,e,c,a,d); X(c,e,a,d,c); 
+												X(c,e,a,c,d); X(c,c,e,d,a); X(c,c,e,a,d); 
+												X(c,c,a,e,d); X(c,a,e,d,c); X(c,a,e,c,d); 
+												X(c,a,c,e,d); X(a,e,d,c,c); X(a,e,c,d,c); 
+												X(a,e,c,c,d); X(a,c,e,d,c); X(a,c,e,c,d); 
+												if (d != e) {
+													X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+													X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+													X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+													X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
+													X(d,a,e,c,c); X(d,a,c,e,c); X(d,a,c,c,e);
+													X(c,d,e,c,a); X(c,d,e,a,c); X(c,d,c,e,a);
+													X(c,d,c,a,e); X(c,d,a,e,c); X(c,d,a,c,e);
+													X(c,c,d,e,a); X(c,c,d,a,e); X(c,c,a,d,e);
+													X(a,d,e,c,c); X(a,d,c,e,c); X(a,d,c,c,e);
+													X(a,c,d,e,c); X(a,c,d,c,e); X(c,a,c,d,e);
+												}
+											}
+										}
+									}
+								} else {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
+												X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
+												X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
+												X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
+												auto e2 = e * p10b;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
+												X(a,e,b,d,d); X(b,e,d,d,a); X(b,e,d,a,d); 
+												X(b,e,a,d,d); X(b,a,d,d,e);
+
+												if (d != e) {
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
+													X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
+													X(d,d,e,b,a); X(d,d,e,a,b); X(d,d,b,e,a);
+													X(d,d,b,a,e); X(d,d,a,e,b); X(d,d,a,b,e);
+													X(d,b,e,d,a); X(d,b,e,a,d); X(d,b,d,e,a);
+													X(d,b,d,a,e); X(d,b,a,e,d); X(d,b,a,d,e);
+													X(d,a,e,d,b); X(d,a,e,b,d); X(d,a,d,e,b);
+													X(d,a,d,b,e); X(d,a,b,e,d); X(d,a,b,d,e);
+
+													X(b,d,e,d,a); X(b,d,e,a,d); X(b,d,d,e,a);
+													X(b,d,d,a,e); X(b,d,a,e,d); X(b,d,a,d,e);
+													X(b,a,e,d,d); X(b,a,d,e,d); 
+
+													X(a,d,e,d,b); X(a,d,e,b,d); X(a,d,d,e,b);
+													X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
+													X(a,b,e,d,d); X(a,b,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
+												X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
+												X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
+												X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
+												X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
+												X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
+												X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
+												X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
+												auto e2 = e * p10b;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e);
+												X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
+												X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
+												X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
+												X(a,b,d,c,e); X(a,b,d,e,c);
+
+												X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
+												X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
+												X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
+												X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
+
+												X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
+												X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
+												X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
+												X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
+
+
+												if (d != e) {
+													auto e3 = e * p10c;
+													X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
+													X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
+													X(a,d,b,e,c); X(a,d,c,b,e); X(a,d,c,e,b);
+													X(a,d,e,b,c); X(a,d,e,c,b); X(a,b,c,e,d); 
+
+													X(b,a,c,d,e); X(b,a,e,c,d); X(b,a,e,d,c); 
+													X(b,c,a,e,d); X(b,c,e,a,d); X(b,c,e,d,a); 
+													X(b,d,a,c,e); X(b,d,a,e,c); X(b,d,c,a,e); 
+													X(b,d,c,e,a); X(b,d,e,a,c); X(b,d,e,c,a); 
+
+													X(c,a,b,e,d); X(c,a,e,b,d); X(c,a,e,d,b); 
+													X(c,b,a,e,d); X(c,d,e,a,b); X(c,d,e,b,a); 
+													X(c,b,e,a,d); X(c,b,e,d,a); X(c,d,a,b,e);
+													X(c,d,a,e,b); X(c,d,b,a,e); X(c,d,b,e,a);
+
+													X(d,a,b,e,c); X(d,a,c,b,e); X(d,a,c,e,b);
+													X(d,a,e,b,c); X(d,a,e,c,b); X(d,b,a,c,e);
+													X(d,b,a,e,c); X(d,b,c,a,e); X(d,b,c,e,a);
+													X(d,b,e,a,c); X(d,b,e,c,a); X(d,c,a,b,e);
+													X(d,c,a,e,b); X(d,c,b,a,e); X(d,c,b,e,a);
+													X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
+													X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
+													X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				} else {
+					for (auto b = a; b < 8ul; ++b) {
+						SKIP5s(b);
+						DECLARE_POSITION_VALUES(b);
+						auto bs = as + b;
+						auto bp = ap * (b + 2);
+						if (a == b) {
+							for (auto c = b; c < 8ul; ++c) {
+								SKIP5s(c);
+								auto cs = bs + c;
+								auto cp = bp * (c + 2);
+								DECLARE_POSITION_VALUES(c);
+								if (b == c) {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e5 = e * p10e;
+												X(d,d,d,d,e);
+												if (d != e) {
+													auto e1 = outerConverted + (e * p10a);
+													auto e2 = e * p10b;
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+													X(d,d,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
+												X(e,c,c,c,d); 
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
+												X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
+												if (d != e) {
+													auto e4 = e * p10d;
+													X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+													X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
+													X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
+													X(c,c,c,e,d); 
+												}
+											}
+										}
+									}
+								} else {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
+												X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
+												auto e2 = e * p10b;
+												X(b,e,b,d,c); X(b,e,d,c,b); X(b,e,c,b,d); 
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												if (d != e) {
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
+													X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
+													X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
+													X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
+													X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
+													X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
+													X(b,b,e,d,d); X(b,b,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
+												X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
+												X(e,c,d,b,b); X(e,c,b,d,b); X(e,c,b,b,d); 
+												X(e,b,c,d,b); X(e,b,c,b,d); X(e,b,b,c,d);
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												X(b,e,d,c,b); X(b,e,c,b,d); X(b,e,b,d,c); 
+												X(c,e,d,b,b); X(c,e,b,d,b); X(c,e,b,b,d);
+												X(c,b,e,d,b); X(c,b,e,b,d); X(c,b,b,d,e);
+
+												X(b,e,d,b,c); X(b,e,c,d,b); X(b,e,b,c,d);
+												X(b,c,e,d,b); X(b,c,e,b,d); X(b,c,b,e,d); 
+												X(b,b,e,d,c); X(b,b,e,c,d); 
+												if (d != e) {
+													X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
+													X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
+													X(d,b,e,c,b); X(d,b,e,b,c); X(d,b,c,e,b);
+													X(d,b,c,b,e); X(d,b,b,e,c); X(d,b,b,c,e);
+													X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
+													X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
+													X(c,d,e,b,b); X(c,d,b,e,b); X(c,d,b,b,e);
+													X(c,b,d,e,b); X(c,b,d,b,e); X(c,b,b,e,d); 
+													X(b,c,d,e,b); X(b,c,d,b,e); X(b,c,b,d,e);
+													X(b,b,d,c,e); X(b,b,d,e,c); X(b,b,c,e,d); 
+												}
+											}
+										}
+									}
+								}
+							}
+						} else {
+							for (auto c = b; c < 8ul; ++c) {
+								SKIP5s(c);
+								auto cs = bs + c;
+								auto cp = bp * (c + 2);
+								DECLARE_POSITION_VALUES(c);
+								if (b == c) {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
+												X(e,a,d,c,c); 
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); 
+												if (d != e) {
+													auto e2 = e * p10b;
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+													X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+													X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+													X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
+													X(d,a,e,d,d); X(a,e,d,d,d); X(a,d,e,d,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
+												X(e,d,a,c,c); X(e,c,d,c,a); X(e,c,d,a,c); 
+												X(e,c,c,d,a); X(e,c,c,a,d); X(e,c,a,d,c); 
+												X(e,c,a,c,d); X(e,a,c,d,c); X(e,a,c,c,d); 
+												auto e2 = e * p10b;
+												auto e3 = e * p10c;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(c,e,d,c,a); X(c,e,d,a,c); 
+												X(c,e,c,d,a); X(c,e,c,a,d); X(c,e,a,d,c); 
+												X(c,e,a,c,d); X(c,c,e,d,a); X(c,c,e,a,d); 
+												X(c,c,a,e,d); X(c,a,e,d,c); X(c,a,e,c,d); 
+												X(c,a,c,e,d); X(a,e,d,c,c); X(a,e,c,d,c); 
+												X(a,e,c,c,d); X(a,c,e,d,c); X(a,c,e,c,d); 
+												if (d != e) {
+													X(d,e,c,c,a); X(d,e,c,a,c); X(d,e,a,c,c);
+													X(d,c,e,c,a); X(d,c,e,a,c); X(d,c,c,e,a);
+													X(d,c,c,a,e); X(d,c,a,e,c); X(d,c,a,c,e);
+													X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
+													X(d,a,e,c,c); X(d,a,c,e,c); X(d,a,c,c,e);
+													X(c,d,e,c,a); X(c,d,e,a,c); X(c,d,c,e,a);
+													X(c,d,c,a,e); X(c,d,a,e,c); X(c,d,a,c,e);
+													X(c,c,d,e,a); X(c,c,d,a,e); X(c,c,a,d,e);
+													X(a,d,e,c,c); X(a,d,c,e,c); X(a,d,c,c,e);
+													X(a,c,d,e,c); X(a,c,d,c,e); X(c,a,c,d,e);
+												}
+											}
+										}
+									}
+								} else {
+									for (auto d = c; d < 8ul; ++d) {
+										SKIP5s(d);
+										auto ds = cs + d;
+										auto dp = cp * (d + 2);
+										DECLARE_POSITION_VALUES(d);
+										if (c == d) {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
+												X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
+												X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
+												X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
+												auto e2 = e * p10b;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
+												X(a,e,b,d,d); X(b,e,d,d,a); X(b,e,d,a,d); 
+												X(b,e,a,d,d); X(b,a,d,d,e);
+
+												if (d != e) {
+													auto e3 = e * p10c;
+													auto e4 = e * p10d;
+													X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
+													X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
+													X(d,d,e,b,a); X(d,d,e,a,b); X(d,d,b,e,a);
+													X(d,d,b,a,e); X(d,d,a,e,b); X(d,d,a,b,e);
+													X(d,b,e,d,a); X(d,b,e,a,d); X(d,b,d,e,a);
+													X(d,b,d,a,e); X(d,b,a,e,d); X(d,b,a,d,e);
+													X(d,a,e,d,b); X(d,a,e,b,d); X(d,a,d,e,b);
+													X(d,a,d,b,e); X(d,a,b,e,d); X(d,a,b,d,e);
+
+													X(b,d,e,d,a); X(b,d,e,a,d); X(b,d,d,e,a);
+													X(b,d,d,a,e); X(b,d,a,e,d); X(b,d,a,d,e);
+													X(b,a,e,d,d); X(b,a,d,e,d); 
+
+													X(a,d,e,d,b); X(a,d,e,b,d); X(a,d,d,e,b);
+													X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
+													X(a,b,e,d,d); X(a,b,d,e,d); 
+												}
+											}
+										} else {
+											for (auto e = d; e < 8ul; ++e) {
+												SKIP5s(e);
+												auto es = ds + e;
+												SUMCHECK
+													auto ep = dp * (e + 2);
+												auto e1 = outerConverted + (e * p10a);
+												X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
+												X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
+												X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
+												X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
+												X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
+												X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
+												X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
+												X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
+												auto e2 = e * p10b;
+												auto e4 = e * p10d;
+												auto e5 = e * p10e;
+												X(a,b,c,d,e);
+												X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
+												X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
+												X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
+												X(a,b,d,c,e); X(a,b,d,e,c);
+
+												X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
+												X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
+												X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
+												X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
+
+												X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
+												X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
+												X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
+												X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
+
+
+												if (d != e) {
+													auto e3 = e * p10c;
+													X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
+													X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
+													X(a,d,b,e,c); X(a,d,c,b,e); X(a,d,c,e,b);
+													X(a,d,e,b,c); X(a,d,e,c,b); X(a,b,c,e,d); 
+
+													X(b,a,c,d,e); X(b,a,e,c,d); X(b,a,e,d,c); 
+													X(b,c,a,e,d); X(b,c,e,a,d); X(b,c,e,d,a); 
+													X(b,d,a,c,e); X(b,d,a,e,c); X(b,d,c,a,e); 
+													X(b,d,c,e,a); X(b,d,e,a,c); X(b,d,e,c,a); 
+
+													X(c,a,b,e,d); X(c,a,e,b,d); X(c,a,e,d,b); 
+													X(c,b,a,e,d); X(c,d,e,a,b); X(c,d,e,b,a); 
+													X(c,b,e,a,d); X(c,b,e,d,a); X(c,d,a,b,e);
+													X(c,d,a,e,b); X(c,d,b,a,e); X(c,d,b,e,a);
+
+													X(d,a,b,e,c); X(d,a,c,b,e); X(d,a,c,e,b);
+													X(d,a,e,b,c); X(d,a,e,c,b); X(d,b,a,c,e);
+													X(d,b,a,e,c); X(d,b,c,a,e); X(d,b,c,e,a);
+													X(d,b,e,a,c); X(d,b,e,c,a); X(d,c,a,b,e);
+													X(d,c,a,e,b); X(d,c,b,a,e); X(d,c,b,e,a);
+													X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
+													X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
+													X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+#undef DECLARE_POSITION_VALUES
+#undef SUMCHECK
+#undef X
+#undef Y
 	} else {
 		auto dprod = product << 1;
 		static constexpr auto indexIncr = getShiftedValue<position>(1ul);
@@ -560,8 +1223,8 @@ int main() {
 				X(16); X(17); X(18); X(19); 
 #undef X
 				default:
-						 std::cerr << "Illegal index " << currentIndex << std::endl;
-						 return 1;
+				std::cerr << "Illegal index " << currentIndex << std::endl;
+				return 1;
 			}
 			std::cout << std::endl;
 		}
