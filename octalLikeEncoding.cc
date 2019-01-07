@@ -94,7 +94,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	static constexpr auto p10d = fastPow10<position+3>;
 	static constexpr auto p10e = fastPow10<position+4>;
 	static constexpr auto p10f = fastPow10<position+5>;
-	static constexpr auto enableSplit6 = false;
+	static constexpr auto enableSplit6 = true;
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -488,27 +488,20 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		//
 
 		auto outerConverted = convertNumber<length>(index);
-		static constexpr u64 PrecomputedVars[][6] = {
-#define X(factor) { factor * p10a, factor * p10b, factor * p10c, factor * p10d, factor * p10e, factor * p10f }
-			X(0),
-			X(1),
-			X(2),
-			X(3),
-			X(4),
-			X(5),
-			X(6),
-			X(7),
-#undef X
+		auto fn = [&list](auto n, auto ep, auto es) {
+			if ((n % ep == 0) && (n % es == 0)) {
+				list.emplace_back(n);
+			}
 		};
-#define X(x,y,z,w,h,q) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5 + q ## 6; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
+#define X(x,y,z,w,h,q) fn( x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5 + q ## 6, ep, es)
 #define SUMCHECK if (es % 3 != 0) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
-		auto var ## 1 = outerConverted + PrecomputedVars[var][0]; \
-		auto var ## 2 = PrecomputedVars[var][1]; \
-		auto var ## 3 = PrecomputedVars[var][2]; \
-		auto var ## 4 = PrecomputedVars[var][3]; \
-		auto var ## 5 = PrecomputedVars[var][4]; \
-		auto var ## 6 = PrecomputedVars[var][5]
+		auto var ## 1 = outerConverted + (var * p10a); \
+		auto var ## 2 = (var * p10b); \
+		auto var ## 3 = (var * p10c); \
+		auto var ## 4 = (var * p10d); \
+		auto var ## 5 = (var * p10e); \
+		auto var ## 6 = (var * p10f)
 		for (auto f = 0ul; f < 8ul; ++f) {
 			SKIP5s(f);
 			DECLARE_POSITION_VALUES(f);
@@ -517,33 +510,24 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			for (auto a = f; a < 8ul; ++a) {
 				SKIP5s(a);
 				DECLARE_POSITION_VALUES(a);
-				auto as = fs + a;
-				auto ap = fp * (a + 2);
-				if (a == f) {
+				if (auto as = fs + a, ap = fp * (a + 2); a == f) {
 					for (auto b = a; b < 8ul; ++b) {
 						SKIP5s(b);
 						DECLARE_POSITION_VALUES(b);
-						auto bs = as + b;
-						auto bp = ap * (b + 2);
-						if (a == b) {
+						if (auto bs = as + b, bp = ap * (b + 2); a == b) {
 							for (auto c = b; c < 8ul; ++c) {
 								SKIP5s(c);
-								auto cs = bs + c;
-								auto cp = bp * (c + 2);
 								DECLARE_POSITION_VALUES(c);
-								if (b == c) {
+								if (auto cs = bs + c, cp = bp * (c + 2); b == c) {
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,d,d,d); X(d,e,d,d,d,d); X(d,d,e,d,d,d); 
 													X(d,d,d,e,d,d); X(d,d,d,d,e,d); X(d,d,d,d,d,e); 
@@ -557,8 +541,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,c,c,c); X(e,c,d,c,c,c); X(e,c,c,d,c,c);
 													X(e,c,c,c,d,c); X(e,c,c,c,c,d); X(d,e,c,c,c,c);
@@ -584,16 +567,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// b != c
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,c,c,b,b,b); X(e,c,b,c,b,b); X(e,c,b,b,c,b);
 													X(e,c,b,b,b,c); X(e,b,c,c,b,b); X(e,b,c,b,c,b);
@@ -631,8 +611,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,b,b,b); X(e,d,b,c,b,b); X(e,d,b,b,c,b);
 													X(e,d,b,b,b,c); X(e,c,d,b,b,b); X(e,c,b,d,b,b);
@@ -706,22 +685,17 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							// a != b
 							for (auto c = b; c < 8ul; ++c) {
 								SKIP5s(c);
-								auto cs = bs + c;
-								auto cp = bp * (c + 2);
 								DECLARE_POSITION_VALUES(c);
-								if (b == c) {
+								if (auto cs = bs + c, cp = bp * (c + 2); b == c) {
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,d,a,a); X(e,d,d,a,d,a); X(e,d,d,a,a,d);
 													X(e,d,a,d,d,a); X(e,d,a,d,a,d); X(e,d,a,a,d,d);
@@ -757,8 +731,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,c,a,a); X(e,d,c,a,c,a); X(e,d,c,a,a,c);
 													X(e,d,a,c,c,a); X(e,d,a,c,a,c); X(e,d,a,a,c,c);
@@ -859,16 +832,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// b != c
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,b,a,a); X(e,d,d,a,b,a); X(e,d,d,a,a,b);
 													X(e,d,b,d,a,a); X(e,d,b,a,d,a); X(e,d,b,a,a,d);
@@ -959,8 +929,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,b,a,a); X(e,d,c,a,b,a); X(e,d,c,a,a,b);
 													X(e,d,b,c,a,a); X(e,d,b,a,c,a); X(e,d,b,a,a,c);
@@ -1156,27 +1125,20 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 					for (auto b = a; b < 8ul; ++b) {
 						SKIP5s(b);
 						DECLARE_POSITION_VALUES(b);
-						auto bs = as + b;
-						auto bp = ap * (b + 2);
-						if (a == b) {
+						if (auto bs = as + b, bp = ap * (b + 2); a == b) {
 							for (auto c = b; c < 8ul; ++c) {
 								SKIP5s(c);
-								auto cs = bs + c;
-								auto cp = bp * (c + 2);
 								DECLARE_POSITION_VALUES(c);
-								if (b == c) {
+								if (auto cs = bs + c, cp = bp * (c + 2); b == c) {
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,d,d,f); X(e,d,d,d,f,d); X(e,d,d,f,d,d);
 													X(e,d,f,d,d,d); X(e,f,d,d,d,d); X(d,e,d,d,d,f);
@@ -1199,8 +1161,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,c,c,f); X(e,d,c,c,f,c); X(e,d,c,f,c,c);
 													X(e,d,f,c,c,c); X(e,c,d,c,c,f); X(e,c,d,c,f,c);
@@ -1271,16 +1232,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// b != c
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,b,b,f); X(e,d,d,b,f,b); X(e,d,d,f,b,b);
 													X(e,d,b,d,b,f); X(e,d,b,d,f,b); X(e,d,b,b,d,f);
@@ -1371,8 +1329,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,b,b,f); X(e,d,c,b,f,b); X(e,d,c,f,b,b);
 													X(e,d,b,c,b,f); X(e,d,b,c,f,b); X(e,d,b,b,c,f);
@@ -1565,22 +1522,17 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							// a != b
 							for (auto c = b; c < 8ul; ++c) {
 								SKIP5s(c);
-								auto cs = bs + c;
-								auto cp = bp * (c + 2);
 								DECLARE_POSITION_VALUES(c);
-								if (b == c) {
+								if (auto cs = bs + c, cp = bp * (c + 2); b == c) {
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,d,a,f); X(e,d,d,d,f,a); X(e,d,d,a,d,f);
 													X(e,d,d,a,f,d); X(e,d,d,f,d,a); X(e,d,d,f,a,d);
@@ -1641,8 +1593,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,c,a,f); X(e,d,c,c,f,a); X(e,d,c,a,c,f);
 													X(e,d,c,a,f,c); X(e,d,c,f,c,a); X(e,d,c,f,a,c);
@@ -1833,16 +1784,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									// b != c
 									for (auto d = c; d < 8ul; ++d) {
 										SKIP5s(d);
-										auto ds = cs + d;
-										auto dp = cp * (d + 2);
 										DECLARE_POSITION_VALUES(d);
-										if (c == d) {
+										if (auto ds = cs + d, dp = cp * (d + 2); c == d) {
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,d,b,a,f); X(e,d,d,b,f,a); X(e,d,d,a,b,f);
 													X(e,d,d,a,f,b); X(e,d,d,f,b,a); X(e,d,d,f,a,b);
@@ -2013,8 +1961,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 												SKIP5s(e);
 												auto es = ds + e;
 												SUMCHECK;
-												auto ep = dp * (e + 2);
-												if (d != e) {
+												if (auto ep = dp * (e + 2); d != e) {
 													DECLARE_POSITION_VALUES(e);
 													X(e,d,c,b,a,f); X(e,d,c,b,f,a); X(e,d,c,a,b,f);
 													X(e,d,c,a,f,b); X(e,d,c,f,b,a); X(e,d,c,f,a,b);
