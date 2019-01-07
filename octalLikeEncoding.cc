@@ -484,7 +484,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// in this model).
 		//
 		// Thus we implicitly add the offsets for each position to this base10 2 value :D
-
+		//
+		
 		auto outerConverted = convertNumber<length>(index);
 #define Y(x,y,z,w,h,q) if (auto n = x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5 + q ## 6; ((n % ep == 0) && (n % es == 0))) { list.emplace_back(n); }
 #define X(x,y,z,w,h) Y(x,y,z,w,h,f)
@@ -528,33 +529,51 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
-												SUMCHECK
-													auto ep = dp * (e + 2);
-												auto e5 = e * p10e;
-												X(d,d,d,d,e);
+												SUMCHECK;
+												auto ep = dp * (e + 2);
+												auto e6 = e * p10f;
+												Y(d,d,d,d,d,e);
 												if (d != e) {
 													auto e1 = outerConverted + (e * p10a);
 													auto e2 = e * p10b;
 													auto e3 = e * p10c;
 													auto e4 = e * p10d;
-													X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-													X(d,d,d,e,d); 
+													auto e5 = e * p10e;
+													Y(e,d,d,d,d,d); 
+													Y(d,e,d,d,d,d); 
+													Y(d,d,e,d,d,d); 
+													Y(d,d,d,e,d,d); 
+													Y(d,d,d,d,e,d); 
 												}
 											}
 										} else {
+											// c != d
 											for (auto e = d; e < 8ul; ++e) {
 												SKIP5s(e);
 												auto es = ds + e;
-												SUMCHECK
-													auto ep = dp * (e + 2);
+												SUMCHECK;
+												auto ep = dp * (e + 2);
 												auto e1 = outerConverted + (e * p10a);
-												X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
-												X(e,c,c,c,d); 
+												Y(e,d,c,c,c,c); 
+												Y(e,c,d,c,c,c); 
+												Y(e,c,c,d,c,c);
+												Y(e,c,c,c,d,c); 
+												Y(e,c,c,c,c,d); 
 												auto e2 = e * p10b;
+												Y(c,e,d,c,c,c); 
+												Y(c,e,c,d,c,c); 
+												Y(c,e,c,c,d,c); 
+												Y(c,e,c,c,c,d); 
 												auto e3 = e * p10c;
+												Y(c,c,e,d,c,c); 
+												Y(c,c,e,c,d,c); 
+												Y(c,c,e,c,c,d); 
+												auto e4 = e * p10d;
+												Y(c,c,c,e,d,c); 
+												Y(c,c,c,e,c,d); 
 												auto e5 = e * p10e;
-												X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
-												X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
+												Y(c,c,c,d,e,c); 
+												auto e6 = e * p10f;
 												if (d != e) {
 													auto e4 = e * p10d;
 													X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
