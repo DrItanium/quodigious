@@ -181,24 +181,34 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								auto dp = cp * (d + 2);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
-									for (auto e = d; e < 8ul; ++e) {
+									fn(d1 + d2 + d3 + d4 + d5, ds + d, dp * (d + 2));
+									for (auto e = d+1; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
 										auto ep = dp * (e + 2);
 										auto e5 = e * p10e;
-										X(d,d,d,d,e);
-										if (d != e) {
-											auto e1 = outerConverted + (e * p10a);
-											auto e2 = e * p10b;
-											auto e3 = e * p10c;
-											auto e4 = e * p10d;
-											X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-											X(d,d,d,e,d); 
-										}
+										auto e1 = outerConverted + (e * p10a);
+										auto e2 = e * p10b;
+										auto e3 = e * p10c;
+										auto e4 = e * p10d;
+										X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+										X(d,d,d,e,d); X(d,d,d,d,e);
 									}
 								} else {
-									for (auto e = d; e < 8ul; ++e) {
+									auto es = ds + d;
+									auto ep = dp * (d + 2);
+									X(d,d,c,c,c); 
+									X(d,c,d,c,c); 
+									X(d,c,c,d,c);
+									X(d,c,c,c,d); 
+									X(a,b,c,d,d); 
+									X(c,d,d,c,c); 
+									X(c,d,c,d,c); 
+									X(c,d,c,c,d); 
+									X(c,c,d,d,c); 
+									X(c,c,d,c,d); 
+									for (auto e = d+1; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
@@ -211,13 +221,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										auto e5 = e * p10e;
 										X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
 										X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
-										if (d != e) {
-											auto e4 = e * p10d;
-											X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
-											X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
-											X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
-											X(c,c,c,e,d); 
-										}
+										auto e4 = e * p10d;
+										X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+										X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
+										X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
+										X(c,c,c,e,d); 
 									}
 								}
 							}
@@ -372,8 +380,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK
-											auto ep = dp * (e + 2);
+										SUMCHECK;
+										auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
