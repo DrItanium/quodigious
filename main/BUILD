@@ -29,7 +29,29 @@ cc_library(
 cc_binary(
         name = "quodigious64_OldLoops",
         srcs = [ "loops64.cc", ],
-        copts = [ "-std=c++17", "-march=native", "-O3", "-fwhole-program", "-Imain/include", "-Imain/", ],
+        copts = [ "-std=c++17", "-march=native", "-O3", "-fwhole-program", "-Imain/include", ],
         linkopts = [ "-lpthread", "-O3", "-std=c++17", "-march=native", "-fwhole-program" ],
         deps = [":libquod", ":libquod64_oldloops", ],
+        )
+
+cc_binary(
+        name = "product-compute",
+        srcs = [ "product-compute.cc", ],
+        copts = [ "-std=c++17", "-march=native", "-O3", "-fwhole-program", "-Imain/include", ],
+        linkopts = [ "-lpthread", "-O3", "-std=c++17", "-march=native", "-fwhole-program" ],
+        deps = [":libquod" ],
+        )
+cc_binary(
+        name = "sum-compute",
+        srcs = [ "sum-compute.cc", ],
+        copts = [ "-std=c++17", "-march=native", "-O3", "-fwhole-program", "-Imain/include", ],
+        linkopts = [ "-lpthread", "-O3", "-std=c++17", "-march=native", "-fwhole-program" ],
+        deps = [":libquod" ],
+        )
+cc_binary(
+        name = "quodigiousSimple",
+        srcs = [ "simpleLoops.cc", ],
+        copts = [ "-std=c++17", "-march=native", "-O3", "-fwhole-program", "-Imain/include", ],
+        linkopts = [ "-lpthread", "-O3", "-std=c++17", "-march=native", "-fwhole-program" ],
+        deps = [":libquod" ],
         )

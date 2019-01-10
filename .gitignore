@@ -26,3 +26,5 @@ sum-compute
 fanalysis
 ocEncoding
 simpleLoops
+bazel-bin
+bazel-*
