@@ -14,6 +14,8 @@ cc_binary(
         deps = [":libquod"],
         )
 cc_library(
+        # these files are included in other files, they are not directly compilable
+        # don't allow bazel to believe they are either
         name = "libquod64_oldloops",
         hdrs = [ "Specialization10Digits.cc",
                 "Specialization2Digits.cc",
