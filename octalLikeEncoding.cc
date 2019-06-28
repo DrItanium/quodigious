@@ -181,9 +181,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
 				DECLARE_POSITION_VALUES(b);
-				auto bs = as + b;
-				auto bp = computePartialProduct(ap, b);
-				if (a == b) {
+				if (auto bs = as + b, bp = computePartialProduct(ap, b); a == b) {
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
