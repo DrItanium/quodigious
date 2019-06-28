@@ -40,8 +40,8 @@ constexpr u64 convertNumber(u64 value) noexcept {
 	if constexpr (position == 1) {
 		return ((value & 0b111) + 2);
 	} else {
-		constexpr auto nextPos = position - 1;
-		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
+		static constexpr auto nextPos = position - 1;
+		static constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
 		auto significand = (value & mask) >> shiftAmount<nextPos>;
 		return [&significand]() -> u64 {
 			switch(significand) {
@@ -62,25 +62,39 @@ template<u64 position>
 constexpr u64 getShiftedValue(u64 value) noexcept {
 	return value << shiftAmount<position>;
 }
+template<u64 len>
+constexpr auto shouldSkip5Digit(u64 x) noexcept {
+    if constexpr (len > 4) {
+        return x == 3ul;
+    } else {
+        return false;
+    }
+}
+
+constexpr auto debugEnabled() noexcept {
+#ifdef DEBUG
+    return true;
+#else
+    return false;
+#endif
+}
 
 #define SKIP5s(x) \
-	if constexpr (length > 4) { \
-		if (x == 3ul) { \
-			continue; \
-		} \
-	}
+    if (shouldSkip5Digit<length>(x)) { \
+        continue; \
+    }
 template<u64 len, u64 pos, u64 length, u64 position>
 constexpr auto lenGreaterAndPos = (length > len) && (position == pos);
 void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
-#ifdef DEBUG
-	if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
-		std::cout << "Duplicate value: " << value << std::endl;
-	} else {
-		l.emplace_back(value);
-	}
-#else
-	l.emplace_back(value);
-#endif
+    if constexpr (debugEnabled()) {
+        if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
+            std::cout << "Duplicate value: " << value << std::endl;
+        } else {
+            l.emplace_back(value);
+        }
+    } else {
+        l.emplace_back(value);
+    }
 }
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
