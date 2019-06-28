@@ -40,8 +40,8 @@ constexpr u64 convertNumber(u64 value) noexcept {
 	if constexpr (position == 1) {
 		return ((value & 0b111) + 2);
 	} else {
-		static constexpr auto nextPos = position - 1;
-		static constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
+		constexpr auto nextPos = position - 1;
+		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
 		auto significand = (value & mask) >> shiftAmount<nextPos>;
 		return [&significand]() -> u64 {
 			switch(significand) {
