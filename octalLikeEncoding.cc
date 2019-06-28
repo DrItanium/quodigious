@@ -71,13 +71,6 @@ constexpr auto shouldSkip5Digit(u64 x) noexcept {
     }
 }
 
-constexpr auto debugEnabled() noexcept {
-#ifdef DEBUG
-    return true;
-#else
-    return false;
-#endif
-}
 
 #define SKIP5s(x) \
     if (shouldSkip5Digit<length>(x)) { \
@@ -96,6 +89,9 @@ void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
         l.emplace_back(value);
     }
 }
+constexpr bool isNotDivisibleByThree(u64 value) noexcept {
+    return (value % 3) != 0;
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -104,7 +100,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
-			if (sum % 3 != 0) {
+            if (isNotDivisibleByThree(sum)) {
 				return;
 			}
 		}
@@ -165,7 +161,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			}
 		};
 #define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
-#define SUMCHECK if (es % 3 != 0) { continue; }
+#define SUMCHECK if (isNotDivisibleByThree(es)) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
 		auto var ## 1 = outerConverted + ( var * p10a ); \
 		auto var ## 2 = var * p10b; \
@@ -386,8 +382,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK
-											auto ep = dp * (e + 2);
+										SUMCHECK;
+                                        auto ep = dp * (e + 2);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);

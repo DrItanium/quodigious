@@ -97,5 +97,13 @@ constexpr u64 encodeDigitIntoOrderHash(u64 value, u64 digit) noexcept {
     return maskedValue | valueToInject;
 }
 
+constexpr auto debugEnabled() noexcept {
+#ifdef DEBUG
+    return true;
+#else
+    return false;
+#endif
+}
+
 
 #endif // end QLIB_H__
