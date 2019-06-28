@@ -92,6 +92,9 @@ void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
 constexpr bool isNotDivisibleByThree(u64 value) noexcept {
     return (value % 3) != 0;
 }
+constexpr u64 computePartialProduct(u64 a, u64 b) noexcept {
+    return a * (b + 2);
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
@@ -129,7 +132,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		auto halveIt = [](std::list<DataTriple> & collection) {
 			MatchList l;
 			for(auto& a : collection) {
-				body<position + 1, length>(l, std::get<0>(a), std::get<1>(a), std::get<2>(a));
+                auto [sum, prod, ind] = a;
+				body<position + 1, length>(l, sum, prod, ind);
 			}
 			return l;
 		};
@@ -159,17 +163,16 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				list.emplace_back(n); 
 			}
 		};
-        static constexpr auto computePartialProduct = [](auto a, auto b) noexcept {
-            return a * (b + 2);
+        auto computePositionValues = [outerConverted](u64 var) {
+            return std::make_tuple(outerConverted + ( var * p10a),
+                                   var * p10b,
+                                   var * p10c,
+                                   var * p10d,
+                                   var * p10e);
         };
 #define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
-#define SUMCHECK if (isNotDivisibleByThree(es)) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
-		auto var ## 1 = outerConverted + ( var * p10a ); \
-		auto var ## 2 = var * p10b; \
-		auto var ## 3 = var * p10c; \
-		auto var ## 4 = var * p10d; \
-		auto var ## 5 = var * p10e
+        auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = computePositionValues(var)
 		for (auto a = 0ul; a < 8ul; ++a) {
 			SKIP5s(a);
 			DECLARE_POSITION_VALUES(a);
@@ -196,7 +199,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e5 = e * p10e;
 										X(d,d,d,d,e);
@@ -213,7 +218,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
@@ -243,7 +250,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
@@ -268,7 +277,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
@@ -320,7 +331,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
@@ -342,7 +355,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
@@ -384,7 +399,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
@@ -422,7 +439,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
-										SUMCHECK;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
+                                        }
                                         auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
@@ -488,7 +507,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			}
 		}
 #undef DECLARE_POSITION_VALUES
-#undef SUMCHECK
 #undef X
 	} else {
 		auto dprod = product << 1;
