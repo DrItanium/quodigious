@@ -120,8 +120,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		static constexpr auto indexIncr = getShiftedValue<position>(1ul);
 		for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
 			SKIP5s(i);
-			auto tup = std::make_tuple(sum, dprod + (i * product), index);
-			if (i < 3) {
+			if (auto tup = std::make_tuple(sum, dprod + (i * product), index); i < 3) {
 				lower.emplace_back(tup);
 			} else {
 				upper.emplace_back(tup);
