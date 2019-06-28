@@ -212,24 +212,60 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                 auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
-									for (auto e = d; e < 8ul; ++e) {
-										SKIP5s(e);
-										auto es = ds + e;
-                                        if (isNotDivisibleByThree(es)) {
-                                            continue;
+                                    if (d > 3) {
+                                        for (auto e = d; e < 8ul; ++e) {
+                                            auto es = ds + e;
+                                            if (isNotDivisibleByThree(es)) {
+                                                continue;
+                                            }
+                                            auto ep = computePartialProduct(dp, e);
+                                            auto e5 = e * p10e;
+                                            X(d,d,d,d,e);
+                                            if (d != e) {
+                                                auto e1 = outerConverted + (e * p10a);
+                                                auto e2 = e * p10b;
+                                                auto e3 = e * p10c;
+                                                auto e4 = e * p10d;
+                                                X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+                                                X(d,d,d,e,d); 
+                                            }
                                         }
-                                        auto ep = computePartialProduct(dp, e);
-										auto e5 = e * p10e;
-										X(d,d,d,d,e);
-										if (d != e) {
-											auto e1 = outerConverted + (e * p10a);
-											auto e2 = e * p10b;
-											auto e3 = e * p10c;
-											auto e4 = e * p10d;
-											X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-											X(d,d,d,e,d); 
-										}
-									}
+                                    } else if ( d == 3 ) {
+                                        for (auto e = (d + 1); e < 8ul; ++e) {
+                                            auto es = ds + e;
+                                            if (isNotDivisibleByThree(es)) {
+                                                continue;
+                                            }
+                                            auto ep = computePartialProduct(dp, e);
+                                            auto e5 = e * p10e;
+                                            X(d,d,d,d,e);
+                                            auto e1 = outerConverted + (e * p10a);
+                                            auto e2 = e * p10b;
+                                            auto e3 = e * p10c;
+                                            auto e4 = e * p10d;
+                                            X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+                                            X(d,d,d,e,d); 
+                                        }
+                                    } else {
+                                        for (auto e = d; e < 8ul; ++e) {
+                                            SKIP5s(e);
+                                            auto es = ds + e;
+                                            if (isNotDivisibleByThree(es)) {
+                                                continue;
+                                            }
+                                            auto ep = computePartialProduct(dp, e);
+                                            auto e5 = e * p10e;
+                                            X(d,d,d,d,e);
+                                            if (d != e) {
+                                                auto e1 = outerConverted + (e * p10a);
+                                                auto e2 = e * p10b;
+                                                auto e3 = e * p10c;
+                                                auto e4 = e * p10d;
+                                                X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
+                                                X(d,d,d,e,d); 
+                                            }
+                                        }
+                                    }
 								} else {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
