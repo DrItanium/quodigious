@@ -95,11 +95,26 @@ constexpr bool isNotDivisibleByThree(u64 value) noexcept {
 constexpr u64 computePartialProduct(u64 a, u64 b) noexcept {
     return a * (b + 2);
 }
+constexpr bool divisibleByProductAndSum(u64 value, u64 product, u64 sum) noexcept {
+    return (value % product == 0) && (value % sum == 0);
+}
+constexpr bool useOriginalLoopCode() noexcept {
+#ifdef COMPACT_CODE
+    return true;
+#else
+    return false;
+#endif
+}
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
 	static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
 	static_assert(length > 0, "Can't have length of zero!");
 	static_assert(length >= position, "Position is out of bounds!");
+    auto fn = [&list](auto n, auto ep, auto es) {
+        if (divisibleByProductAndSum(n, ep, es)) {
+            list.emplace_back(n); 
+        }
+    };
 	if constexpr (position == length) {
 		if constexpr (length > 10) {
 			// if the number is not divisible by three then skip it
@@ -107,9 +122,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				return;
 			}
 		}
-		if (auto conv = convertNumber<length>(index); (conv % product == 0) && (conv % sum == 0)) {
-			list.emplace_back(conv);
-		}
+        fn(convertNumber<length>(index), product, sum);
 	} else if constexpr (lenGreaterAndPos<10, 2,length, position> || 
 			lenGreaterAndPos<11, 3, length, position> || 
 			lenGreaterAndPos<12, 4, length, position> || 
@@ -121,14 +134,24 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		std::list<DataTriple> lower, upper;
 		auto dprod = product << 1;
 		static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-		for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
-			SKIP5s(i);
-			if (auto tup = std::make_tuple(sum, dprod + (i * product), index); i < 3) {
-				lower.emplace_back(tup);
-			} else {
-				upper.emplace_back(tup);
-			}
-		}
+        if constexpr (useOriginalLoopCode()) {
+            for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
+                SKIP5s(i);
+                if (auto tup = std::make_tuple(sum, dprod + (i * product), index); i < 3) {
+                    lower.emplace_back(tup);
+                } else {
+                    upper.emplace_back(tup);
+                }
+            }
+        } else {
+            lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+            lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+            lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+            upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+            upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+            upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+            upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+        }
 		auto halveIt = [](std::list<DataTriple> & collection) {
 			MatchList l;
 			for(auto& a : collection) {
@@ -158,11 +181,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 		// Thus we implicitly add the offsets for each position to this base10 2 value :D
 
 		auto outerConverted = convertNumber<length>(index);
-		auto fn = [&list](auto n, auto ep, auto es) {
-			if ((n % ep == 0) && (n % es == 0)) { 
-				list.emplace_back(n); 
-			}
-		};
         auto computePositionValues = [outerConverted](u64 var) {
             return std::make_tuple(outerConverted + ( var * p10a),
                                    var * p10b,
