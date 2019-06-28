@@ -35,13 +35,17 @@ constexpr auto shiftAmount = position * 3;
 template<u64 base, u64 pos>
 constexpr auto computeFactor = base * fastPow10<pos>;
 template<u64 position>
+constexpr u64 getShiftedValue(u64 value) noexcept {
+	return value << shiftAmount<position>;
+}
+template<u64 position>
 constexpr u64 convertNumber(u64 value) noexcept {
 	static_assert(position > 0, "Can't access position 0!");
 	if constexpr (position == 1) {
 		return ((value & 0b111) + 2);
 	} else {
 		constexpr auto nextPos = position - 1;
-		constexpr auto mask = 0b111ul << shiftAmount<nextPos>; 
+        constexpr auto mask = getShiftedValue<nextPos>(0b111ul);
 		auto significand = (value & mask) >> shiftAmount<nextPos>;
 		return [&significand]() -> u64 {
 			switch(significand) {
@@ -57,10 +61,6 @@ constexpr u64 convertNumber(u64 value) noexcept {
 			return 0;
 		}() + convertNumber<nextPos>(value);
 	}
-}
-template<u64 position>
-constexpr u64 getShiftedValue(u64 value) noexcept {
-	return value << shiftAmount<position>;
 }
 template<u64 len>
 constexpr auto shouldSkip5Digit(u64 x) noexcept {
