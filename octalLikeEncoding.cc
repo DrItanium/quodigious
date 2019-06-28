@@ -159,6 +159,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 				list.emplace_back(n); 
 			}
 		};
+        static constexpr auto computePartialProduct = [](auto a, auto b) noexcept {
+            return a * (b + 2);
+        };
 #define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define SUMCHECK if (isNotDivisibleByThree(es)) { continue; }
 #define DECLARE_POSITION_VALUES(var) \
@@ -171,30 +174,30 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 			SKIP5s(a);
 			DECLARE_POSITION_VALUES(a);
 			auto as = sum + a;
-			auto ap = product * (a + 2);
+            auto ap = computePartialProduct(product, a);
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
 				DECLARE_POSITION_VALUES(b);
 				auto bs = as + b;
-				auto bp = ap * (b + 2);
+				auto bp = computePartialProduct(ap, b);
 				if (a == b) {
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
-						auto cp = bp * (c + 2);
+                        auto cp = computePartialProduct(bp, c);
 						DECLARE_POSITION_VALUES(c);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
-								auto dp = cp * (d + 2);
+                                auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e5 = e * p10e;
 										X(d,d,d,d,e);
 										if (d != e) {
@@ -211,7 +214,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
 										X(e,c,c,c,d); 
@@ -234,14 +237,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
-								auto dp = cp * (d + 2);
+                                auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
 										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
@@ -266,7 +269,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
 										X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
@@ -305,20 +308,20 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
-						auto cp = bp * (c + 2);
+                        auto cp = computePartialProduct(bp, c);
 						DECLARE_POSITION_VALUES(c);
 						if (b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
-								auto dp = cp * (d + 2);
+                                auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,c,c,a); X(e,d,c,a,c); X(e,d,a,c,c); 
 										X(e,a,d,c,c); 
@@ -340,7 +343,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK
-											auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,d,c,c); X(e,d,c,c,a); X(e,d,c,a,c); 
 										X(e,d,a,c,c); X(e,c,d,c,a); X(e,c,d,a,c); 
@@ -375,14 +378,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
-								auto dp = cp * (d + 2);
+                                auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-                                        auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
 										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
@@ -420,7 +423,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 										SKIP5s(e);
 										auto es = ds + e;
 										SUMCHECK;
-										auto ep = dp * (e + 2);
+                                        auto ep = computePartialProduct(dp, e);
 										auto e1 = outerConverted + (e * p10a);
 										X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
 										X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
@@ -504,12 +507,13 @@ MatchList parallelBody(u64 base) noexcept {
 	auto start = (base - 2ul);
 	auto index = start << 3;
 	static constexpr auto addon = width << 1;
+    auto startPlusAddon = start + addon;
 	// using the frequency analysis I did before for loops64.cc I found
 	// that on even digits that 4 and 8 are used while odd digits use 2
 	// and 6. This is a frequency analysis job only :D
 	for (auto i = ((base % 2ul == 0) ? 4ul : 2ul); i < 10ul; i += 4ul) {
 		auto j = i - 2ul;
-		body<2, width>(list, start + j + addon, base * i, index + j);
+		body<2, width>(list, startPlusAddon + j, base * i, index + j);
 	}
 	return list;
 }
