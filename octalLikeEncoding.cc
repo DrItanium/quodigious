@@ -137,11 +137,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if constexpr (useOriginalLoopCode()) {
             for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
                 SKIP5s(i);
-                if (auto tup = std::make_tuple(sum, dprod + (i * product), index); i < 3) {
-                    lower.emplace_back(tup);
-                } else {
-                    upper.emplace_back(tup);
-                }
+                ((i < 3) ? lower : upper).emplace_back(sum, dprod + (i * product), index);
             }
         } else {
             lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
@@ -152,16 +148,16 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
             upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
         }
-        auto halveIt = [](std::list<DataTriple> & collection) {
+        auto halveIt = [](const std::list<DataTriple> & collection) {
             MatchList l;
-            for(auto& a : collection) {
+            for(const auto& a : collection) {
                 auto [sum, prod, ind] = a;
                 body<position + 1, length>(l, sum, prod, ind);
             }
             return l;
         };
-        auto t0 = std::async(std::launch::async, halveIt, std::ref(lower));
-        auto t1 = std::async(std::launch::async, halveIt, std::ref(upper));
+        auto t0 = std::async(std::launch::async, halveIt, std::cref(lower));
+        auto t1 = std::async(std::launch::async, halveIt, std::cref(upper));
         auto l0 = t0.get();
         auto l1 = t1.get();
         list.splice(list.cbegin(), l0);
