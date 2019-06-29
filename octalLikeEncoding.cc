@@ -198,20 +198,19 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             auto ap = computePartialProduct(product, a);
 			for (auto b = a; b < 8ul; ++b) {
 				SKIP5s(b);
-				DECLARE_POSITION_VALUES(b);
-				if (auto bs = as + b, bp = computePartialProduct(ap, b); a == b) {
+                auto bs = as + b;
+                auto bp = computePartialProduct(ap, b);
+                if (DECLARE_POSITION_VALUES(b); a == b) {
 					for (auto c = b; c < 8ul; ++c) {
 						SKIP5s(c);
 						auto cs = bs + c;
                         auto cp = computePartialProduct(bp, c);
-						DECLARE_POSITION_VALUES(c);
-						if (b == c) {
+						if (DECLARE_POSITION_VALUES(c); b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
                                 auto dp = computePartialProduct(cp, d);
-								DECLARE_POSITION_VALUES(d);
-								if (c == d) {
+								if (DECLARE_POSITION_VALUES(d); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         auto es = ds + e;
@@ -261,8 +260,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
                                 auto dp = computePartialProduct(cp, d);
-								DECLARE_POSITION_VALUES(d);
-								if (c == d) {
+								if (DECLARE_POSITION_VALUES(d); c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
@@ -336,14 +334,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 						SKIP5s(c);
 						auto cs = bs + c;
                         auto cp = computePartialProduct(bp, c);
-						DECLARE_POSITION_VALUES(c);
-						if (b == c) {
+						if (DECLARE_POSITION_VALUES(c); b == c) {
 							for (auto d = c; d < 8ul; ++d) {
 								SKIP5s(d);
 								auto ds = cs + d;
                                 auto dp = computePartialProduct(cp, d);
-								DECLARE_POSITION_VALUES(d);
-								if (c == d) {
+								if (DECLARE_POSITION_VALUES(d); c == d) {
 									for (auto e = d; e < 8ul; ++e) {
 										SKIP5s(e);
 										auto es = ds + e;
