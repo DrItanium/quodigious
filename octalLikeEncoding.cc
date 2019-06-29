@@ -457,17 +457,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             continue;
                                         } else {
                                             auto ep = computePartialProduct(dp, e);
-                                            {
-                                                auto e1 = outerConverted + (e * p10a);
-                                                X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
-                                                X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
-                                                X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
-                                                X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
-                                                X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
-                                                X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
-                                                X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
-                                                X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
-                                            }
+                                            auto e1 = outerConverted + (e * p10a);
+                                            X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
+                                            X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
+                                            X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
+                                            X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
+                                            X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
+                                            X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
+                                            X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
+                                            X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
                                             auto e2 = e * p10b;
                                             auto e4 = e * p10d;
                                             auto e5 = e * p10e;
