@@ -172,6 +172,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         static constexpr auto p10c = fastPow10<position+2>;
         static constexpr auto p10d = fastPow10<position+3>;
         static constexpr auto p10e = fastPow10<position+4>;
+
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
         // The last two digits are handled in a base 10 fashion without the +2 added
@@ -188,28 +189,27 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     var * p10d,
                     var * p10e);
         };
+        static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
+            return std::make_tuple(var + sum, computePartialProduct(product, var)); 
+        };
 #define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define DECLARE_POSITION_VALUES(var) \
         auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = computePositionValues(var)
         for (auto a = 0ul; a < 8ul; ++a) {
             SKIP5s(a);
             DECLARE_POSITION_VALUES(a);
-            auto as = sum + a;
-            auto ap = computePartialProduct(product, a);
+            auto [as, ap] = computeSumProduct(a, sum, product);
             for (auto b = a; b < 8ul; ++b) {
                 SKIP5s(b);
-                auto bs = as + b;
-                auto bp = computePartialProduct(ap, b);
+                auto [bs, bp] = computeSumProduct(b, as, ap);
                 if (DECLARE_POSITION_VALUES(b); a == b) {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
-                        auto cs = bs + c;
-                        auto cp = computePartialProduct(bp, c);
+                        auto [cs, cp] = computeSumProduct(c, bs, bp);
                         if (DECLARE_POSITION_VALUES(c); b == c) {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto ds = cs + d;
-                                auto dp = computePartialProduct(cp, d);
+                                auto [ds, dp] = computeSumProduct(d, cs, cp);
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
@@ -258,8 +258,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                         } else {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto ds = cs + d;
-                                auto dp = computePartialProduct(cp, d);
+                                auto [ds, dp] = computeSumProduct(d, cs, cp);
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
@@ -332,13 +331,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 } else {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
-                        auto cs = bs + c;
-                        auto cp = computePartialProduct(bp, c);
+                        auto [cs, cp] = computeSumProduct(c, bs, bp);
                         if (DECLARE_POSITION_VALUES(c); b == c) {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto ds = cs + d;
-                                auto dp = computePartialProduct(cp, d);
+                                auto [ds, dp] = computeSumProduct(d, cs, cp);
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
@@ -404,8 +401,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                         } else {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto ds = cs + d;
-                                auto dp = computePartialProduct(cp, d);
+                                auto [ds, dp] = computeSumProduct(d, cs, cp);
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
