@@ -212,33 +212,16 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                 auto dp = computePartialProduct(cp, d);
 								DECLARE_POSITION_VALUES(d);
 								if (c == d) {
-                                    if (d > 3) {
-                                        for (auto e = d; e < 8ul; ++e) {
-                                            auto es = ds + e;
-                                            if (isNotDivisibleByThree(es)) {
-                                                continue;
-                                            }
-                                            auto ep = computePartialProduct(dp, e);
-                                            auto e5 = e * p10e;
-                                            X(d,d,d,d,e);
-                                            if (d != e) {
-                                                auto e1 = outerConverted + (e * p10a);
-                                                auto e2 = e * p10b;
-                                                auto e3 = e * p10c;
-                                                auto e4 = e * p10d;
-                                                X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-                                                X(d,d,d,e,d); 
-                                            }
+                                    for (auto e = d; e < 8ul; ++e) {
+                                        SKIP5s(e);
+                                        auto es = ds + e;
+                                        if (isNotDivisibleByThree(es)) {
+                                            continue;
                                         }
-                                    } else if ( d == 3 ) {
-                                        for (auto e = (d + 1); e < 8ul; ++e) {
-                                            auto es = ds + e;
-                                            if (isNotDivisibleByThree(es)) {
-                                                continue;
-                                            }
-                                            auto ep = computePartialProduct(dp, e);
-                                            auto e5 = e * p10e;
-                                            X(d,d,d,d,e);
+                                        auto ep = computePartialProduct(dp, e);
+                                        auto e5 = e * p10e;
+                                        X(d,d,d,d,e);
+                                        if (d != e) {
                                             auto e1 = outerConverted + (e * p10a);
                                             auto e2 = e * p10b;
                                             auto e3 = e * p10c;
@@ -246,51 +229,32 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
                                             X(d,d,d,e,d); 
                                         }
-                                    } else {
-                                        for (auto e = d; e < 8ul; ++e) {
-                                            SKIP5s(e);
-                                            auto es = ds + e;
-                                            if (isNotDivisibleByThree(es)) {
-                                                continue;
-                                            }
-                                            auto ep = computePartialProduct(dp, e);
-                                            auto e5 = e * p10e;
-                                            X(d,d,d,d,e);
-                                            if (d != e) {
-                                                auto e1 = outerConverted + (e * p10a);
-                                                auto e2 = e * p10b;
-                                                auto e3 = e * p10c;
-                                                auto e4 = e * p10d;
-                                                X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-                                                X(d,d,d,e,d); 
-                                            }
-                                        }
                                     }
 								} else {
-									for (auto e = d; e < 8ul; ++e) {
-										SKIP5s(e);
-										auto es = ds + e;
+                                    for (auto e = d; e < 8ul; ++e) {
+                                        SKIP5s(e);
+                                        auto es = ds + e;
                                         if (isNotDivisibleByThree(es)) {
                                             continue;
                                         }
                                         auto ep = computePartialProduct(dp, e);
-										auto e1 = outerConverted + (e * p10a);
-										X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
-										X(e,c,c,c,d); 
-										auto e2 = e * p10b;
-										auto e3 = e * p10c;
-										auto e5 = e * p10e;
-										X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
-										X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
-										if (d != e) {
-											auto e4 = e * p10d;
-											X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
-											X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
-											X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
-											X(c,c,c,e,d); 
-										}
-									}
-								}
+                                        auto e1 = outerConverted + (e * p10a);
+                                        X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
+                                        X(e,c,c,c,d); 
+                                        auto e2 = e * p10b;
+                                        auto e3 = e * p10c;
+                                        auto e5 = e * p10e;
+                                        X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
+                                        X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
+                                        if (d != e) {
+                                            auto e4 = e * p10d;
+                                            X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
+                                            X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
+                                            X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
+                                            X(c,c,c,e,d); 
+                                        }
+                                    }
+                                }
 							}
 						} else {
 							for (auto d = c; d < 8ul; ++d) {
@@ -446,110 +410,111 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 								SKIP5s(d);
 								auto ds = cs + d;
                                 auto dp = computePartialProduct(cp, d);
-								DECLARE_POSITION_VALUES(d);
-								if (c == d) {
+								if (DECLARE_POSITION_VALUES(d); c == d) {
 									for (auto e = d; e < 8ul; ++e) {
-										SKIP5s(e);
-										auto es = ds + e;
-                                        if (isNotDivisibleByThree(es)) {
+                                        SKIP5s(e);
+                                        if (auto es = ds + e; isNotDivisibleByThree(es)) {
                                             continue;
+                                        } else {
+                                            auto ep = computePartialProduct(dp, e);
+                                            auto e1 = outerConverted + (e * p10a);
+                                            X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
+                                            X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
+                                            X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
+                                            X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
+                                            auto e2 = e * p10b;
+                                            auto e5 = e * p10e;
+                                            X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
+                                            X(a,e,b,d,d); X(b,e,d,d,a); X(b,e,d,a,d); 
+                                            X(b,e,a,d,d); X(b,a,d,d,e);
+
+                                            if (d != e) {
+                                                auto e3 = e * p10c;
+                                                auto e4 = e * p10d;
+                                                X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
+                                                X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
+                                                X(d,d,e,b,a); X(d,d,e,a,b); X(d,d,b,e,a);
+                                                X(d,d,b,a,e); X(d,d,a,e,b); X(d,d,a,b,e);
+                                                X(d,b,e,d,a); X(d,b,e,a,d); X(d,b,d,e,a);
+                                                X(d,b,d,a,e); X(d,b,a,e,d); X(d,b,a,d,e);
+                                                X(d,a,e,d,b); X(d,a,e,b,d); X(d,a,d,e,b);
+                                                X(d,a,d,b,e); X(d,a,b,e,d); X(d,a,b,d,e);
+
+                                                X(b,d,e,d,a); X(b,d,e,a,d); X(b,d,d,e,a);
+                                                X(b,d,d,a,e); X(b,d,a,e,d); X(b,d,a,d,e);
+                                                X(b,a,e,d,d); X(b,a,d,e,d); 
+
+                                                X(a,d,e,d,b); X(a,d,e,b,d); X(a,d,d,e,b);
+                                                X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
+                                                X(a,b,e,d,d); X(a,b,d,e,d); 
+                                            }
                                         }
-                                        auto ep = computePartialProduct(dp, e);
-										auto e1 = outerConverted + (e * p10a);
-										X(e,d,d,b,a); X(e,d,d,a,b); X(e,d,b,d,a);
-										X(e,d,b,a,d); X(e,d,a,d,b); X(e,d,a,b,d);
-										X(e,b,d,d,a); X(e,b,d,a,d); X(e,b,a,d,d);
-										X(e,a,d,d,b); X(e,a,d,b,d); X(e,a,b,d,d);
-										auto e2 = e * p10b;
-										auto e5 = e * p10e;
-										X(a,b,c,d,e); X(a,e,d,d,b); X(a,e,d,b,d); 
-										X(a,e,b,d,d); X(b,e,d,d,a); X(b,e,d,a,d); 
-										X(b,e,a,d,d); X(b,a,d,d,e);
-
-										if (d != e) {
-											auto e3 = e * p10c;
-											auto e4 = e * p10d;
-											X(d,e,d,b,a); X(d,e,d,a,b); X(d,e,b,d,a);
-											X(d,e,b,a,d); X(d,e,a,d,b); X(d,e,a,b,d);
-											X(d,d,e,b,a); X(d,d,e,a,b); X(d,d,b,e,a);
-											X(d,d,b,a,e); X(d,d,a,e,b); X(d,d,a,b,e);
-											X(d,b,e,d,a); X(d,b,e,a,d); X(d,b,d,e,a);
-											X(d,b,d,a,e); X(d,b,a,e,d); X(d,b,a,d,e);
-											X(d,a,e,d,b); X(d,a,e,b,d); X(d,a,d,e,b);
-											X(d,a,d,b,e); X(d,a,b,e,d); X(d,a,b,d,e);
-
-											X(b,d,e,d,a); X(b,d,e,a,d); X(b,d,d,e,a);
-											X(b,d,d,a,e); X(b,d,a,e,d); X(b,d,a,d,e);
-											X(b,a,e,d,d); X(b,a,d,e,d); 
-
-											X(a,d,e,d,b); X(a,d,e,b,d); X(a,d,d,e,b);
-											X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
-											X(a,b,e,d,d); X(a,b,d,e,d); 
-										}
-									}
+                                    }
 								} else {
-									for (auto e = d; e < 8ul; ++e) {
-										SKIP5s(e);
-										auto es = ds + e;
-                                        if (isNotDivisibleByThree(es)) {
+                                    for (auto e = d; e < 8ul; ++e) {
+                                        SKIP5s(e);
+                                        if (auto es = ds + e; isNotDivisibleByThree(es)) {
                                             continue;
+                                        } else {
+                                            auto ep = computePartialProduct(dp, e);
+                                            {
+                                                auto e1 = outerConverted + (e * p10a);
+                                                X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
+                                                X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
+                                                X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
+                                                X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
+                                                X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
+                                                X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
+                                                X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
+                                                X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
+                                            }
+                                            auto e2 = e * p10b;
+                                            auto e4 = e * p10d;
+                                            auto e5 = e * p10e;
+                                            X(a,b,c,d,e);
+                                            X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
+                                            X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
+                                            X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
+                                            X(a,b,d,c,e); X(a,b,d,e,c);
+
+                                            X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
+                                            X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
+                                            X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
+                                            X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
+
+                                            X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
+                                            X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
+                                            X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
+                                            X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
+
+
+                                            if (d != e) {
+                                                auto e3 = e * p10c;
+                                                X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
+                                                X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
+                                                X(a,d,b,e,c); X(a,d,c,b,e); X(a,d,c,e,b);
+                                                X(a,d,e,b,c); X(a,d,e,c,b); X(a,b,c,e,d); 
+
+                                                X(b,a,c,d,e); X(b,a,e,c,d); X(b,a,e,d,c); 
+                                                X(b,c,a,e,d); X(b,c,e,a,d); X(b,c,e,d,a); 
+                                                X(b,d,a,c,e); X(b,d,a,e,c); X(b,d,c,a,e); 
+                                                X(b,d,c,e,a); X(b,d,e,a,c); X(b,d,e,c,a); 
+
+                                                X(c,a,b,e,d); X(c,a,e,b,d); X(c,a,e,d,b); 
+                                                X(c,b,a,e,d); X(c,d,e,a,b); X(c,d,e,b,a); 
+                                                X(c,b,e,a,d); X(c,b,e,d,a); X(c,d,a,b,e);
+                                                X(c,d,a,e,b); X(c,d,b,a,e); X(c,d,b,e,a);
+
+                                                X(d,a,b,e,c); X(d,a,c,b,e); X(d,a,c,e,b);
+                                                X(d,a,e,b,c); X(d,a,e,c,b); X(d,b,a,c,e);
+                                                X(d,b,a,e,c); X(d,b,c,a,e); X(d,b,c,e,a);
+                                                X(d,b,e,a,c); X(d,b,e,c,a); X(d,c,a,b,e);
+                                                X(d,c,a,e,b); X(d,c,b,a,e); X(d,c,b,e,a);
+                                                X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
+                                                X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
+                                                X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
+                                            }
                                         }
-                                        auto ep = computePartialProduct(dp, e);
-										auto e1 = outerConverted + (e * p10a);
-										X(e,a,b,d,c); X(e,a,c,b,d); X(e,a,c,d,b);
-										X(e,d,c,b,a); X(e,d,c,a,b); X(e,d,b,c,a);
-										X(e,d,a,b,c); X(e,d,a,c,b); X(e,d,b,a,c); 
-										X(e,c,b,d,a); X(e,c,d,a,b); X(e,c,d,b,a); 
-										X(e,c,a,b,d); X(e,c,a,d,b); X(e,c,b,a,d);
-										X(e,a,b,c,d); X(e,a,d,b,c); X(e,a,d,c,b); 
-										X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
-										X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
-										auto e2 = e * p10b;
-										auto e4 = e * p10d;
-										auto e5 = e * p10e;
-										X(a,b,c,d,e);
-										X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
-										X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
-										X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
-										X(a,b,d,c,e); X(a,b,d,e,c);
-
-										X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
-										X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
-										X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
-										X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
-
-										X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
-										X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
-										X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
-										X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
-
-
-										if (d != e) {
-											auto e3 = e * p10c;
-											X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
-											X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
-											X(a,d,b,e,c); X(a,d,c,b,e); X(a,d,c,e,b);
-											X(a,d,e,b,c); X(a,d,e,c,b); X(a,b,c,e,d); 
-
-											X(b,a,c,d,e); X(b,a,e,c,d); X(b,a,e,d,c); 
-											X(b,c,a,e,d); X(b,c,e,a,d); X(b,c,e,d,a); 
-											X(b,d,a,c,e); X(b,d,a,e,c); X(b,d,c,a,e); 
-											X(b,d,c,e,a); X(b,d,e,a,c); X(b,d,e,c,a); 
-
-											X(c,a,b,e,d); X(c,a,e,b,d); X(c,a,e,d,b); 
-											X(c,b,a,e,d); X(c,d,e,a,b); X(c,d,e,b,a); 
-											X(c,b,e,a,d); X(c,b,e,d,a); X(c,d,a,b,e);
-											X(c,d,a,e,b); X(c,d,b,a,e); X(c,d,b,e,a);
-
-											X(d,a,b,e,c); X(d,a,c,b,e); X(d,a,c,e,b);
-											X(d,a,e,b,c); X(d,a,e,c,b); X(d,b,a,c,e);
-											X(d,b,a,e,c); X(d,b,c,a,e); X(d,b,c,e,a);
-											X(d,b,e,a,c); X(d,b,e,c,a); X(d,c,a,b,e);
-											X(d,c,a,e,b); X(d,c,b,a,e); X(d,c,b,e,a);
-											X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
-											X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
-											X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
-										}
 									}
 								}
 							}
