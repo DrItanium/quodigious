@@ -463,23 +463,24 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
                                             X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
                                             auto e2 = e * p10b;
-                                            auto e4 = e * p10d;
-                                            auto e5 = e * p10e;
-                                            X(a,b,c,d,e);
                                             X(a,e,c,d,b); X(a,e,d,b,c); X(a,e,d,c,b); 
                                             X(a,e,b,c,d); X(a,e,b,d,c); X(a,e,c,b,d); 
-                                            X(a,c,b,e,d); X(a,c,d,b,e); X(a,c,d,e,b);
-                                            X(a,b,d,c,e); X(a,b,d,e,c);
-
                                             X(b,e,c,d,a); X(b,e,d,a,c); X(b,e,d,c,a); 
                                             X(b,e,a,c,d); X(b,e,a,d,c); X(b,e,c,a,d); 
-                                            X(b,c,d,e,a); X(b,c,d,a,e); X(b,c,a,d,e);
-                                            X(b,a,c,e,d); X(b,a,d,c,e); X(b,a,d,e,c);
-
                                             X(c,e,b,d,a); X(c,e,d,a,b); X(c,e,d,b,a); 
                                             X(c,e,a,b,d); X(c,e,a,d,b); X(c,e,b,a,d); 
-                                            X(c,b,d,a,e); X(c,b,d,e,a); X(c,b,a,d,e);
-                                            X(c,a,d,e,b); X(c,a,d,b,e); X(c,a,b,d,e);
+                                            auto e4 = e * p10d;
+
+                                            X(a,c,b,e,d); X(a,c,d,e,b); X(a,b,d,e,c);
+                                            X(c,b,d,e,a); X(b,c,d,e,a); X(b,a,c,e,d); 
+                                            X(b,a,d,e,c); X(c,a,d,e,b); 
+
+
+                                            auto e5 = e * p10e;
+                                            X(a,b,c,d,e); X(a,b,d,c,e); X(a,c,d,b,e); 
+                                            X(c,b,d,a,e); X(c,b,a,d,e); X(b,c,d,a,e); 
+                                            X(b,c,a,d,e); X(c,a,d,b,e); X(c,a,b,d,e); 
+                                            X(b,a,d,c,e); 
 
 
                                             if (d != e) {
