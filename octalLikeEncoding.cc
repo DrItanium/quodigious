@@ -126,7 +126,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
     static constexpr auto indexIncr = getShiftedValue<position>(1ul);
-    auto fn = [&list](auto n, auto ep, auto es) {
+    auto fn = [&list](auto n, auto ep, auto es) noexcept {
         if (divisibleByProductAndSum(n, ep, es)) {
             list.emplace_back(n); 
         }
