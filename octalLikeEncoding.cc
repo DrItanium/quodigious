@@ -109,6 +109,14 @@ constexpr bool useOriginalLoopCode() noexcept {
 #endif
 }
 
+constexpr bool disableUnpackingOptimization() noexcept {
+#ifdef DISABLE_UNPACKED5
+    return false;
+#else
+    return true;
+#endif
+}
+
 using DataTriple = std::tuple<u64, u64, u64>;
 template<u64 position, u64 length>
 void body(MatchList& list, const DataTriple& contents) noexcept;
@@ -167,7 +175,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
              l1 = t1.get();
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
-    } else if constexpr (length > 10 && (length - position) == 5) {
+    } else if constexpr (length > 10 && ((length - position) == 5) && !disableUnpackingOptimization()) {
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
         static constexpr auto p10c = fastPow10<position+2>;
