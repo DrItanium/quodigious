@@ -105,6 +105,7 @@ constexpr bool useOriginalLoopCode() noexcept {
     return false;
 #endif
 }
+
 using DataTriple = std::tuple<u64, u64, u64>;
 template<u64 position, u64 length>
 void body(MatchList& list, const DataTriple& contents) noexcept;
@@ -157,10 +158,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
             return l;
         };
-        auto t0 = std::async(std::launch::async, halveIt, std::cref(lower));
-        auto t1 = std::async(std::launch::async, halveIt, std::cref(upper));
-        auto l0 = t0.get();
-        auto l1 = t1.get();
+        auto t0 = std::async(std::launch::async, halveIt, std::cref(lower)),
+             t1 = std::async(std::launch::async, halveIt, std::cref(upper));
+        auto l0 = t0.get(),
+             l1 = t1.get();
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && (length - position) == 5) {
