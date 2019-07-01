@@ -105,11 +105,15 @@ constexpr bool useOriginalLoopCode() noexcept {
     return false;
 #endif
 }
+using DataTriple = std::tuple<u64, u64, u64>;
+template<u64 position, u64 length>
+void body(MatchList& list, const DataTriple& contents) noexcept;
 template<u64 position, u64 length>
 void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept {
     static_assert(length <= 19, "Can't have numbers over 19 digits on 64-bit numbers!");
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
+    static constexpr auto indexIncr = getShiftedValue<position>(1ul);
     auto fn = [&list](auto n, auto ep, auto es) {
         if (divisibleByProductAndSum(n, ep, es)) {
             list.emplace_back(n); 
@@ -128,12 +132,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             lenGreaterAndPos<12, 4, length, position> || 
             lenGreaterAndPos<13, 5, length, position> || 
             lenGreaterAndPos<14, 6, length, position>) {
-        using DataTriple = std::tuple<u64, u64, u64>;
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
         std::list<DataTriple> lower, upper;
         auto dprod = product << 1;
-        static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         if constexpr (useOriginalLoopCode()) {
             for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
                 SKIP5s(i);
@@ -151,8 +153,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         auto halveIt = [](const std::list<DataTriple> & collection) {
             MatchList l;
             for(const auto& a : collection) {
-                auto [sum, prod, ind] = a;
-                body<position + 1, length>(l, sum, prod, ind);
+                body<position + 1, length>(l, a);
             }
             return l;
         };
@@ -514,7 +515,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef X
     } else {
         auto dprod = product << 1;
-        static constexpr auto indexIncr = getShiftedValue<position>(1ul);
         for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
             SKIP5s(i);
             body<position + 1, length>(list, sum, dprod + (i * product), index);
@@ -522,6 +522,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     }
 }
 #undef SKIP5s
+template<u64 position, u64 length>
+void body(MatchList& list, const DataTriple& contents) noexcept {
+    auto [sum, prod, ind] = contents;
+    body<position, length>(list, sum, prod, ind);
+}
 
 template<auto width>
 MatchList parallelBody(u64 base) noexcept {
