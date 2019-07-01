@@ -74,7 +74,7 @@ constexpr auto shouldSkip5Digit(u64 x) noexcept {
 
 #define SKIP5s(x) \
     if (shouldSkip5Digit<length>(x)) { \
-        continue; \
+        ++x; \
     }
 template<u64 len, u64 pos, u64 length, u64 position>
 constexpr auto lenGreaterAndPos = (length > len) && (position == pos);
