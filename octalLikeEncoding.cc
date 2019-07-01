@@ -179,7 +179,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // Thus we implicitly add the offsets for each position to this base10 2 value :D
 
         auto outerConverted = convertNumber<length>(index);
-        auto computePositionValues = [outerConverted](u64 var) {
+        auto computePositionValues = [outerConverted](u64 var) noexcept {
             return std::make_tuple(outerConverted + ( var * p10a),
                     var * p10b,
                     var * p10c,
@@ -521,15 +521,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 body<position + 1, length>(list, sum, dprod + (i * product), index);
             }
         } else {
-#if 0
-            lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-            lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-            lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-            upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-            upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-            upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-            upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-#endif
             body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
             body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
             body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
@@ -537,7 +528,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
             body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
             body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-
         }
     }
 }
