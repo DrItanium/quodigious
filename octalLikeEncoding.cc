@@ -146,47 +146,35 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             lenGreaterAndPos<14, 6, length, position>) {
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
+        std::list<DataTriple> lower, upper;
         auto dprod = product << 1;
         if constexpr (useOriginalLoopCode()) {
-            std::list<DataTriple> lower, upper;
             for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
                 SKIP5s(i);
                 ((i < 3) ? lower : upper).emplace_back(sum, dprod + (i * product), index);
             }
-            auto halveIt = [](const std::list<DataTriple> & collection) {
-                MatchList l;
-                for(const auto& a : collection) {
-                    body<position + 1, length>(l, a);
-                }
-                return l;
-            };
-            auto t0 = std::async(std::launch::async, halveIt, std::cref(lower)),
-                 t1 = std::async(std::launch::async, halveIt, std::cref(upper));
-            auto l0 = t0.get(),
-                 l1 = t1.get();
-            list.splice(list.cbegin(), l0);
-            list.splice(list.cbegin(), l1);
         } else {
-            auto lowerHalf = std::async(std::launch::async, [sum, product, index, dprod]() {
-                        MatchList l;
-                        body<position + 1, length>(l, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-                        body<position + 1, length>(l, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-                        body<position + 1, length>(l, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-                        return l;
-                    });
-            auto upperHalf = std::async(std::launch::async, [sum, product, index, dprod]() {
-                        MatchList l;
-                        body<position + 1, length>(l, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-                        body<position + 1, length>(l, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-                        body<position + 1, length>(l, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-                        body<position + 1, length>(l, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-                        return l;
-                    });
-            auto l0 = lowerHalf.get();
-            auto l1 = upperHalf.get();
-            list.splice(list.cbegin(), l0);
-            list.splice(list.cbegin(), l1);
+            lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+            lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+            lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+            upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+            upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+            upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+            upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
         }
+        auto halveIt = [](const std::list<DataTriple> & collection) {
+            MatchList l;
+            for(const auto& a : collection) {
+                body<position + 1, length>(l, a);
+            }
+            return l;
+        };
+        auto t0 = std::async(std::launch::async, halveIt, std::cref(lower)),
+             t1 = std::async(std::launch::async, halveIt, std::cref(upper));
+        auto l0 = t0.get(),
+             l1 = t1.get();
+        list.splice(list.cbegin(), l0);
+        list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && ((length - position) == 5) && !disableUnpackingOptimization()) {
         static constexpr auto p10a = fastPow10<position>;
         static constexpr auto p10b = fastPow10<position+1>;
