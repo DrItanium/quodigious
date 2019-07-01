@@ -176,11 +176,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && ((length - position) == 5) && !disableUnpackingOptimization()) {
-        static constexpr auto p10a = fastPow10<position>;
-        static constexpr auto p10b = fastPow10<position+1>;
-        static constexpr auto p10c = fastPow10<position+2>;
-        static constexpr auto p10d = fastPow10<position+3>;
-        static constexpr auto p10e = fastPow10<position+4>;
+        static constexpr auto p10a = fastPow10<position>,
+                         p10b = fastPow10<position+1>,
+                         p10c = fastPow10<position+2>,
+                         p10d = fastPow10<position+3>,
+                         p10e = fastPow10<position+4>;
 
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
