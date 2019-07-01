@@ -111,9 +111,9 @@ constexpr bool useOriginalLoopCode() noexcept {
 
 constexpr bool disableUnpackingOptimization() noexcept {
 #ifdef DISABLE_UNPACKED5
-    return false;
-#else
     return true;
+#else
+    return false;
 #endif
 }
 
