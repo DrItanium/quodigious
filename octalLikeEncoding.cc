@@ -76,8 +76,6 @@ constexpr auto shouldSkip5Digit(u64 x) noexcept {
     if (shouldSkip5Digit<length>(x)) { \
         ++x; \
     }
-template<u64 len, u64 pos, u64 length, u64 position>
-constexpr auto lenGreaterAndPos = (length > len) && (position == pos);
 void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
     if constexpr (debugEnabled()) {
         if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
@@ -126,6 +124,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static_assert(length > 0, "Can't have length of zero!");
     static_assert(length >= position, "Position is out of bounds!");
     static constexpr auto indexIncr = getShiftedValue<position>(1ul);
+    static constexpr auto lenGreaterAndPos = [](u64 len, u64 pos) noexcept {
+        return (length > len) && (position == pos);
+    };
     auto fn = [&list](auto n, auto ep, auto es) noexcept {
         if (divisibleByProductAndSum(n, ep, es)) {
             list.emplace_back(n); 
@@ -139,11 +140,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             }
         }
         fn(convertNumber<length>(index), product, sum);
-    } else if constexpr (lenGreaterAndPos<10, 2,length, position> || 
-            lenGreaterAndPos<11, 3, length, position> || 
-            lenGreaterAndPos<12, 4, length, position> || 
-            lenGreaterAndPos<13, 5, length, position> || 
-            lenGreaterAndPos<14, 6, length, position>) {
+    } else if constexpr (lenGreaterAndPos(10, 2) || 
+            lenGreaterAndPos(11, 3) || 
+            lenGreaterAndPos(12, 4) || 
+            lenGreaterAndPos(13, 5) || 
+            lenGreaterAndPos(14, 6)) {
+            //lenGreaterAndPos<14, 6, length, position>) {
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
         std::list<DataTriple> lower, upper;
