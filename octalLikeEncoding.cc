@@ -204,11 +204,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         auto computePositionValues = [outerConverted](u64 var) noexcept {
             auto [a0, a1, a2, a3, a4] = p10s[var];
             return std::make_tuple(outerConverted + a0, a1, a2, a3, a4);
-            //return std::make_tuple(outerConverted + ( var * p10a),
-            //        var * p10b,
-            //        var * p10c,
-            //        var * p10d,
-            //        var * p10e);
         };
         static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
