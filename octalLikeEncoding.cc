@@ -181,6 +181,16 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                          p10c = fastPow10<position+2>,
                          p10d = fastPow10<position+3>,
                          p10e = fastPow10<position+4>;
+        static constexpr std::tuple<u64, u64, u64, u64, u64> p10s[] = {
+            std::make_tuple<u64, u64, u64, u64, u64>(0 * p10a, 0 * p10b, 0 * p10c, 0 * p10d, 0 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(1 * p10a, 1 * p10b, 1 * p10c, 1 * p10d, 1 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(2 * p10a, 2 * p10b, 2 * p10c, 2 * p10d, 2 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(3 * p10a, 3 * p10b, 3 * p10c, 3 * p10d, 3 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(4 * p10a, 4 * p10b, 4 * p10c, 4 * p10d, 4 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(5 * p10a, 5 * p10b, 5 * p10c, 5 * p10d, 5 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(6 * p10a, 6 * p10b, 6 * p10c, 6 * p10d, 6 * p10e),
+            std::make_tuple<u64, u64, u64, u64, u64>(7 * p10a, 7 * p10b, 7 * p10c, 7 * p10d, 7 * p10e),
+        };
 
         // this will generate a partial number but reduce the number of conversions
         // required greatly!
@@ -224,13 +234,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
                                             auto ep = computePartialProduct(dp, e);
-                                            auto e5 = e * p10e;
+                                            auto [e1a, e2, e3, e4, e5] = p10s[e];
                                             X(d,d,d,d,e);
                                             if (d != e) {
-                                                auto e1 = outerConverted + (e * p10a);
-                                                auto e2 = e * p10b;
-                                                auto e3 = e * p10c;
-                                                auto e4 = e * p10d;
+                                                auto e1 = outerConverted + e1a;
                                                 X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
                                                 X(d,d,d,e,d); 
                                             }
