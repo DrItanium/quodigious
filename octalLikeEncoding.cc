@@ -206,13 +206,14 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 
         auto outerConverted = convertNumber<length>(index);
         auto computePositionValues = [outerConverted](u64 var) noexcept {
-            auto [a0, a1, a2, a3, a4] = p10s[var];
-            return std::make_tuple(outerConverted + a0, a1, a2, a3, a4);
+            return p10s[var];
+            //auto [a0, a1, a2, a3, a4] = p10s[var];
+            //return std::make_tuple(outerConverted + a0, a1, a2, a3, a4);
         };
         static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
-#define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
+#define X(x,y,z,w,h) fn(outerConverted + x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define DECLARE_POSITION_VALUES(var) \
         auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = computePositionValues(var)
         for (auto a = 0ul; a < 8ul; ++a) {
