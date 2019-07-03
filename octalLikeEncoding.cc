@@ -205,11 +205,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // Thus we implicitly add the offsets for each position to this base10 2 value :D
 
         auto outerConverted = convertNumber<length>(index);
-        auto computePositionValues = [outerConverted](u64 var) noexcept {
-            return p10s[var];
-            //auto [a0, a1, a2, a3, a4] = p10s[var];
-            //return std::make_tuple(outerConverted + a0, a1, a2, a3, a4);
-        };
+        static constexpr auto computePositionValues = [](u64 var) noexcept { return p10s[var]; };
         static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
