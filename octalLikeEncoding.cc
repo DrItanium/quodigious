@@ -209,6 +209,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
+
 #define X(x,y,z,w,h) fn(outerConverted + x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define DECLARE_POSITION_VALUES(var) \
         auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = computePositionValues(var)
@@ -225,7 +226,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 // separate computation with a and b. We can just use b (or a) in
                 // all cases where a and b need to be used. This allows us to 
                 // eliminate redundant cases. Thus speeding computation up quite
-                // a bit. 
+                // a bit.
                 if (DECLARE_POSITION_VALUES(b); a == b) {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
@@ -318,7 +319,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                     // c != d it means that d is greater than c. Thus
                                     // it means that d != a and thus d != b. This property
                                     // applies to all cases as we enter into further nested
-                                    // loops. 
+                                    // loops. Thus we get to the logic of:
+                                    //
+                                    // a == b and b != c and c != d and a != c and d > c => a != d and b != d 
    
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
