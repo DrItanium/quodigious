@@ -230,18 +230,19 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
                         auto [cs, cp] = computeSumProduct(c, bs, bp);
-                        // if a == b and b == c, then a == c. Thus a, b, and c 
-                        // can be used interchangeably. Thus the number of 
-                        // unique computations required is reduced even further
-                        // down this path
                         if (DECLARE_POSITION_VALUES(c); b == c) {
+                            // a == b and b == c, => a == c. Thus a, b, and c 
+                            // can be used interchangeably. Thus the number of 
+                            // unique computations required is reduced even further
+                            // down this path
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
                                 auto [ds, dp] = computeSumProduct(d, cs, cp);
-                                // if a == b and b == c and c == d -> a == c 
-                                // and a == d and b == d. Further reducing the
-                                // number of required computations
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
+                                    // a == b and b == c and c == d => a == c 
+                                    // and a == d and b == d. Further reducing the
+                                    // number of required computations
+                                    //
                                     // NOTE: This is the edge case where the number is
                                     // like 4444444443, 999999999, 9999999998, etc.
                                     for (auto e = d; e < 8ul; ++e) {
@@ -262,6 +263,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                         }
                                     }
                                 } else {
+                                    // a == b and b == c and c != d => a == c and a != d and b != d
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
@@ -282,10 +284,12 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                 }
                             }
                         } else {
+                            // a == b and b != c => a != c
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
                                 auto [ds, dp] = computeSumProduct(d, cs, cp);
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
+                                    // a == b and b != c and c == d and a != c => a != d and b != d
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
@@ -307,6 +311,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                         }
                                     }
                                 } else {
+                                    // a == b and b != c and c != d and a != c could
+                                    // cause problems because a could equal d and thus so
+                                    // could b. That is impossible in this case though
+                                    // as d would only ever be >= to c. In this case since
+                                    // c != d it means that d is greater than c. Thus
+                                    // it means that d != a and thus d != b. This property
+                                    // applies to all cases as we enter into further nested
+                                    // loops. 
+   
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
