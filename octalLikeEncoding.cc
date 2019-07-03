@@ -285,7 +285,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                 }
                             }
                         } else {
-                            // a == b and b != c => a != c
+                            // a == b and b != c => a != c and c > b and c > a
+                            // read on for more information about the use of strict inequalities
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
                                 auto [ds, dp] = computeSumProduct(d, cs, cp);
