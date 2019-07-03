@@ -219,25 +219,46 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             for (auto b = a; b < 8ul; ++b) {
                 SKIP5s(b);
                 auto [bs, bp] = computeSumProduct(b, as, ap);
+                // use transitivity to reduce the amount of recomputation. 
+                // if a == b then it means that a and b can be used interchangably
+                // in the final computation so there is no need to actually perform
+                // separate computation with a and b. We can just use b (or a) in
+                // all cases where a and b need to be used. This allows us to 
+                // eliminate redundant cases. Thus speeding computation up quite
+                // a bit. 
                 if (DECLARE_POSITION_VALUES(b); a == b) {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
                         auto [cs, cp] = computeSumProduct(c, bs, bp);
+                        // if a == b and b == c, then a == c. Thus a, b, and c 
+                        // can be used interchangeably. Thus the number of 
+                        // unique computations required is reduced even further
+                        // down this path
                         if (DECLARE_POSITION_VALUES(c); b == c) {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
                                 auto [ds, dp] = computeSumProduct(d, cs, cp);
+                                // if a == b and b == c and c == d -> a == c 
+                                // and a == d and b == d. Further reducing the
+                                // number of required computations
                                 if (DECLARE_POSITION_VALUES(d); c == d) {
+                                    // NOTE: This is the edge case where the number is
+                                    // like 4444444443, 999999999, 9999999998, etc.
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
                                             auto ep = computePartialProduct(dp, e);
                                             DECLARE_POSITION_VALUES(e);
+                                            // in all cases we must check this computation
                                             X(d,d,d,d,e);
                                             if (d != e) {
+                                                // if d != e then e is unique compared to
+                                                // every other value, thus we should perform
+                                                // computation with e in each position.
                                                 X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
                                                 X(d,d,d,e,d); 
                                             }
+
                                         }
                                     }
                                 } else {
