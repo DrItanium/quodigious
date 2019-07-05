@@ -148,6 +148,52 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
              l1 = t1.get();
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
+    } else if constexpr (length > 10 && ((length - position) == 10)) {
+#if 0
+        auto dprod = product << 1;
+        body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+        body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+        body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+        body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+        body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+        body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+        body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+#endif
+        static constexpr auto indexIncr2 = getShiftedValue<position+1>(1ul);
+        static constexpr auto indexIncr3 = getShiftedValue<position+2>(1ul);
+        static constexpr auto indexIncr4 = getShiftedValue<position+3>(1ul);
+        static constexpr auto indexIncr5 = getShiftedValue<position+4>(1ul);
+        for (auto a = 0ul; a < 8ul; ++a) {
+            SKIP5s(a);
+            auto as = sum + a;
+            auto ap = computePartialProduct(product, a);
+            auto ai = index + (indexIncr * a);
+            for (auto b = 0ul; b < 8ul; ++b) {
+                SKIP5s(b);
+                auto bs = as + b;
+                auto bp = computePartialProduct(ap, b);
+                auto bi = ai + (indexIncr2 * b);
+                for (auto c = 0ul; c < 8ul; ++c) {
+                    SKIP5s(c);
+                    auto cs = bs + c;
+                    auto cp = computePartialProduct(bp, c);
+                    auto ci = bi + (indexIncr3 * c);
+                    for (auto d = 0ul; d < 8ul; ++d) {
+                        SKIP5s(d);
+                        auto ds = cs + d;
+                        auto dp = computePartialProduct(cp, d);
+                        auto di = ci + (indexIncr4 * d);
+                        for (auto e = 0ul; e < 8ul; ++e) {
+                            SKIP5s(e);
+                            auto es = ds + e;
+                            auto ep = computePartialProduct(dp, e);
+                            auto ei = di + (indexIncr5 * e);
+                            body<position + 5, length>(list, es, ep, ei);
+                        }
+                    }
+                }
+            }
+        }
     } else if constexpr (length > 10 && ((length - position) == 5)) {
         using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
         static constexpr auto buildTuple = [](u64 val) noexcept {
