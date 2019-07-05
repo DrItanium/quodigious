@@ -259,7 +259,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             DECLARE_POSITION_VALUES(e);
                                             X(e,d,c,c,c); X(e,c,d,c,c); X(e,c,c,d,c);
                                             X(e,c,c,c,d); 
-                                            X(a,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
+                                            X(b,b,c,d,e); X(c,e,d,c,c); X(c,e,c,d,c); 
                                             X(c,e,c,c,d); X(c,c,e,d,c); X(c,c,e,c,d); 
                                             if (d != e) {
                                                 X(d,e,c,c,c); X(d,c,e,c,c); X(d,c,c,e,c); 
@@ -286,7 +286,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             X(e,d,c,b,b); X(e,d,b,c,b); X(e,d,b,b,c); 
                                             X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
                                             X(b,e,b,d,c); X(b,e,d,c,b); X(b,e,c,b,d); 
-                                            X(a,b,c,d,e); 
+                                            X(b,b,c,d,e); 
                                             if (d != e) {
                                                 X(d,e,c,b,b); X(d,e,b,c,b); X(d,e,b,b,c);
                                                 X(d,c,e,b,b); X(d,c,b,e,b); X(d,c,b,b,e);
@@ -319,7 +319,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             X(e,b,b,d,c); X(e,b,d,c,b); X(e,b,d,b,c); 
                                             X(e,c,d,b,b); X(e,c,b,d,b); X(e,c,b,b,d); 
                                             X(e,b,c,d,b); X(e,b,c,b,d); X(e,b,b,c,d);
-                                            X(a,b,c,d,e); 
+                                            X(b,b,c,d,e); 
                                             X(b,e,d,c,b); X(b,e,c,b,d); X(b,e,b,d,c); 
                                             X(c,e,d,b,b); X(c,e,b,d,b); X(c,e,b,b,d);
                                             X(c,b,e,d,b); X(c,b,e,b,d); X(c,b,b,d,e);
