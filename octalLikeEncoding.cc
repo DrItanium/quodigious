@@ -47,7 +47,7 @@ constexpr u64 convertNumber(u64 value) noexcept {
         constexpr auto nextPos = position - 1;
         constexpr auto mask = getShiftedValue<nextPos>(0b111ul);
         auto significand = (value & mask) >> shiftAmount<nextPos>;
-        return [significand]() -> u64 {
+        return [significand]() noexcept -> u64 {
             switch(significand) {
                 case 0b000: return computeFactor<2ul, nextPos>;
                 case 0b001: return computeFactor<3ul, nextPos>;
@@ -150,7 +150,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && ((length - position) == 5)) {
         using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
-        static constexpr auto buildTuple = [](u64 val) {
+        static constexpr auto buildTuple = [](u64 val) noexcept {
             return p10Collection(val * fastPow10<position>, 
                     val * fastPow10<position+1>,
                     val * fastPow10<position+2>,
@@ -196,16 +196,20 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
 
+        auto makeUltimatePackage = [&outerComputed, combineWithOuterConverted](auto var, auto sum, auto product) noexcept {
+            return std::tuple_cat(outerComputed[var], computeSumProduct(var, sum, product));
+        };
+
 #define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define DECLARE_POSITION_VALUES(var) \
         auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = outerComputed[var]
+#define DECLARE_POSITION_VALUES2(var, sum, product) \
+        auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5, var ## s , var ## p] = makeUltimatePackage(var, sum, product)
         for (auto a = 0ul; a < 8ul; ++a) {
             SKIP5s(a);
-            DECLARE_POSITION_VALUES(a);
-            auto [as, ap] = computeSumProduct(a, sum, product);
+            DECLARE_POSITION_VALUES2(a, sum, product);
             for (auto b = a; b < 8ul; ++b) {
                 SKIP5s(b);
-                auto [bs, bp] = computeSumProduct(b, as, ap);
                 // use transitivity to reduce the amount of recomputation. 
                 // if a == b then it means that a and b can be used interchangably
                 // in the final computation so there is no need to actually perform
@@ -213,19 +217,17 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 // all cases where a and b need to be used. This allows us to 
                 // eliminate redundant cases. Thus speeding computation up quite
                 // a bit.
-                if (DECLARE_POSITION_VALUES(b); a == b) {
+                if (DECLARE_POSITION_VALUES2(b, as, ap); a == b) {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
-                        auto [cs, cp] = computeSumProduct(c, bs, bp);
-                        if (DECLARE_POSITION_VALUES(c); b == c) {
+                        if (DECLARE_POSITION_VALUES2(c, bs, bp); b == c) {
                             // a == b and b == c, => a == c. Thus a, b, and c 
                             // can be used interchangeably. Thus the number of 
                             // unique computations required is reduced even further
                             // down this path
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto [ds, dp] = computeSumProduct(d, cs, cp);
-                                if (DECLARE_POSITION_VALUES(d); c == d) {
+                                if (DECLARE_POSITION_VALUES2(d, cs, cp); c == d) {
                                     // a == b and b == c and c == d => a == c 
                                     // and a == d and b == d. Further reducing the
                                     // number of required computations
@@ -274,8 +276,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                             // read on for more information about the use of strict inequalities
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto [ds, dp] = computeSumProduct(d, cs, cp);
-                                if (DECLARE_POSITION_VALUES(d); c == d) {
+                                if (DECLARE_POSITION_VALUES2(d, cs, cp); c == d) {
                                     // a == b and b != c and c == d and a != c => a != d and b != d
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
@@ -347,12 +348,10 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 } else {
                     for (auto c = b; c < 8ul; ++c) {
                         SKIP5s(c);
-                        auto [cs, cp] = computeSumProduct(c, bs, bp);
-                        if (DECLARE_POSITION_VALUES(c); b == c) {
+                        if (DECLARE_POSITION_VALUES2(c, bs, bp); b == c) {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto [ds, dp] = computeSumProduct(d, cs, cp);
-                                if (DECLARE_POSITION_VALUES(d); c == d) {
+                                if (DECLARE_POSITION_VALUES2(d, cs, cp); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
@@ -405,8 +404,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                         } else {
                             for (auto d = c; d < 8ul; ++d) {
                                 SKIP5s(d);
-                                auto [ds, dp] = computeSumProduct(d, cs, cp);
-                                if (DECLARE_POSITION_VALUES(d); c == d) {
+                                if (DECLARE_POSITION_VALUES2(d,cs, cp); c == d) {
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
