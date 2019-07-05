@@ -169,14 +169,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
     } else if constexpr (length > 10 && ((length - position) == 5) && !disableUnpackingOptimization()) {
+        using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
         static constexpr auto buildTuple = [](u64 val) {
-            return std::make_tuple<u64, u64, u64, u64, u64>(val * fastPow10<position>, 
-                                                            val * fastPow10<position+1>,
-                                                            val * fastPow10<position+2>,
-                                                            val * fastPow10<position+3>,
-                                                            val * fastPow10<position+4>);
+            return p10Collection(val * fastPow10<position>, 
+                    val * fastPow10<position+1>,
+                    val * fastPow10<position+2>,
+                    val * fastPow10<position+3>,
+                    val * fastPow10<position+4>);
         };
-        static constexpr std::tuple<u64, u64, u64, u64, u64> p10s[] = {
+        static constexpr p10Collection p10s[] {
             buildTuple(0),
             buildTuple(1),
             buildTuple(2),
@@ -197,13 +198,27 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 
         auto outerConverted = convertNumber<length>(index);
         static constexpr auto computePositionValues = [](u64 var) noexcept { return p10s[var]; };
+        auto combineWithOuterConverted = [outerConverted](u64 var) noexcept {
+            auto [a0, a1, a2, a3, a4] = p10s[var]; 
+            return {a0 + outerConverted, a1, a2, a3, a4};
+        };
+        std::array<p10Collection, 8> outerComputed {
+            combineWithOuterConverted(0),
+            combineWithOuterConverted(1),
+            combineWithOuterConverted(2),
+            combineWithOuterConverted(3),
+            combineWithOuterConverted(4),
+            combineWithOuterConverted(5),
+            combineWithOuterConverted(6),
+            combineWithOuterConverted(7),
+        };
         static constexpr auto computeSumProduct = [](auto var, auto sum, auto product) noexcept {
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
 
-#define X(x,y,z,w,h) fn(outerConverted + x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
+#define X(x,y,z,w,h) fn(x ## 1 + y ## 2 + z ## 3 + w ## 4 + h ## 5, ep, es)
 #define DECLARE_POSITION_VALUES(var) \
-        auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = computePositionValues(var)
+        auto [var ## 1, var ## 2, var ## 3, var ## 4, var ## 5] = outerComputed[var]
         for (auto a = 0ul; a < 8ul; ++a) {
             SKIP5s(a);
             DECLARE_POSITION_VALUES(a);
