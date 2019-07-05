@@ -234,6 +234,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                     //
                                     // NOTE: This is the edge case where the number is
                                     // like 4444444443, 999999999, 9999999998, etc.
+                                    // 
+                                    // but let's precompute stuff
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
