@@ -150,7 +150,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             lenGreaterAndPos(12, 4) || 
             lenGreaterAndPos(13, 5) || 
             lenGreaterAndPos(14, 6)) {
-            //lenGreaterAndPos<14, 6, length, position>) {
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
         auto dprod = product << 1;
@@ -657,8 +656,8 @@ int main() {
                 X(16); X(17); X(18); X(19); 
 #undef X
                 default:
-                std::cerr << "Illegal index " << currentIndex << std::endl;
-                return 1;
+                    std::cerr << "Illegal index " << currentIndex << std::endl;
+                    return 1;
             }
             std::cout << std::endl;
         }
