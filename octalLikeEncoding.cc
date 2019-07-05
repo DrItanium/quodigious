@@ -235,20 +235,27 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                     // NOTE: This is the edge case where the number is
                                     // like 4444444443, 999999999, 9999999998, etc.
                                     // 
-                                    // but let's precompute stuff
+                                    // but let's precompute some stuff
+                                    auto d1234 = d1 + d2 + d3 + d4;
+                                    auto d2345 = d2 + d3 + d4 + d5;
+                                    auto d1345 = d1 + d3 + d4 + d5;
+                                    auto d1245 = d1 + d2 + d4 + d5;
+                                    auto d1235 = d1 + d2 + d3 + d5;
                                     for (auto e = d; e < 8ul; ++e) {
                                         SKIP5s(e);
                                         if (auto es = ds + e; isDivisibleByThree(es)) {
                                             auto ep = computePartialProduct(dp, e);
                                             DECLARE_POSITION_VALUES(e);
                                             // in all cases we must check this computation
-                                            X(d,d,d,d,e);
+                                            fn(d1234 + e5, ep, es);
                                             if (d != e) {
                                                 // if d != e then e is unique compared to
                                                 // every other value, thus we should perform
                                                 // computation with e in each position.
-                                                X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
-                                                X(d,d,d,e,d); 
+                                                fn(e1 + d2345, ep, es);
+                                                fn(e2 + d1345, ep, es);
+                                                fn(e3 + d1245, ep, es);
+                                                fn(e4 + d1235, ep, es);
                                             }
                                         }
                                     }
