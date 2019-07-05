@@ -76,17 +76,6 @@ constexpr auto shouldSkip5Digit(u64 x) noexcept {
     if (shouldSkip5Digit<length>(x)) { \
         ++x; \
     }
-void tryInsertIntoList(u64 value, std::list<u64>& l) noexcept {
-    if constexpr (debugEnabled()) {
-        if (auto it = std::find(l.begin(), l.end(), value); it != l.end()) {
-            std::cout << "Duplicate value: " << value << std::endl;
-        } else {
-            l.emplace_back(value);
-        }
-    } else {
-        l.emplace_back(value);
-    }
-}
 constexpr bool isNotDivisibleByThree(u64 value) noexcept {
     return (value % 3) != 0;
 }
