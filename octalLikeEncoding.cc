@@ -148,27 +148,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
              l1 = t1.get();
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
-    } else if constexpr (length > 10 && ((length - position) == 7)) {
-        // merge 5 body calls into one and perform partial computation here
-        static constexpr auto indexIncr2 = getShiftedValue<position+1>(1ul);
-        for (auto a = 0ul; a < 8ul; ++a) {
-            SKIP5s(a);
-            auto as = sum + a;
-            auto ap = computePartialProduct(product, a);
-            auto ai0 = index + (indexIncr * a);
-            auto ai1 = index + (indexIncr2 * a);
-            for (auto b = a; b < 8ul; ++b) {
-                SKIP5s(b);
-                auto bs = as + b;
-                auto bp = computePartialProduct(ap, b);
-                auto bi0 = ai0 + (indexIncr2 * b);
-                body<position + 2, length>(list, bs, bp, bi0);
-                if (a != b) {
-                    auto bi1 = ai1 + (indexIncr * b);
-                    body<position + 2, length>(list, bs, bp, bi1);
-                }
-            }
-        }
     } else if constexpr (length > 10 && ((length - position) == 5)) {
         using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
         static constexpr auto buildTuple = [](u64 val) noexcept {
@@ -527,14 +506,38 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef DECLARE_POSITION_VALUES
 #undef X
     } else {
-        auto dprod = product << 1;
-        body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-        body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-        body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-        body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-        body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-        body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-        body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+        if constexpr (length > 10 && ((length - position) > 6)) {
+            // merge 2 body calls into one and perform partial computation here
+            static constexpr auto indexIncr2 = getShiftedValue<position+1>(1ul);
+            for (auto a = 0ul; a < 8ul; ++a) {
+                SKIP5s(a);
+                auto as = sum + a;
+                auto ap = computePartialProduct(product, a);
+                auto ai0 = index + (indexIncr * a);
+                auto ai1 = index + (indexIncr2 * a);
+                for (auto b = a; b < 8ul; ++b) {
+                    SKIP5s(b);
+                    auto bs = as + b;
+                    auto bp = computePartialProduct(ap, b);
+                    auto bi0 = ai0 + (indexIncr2 * b);
+                    body<position +2, length>(list, bs, bp, bi0);
+                    if (a != b) {
+                        auto bi1 = ai1 + (indexIncr * b);
+                        body<position + 2, length>(list, bs, bp, bi1);
+                    }
+
+                }
+            }
+        } else {
+            auto dprod = product << 1;
+            body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+            body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+            body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+            body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+            body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+            body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+            body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+        }
     }
 }
 #undef SKIP5s
