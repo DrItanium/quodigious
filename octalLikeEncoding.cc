@@ -509,19 +509,41 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         if constexpr (length > 10 && ((length - position) > 6)) {
             // merge 2 body calls into one and perform partial computation here
             static constexpr auto indexIncr2 = getShiftedValue<position+1>(1ul);
+            static constexpr std::array<u64, 8> indexIncrs {
+                0 * indexIncr,
+                1 * indexIncr,
+                2 * indexIncr,
+                3 * indexIncr,
+                4 * indexIncr,
+                5 * indexIncr,
+                6 * indexIncr,
+                7 * indexIncr,
+            };
+            static constexpr std::array<u64, 8> indexIncrs2 {
+                0 * indexIncr2,
+                1 * indexIncr2,
+                2 * indexIncr2,
+                3 * indexIncr2,
+                4 * indexIncr2,
+                5 * indexIncr2,
+                6 * indexIncr2,
+                7 * indexIncr2,
+            };
+            // when a == 0, we should not waste time computing those values
+            // instead flatten that and perhaps execute in parallel?
             for (auto a = 0ul; a < 8ul; ++a) {
                 SKIP5s(a);
                 auto as = sum + a;
                 auto ap = computePartialProduct(product, a);
-                auto ai0 = index + (indexIncr * a);
-                auto ai1 = index + (indexIncr2 * a);
-                body<position +2, length>(list, as +a, computePartialProduct(ap, a), ai0 + (indexIncr2 * a));
+                auto ai0 = index + indexIncrs[a],
+                     ai1 = index + indexIncrs2[a];
+                body<position +2, length>(list, as + a, computePartialProduct(ap, a), ai0 + indexIncrs2[a]);
                 for (auto b = (a+1); b < 8ul; ++b) {
                     SKIP5s(b);
                     auto bs = as + b;
                     auto bp = computePartialProduct(ap, b);
-                    auto bi0 = ai0 + (indexIncr2 * b);
-                    auto bi1 = ai1 + (indexIncr * b);
+                    auto bi0 = ai0 + indexIncrs2[b];
+                    auto bi1 = ai1 + indexIncrs[b];
                     body<position+2, length>(list, bs, bp, bi0);
                     body<position+2, length>(list, bs, bp, bi1);
 
