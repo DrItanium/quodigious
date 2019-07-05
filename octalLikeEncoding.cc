@@ -107,6 +107,18 @@ constexpr bool disableUnpackingOptimization() noexcept {
     return false;
 #endif
 }
+constexpr bool activateStatisticsComputation() noexcept {
+    return true;
+}
+u64 nest0 = 0ul;
+u64 nest1 = 0ul;
+u64 nest2 = 0ul;
+u64 nest3 = 0ul;
+u64 nest4 = 0ul;
+u64 nest5 = 0ul;
+u64 nest6 = 0ul;
+u64 nest7 = 0ul;
+
 
 using DataTriple = std::tuple<u64, u64, u64>;
 template<u64 position, u64 length>
@@ -266,7 +278,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(e,d,d,d,d); X(d,e,d,d,d); X(d,d,e,d,d); 
                                                 X(d,d,d,e,d); 
                                             }
-
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest0;
+                                            }
                                         }
                                     }
                                 } else {
@@ -285,6 +299,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(d,c,c,c,e); X(c,d,e,c,c); X(c,d,c,e,c); 
                                                 X(c,d,c,c,e); X(c,c,d,e,c); X(c,c,d,c,e); 
                                                 X(c,c,c,e,d); 
+                                            }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest1;
                                             }
                                         }
                                     }
@@ -315,6 +332,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(b,d,e,c,b); X(b,d,e,b,c); X(b,d,c,e,b);
                                                 X(b,d,c,b,e); X(b,d,b,e,c); X(b,d,b,c,e);
                                                 X(b,b,e,d,d); X(b,b,d,e,d); 
+                                            }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest2;
                                             }
                                         }
                                     }
@@ -359,6 +379,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(b,c,d,e,b); X(b,c,d,b,e); X(b,c,b,d,e);
                                                 X(b,b,d,c,e); X(b,b,d,e,c); X(b,b,c,e,d); 
                                             }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest3;
+                                            }
                                         }
                                     }
                                 }
@@ -389,6 +412,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(a,c,c,e,d); X(c,a,d,e,c); X(c,a,d,c,e); 
                                                 X(d,a,e,d,d); X(a,e,d,d,d); X(a,d,e,d,d); 
                                             }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest4;
+                                            }
                                         }
                                     }
                                 } else {
@@ -418,6 +444,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(c,c,d,e,a); X(c,c,d,a,e); X(c,c,a,d,e);
                                                 X(a,d,e,c,c); X(a,d,c,e,c); X(a,d,c,c,e);
                                                 X(a,c,d,e,c); X(a,c,d,c,e); X(c,a,c,d,e);
+                                            }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest5;
                                             }
                                         }
                                     }
@@ -459,6 +488,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(a,d,d,b,e); X(a,d,b,e,d); X(a,d,b,d,e);
                                                 X(a,b,e,d,d); X(a,b,d,e,d); 
                                             }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest6;
+                                            }
                                         }
                                     }
                                 } else {
@@ -492,9 +524,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                             X(e,b,a,c,d); X(e,b,a,d,c); X(e,b,c,a,d); 
                                             X(e,b,c,d,a); X(e,b,d,a,c); X(e,b,d,c,a); 
 
-
-
-
                                             if (d != e) {
                                                 X(a,b,e,c,d); X(a,b,e,d,c); X(a,c,b,d,e);
                                                 X(a,c,e,b,d); X(a,c,e,d,b); X(a,d,b,c,e);
@@ -519,6 +548,9 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                                                 X(d,c,e,a,b); X(d,c,e,b,a); X(d,e,a,b,c);
                                                 X(d,e,a,c,b); X(d,e,b,a,c); X(d,e,b,c,a);
                                                 X(d,e,c,a,b); X(d,e,c,b,a); X(d,a,b,c,e);
+                                            }
+                                            if constexpr (activateStatisticsComputation()) {
+                                                ++nest7;
                                             }
                                         }
                                     }
@@ -630,6 +662,23 @@ int main() {
             }
             std::cout << std::endl;
         }
+    }
+    if constexpr (activateStatisticsComputation()) {
+        std::map<u64, std::string> lookupTable {
+            { nest0, "a == b && b == c && c == d"},
+            { nest1, "a == b && b == c && c != d"},
+            { nest2, "a == b && b != c && c == d"},
+            { nest3, "a == b && b != c && c != d"},
+            { nest4, "a != b && b == c && c == d"},
+            { nest5, "a != b && b == c && c != d"},
+            { nest6, "a != b && b != c && c == d"},
+            { nest7, "a != b && b != c && c != d"},
+        };
+        auto largest = std::max({ nest0, nest1, nest2, nest3, nest4, nest5, nest6, nest7 });
+        for (const auto& p : lookupTable) {
+            std::cout << p.second << ": " << p.first << std::endl;
+        }
+        std::cout << "LARGEST: " << largest << std::endl;
     }
     return 0;
 }
