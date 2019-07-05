@@ -200,7 +200,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         static constexpr auto computePositionValues = [](u64 var) noexcept { return p10s[var]; };
         auto combineWithOuterConverted = [outerConverted](u64 var) noexcept {
             auto [a0, a1, a2, a3, a4] = p10s[var]; 
-            return {a0 + outerConverted, a1, a2, a3, a4};
+            return p10Collection(a0 + outerConverted, a1, a2, a3, a4);
         };
         std::array<p10Collection, 8> outerComputed {
             combineWithOuterConverted(0),
