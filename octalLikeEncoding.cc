@@ -141,16 +141,21 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             //lenGreaterAndPos<14, 6, length, position>) {
         // setup a series of operations to execute in parallel on two separate threads
         // of execution
-        std::list<DataTriple> lower, upper;
         auto dprod = product << 1;
-        lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-        lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-        lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-        upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-        upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-        upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-        upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-        auto halveIt = [](const std::list<DataTriple> & collection) {
+        using DataTripleList = std::list<DataTriple>;
+        DataTripleList lower {
+            { sum + 0, dprod + (0 * product), index + (0 * indexIncr)},
+            { sum + 1, dprod + (1 * product), index + (1 * indexIncr)},
+            { sum + 2, dprod + (2 * product), index + (2 * indexIncr)},
+            // ignore 3oct (5dec) digits
+        };
+        DataTripleList upper {
+            {sum + 4, dprod + (4 * product), index + (4 * indexIncr)},
+            {sum + 5, dprod + (5 * product), index + (5 * indexIncr)},
+            {sum + 6, dprod + (6 * product), index + (6 * indexIncr)},
+            {sum + 7, dprod + (7 * product), index + (7 * indexIncr)},
+        };
+        auto halveIt = [](const DataTripleList& collection) {
             MatchList l;
             for(const auto& a : collection) {
                 body<position + 1, length>(l, a);
