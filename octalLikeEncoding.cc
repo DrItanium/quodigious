@@ -606,13 +606,13 @@ void initialBody() noexcept {
         auto mkfuture = [](auto base) {
             return std::async(std::launch::async, parallelBody<width>, base);
         };
-        auto t0 = mkfuture(2);
-        auto t1 = mkfuture(3);
-        auto t2 = mkfuture(4);
-        auto t3 = mkfuture(6);
-        auto t4 = mkfuture(7);
-        auto t5 = mkfuture(8);
-        auto t6 = mkfuture(9);
+        auto t0 = mkfuture(2),
+             t1 = mkfuture(3),
+             t2 = mkfuture(4),
+             t3 = mkfuture(6),
+             t4 = mkfuture(7),
+             t5 = mkfuture(8),
+             t6 = mkfuture(9);
         if constexpr (width == 19) {
             auto printSplice = [](auto& thing) {
                 auto r = thing.get();
