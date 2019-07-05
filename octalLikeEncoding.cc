@@ -515,16 +515,15 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                 auto ap = computePartialProduct(product, a);
                 auto ai0 = index + (indexIncr * a);
                 auto ai1 = index + (indexIncr2 * a);
-                for (auto b = a; b < 8ul; ++b) {
+                body<position +2, length>(list, as +a, computePartialProduct(ap, a), ai0 + (indexIncr2 * a));
+                for (auto b = (a+1); b < 8ul; ++b) {
                     SKIP5s(b);
                     auto bs = as + b;
                     auto bp = computePartialProduct(ap, b);
                     auto bi0 = ai0 + (indexIncr2 * b);
-                    body<position +2, length>(list, bs, bp, bi0);
-                    if (a != b) {
-                        auto bi1 = ai1 + (indexIncr * b);
-                        body<position + 2, length>(list, bs, bp, bi1);
-                    }
+                    auto bi1 = ai1 + (indexIncr * b);
+                    body<position+2, length>(list, bs, bp, bi0);
+                    body<position+2, length>(list, bs, bp, bi1);
 
                 }
             }
