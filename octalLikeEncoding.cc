@@ -135,7 +135,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             {sum + 6, dprod + (6 * product), index + (6 * indexIncr)},
             {sum + 7, dprod + (7 * product), index + (7 * indexIncr)},
         };
-        auto halveIt = [](const DataTripleList& collection) {
+        auto halveIt = [](const DataTripleList& collection) noexcept {
             MatchList l;
             for(const auto& a : collection) {
                 body<position + 1, length>(l, a);
@@ -157,7 +157,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
                     val * fastPow10<position+3>,
                     val * fastPow10<position+4>);
         };
-        static constexpr p10Collection p10s[] {
+        static constexpr std::array<p10Collection,8> p10s {
             buildTuple(0),
             buildTuple(1),
             buildTuple(2),
