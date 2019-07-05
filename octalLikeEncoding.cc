@@ -99,14 +99,6 @@ constexpr u64 computePartialProduct(u64 a, u64 b) noexcept {
 constexpr bool divisibleByProductAndSum(u64 value, u64 product, u64 sum) noexcept {
     return (value % product == 0) && (value % sum == 0);
 }
-constexpr bool useOriginalLoopCode() noexcept {
-    return true;
-#ifdef COMPACT_CODE
-    return true;
-#else
-    return false;
-#endif
-}
 
 constexpr bool disableUnpackingOptimization() noexcept {
 #ifdef DISABLE_UNPACKED5
@@ -519,20 +511,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef X
     } else {
         auto dprod = product << 1;
-        if constexpr (useOriginalLoopCode()) {
-            for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
-                SKIP5s(i);
-                body<position + 1, length>(list, sum, dprod + (i * product), index);
-            }
-        } else {
-            body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-            body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-            body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-            body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-            body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-            body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-            body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-        }
+        body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+        body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+        body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+        body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+        body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+        body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+        body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
     }
 }
 #undef SKIP5s
