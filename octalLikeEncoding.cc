@@ -100,6 +100,7 @@ constexpr bool divisibleByProductAndSum(u64 value, u64 product, u64 sum) noexcep
     return (value % product == 0) && (value % sum == 0);
 }
 constexpr bool useOriginalLoopCode() noexcept {
+    return true;
 #ifdef COMPACT_CODE
     return true;
 #else
@@ -150,20 +151,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // of execution
         std::list<DataTriple> lower, upper;
         auto dprod = product << 1;
-        if constexpr (useOriginalLoopCode()) {
-            for (auto i = 0ul; i < 8ul; ++i, ++sum, index += indexIncr) {
-                SKIP5s(i);
-                ((i < 3) ? lower : upper).emplace_back(sum, dprod + (i * product), index);
-            }
-        } else {
-            lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-            lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-            lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-            upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-            upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-            upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-            upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
-        }
+        lower.emplace_back(sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+        lower.emplace_back(sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+        lower.emplace_back(sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+        upper.emplace_back(sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+        upper.emplace_back(sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+        upper.emplace_back(sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+        upper.emplace_back(sum + 7, dprod + (7 * product), index + (7 * indexIncr));
         auto halveIt = [](const std::list<DataTriple> & collection) {
             MatchList l;
             for(const auto& a : collection) {
