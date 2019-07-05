@@ -108,7 +108,7 @@ constexpr bool disableUnpackingOptimization() noexcept {
 #endif
 }
 constexpr bool activateStatisticsComputation() noexcept {
-    return true;
+    return debugEnabled();
 }
 u64 nest0 = 0ul;
 u64 nest1 = 0ul;
