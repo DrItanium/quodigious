@@ -28,13 +28,6 @@
 #include "qlib.h"
 #include <iostream>
 
-inline constexpr u64 factors10[] = {
-    fastPow10<0>,  fastPow10<1>,  fastPow10<2>,  fastPow10<3>,
-    fastPow10<4>,  fastPow10<5>,  fastPow10<6>,  fastPow10<7>,
-    fastPow10<8>,  fastPow10<9>,  fastPow10<10>, fastPow10<11>,
-    fastPow10<12>, fastPow10<13>, fastPow10<14>, fastPow10<15>,
-    fastPow10<16>, fastPow10<17>, fastPow10<18>, fastPow10<19>,
-};
 
 void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
     if (depth == 0) {

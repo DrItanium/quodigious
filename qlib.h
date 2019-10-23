@@ -40,6 +40,13 @@ template<u64 length>
 constexpr auto fastPow10 = fastPow<10, length>;
 
 
+inline constexpr u64 factors10[] = {
+    fastPow10<0>,  fastPow10<1>,  fastPow10<2>,  fastPow10<3>,
+    fastPow10<4>,  fastPow10<5>,  fastPow10<6>,  fastPow10<7>,
+    fastPow10<8>,  fastPow10<9>,  fastPow10<10>, fastPow10<11>,
+    fastPow10<12>, fastPow10<13>, fastPow10<14>, fastPow10<15>,
+    fastPow10<16>, fastPow10<17>, fastPow10<18>, fastPow10<19>,
+};
 
 template<typename T>
 constexpr bool componentQuodigious(T value, T compare) noexcept {
