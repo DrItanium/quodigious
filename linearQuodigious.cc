@@ -34,8 +34,12 @@ void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product =
             std::cout << number << std::endl;
         }
     } else {
+        auto innerDepth = depth - 1;
+        auto currentFactor = factors10[innerDepth];
+        ++sum; // always add one to start with
         for (auto i = 2; i < 10; ++i) {
-            performQuodigious(depth - 1, number + (i * factors10[depth-1]), sum + i, product * i);
+            ++sum;
+            performQuodigious(innerDepth, number + (i * currentFactor), sum, product * i);
         }
     }
 }
