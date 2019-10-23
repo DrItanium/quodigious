@@ -37,7 +37,7 @@ ${PROGRAM}: quodigious.o
 
 ${PROGRAM2}: linearQuodigious.o
 	@echo -n "Building non-threaded quodigious... "
-	@${CXX} ${LXXFLAGS} -o ${PROGRAM} linearQuodigious.o
+	@${CXX} ${LXXFLAGS} -o ${PROGRAM2} linearQuodigious.o
 	@echo done.
 
 %.o: %.cc

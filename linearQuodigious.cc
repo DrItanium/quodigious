@@ -35,8 +35,6 @@ void performQuodigious(uint8_t depth, u64 number, u64 sum = 0, u64 product = 1) 
         }
     } else {
         for (auto i = 2; i < 10; ++i) {
-            product *= i;
-            number += (i * factors10[depth-1]);
             performQuodigious(depth - 1, number + (i * factors10[depth-1]), sum + i, product * i);
         }
     }
