@@ -19,14 +19,6 @@
 #ifndef QLIB_H__
 #define QLIB_H__
 #include <cstdint>
-#include <iostream>
-#include <tuple>
-#include <fstream>
-#include <cmath>
-#include <sstream>
-#include <functional>
-#include <future>
-#include <map>
 using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;

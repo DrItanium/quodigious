@@ -26,6 +26,9 @@
 // in the encoding so it is perfect for this design.
 // decimal would be
 #include "qlib.h"
+#include <iostream>
+#include <tuple>
+#include <functional>
 #include <future>
 #include <list>
 

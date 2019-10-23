@@ -26,7 +26,6 @@
 // in the encoding so it is perfect for this design.
 // decimal would be
 #include "qlib.h"
-#include <list>
 
 inline constexpr u64 factors10[] = {
     fastPow10<0>,
