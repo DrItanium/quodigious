@@ -60,8 +60,17 @@ void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
 }
 void performQuodigious(uint8_t depth) noexcept {
     switch (depth) {
+        case 1: 
+            []() noexcept {
+                for (u64 i = 2; i < 10; ++i) {
+                    if (isQuodigious(i, i, i)) {
+                        std::cout << i << std::endl;
+                    }
+                }
+            }();
+            break;
 #define X(length) case length : performQuodigious<length> (); break
-        X(1);  X(2); 
+        X(2); 
         X(3);  X(4);
         X(5);  X(6); 
         X(7);  X(8); 

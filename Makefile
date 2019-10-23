@@ -42,7 +42,7 @@ ${PROGRAM2}: linearQuodigious.o
 	@echo done.
 
 ${PROGRAM3}: templatedLinearQuodigious.o
-	@echo -n "Building non-threaded quodigious... "
+	@echo -n "Building non-threaded but templated quodigious... "
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM3} templatedLinearQuodigious.o
 	@echo done.
 
