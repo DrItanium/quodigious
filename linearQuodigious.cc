@@ -28,7 +28,7 @@
 #include "qlib.h"
 #include <list>
 
-void performQuodigious(uint8_t depth, u64 number, u64 sum = 0, u64 product = 1) noexcept {
+void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
     if (depth == 0) {
         if (isQuodigious(number, sum, product)) {
             std::cout << number << std::endl;
@@ -38,9 +38,6 @@ void performQuodigious(uint8_t depth, u64 number, u64 sum = 0, u64 product = 1) 
             performQuodigious(depth - 1, number + (i * factors10[depth-1]), sum + i, product * i);
         }
     }
-}
-void performQuodigious(uint8_t depth) {
-    performQuodigious(depth, 0);
 }
 
 int main() {
