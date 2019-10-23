@@ -23,7 +23,7 @@ OPTIMIZATION_FLAGS := -Ofast -fwhole-program -march=native
 CXXFLAGS += -std=c++17 ${OPTIMIZATION_FLAGS} ${DEBUG_FLAGS}
 
 
-LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS}
+LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
 
 PROGRAM = quodigious
 PROGS = ${PROGRAM}
