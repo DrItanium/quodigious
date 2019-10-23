@@ -76,7 +76,7 @@ int main() {
             if ((currentIndex > 0) && (currentIndex < 20)) {
                 performQuodigious(currentIndex);
             } else {
-                std::cerr << "Illegal index " << currentIndex << std::endl;
+                std::cout << "Illegal index " << currentIndex << std::endl;
                 return 1;
             }
             std::cout << std::endl;
