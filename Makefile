@@ -29,9 +29,9 @@ PROGRAM = quodigious
 PROGS = ${PROGRAM}
 all: ${PROGRAM}
 
-${PROGRAM}: octalLikeEncoding.o
+${PROGRAM}: quodigious.o
 	@echo -n "Building quodigious... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
+	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} quodigious.o
 	@echo done.
 
 %.o: %.cc
@@ -44,4 +44,4 @@ clean:
 	@rm -rf *.o ${PROGS}
 	@echo done.
 
-octalLikeEncoding.o: qlib.h
+quodigious.o: qlib.h
