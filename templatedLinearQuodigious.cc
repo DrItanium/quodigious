@@ -20,43 +20,61 @@
 #include <iostream>
 
 
-void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
-    if (depth == 0) {
+template<uint8_t depth>
+void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
+    static_assert(depth < 20, "Too large of a number");
+    if constexpr (depth == 0) {
         if (isQuodigious(number, sum, product)) {
             std::cout << number << std::endl;
         }
     } else {
-        auto innerDepth = depth - 1;
-        auto baseFactor = factors10[innerDepth];
+        static constexpr auto innerDepth = depth - 1;
+        static constexpr auto baseFactor = factors10[innerDepth];
         // this will eliminate multiplies
         number += (baseFactor << 1); // always will have a minimum of baseFactor * 2
         sum += 2; // always will be two more than we started with
         // hand unroll to expose more optimization surface area
-        performQuodigious(innerDepth, number, sum, product * 2);
+        performQuodigious<innerDepth>(number, sum, product * 2);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 3);
+        performQuodigious<innerDepth>(number, sum, product * 3);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 4);
+        performQuodigious<innerDepth>(number, sum, product * 4);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 5);
+        performQuodigious<innerDepth>(number, sum, product * 5);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 6);
+        performQuodigious<innerDepth>(number, sum, product * 6);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 7);
+        performQuodigious<innerDepth>(number, sum, product * 7);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 8);
+        performQuodigious<innerDepth>(number, sum, product * 8);
         number += baseFactor;
         ++sum;
-        performQuodigious(innerDepth, number, sum, product * 9);
+        performQuodigious<innerDepth>(number, sum, product * 9);
     }
 }
-
+void performQuodigious(uint8_t depth) noexcept {
+    switch (depth) {
+#define X(length) case length : performQuodigious<length> (); break
+        X(1);  X(2); 
+        X(3);  X(4);
+        X(5);  X(6); 
+        X(7);  X(8); 
+        X(9);  X(10); 
+        X(11); X(12);
+        X(13); X(14);
+        X(15); X(16);
+        X(17); X(18);
+        X(19); 
+        default: break;
+#undef X
+    }
+}
 int main() {
     while(std::cin.good()) {
         u64 currentIndex = 0;

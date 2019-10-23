@@ -27,7 +27,8 @@ LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
 
 PROGRAM = quodigious
 PROGRAM2 = lquodigious 
-PROGS = ${PROGRAM} ${PROGRAM2}
+PROGRAM3 = tlquodigious 
+PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3}
 all: ${PROGS}
 
 ${PROGRAM}: quodigious.o
@@ -38,6 +39,11 @@ ${PROGRAM}: quodigious.o
 ${PROGRAM2}: linearQuodigious.o
 	@echo -n "Building non-threaded quodigious... "
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM2} linearQuodigious.o
+	@echo done.
+
+${PROGRAM3}: templatedLinearQuodigious.o
+	@echo -n "Building non-threaded quodigious... "
+	@${CXX} ${LXXFLAGS} -o ${PROGRAM3} templatedLinearQuodigious.o
 	@echo done.
 
 %.o: %.cc
@@ -52,3 +58,4 @@ clean:
 
 quodigious.o: qlib.h
 linearQuodigious.o: qlib.h
+templatedLinearQuodigious.o: qlib.h
