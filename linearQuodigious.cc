@@ -45,29 +45,31 @@ void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product =
         auto innerDepth = depth - 1;
         auto baseFactor = factors10[innerDepth];
         // this will eliminate multiplies
-        auto computableFactor = baseFactor << 1;
-#if 0
-        for (auto i = 2; i < 10; ++i) {
-            performQuodigious(innerDepth, number + computableFactor, sum + i, product * i);
-            computableFactor += baseFactor;
-        }
-#endif
-        performQuodigious(innerDepth, number + computableFactor, sum + 2, product * 2);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 3, product * 3);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 4, product * 4);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 5, product * 5);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 6, product * 6);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 7, product * 7);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 8, product * 8);
-        computableFactor += baseFactor;
-        performQuodigious(innerDepth, number + computableFactor, sum + 9, product * 9);
-        computableFactor += baseFactor;
+        number += (baseFactor << 1); // always will have a minimum of baseFactor * 2
+        sum += 2; // always will be two more than we started with
+        // hand unroll to expose more optimization surface area
+        performQuodigious(innerDepth, number, sum, product * 2);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 3);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 4);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 5);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 6);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 7);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 8);
+        number += baseFactor;
+        ++sum;
+        performQuodigious(innerDepth, number, sum, product * 9);
     }
 }
 
