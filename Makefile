@@ -25,57 +25,13 @@ CXXFLAGS += -std=c++17 ${OPTIMIZATION_FLAGS} ${DEBUG_FLAGS}
 
 LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
 
-PRODUCT_COMPUTATION = product-compute
-SUM_COMPUTATION = sum-compute
-QLOOPS_PROG64 = quodigious64
-FREQUENCY_ANALYSIS = fanalysis
-ENCODING = ocEncoding 
-INV_ENCODING = invOCEncoding
-SIMPLE_LOOPS = simpleLoops 
-COMPUTE_NINE_DIGITS = compute9digs
-PROGS = ${PRODUCT_COMPUTATION} ${QLOOPS_PROG64} ${SUM_COMPUTATION} ${FREQUENCY_ANALYSIS} ${ENCODING} ${SIMPLE_LOOPS} ${COMPUTE_NINE_DIGITS} ${INV_ENCODING}
-all: ${PROGS}
+PROGRAM = quodigious
+PROGS = ${PROGRAM}
+all: ${PROGRAM}
 
-${FREQUENCY_ANALYSIS}:
-	@echo -n "Building 64-bit number quodigious computer with frequency analyzer..."
-	@${CXX} -lpthread -flto ${LXXFLAGS} -o ${FREQUENCY_ANALYSIS} numericReduction.cc FrequencyAnalyzer.cc
-	@echo done.
-
-${QLOOPS_PROG64}: loops64.o
-	@echo -n "Building 64-bit number quodigious computer ..."
-	@${CXX} -lpthread ${LXXFLAGS} -o ${QLOOPS_PROG64} loops64.o
-	@echo done.
-
-
-${PRODUCT_COMPUTATION}: product-compute.o
-	@echo -n "Building unique product computer ... "
-	@${CXX} ${LXXFLAGS} -o ${PRODUCT_COMPUTATION} product-compute.o
-	@echo done.
-
-
-${SUM_COMPUTATION}: sum-compute.o
-	@echo -n "Building unique sum computer ... "
-	@${CXX} ${LXXFLAGS} -o ${SUM_COMPUTATION} sum-compute.o
-	@echo done.
-
-
-${ENCODING}: octalLikeEncoding.o
-	@echo -n "Building special octal computer ... "
+${PROGRAM}: octalLikeEncoding.o
+	@echo -n "Building quodigious... "
 	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} octalLikeEncoding.o
-	@echo done.
-${INV_ENCODING}: invertedOctalLikeEncoding.o
-	@echo -n "Building inverted special octal computer ... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${INV_ENCODING} invertedOctalLikeEncoding.o
-	@echo done.
-
-${SIMPLE_LOOPS}: simpleLoops.o
-	@echo -n "Building special simple loops computer ... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${SIMPLE_LOOPS} simpleLoops.o
-	@echo done.
-
-${COMPUTE_NINE_DIGITS}: ComputeNineDigits.o
-	@echo -n "Building nine digit partial computer... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${COMPUTE_NINE_DIGITS} ComputeNineDigits.o
 	@echo done.
 
 %.o: %.cc
@@ -88,8 +44,4 @@ clean:
 	@rm -rf *.o ${PROGS}
 	@echo done.
 
-loops64.o: qlib.h Specialization8Digits.cc
-numericReduction.o: qlib.h FrequencyAnalyzer.h
-FrequencyAnalyzer.o: qlib.h FrequencyAnalyzer.h
 octalLikeEncoding.o: qlib.h
-ComputeNineDigits.o: qlib.h
