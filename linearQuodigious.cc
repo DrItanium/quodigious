@@ -39,7 +39,7 @@ void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product =
         ++sum; // always add one to start with
         for (auto i = 2; i < 10; ++i) {
             ++sum;
-            performQuodigious(innerDepth, number + (i * currentFactor), sum, product * i);
+            performQuodigious(innerDepth, number + factors10ByProduct[i][innerDepth], sum, product * i);
         }
     }
 }
