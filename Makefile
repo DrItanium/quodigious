@@ -23,7 +23,7 @@ OPTIMIZATION_FLAGS := -Ofast -fwhole-program -march=native
 CXXFLAGS += -std=c++17 ${OPTIMIZATION_FLAGS} ${DEBUG_FLAGS}
 
 
-LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
+LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS}
 
 PROGRAM = quodigious
 PROGS = ${PROGRAM}
@@ -31,7 +31,7 @@ all: ${PROGRAM}
 
 ${PROGRAM}: quodigious.o
 	@echo -n "Building quodigious... "
-	@${CXX} -lpthread ${LXXFLAGS} -o ${ENCODING} quodigious.o
+	@${CXX} ${LXXFLAGS} -o ${PROGRAM} quodigious.o -lpthread
 	@echo done.
 
 %.o: %.cc
