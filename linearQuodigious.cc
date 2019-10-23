@@ -51,42 +51,6 @@ inline constexpr u64 factors10[] = {
     fastPow10<19>,
 };
 
-inline constexpr u64 factors10ByProduct[][20] = {
-#define X(index) { \
-     index * fastPow10<0>, \
-     index * fastPow10<1>, \
-     index * fastPow10<2>, \
-     index * fastPow10<3>, \
-     index * fastPow10<4>, \
-     index * fastPow10<5>, \
-     index * fastPow10<6>, \
-     index * fastPow10<7>, \
-     index * fastPow10<8>, \
-     index * fastPow10<9>, \
-     index * fastPow10<10>, \
-     index * fastPow10<11>, \
-     index * fastPow10<12>, \
-     index * fastPow10<13>, \
-     index * fastPow10<14>, \
-     index * fastPow10<15>, \
-     index * fastPow10<16>, \
-     index * fastPow10<17>, \
-     index * fastPow10<18>, \
-     index * fastPow10<19>, \
-    }
-    X(0),
-    X(1),
-    X(2),
-    X(3),
-    X(4),
-    X(5),
-    X(6),
-    X(7),
-    X(8),
-    X(9),
-#undef X
-};
-
 void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
     if (depth == 0) {
         if (isQuodigious(number, sum, product)) {
@@ -94,11 +58,12 @@ void performQuodigious(uint8_t depth, u64 number = 0, u64 sum = 0, u64 product =
         }
     } else {
         auto innerDepth = depth - 1;
-        auto currentFactor = factors10[innerDepth];
-        ++sum; // always add one to start with
+        auto baseFactor = factors10[innerDepth];
+        // this will eliminate multiplies
+        auto computableFactor = baseFactor << 1;
         for (auto i = 2; i < 10; ++i) {
-            ++sum;
-            performQuodigious(innerDepth, number + factors10ByProduct[i][innerDepth], sum, product * i);
+            performQuodigious(innerDepth, number + computableFactor, sum + i, product * i);
+            computableFactor += baseFactor;
         }
     }
 }
