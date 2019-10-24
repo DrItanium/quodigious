@@ -20,7 +20,7 @@
 #include <iostream>
 
 
-template<uint8_t depth>
+template<uint8_t depth, bool includeFive = true>
 void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
     static_assert(depth < 20, "Too large of a number");
     if constexpr (depth == 0) {
@@ -41,11 +41,16 @@ void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
         number += baseFactor;
         ++sum;
         performQuodigious<innerDepth>(number, sum, product * 4);
-        number += baseFactor;
-        ++sum;
-        performQuodigious<innerDepth>(number, sum, product * 5);
-        number += baseFactor;
-        ++sum;
+        if constexpr (includeFive) {
+            number += baseFactor;
+            ++sum;
+            performQuodigious<innerDepth>(number, sum, product * 5);
+            number += baseFactor;
+            ++sum;
+        } else {
+            number += (baseFactor << 1);
+            sum += 2;
+        }
         performQuodigious<innerDepth>(number, sum, product * 6);
         number += baseFactor;
         ++sum;
@@ -60,7 +65,7 @@ void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
 }
 void performQuodigious(uint8_t depth) noexcept {
     switch (depth) {
-#define X(length) case length : performQuodigious<length> (); break
+#define X(length) case length : performQuodigious<length, length < 4> (); break
         X(1);  X(2);
         X(3);  X(4);
         X(5);  X(6); 
