@@ -19,9 +19,11 @@
 #ifndef QLIB_H__
 #define QLIB_H__
 #include <cstdint>
+#include <list>
 using byte = uint8_t;
 using u64 = uint64_t;
 using u32 = uint32_t;
+using MatchList = std::list<u64>;
 
 template<u64 base, u64 exponent>
 constexpr u64 compileTimePow() noexcept {

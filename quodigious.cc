@@ -30,9 +30,7 @@
 #include <tuple>
 #include <functional>
 #include <future>
-#include <list>
 
-using MatchList = std::list<u64>;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 base, u64 pos>
