@@ -64,9 +64,3 @@ program, it takes upwards of 18 seconds to compile and consumes at least a
 gigabyte of RAM! The 29k executable balloons to 1.4 megabytes (pre strip) with
 all of the templating I use :D. I'm super lazy!
 
-
-Rant
-----
-Fuck C#, it's a slow language for doing things like numeric computation (yes,
-the JIT does speed it up greatly but the C++14 implementation is just
-so much faster :D.

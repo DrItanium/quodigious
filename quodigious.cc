@@ -26,10 +26,11 @@
 // in the encoding so it is perfect for this design.
 // decimal would be
 #include "qlib.h"
+#include <iostream>
+#include <tuple>
+#include <functional>
 #include <future>
-#include <list>
 
-using MatchList = std::list<u64>;
 template<u64 position>
 constexpr auto shiftAmount = position * 3;
 template<u64 base, u64 pos>
@@ -76,17 +77,18 @@ constexpr auto shouldSkip5Digit(u64 x) noexcept {
     if (shouldSkip5Digit<length>(x)) { \
         ++x; \
     }
-constexpr bool isNotDivisibleByThree(u64 value) noexcept {
-    return (value % 3) != 0;
-}
 constexpr bool isDivisibleByThree(u64 value) noexcept {
     return (value % 3) == 0;
+}
+constexpr bool isNotDivisibleByThree(u64 value) noexcept {
+    return !isDivisibleByThree(value);
 }
 constexpr u64 computePartialProduct(u64 a, u64 b) noexcept {
     return a * (b + 2);
 }
 constexpr bool divisibleByProductAndSum(u64 value, u64 product, u64 sum) noexcept {
-    return (value % product == 0) && (value % sum == 0);
+    return isQuodigious(value, sum, product);
+    //return (value % product == 0) && (value % sum == 0);
 }
 
 using DataTriple = std::tuple<u64, u64, u64>;
@@ -102,11 +104,13 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
     static constexpr auto lenGreaterAndPos = [](u64 len, u64 pos) noexcept {
         return (length > len) && (position == pos);
     };
+    static constexpr auto nextPosition = position + 1;
     auto fn = [&list](auto n, auto ep, auto es) noexcept {
         if (divisibleByProductAndSum(n, ep, es)) {
             list.emplace_back(n); 
         }
     };
+    static constexpr auto lenPosDifference = length - position;
     if constexpr (position == length) {
         if constexpr (length > 10) {
             // if the number is not divisible by three then skip it
@@ -124,8 +128,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // of execution
         auto dprod = product << 1;
         DataTripleList lower {
-            { sum + 0, dprod + (0 * product), index + (0 * indexIncr)},
-            { sum + 1, dprod + (1 * product), index + (1 * indexIncr)},
+            { sum, dprod, index },
+            { sum + 1, dprod + product, index + indexIncr},
             { sum + 2, dprod + (2 * product), index + (2 * indexIncr)},
             // ignore 3oct (5dec) digits
         };
@@ -138,7 +142,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         auto halveIt = [](const DataTripleList& collection) noexcept {
             MatchList l;
             for(const auto& a : collection) {
-                body<position + 1, length>(l, a);
+                body<nextPosition, length>(l, a);
             }
             return l;
         };
@@ -148,10 +152,11 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
              l1 = t1.get();
         list.splice(list.cbegin(), l0);
         list.splice(list.cbegin(), l1);
-    } else if constexpr (length > 10 && ((length - position) == 5)) {
+    } else if constexpr (length > 10 && (lenPosDifference == 5)) {
         using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
         static constexpr auto buildTuple = [](u64 val) noexcept {
-            return p10Collection(val * fastPow10<position>, 
+            return p10Collection(
+                    val * fastPow10<position>, 
                     val * fastPow10<position+1>,
                     val * fastPow10<position+2>,
                     val * fastPow10<position+3>,
@@ -177,7 +182,6 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         // Thus we implicitly add the offsets for each position to this base10 2 value :D
 
         auto outerConverted = convertNumber<length>(index);
-        static constexpr auto computePositionValues = [](u64 var) noexcept { return p10s[var]; };
         auto combineWithOuterConverted = [outerConverted](u64 var) noexcept {
             auto [a0, a1, a2, a3, a4] = p10s[var]; 
             return p10Collection(a0 + outerConverted, a1, a2, a3, a4);
@@ -196,7 +200,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             return std::make_tuple(var + sum, computePartialProduct(product, var)); 
         };
 
-        auto makeUltimatePackage = [&outerComputed, combineWithOuterConverted](auto var, auto sum, auto product) noexcept {
+        auto makeUltimatePackage = [&outerComputed](auto var, auto sum, auto product) noexcept {
             return std::tuple_cat(outerComputed[var], computeSumProduct(var, sum, product));
         };
 
@@ -507,13 +511,34 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
 #undef X
     } else {
         auto dprod = product << 1;
-        body<position + 1, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
-        body<position + 1, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
-        body<position + 1, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
-        body<position + 1, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
-        body<position + 1, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
-        body<position + 1, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
-        body<position + 1, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+        body<nextPosition, length>(list, sum, dprod, index + (0 * indexIncr)); // 0
+        ++sum;
+        dprod += product;
+        body<nextPosition, length>(list, sum, dprod, index + (1 * indexIncr)); // 1
+        ++sum;
+        dprod += product;
+        body<nextPosition, length>(list, sum, dprod, index + (2 * indexIncr)); // 2
+        sum += 2;
+        dprod += (2 * product);
+        body<nextPosition, length>(list, sum, dprod, index + (4 * indexIncr)); // 4
+        ++sum;
+        dprod += product;
+        body<nextPosition, length>(list, sum, dprod, index + (5 * indexIncr)); // 5
+        ++sum;
+        dprod += product;
+        body<nextPosition, length>(list, sum, dprod, index + (6 * indexIncr)); // 6
+        ++sum;
+        dprod += product;
+        body<nextPosition, length>(list, sum, dprod, index + (7 * indexIncr)); // 7
+#if 0
+        body<nextPosition, length>(list, sum + 0, dprod + (0 * product), index + (0 * indexIncr));
+        body<nextPosition, length>(list, sum + 1, dprod + (1 * product), index + (1 * indexIncr));
+        body<nextPosition, length>(list, sum + 2, dprod + (2 * product), index + (2 * indexIncr));
+        body<nextPosition, length>(list, sum + 4, dprod + (4 * product), index + (4 * indexIncr));
+        body<nextPosition, length>(list, sum + 5, dprod + (5 * product), index + (5 * indexIncr));
+        body<nextPosition, length>(list, sum + 6, dprod + (6 * product), index + (6 * indexIncr));
+        body<nextPosition, length>(list, sum + 7, dprod + (7 * product), index + (7 * indexIncr));
+#endif
     }
 }
 #undef SKIP5s
