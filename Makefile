@@ -17,7 +17,7 @@
 # 3. This notice may not be removed or altered from any source distribution.
 
 # Makefile for the quodigious application
-OPTIMIZATION_FLAGS := -Ofast -fwhole-program -march=native
+OPTIMIZATION_FLAGS := -Ofast -fwhole-program -march=native -flto
 # enable debugging
 #DEBUG_FLAGS := -DDEBUG -g3
 CXXFLAGS += -std=c++17 ${OPTIMIZATION_FLAGS} ${DEBUG_FLAGS}
