@@ -148,10 +148,8 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
         };
         auto t0 = std::async(std::launch::async, halveIt, std::cref(lower)),
              t1 = std::async(std::launch::async, halveIt, std::cref(upper));
-        auto l0 = t0.get(),
-             l1 = t1.get();
-        list.splice(list.cbegin(), l0);
-        list.splice(list.cbegin(), l1);
+        list.splice(list.cbegin(), t0.get());
+        list.splice(list.cbegin(), t1.get());
     } else if constexpr (length > 10 && (lenPosDifference == 5)) {
         using p10Collection = std::tuple<u64, u64, u64, u64, u64>;
         static constexpr auto buildTuple = [](u64 val) noexcept {
