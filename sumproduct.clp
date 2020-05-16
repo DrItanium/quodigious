@@ -89,17 +89,18 @@
                      (product ?product)
                      (line ?line))
          =>
-         (printout t ?line ": (" ?sum ", " ?product "): (" 
-                   (mod ?product 
-                        ?sum) 
-                   ", " 
-                   (mod ?sum
-                        ?product) "), " 
-                   (or (= ?sum 
-                          (mod ?sum 
-                               ?product))
-                       (= ?sum
-                          (mod ?product
-                               ?sum)))
-                   crlf))
+         (printout t 
+                   "(qnum-length (line \"" ?line "\")" crlf
+                   "             (sum " ?sum ")" crlf
+                   "             (product " ?product ")" crlf
+                   "             (sum-mod-product " (mod ?sum 
+                                                         ?product) ")" crlf
+                   "             (product-mod-sum " (mod ?product
+                                                         ?sum) ")" crlf
+                   "             (sum-eq-sum-mod-product " (= ?sum
+                                                              (mod ?sum
+                                                                   ?product)) ")" crlf
+                   "             (sum-eq-product-mod-sum " (= ?sum
+                                                              (mod ?product
+                                                                   ?sum)) "))" crlf))
 
