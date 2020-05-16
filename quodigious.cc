@@ -131,7 +131,7 @@ void body(MatchList& list, u64 sum = 0, u64 product = 1, u64 index = 0) noexcept
             { sum, dprod, index },
             { sum + 1, dprod + product, index + indexIncr},
             { sum + 2, dprod + (2 * product), index + (2 * indexIncr)},
-            // ignore 3oct (5dec) digits
+            //{ sum + 3, dprod + (3 * product), index + (3 * indexIncr)}, // ignore 3oct (5dec) digits
         };
         DataTripleList upper {
             {sum + 4, dprod + (4 * product), index + (4 * indexIncr)},
