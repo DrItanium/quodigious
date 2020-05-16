@@ -25,10 +25,10 @@
 
 (deffunction digit-sum
              (?str)
-             (+ (expand$ (get-digits ?str))))
+             (+ 0 (expand$ (get-digits ?str))))
 (deffunction digit-product
              (?str)
-             (* (expand$ (get-digits ?str))))
+             (* 1 (expand$ (get-digits ?str))))
 
 (deffunction digit-sum-product
              (?str)
@@ -56,6 +56,7 @@
                (close foo)))
 
 (defrule generate-qnum-stats
+         (declare (salience 1))
          ?f <- (qnum-length ?length)
          =>
          (retract ?f)
@@ -63,7 +64,7 @@
 
 
 (deffacts qnum-bases
-          (qnum-length 10)
+          (qnum-length 10) ; has all the numbers below 10 digits as well
           (qnum-length 11)
           (qnum-length 12)
           (qnum-length 13)
@@ -78,12 +79,27 @@
          ?f <- (qnum-stats (sum ?sum)
                            (product ?product))
          =>
-         (assert (sum ?sum))
-         (if (not (assert (product ?product))) then
-           (assert (product duplicate found))))
+         (assert (sum ?sum)
+                 (product ?product)))
 
-(defrule print-found-sums
-         (declare (salience -10000))
+(defrule print-found-sums-and-mappings
+         (declare (salience -9995))
          (sum ?sum)
+         (qnum-stats (sum ?sum)
+                     (product ?product)
+                     (line ?line))
          =>
-         (printout t "Sum: " ?sum crlf))
+         (printout t ?line ": (" ?sum ", " ?product "): (" 
+                   (mod ?product 
+                        ?sum) 
+                   ", " 
+                   (mod ?sum
+                        ?product) "), " 
+                   (or (= ?sum 
+                          (mod ?sum 
+                               ?product))
+                       (= ?sum
+                          (mod ?product
+                               ?sum)))
+                   crlf))
+
