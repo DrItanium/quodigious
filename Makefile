@@ -18,12 +18,14 @@
 
 # Makefile for the quodigious application
 OPTIMIZATION_FLAGS := -Ofast -fwhole-program -march=native -flto
+#OPTIMIZATION_FLAGS := -Ofast -march=native
 # enable debugging
 #DEBUG_FLAGS := -DDEBUG -g3
 CXXFLAGS += -std=c++17 ${OPTIMIZATION_FLAGS} ${DEBUG_FLAGS}
 
 
-LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
+#LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS} -flto
+LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS}
 
 PROGRAM = quodigious
 PROGRAM2 = lquodigious 

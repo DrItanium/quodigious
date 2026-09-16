@@ -48,7 +48,7 @@ constexpr u64 convertNumber(u64 value) noexcept {
         constexpr auto nextPos = position - 1;
         constexpr auto mask = getShiftedValue<nextPos>(0b111ul);
         auto significand = (value & mask) >> shiftAmount<nextPos>;
-        return [significand]() noexcept -> u64 {
+        return [significand, nextPos]() noexcept -> u64 {
             switch(significand) {
                 case 0b000: return computeFactor<2ul, nextPos>;
                 case 0b001: return computeFactor<3ul, nextPos>;
