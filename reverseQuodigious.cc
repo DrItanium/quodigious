@@ -29,7 +29,7 @@ void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
         auto tSum = sum + i;
         auto tProd = product * i;
         if (isQuodigious(tNum, tSum, tProd)) {
-            std::cout << std::right << std::setw(32) << std::dec << number << std::endl;
+            std::cout << std::right << std::setw(32) << std::dec << tNum << std::endl;
         }
         if constexpr (nextDepth < depth) {
             performQuodigious<depth, nextDepth, factor * 10>( tNum, tSum, tProd);
