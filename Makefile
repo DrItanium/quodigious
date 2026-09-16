@@ -30,7 +30,7 @@ LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS}
 PROGRAM = quodigious
 PROGRAM2 = lquodigious 
 PROGRAM3 = tlquodigious 
-PROGRAM4 = tlquodigious 
+PROGRAM4 = rlquodigious
 PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3} ${PROGRAM4}
 all: ${PROGS}
 
