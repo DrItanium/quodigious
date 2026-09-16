@@ -30,7 +30,8 @@ LXXFLAGS = -std=c++17 ${OPTIMIZATION_FLAGS}
 PROGRAM = quodigious
 PROGRAM2 = lquodigious 
 PROGRAM3 = tlquodigious 
-PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3}
+PROGRAM4 = tlquodigious 
+PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3} ${PROGRAM4}
 all: ${PROGS}
 
 ${PROGRAM}: quodigious.o
@@ -46,6 +47,11 @@ ${PROGRAM2}: linearQuodigious.o
 ${PROGRAM3}: templatedLinearQuodigious.o
 	@echo -n "Building non-threaded but templated quodigious... "
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM3} templatedLinearQuodigious.o
+	@echo done.
+
+${PROGRAM4}: reverseQuodigious.o
+	@echo -n "Reverse ordering simplified quodigious executor... "
+	@${CXX} ${LXXFLAGS} -o ${PROGRAM4} reverseQuodigious.o
 	@echo done.
 
 %.o: %.cc

@@ -1,0 +1,86 @@
+//  Copyright (c) 2017-2019 Joshua Scoggins
+//
+//  This software is provided 'as-is', without any express or implied
+//  warranty. In no event will the authors be held liable for any damages
+//  arising from the use of this software.
+//
+//  Permission is granted to anyone to use this software for any purpose,
+//  including commercial applications, and to alter it and redistribute it
+//  freely, subject to the following restrictions:
+//
+//  1. The origin of this software must not be misrepresented; you must not
+//     claim that you wrote the original software. If you use this software
+//     in a product, an acknowledgment in the product documentation would be
+//     appreciated but is not required.
+//  2. Altered source versions must be plainly marked as such, and must not be
+//     misrepresented as being the original software.
+//  3. This notice may not be removed or altered from any source distribution.
+
+#include "qlib.h"
+#include <iostream>
+#include <iomanip>
+
+
+template<uint8_t depth, uint8_t currentDepth = 0, u64 factor = 1>
+void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
+    constexpr auto nextDepth = currentDepth + 1;
+    for (u64 i = 2; i < 10; ++i) {
+        auto tNum = number + (i * factor);
+        auto tSum = sum + i;
+        auto tProd = product * i;
+        if (isQuodigious(tNum, tSum, tProd)) {
+            std::cout << std::right << std::setw(32) << std::dec << number << std::endl;
+        }
+        if constexpr (nextDepth < depth) {
+            performQuodigious<depth, nextDepth, factor * 10>( tNum, tSum, tProd);
+        }
+    }
+}
+
+void doQuodigious(uint8_t depth) noexcept {
+    switch (depth) {
+#define X(ind) case ind : performQuodigious< ind > (); break
+        X(1);
+        X(2);
+        X(3);
+        X(4);
+        X(5);
+        X(6);
+        X(7);
+        X(8);
+        X(9);
+        X(10);
+        X(11);
+        X(12);
+        X(13);
+        X(14);
+        X(15);
+        X(16);
+        X(17);
+        X(18);
+        X(19);
+#undef X
+        default:
+            std::cout << "Illegal depth: " << static_cast<int>(depth) << std::endl;
+            break;
+    }
+}
+
+
+
+int main() {
+    while(std::cin.good()) {
+        u64 currentIndex = 0;
+        std::cin >> currentIndex;
+        if (std::cin.good()) {
+            if ((currentIndex > 0) && (currentIndex < 20)) {
+                doQuodigious(currentIndex);
+            } else {
+                std::cout << "Illegal index " << currentIndex << std::endl;
+                return 1;
+            }
+            std::cout << std::endl;
+        }
+    }
+    return 0;
+}
