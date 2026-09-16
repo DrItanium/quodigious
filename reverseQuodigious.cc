@@ -22,7 +22,8 @@
 
 
 template<uint8_t depth, uint8_t currentDepth = 0, u64 factor = 1>
-void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
+void 
+performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
     constexpr auto nextDepth = currentDepth + 1;
     for (u64 i = 2; i < 10; ++i) {
         auto tNum = number + (i * factor);
@@ -36,6 +37,7 @@ void performQuodigious(u64 number = 0, u64 sum = 0, u64 product = 1) noexcept {
         }
     }
 }
+
 
 void doQuodigious(uint8_t depth) noexcept {
     switch (depth) {
