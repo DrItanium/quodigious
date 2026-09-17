@@ -31,7 +31,8 @@ PROGRAM = quodigious
 PROGRAM2 = lquodigious 
 PROGRAM3 = tlquodigious 
 PROGRAM4 = rlquodigious
-PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3} ${PROGRAM4}
+PROGRAM5 = trlquodigious
+PROGS = ${PROGRAM} ${PROGRAM2} ${PROGRAM3} ${PROGRAM4} ${PROGRAM5}
 all: ${PROGS}
 
 ${PROGRAM}: quodigious.o
@@ -50,8 +51,12 @@ ${PROGRAM3}: templatedLinearQuodigious.o
 	@echo done.
 
 ${PROGRAM4}: reverseQuodigious.o
-	@echo -n "Reverse ordering simplified quodigious executor... "
+	@echo -n "Building Reverse ordering simplified quodigious executor... "
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM4} reverseQuodigious.o
+	@echo done.
+${PROGRAM5}: threadedReverseQuodigious.o
+	@echo -n "Building Threaded reverse ordering simplified quodigious executor... "
+	@${CXX} ${LXXFLAGS} -o ${PROGRAM5} threadedReverseQuodigious.o
 	@echo done.
 
 %.o: %.cc
