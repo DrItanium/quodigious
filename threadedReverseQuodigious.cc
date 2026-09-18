@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <future>
 #include <vector>
+#include <type_traits>
 
 using StorageCell = std::vector<u64>;
 
@@ -46,35 +47,28 @@ template<uint8_t depth>
 void
 performQuodigious() noexcept {
     StorageCell cells[8];
-    // don't waste time checking quodigiousness
-    for (int i = 0, j = 2; i < 8; ++i, ++j) {
-        cells[i].emplace_back(j);
-    }
     auto fn = [&cells](u64 base) {
         auto& cell = cells[base - 2];
         performQuodigious<depth, 1, 10>(cell, base, base, base);
     };
+    decltype(std::async(std::launch::async, fn, 2)) storageElements[8];
+
+    // don't waste time checking quodigiousness of single digits
+    for (int i = 0, j = 2; i < 8; ++i, ++j) {
+        cells[i].emplace_back(j);
+    }
     auto display = [](auto& cell) {
         for (auto value : cell) {
             std::cout << std::right << std::setw(32) << std::dec << value << std::endl;
         }
     };
-    auto f2 = std::async(std::launch::async, fn, 2);
-    auto f3 = std::async(std::launch::async, fn, 3);
-    auto f4 = std::async(std::launch::async, fn, 4);
-    auto f5 = std::async(std::launch::async, fn, 5);
-    auto f6 = std::async(std::launch::async, fn, 6);
-    auto f7 = std::async(std::launch::async, fn, 7);
-    auto f8 = std::async(std::launch::async, fn, 8);
-    auto f9 = std::async(std::launch::async, fn, 9);
-    f2.wait(); display(cells[0]);
-    f3.wait(); display(cells[1]);
-    f4.wait(); display(cells[2]);
-    f5.wait(); display(cells[3]);
-    f6.wait(); display(cells[4]);
-    f7.wait(); display(cells[5]);
-    f8.wait(); display(cells[6]);
-    f9.wait(); display(cells[7]);
+    for (int i = 0, j = 2; i < 8; ++i, ++j) {
+        storageElements[i] = std::async(std::launch::async, fn, j);
+    }
+    for (int i = 0; i < 8; ++i) {
+        storageElements[i].wait(); 
+        display(cells[i]);
+    }
 
 }
 
