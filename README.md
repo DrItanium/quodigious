@@ -1,4 +1,4 @@
-Taken from: https://www.cpp.edu/~carich/programming_contests/200802/quodigious.pdf
+Taken from: https://www.cpp.edu/~carich/programming_contests/200802/quodigious.pdf (this is a dead link with no archive available...)
 
 A quodigious number is a positive decimal number whose digits are each greater
 than 1, and which is evenly divisible by both the sum and product of its
