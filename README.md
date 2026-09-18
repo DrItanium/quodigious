@@ -25,42 +25,18 @@ decided to keep going and use a 64-bit unsigned integer. This allows digit
 counts of up to 19 digits! 
 
 
-Tricks used
------------
-My whole objective in starting this repo is to show various tricks that I used
-to greatly speed up the process of identifying these numbers. Some of these
-tricks include:
+Computation Technique
+---------------------
 
-Starting at (mul (pow 10 ?width) (+ 2.0 (/ 2.0 9.0))) to eliminate a huge
-majority of numbers which will never ever be legal due to the fact they have
-the digits 0 and 1 in them.
+Instead of generating each number and then breaking it apart, the modern versions of this program actually just build the number digit by digit using recursion.  This allows for easy sum and product calculation. It also makes it possible to introduce threading at different layers. 
 
-Memoizing the sums, products, and legality of numbers with digital widths of
-3,4,5,6,7. Going above these values requires a fuck ton of ram with very little
-benefit (cache thrash anyone?). Even at this point, the program will use
-roughly 185 megs of ram! To save space, the sums are a single list where the
-products and predicates have to be separate lists for each width.
+Previously, we started at the largest digit and walked _down_ to the least significant digit. Since 9/15/2026, I have come up with a _reverse_ direction implementation where we start at the
+least significant digit and work our way up towards the most significant digit. This has some interesting benefits including:
 
-Std::async is a wonderful drug :D. I use it like crazy and I spawn about 6
-threads (plus the main one) during execution of widths of 7 or more. 
+# Able to compute all quodigious numbers up to the width specified instead of _only_ at the width specified! This has the benefit of improving performance by not requiring recomputation of values. Instead we just walk into the number computation and check for quodigious-ness as we walk through. We stop once we get to the defined depth
+# No need for a lookup table for the factors of computation (we can just use templates and multiple each depth by 10).
+# We can construct a _histogram_-like image of the numbers if we print out these values as we walk through the network.
+# Patterns in the set of quodigious numbers is far more obvious in the reverse format instead of the forward format. For example, no quodigious numbers have 3, 7, or 9 as their least significant digit. This makes it possible to eliminate up to 3/8th of the compute space and then allows us to go back and test those spaces separately if needed
+# Each subset of the execution graph can be thrown onto a separate thread. So LSB's of 2, 3, 4, 5, 6, 7, 8, and 9 are all thrown onto their own thread. We can go one step further and do the next depth in as well if desired.
 
-
-I can't find any quodigious numbers above widths of 3 digits that contain the
-number 5! I haven't been able to verify this for 14-19 digits (without the
-code I have now it would've taken in literal years to compute!) though. So in
-the case of 4 digits through 13 digits I do not even bother computing any
-numbers whose most significant digit is 5! I have even gone so far as to
-removing all checks for digits which contain 5 as well ! I had to hard code
-body<3> because of this. However, I think this is a safe assumption
-
-
-In essence all of the code I have written is centered around reducing the
-scanning space. If there is a constant time solution to this problem I would
-love to know :).
-
-I love using templates to write code for me :D. The problem with using
-templates though is the amount of time it takes to compile. In the case of this
-program, it takes upwards of 18 seconds to compile and consumes at least a
-gigabyte of RAM! The 29k executable balloons to 1.4 megabytes (pre strip) with
-all of the templating I use :D. I'm super lazy!
 
