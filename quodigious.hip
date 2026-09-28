@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <hip/hip_runtime.h>
+#include <iostream>
 
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
@@ -34,7 +35,19 @@ __global__ void quodigiousKernel(int maxDepth) {
 }
 
 int main() {
-	quodigiousKernel<<<64, 64>>>(13);
-	hipDeviceSynchronize();
+    while(std::cin.good()) {
+        uint64_t currentIndex = 0;
+        std::cin >> currentIndex;
+        if (std::cin.good()) {
+            if ((currentIndex > 5) && (currentIndex < 20)) {
+				quodigiousKernel<<<64, 64>>>(currentIndex);
+				hipDeviceSynchronize();
+            } else {
+                std::cout << "Illegal index " << currentIndex << std::endl;
+                return 1;
+            }
+            std::cout << std::endl;
+        }
+    }
 	return 0;
 }
