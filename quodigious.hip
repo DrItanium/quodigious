@@ -27,11 +27,12 @@ __global__ void quodigiousKernel(int maxDepth) {
 	auto d1 = (((stride >> 3) & 0b111)) + 2;
 	auto d2 = (((stride >> 6) & 0b111)) + 2;
 	auto d3 = (((stride >> 9) & 0b111)) + 2;
+	auto d4 = (((stride >> 12) & 0b111)) + 2;
 
-	auto number = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000);
-	auto sum = d0 + d1 + d2 + d3;
-	auto prod = d0 * d1 * d2 * d3;
-	doQuodigious(maxDepth, 4, number, sum, prod, 10000);
+	auto number = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000)  + (d4 * 10000);
+	auto sum = d0 + d1 + d2 + d3 + d4;
+	auto prod = d0 * d1 * d2 * d3 * d4;
+	doQuodigious(maxDepth, 5, number, sum, prod, 100000);
 }
 
 int main() {
@@ -40,7 +41,7 @@ int main() {
         std::cin >> currentIndex;
         if (std::cin.good()) {
             if ((currentIndex > 5) && (currentIndex < 20)) {
-				quodigiousKernel<<<64, 64>>>(currentIndex);
+				quodigiousKernel<<<256, 128>>>(currentIndex);
 				hipDeviceSynchronize();
             } else {
                 std::cout << "Illegal index " << currentIndex << std::endl;
