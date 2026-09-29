@@ -6,14 +6,15 @@
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
 }
-__device__ void doQuodigious(int maxDepth, int depth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
-    auto nextDepth = depth + 1;
+template<uint8_t maxDepth, uint8_t currentDepth, uint64_t factor>
+__device__ void doQuodigious(uint64_t number, uint64_t sum, uint64_t product) {
+    constexpr auto nextDepth = currentDepth + 1;
     for (auto i = 2; i < 10; ++i) {
         auto tNum = number + (i * factor);
         auto tSum = sum + i;
         auto tProd = product * i;
-        if (nextDepth < maxDepth) {
-			doQuodigious(maxDepth, nextDepth, tNum, tSum, tProd, factor * 10);
+        if constexpr (nextDepth < maxDepth) {
+			doQuodigious<maxDepth, nextDepth, factor * 10>(tNum, tSum, tProd);
         } else {
 			if (isQuodigious(tNum, tSum, tProd)) {
 				printf("\t\t%lu\n", tNum);
@@ -22,7 +23,8 @@ __device__ void doQuodigious(int maxDepth, int depth, uint64_t number, uint64_t 
     }
 }
 
-__global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
+template<uint8_t maxDepth, uint8_t depth, uint64_t factor>
+__global__ void quodigiousKernel(uint64_t number, uint64_t sum, uint64_t product) {
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
@@ -43,7 +45,7 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 					   + (d4 * factor * 10000);
 	auto tSum = d0 + d1 + sum + d2 + d3 + d4;
 	auto tProd = d0 * d1 * product * d2 * d3 * d4;
-	doQuodigious(maxDepth, depth + 5, tNum, tSum, tProd, factor * 100000);
+	doQuodigious<maxDepth, depth + 5, factor * 100000>(tNum, tSum, tProd);
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
 // generally, doing 5-8 digits in a linear fashion is totally safe so we should setup partitioning breaks.
@@ -73,7 +75,7 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 	} else {
 		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
 		static_assert(currentDepth == 0);
-		quodigiousKernel<<<256, 128>>>(depth, 0, number, sum, product, factor);
+		quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>(number, sum, product);
 		(void)hipDeviceSynchronize();
 	} 
 }
@@ -100,8 +102,8 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 		X(16);
 		X(17);
 		X(18);
-		X(19);
 #undef X
+		case 19: performQuodigious<19, 0, 1>(); return true;
 		default:
 			std::cerr << "Illegal index " << idx << std::endl;
 			return false;
