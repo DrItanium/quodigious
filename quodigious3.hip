@@ -54,24 +54,75 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 // 12 digits means that we need to break the operation up into 5 digits -> 7 digits each or 3 | 5 | 4 digits 
 // 13 digits means that we need to break the operation up into 1|5|7 or 2|5|6 (or another combination)
 // 14 digits means that we need to 
-__host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
-    auto nextDepth = currentDepth + 1;
-    for (auto i = 2; i < 10; ++i) {
-        auto tNum = number + (i * factor);
-        auto tSum = sum + i;
-        auto tProd = product * i;
-        if (nextDepth < depth) {
-			if (depth > 9 && ((depth - nextDepth) > 5)) {
-				quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
+template<uint8_t depth, uint8_t currentDepth = 0, uint64_t factor = 1>
+__host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t product = 1) {
+	if constexpr (depth < 12) {
+		constexpr auto nextDepth = currentDepth + 1;
+		for (auto i = 2; i < 10; ++i) {
+			auto tNum = number + (i * factor);
+			auto tSum = sum + i;
+			auto tProd = product * i;
+			if constexpr (nextDepth < depth) {
+				performQuodigious<depth, nextDepth, factor * 10>( tNum, tSum, tProd);
 			} else {
-				performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
-			}
-        } else {
-			if (isQuodigious(tNum, tSum, tProd)) {
-				std::cout << "\t\t" << tNum << std::endl;
+				if (isQuodigious(tNum, tSum, tProd)) {
+					std::cout << "\t\t" << tNum << std::endl;
+				}
 			}
 		}
-    }
+	} else {
+		constexpr auto nextDepth = currentDepth + 1;
+		for (auto i = 2; i < 10; ++i) {
+			auto tNum = number + (i * factor);
+			auto tSum = sum + i;
+			auto tProd = product * i;
+			if (nextDepth < depth) {
+				if (depth > 9 && ((depth - nextDepth) > 5)) {
+					quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
+				} else {
+					performQuodigious<depth, nextDepth, factor * 10>( tNum, tSum, tProd);
+				}
+			} else {
+				if (isQuodigious(tNum, tSum, tProd)) {
+					std::cout << "\t\t" << tNum << std::endl;
+				}
+			}
+		}
+		if constexpr (currentDepth == 0) {
+			hipDeviceSynchronize();
+		}
+	}
+}
+
+__host__ bool dispatchQuodigious(uint64_t idx) noexcept {
+
+	switch (idx) {
+#define X(index) case index : performQuodigious< index , 0, 1> () ; return true
+		X(1);
+		X(2);
+		X(3);
+		X(4);
+		X(5);
+		X(6);
+		X(7);
+		X(8);
+		X(9);
+		// X(10);
+		// X(11);
+		// X(12);
+		// X(13);
+		// X(14);
+		// X(15);
+		// X(16);
+		// X(17);
+		// X(18);
+		// X(19);
+#undef X
+		default:
+			std::cerr << "Illegal index " << idx << std::endl;
+			return false;
+			
+	}
 }
 
 int main() {
@@ -79,13 +130,9 @@ int main() {
         uint64_t currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
-            if ((currentIndex > 0) && (currentIndex < 20)) {
-				performQuodigious(currentIndex, 0, 0, 0, 1, 1);
-				hipDeviceSynchronize();
-            } else {
-                std::cout << "Illegal index " << currentIndex << std::endl;
-                return 1;
-            }
+			if (!dispatchQuodigious(currentIndex)) {
+				return 1;
+			}
             std::cout << std::endl;
         }
     }
