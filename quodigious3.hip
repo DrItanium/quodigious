@@ -56,8 +56,8 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 // 14 digits means that we need to 
 template<uint8_t depth, uint8_t currentDepth = 0, uint64_t factor = 1>
 __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t product = 1) {
-	if constexpr (depth < 12) {
-		constexpr auto nextDepth = currentDepth + 1;
+	constexpr auto nextDepth = currentDepth + 1;
+	if constexpr (depth < 10) {
 		for (auto i = 2; i < 10; ++i) {
 			auto tNum = number + (i * factor);
 			auto tSum = sum + i;
@@ -70,13 +70,19 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 				}
 			}
 		}
+	} else if constexpr (depth < 14) {
+		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
+		static_assert(currentDepth == 0);
+		quodigiousKernel<<<256, 128>>>(depth, 0, number, sum, product, factor);
+		(void)hipDeviceSynchronize();
 	} else {
+#if 0
 		constexpr auto nextDepth = currentDepth + 1;
 		for (auto i = 2; i < 10; ++i) {
 			auto tNum = number + (i * factor);
 			auto tSum = sum + i;
 			auto tProd = product * i;
-			if (nextDepth < depth) {
+			if constexpr (nextDepth < depth) {
 				if (depth > 9 && ((depth - nextDepth) > 5)) {
 					quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
 				} else {
@@ -91,6 +97,7 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 		if constexpr (currentDepth == 0) {
 			hipDeviceSynchronize();
 		}
+#endif
 	}
 }
 
@@ -107,16 +114,16 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 		X(7);
 		X(8);
 		X(9);
-		// X(10);
-		// X(11);
-		// X(12);
-		// X(13);
-		// X(14);
-		// X(15);
-		// X(16);
-		// X(17);
-		// X(18);
-		// X(19);
+		X(10);
+		X(11);
+		X(12);
+		X(13);
+		//X(14);
+		//X(15);
+		//X(16);
+		//X(17);
+		//X(18);
+		//X(19);
 #undef X
 		default:
 			std::cerr << "Illegal index " << idx << std::endl;
