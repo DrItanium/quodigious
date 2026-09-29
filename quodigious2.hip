@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <hip/hip_runtime.h>
 #include <iostream>
+#include <iomanip>
 
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
@@ -35,14 +36,36 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 	doQuodigious(maxDepth, depth + 5, tNum, tSum, tProd, factor * 100000);
 }
 
+__host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
+    auto nextDepth = currentDepth + 1;
+    for (auto i = 2; i < 10; ++i) {
+        auto tNum = number + (i * factor);
+        auto tSum = sum + i;
+        auto tProd = product * i;
+        if (isQuodigious(tNum, tSum, tProd)) {
+            std::cout << std::right << std::setw(32) << std::dec << tNum << std::endl;
+        }
+        if (nextDepth < depth) {
+			switch (nextDepth) {
+				case 10 ... 19:
+					quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
+					hipDeviceSynchronize();
+					break;
+				default:
+            		performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
+					break;
+			}
+        }
+    }
+}
+
 int main() {
     while(std::cin.good()) {
         uint64_t currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
             if ((currentIndex > 5) && (currentIndex < 20)) {
-				quodigiousKernel<<<256, 128>>>(currentIndex, 0, 0, 0, 1, 1);
-				hipDeviceSynchronize();
+				performQuodigious(currentIndex, 0, 0, 0, 1, 1);
             } else {
                 std::cout << "Illegal index " << currentIndex << std::endl;
                 return 1;
