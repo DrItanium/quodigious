@@ -70,43 +70,12 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 				}
 			}
 		}
-	} else if constexpr (depth < 14) {
+	} else {
 		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
 		static_assert(currentDepth == 0);
 		quodigiousKernel<<<256, 128>>>(depth, 0, number, sum, product, factor);
 		(void)hipDeviceSynchronize();
-	} else if constexpr (depth < 16) {
-		for (int i = 2; i < 10; ++i) {
-			auto tNum = number + (i * factor);
-			auto tSum = sum + i;
-			auto tProd = product * i;
-			quodigiousKernel<<<256, 128>>>(depth, 1, tNum, tSum, tProd, factor * 10);
-		}
-		(void)hipDeviceSynchronize();
-	} else {
-#if 0
-		constexpr auto nextDepth = currentDepth + 1;
-		for (auto i = 2; i < 10; ++i) {
-			auto tNum = number + (i * factor);
-			auto tSum = sum + i;
-			auto tProd = product * i;
-			if constexpr (nextDepth < depth) {
-				if (depth > 9 && ((depth - nextDepth) > 5)) {
-					quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
-				} else {
-					performQuodigious<depth, nextDepth, factor * 10>( tNum, tSum, tProd);
-				}
-			} else {
-				if (isQuodigious(tNum, tSum, tProd)) {
-					std::cout << "\t\t" << tNum << std::endl;
-				}
-			}
-		}
-		if constexpr (currentDepth == 0) {
-			hipDeviceSynchronize();
-		}
-#endif
-	}
+	} 
 }
 
 __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
@@ -128,10 +97,10 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 		X(13);
 		X(14);
 		X(15);
-		//X(16);
-		//X(17);
-		//X(18);
-		//X(19);
+		X(16);
+		X(17);
+		X(18);
+		X(19);
 #undef X
 		default:
 			std::cerr << "Illegal index " << idx << std::endl;
