@@ -59,6 +59,23 @@ ${PROGRAM5}: threadedReverseQuodigious.o
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM5} threadedReverseQuodigious.o
 	@echo done.
 
+hip_targets: amdquodigious_v1 amdquodigious_v2 amdquodigious_v3
+
+amdquodigious_v1: quodigious.hip
+	@echo -n "Building HIP Version (v1)..."
+	@hipcc -o amdquodigious_v1 quodigious.hip
+	@echo done.
+
+amdquodigious_v2: quodigious2.hip
+	@echo -n "Building HIP Version (v2)..."
+	@hipcc -o amdquodigious_v2 quodigious2.hip
+	@echo done.
+
+amdquodigious_v3: quodigious3.hip
+	@echo -n "Building HIP Version (v3)..."
+	@hipcc -o amdquodigious_v3 quodigious3.hip
+	@echo done.
+
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
 	@${CXX} ${CXXFLAGS} -c $< -o $@
@@ -66,9 +83,14 @@ ${PROGRAM5}: threadedReverseQuodigious.o
 
 clean:
 	@echo -n cleaning...
-	@rm -rf *.o ${PROGS}
+	@rm -rf *.o ${PROGS} \
+		amdquodigious_v1 \
+		amdquodigious_v2 \
+		amdquodigious_v3
 	@echo done.
 
 quodigious.o: qlib.h
 linearQuodigious.o: qlib.h
 templatedLinearQuodigious.o: qlib.h
+
+.PHONY: clean hip_targets
