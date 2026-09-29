@@ -75,6 +75,14 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 		static_assert(currentDepth == 0);
 		quodigiousKernel<<<256, 128>>>(depth, 0, number, sum, product, factor);
 		(void)hipDeviceSynchronize();
+	} else if constexpr (depth < 16) {
+		for (int i = 2; i < 10; ++i) {
+			auto tNum = number + (i * factor);
+			auto tSum = sum + i;
+			auto tProd = product * i;
+			quodigiousKernel<<<256, 128>>>(depth, 1, tNum, tSum, tProd, factor * 10);
+		}
+		(void)hipDeviceSynchronize();
 	} else {
 #if 0
 		constexpr auto nextDepth = currentDepth + 1;
@@ -118,8 +126,8 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 		X(11);
 		X(12);
 		X(13);
-		//X(14);
-		//X(15);
+		X(14);
+		X(15);
 		//X(16);
 		//X(17);
 		//X(18);
