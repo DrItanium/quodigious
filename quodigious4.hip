@@ -13,8 +13,9 @@ private:
 			 _sum, 
 			 _product;
 };
-__device__ DataContainer DataElements[256*128];
-__global__ void computeDataElements() {
+__device__ DataContainer DataElements5[256*128];
+__device__ DataContainer DataElements4[64*64];
+__global__ void computeDataElements5() {
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
@@ -31,7 +32,25 @@ __global__ void computeDataElements() {
 	auto tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000) + (d4 * 10000);
 	auto tSum = d0 + d1 + d2 + d3 + d4;
 	auto tProd = d0 * d1 * d2 * d3 * d4;
-	DataElements[stride] = DataContainer{tNum, tSum, tProd};
+	DataElements5[stride] = DataContainer{tNum, tSum, tProd};
+}
+__global__ void computeDataElements4() {
+	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
+	// use the stride to determine a fixed digit pattern to add onto the number to compute.
+	// We break the stride up into multiple three bit quantities and generate our data off of that.
+
+	// This means the design is actually based off of the number of threads you dispatch on.
+	//
+	// This is garbage code so who cares!
+	auto d0 = ((stride & 0b111)) + 2;
+	auto d1 = (((stride >> 3) & 0b111)) + 2;
+	auto d2 = (((stride >> 6) & 0b111)) + 2;
+	auto d3 = (((stride >> 9) & 0b111)) + 2;
+
+	auto tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000);
+	auto tSum = d0 + d1 + d2 + d3;
+	auto tProd = d0 * d1 * d2 * d3;
+	DataElements4[stride] = DataContainer{tNum, tSum, tProd};
 }
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
@@ -39,9 +58,19 @@ __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t pr
 template<uint8_t maxDepth, uint8_t currentDepth, uint64_t factor>
 __device__ void doQuodigious(uint64_t number, uint64_t sum, uint64_t product) {
 	if constexpr ((currentDepth + 5) < maxDepth) {
-		for (const auto& item : DataElements) {
+		// we have enough space in the search to save on precomputation space
+		for (const auto& item : DataElements5) {
 			auto newNumber = ((item.getNumber() * factor) + number);
 			doQuodigious<maxDepth, currentDepth + 5, factor * 100000>(
+					((item.getNumber() * factor) + number),
+					sum + item.getSum(), 
+					product * item.getProduct());
+		}
+	} else if constexpr ((currentDepth + 4) < maxDepth) {
+		// we have enough space in the search to save on precomputation space
+		for (const auto& item : DataElements4) {
+			auto newNumber = ((item.getNumber() * factor) + number);
+			doQuodigious<maxDepth, currentDepth + 4, factor * 10000>(
 					((item.getNumber() * factor) + number),
 					sum + item.getSum(), 
 					product * item.getProduct());
@@ -69,7 +98,7 @@ __global__ void quodigiousKernel(uint64_t number = 0, uint64_t sum = 0, uint64_t
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
-	auto item = DataElements[stride];
+	auto item = DataElements5[stride];
 	doQuodigious<maxDepth, depth + 5, factor * 100000>(item.getNumber(), item.getSum(), item.getProduct());
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
@@ -137,7 +166,8 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 }
 
 int main() {
-	computeDataElements<<<256, 128>>>();
+	computeDataElements5<<<256, 128>>>();
+	computeDataElements4<<<64, 64>>>();
 	(void)hipDeviceSynchronize();
     while(std::cin.good()) {
         uint64_t currentIndex = 0;
