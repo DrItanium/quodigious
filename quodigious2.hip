@@ -25,15 +25,16 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// assume four digits
 	auto d0 = ((stride & 0b111)) + 2;
-	auto d1 = (((stride >> 3) & 0b111)) + 2;
-	auto d2 = (((stride >> 6) & 0b111)) + 2;
-	auto d3 = (((stride >> 9) & 0b111)) + 2;
-	auto d4 = (((stride >> 12) & 0b111)) + 2;
 
-	auto tNum = number + (d0 * factor) + (d1 * 10 * factor) + (d2 * 100 * factor) + (d3 * 1000 * factor)  + (d4 * 10000 * factor);
-	auto tSum = d0 + d1 + d2 + d3 + d4 + sum;
-	auto tProd = d0 * d1 * d2 * d3 * d4 * product;
-	doQuodigious(maxDepth, depth + 5, tNum, tSum, tProd, factor * 100000);
+	auto tNum = number + (d0 * factor) ;
+	auto tSum = d0 + sum;
+	auto tProd = d0 * product;
+	if (isQuodigious(tNum, tSum, tProd)) {
+		printf("\t\t%lu\n", tNum);
+	}
+	if ((depth + 1) < maxDepth) {
+		doQuodigious(maxDepth, depth + 1, tNum, tSum, tProd, factor * 10);
+	}
 }
 
 __host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
@@ -43,13 +44,12 @@ __host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t nu
         auto tSum = sum + i;
         auto tProd = product * i;
         if (isQuodigious(tNum, tSum, tProd)) {
-            std::cout << std::right << std::setw(32) << std::dec << tNum << std::endl;
+			std::cout << "\t\t" << tNum << std::endl;
         }
         if (nextDepth < depth) {
 			switch (nextDepth) {
-				case 10 ... 19:
-					quodigiousKernel<<<256, 128>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
-					hipDeviceSynchronize();
+				case 8 ... 19:
+					quodigiousKernel<<< 1, 8>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
 					break;
 				default:
             		performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
@@ -57,6 +57,7 @@ __host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t nu
 			}
         }
     }
+	hipDeviceSynchronize();
 }
 
 int main() {
@@ -64,7 +65,7 @@ int main() {
         uint64_t currentIndex = 0;
         std::cin >> currentIndex;
         if (std::cin.good()) {
-            if ((currentIndex > 5) && (currentIndex < 20)) {
+            if ((currentIndex > 0) && (currentIndex < 20)) {
 				performQuodigious(currentIndex, 0, 0, 0, 1, 1);
             } else {
                 std::cout << "Illegal index " << currentIndex << std::endl;
