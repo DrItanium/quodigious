@@ -29,11 +29,12 @@ __global__ void quodigiousKernel(int maxDepth, int depth, uint64_t number, uint6
 	auto d1 = (((stride >> 3) & 0b111)) + 2;
 	auto d2 = (((stride >> 6) & 0b111)) + 2;
 	auto d3 = (((stride >> 9) & 0b111)) + 2;
+	auto d4 = (((stride >> 12) & 0b111)) + 2;
 
-	auto tNum = number + (d0 * factor) + (d1 * factor * 10) + (d2 * factor * 100) + (d3 * factor * 1000);
-	auto tSum = d0 + d1 + sum + d2 + d3;
-	auto tProd = d0 * d1 * product * d2 * d3;
-	doQuodigious(maxDepth, depth + 4, tNum, tSum, tProd, factor * 10000);
+	auto tNum = number + (d0 * factor) + (d1 * factor * 10) + (d2 * factor * 100) + (d3 * factor * 1000) + (d4 * factor * 10000);
+	auto tSum = d0 + d1 + sum + d2 + d3 + d4;
+	auto tProd = d0 * d1 * product * d2 * d3 * d4;
+	doQuodigious(maxDepth, depth + 5, tNum, tSum, tProd, factor * 100000);
 }
 
 __host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t number, uint64_t sum, uint64_t product, uint64_t factor) {
@@ -43,17 +44,10 @@ __host__ void performQuodigious(uint8_t depth, uint8_t currentDepth, uint64_t nu
         auto tSum = sum + i;
         auto tProd = product * i;
         if (nextDepth < depth) {
-			switch (nextDepth) {
-				case 8 ... 19:
-					if ((depth - nextDepth) > 4) {
-						quodigiousKernel<<<64, 64>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
-					} else {
-						performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
-					}
-					break;
-				default:
-            		performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
-					break;
+			if ((depth - nextDepth) > 5) {
+				quodigiousKernel<<<128, 256>>>(depth, nextDepth, tNum, tSum, tProd, factor * 10);
+			} else {
+				performQuodigious( depth, nextDepth, tNum, tSum, tProd, factor * 10);
 			}
         } else {
 			if (isQuodigious(tNum, tSum, tProd)) {
