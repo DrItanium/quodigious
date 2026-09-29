@@ -102,8 +102,8 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 		X(16);
 		X(17);
 		X(18);
+		X(19);
 #undef X
-		case 19: performQuodigious<19, 0, 1>(); return true;
 		default:
 			std::cerr << "Illegal index " << idx << std::endl;
 			return false;
