@@ -50,12 +50,12 @@ __device__ void doQuodigious(uint64_t number, uint64_t sum, uint64_t product) {
 
 
 template<uint8_t maxDepth, uint8_t depth, uint64_t factor>
-__global__ void quodigiousKernel(uint64_t number = 0, uint64_t sum = 0, uint64_t product = 1) {
+__global__ void quodigiousKernel(int size = 256 * 128, uint64_t number = 0, uint64_t sum = 0, uint64_t product = 1) {
 	//auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
 	for (int i = blockIdx.x * blockDim.x + threadIdx.x; 
-			i < 256*128;
+			i < size;
 			i += blockDim.x * gridDim.x) {
 		auto item = computeDataContainer(i);
 		doQuodigious<maxDepth, depth + 5, factor * 100000>(
