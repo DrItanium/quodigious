@@ -14,8 +14,18 @@ private:
 			 _product;
 };
 __device__ DataContainer DataElements5[256*128];
-__device__ DataContainer DataElements4[64*64];
-__device__ DataContainer DataElements3[32*16];
+__device__ DataContainer computeDataContainer(int stride) noexcept {
+	auto d0 = ((stride & 0b111)) + 2;
+	auto d1 = (((stride >> 3) & 0b111)) + 2;
+	auto d2 = (((stride >> 6) & 0b111)) + 2;
+	auto d3 = (((stride >> 9) & 0b111)) + 2;
+	auto d4 = (((stride >> 12) & 0b111)) + 2;
+
+	uint64_t tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000) + (d4 * 10000);
+	uint64_t tSum = d0 + d1 + d2 + d3 + d4;
+	uint64_t tProd = d0 * d1 * d2 * d3 * d4;
+	return DataContainer{tNum, tSum, tProd};
+}
 __global__ void computeDataElements5() {
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
@@ -23,51 +33,7 @@ __global__ void computeDataElements5() {
 	// This means the design is actually based off of the number of threads you dispatch on.
 	//
 	// This is garbage code so who cares!
-	auto d0 = ((stride & 0b111)) + 2;
-	auto d1 = (((stride >> 3) & 0b111)) + 2;
-	auto d2 = (((stride >> 6) & 0b111)) + 2;
-	auto d3 = (((stride >> 9) & 0b111)) + 2;
-	auto d4 = (((stride >> 12) & 0b111)) + 2;
-
-	auto tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000) + (d4 * 10000);
-	auto tSum = d0 + d1 + d2 + d3 + d4;
-	auto tProd = d0 * d1 * d2 * d3 * d4;
-	DataElements5[stride] = DataContainer{tNum, tSum, tProd};
-}
-__global__ void computeDataElements4() {
-	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
-	// use the stride to determine a fixed digit pattern to add onto the number to compute.
-	// We break the stride up into multiple three bit quantities and generate our data off of that.
-
-	// This means the design is actually based off of the number of threads you dispatch on.
-	//
-	// This is garbage code so who cares!
-	auto d0 = ((stride & 0b111)) + 2;
-	auto d1 = (((stride >> 3) & 0b111)) + 2;
-	auto d2 = (((stride >> 6) & 0b111)) + 2;
-	auto d3 = (((stride >> 9) & 0b111)) + 2;
-
-	auto tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000);
-	auto tSum = d0 + d1 + d2 + d3;
-	auto tProd = d0 * d1 * d2 * d3;
-	DataElements4[stride] = DataContainer{tNum, tSum, tProd};
-}
-__global__ void computeDataElements3() {
-	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
-	// use the stride to determine a fixed digit pattern to add onto the number to compute.
-	// We break the stride up into multiple three bit quantities and generate our data off of that.
-
-	// This means the design is actually based off of the number of threads you dispatch on.
-	//
-	// This is garbage code so who cares!
-	auto d0 = ((stride & 0b111)) + 2;
-	auto d1 = (((stride >> 3) & 0b111)) + 2;
-	auto d2 = (((stride >> 6) & 0b111)) + 2;
-
-	auto tNum = d0 + (d1 * 10) + (d2 * 100);
-	auto tSum = d0 + d1 + d2;
-	auto tProd = d0 * d1 * d2;
-	DataElements3[stride] = DataContainer{tNum, tSum, tProd};
+	DataElements5[stride] = computeDataContainer(stride);
 }
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
@@ -101,8 +67,11 @@ __global__ void quodigiousKernel(uint64_t number = 0, uint64_t sum = 0, uint64_t
 	for (int i = blockIdx.x * blockDim.x + threadIdx.x; 
 			i < (sizeof(DataElements5)/sizeof(DataContainer));
 			i += blockDim.x * gridDim.x) {
-		auto item = DataElements5[i];
-		doQuodigious<maxDepth, depth + 5, factor * 100000>(item.getNumber(), item.getSum(), item.getProduct());
+		auto item = computeDataContainer(i);
+		doQuodigious<maxDepth, depth + 5, factor * 100000>(
+				number + (item.getNumber() * factor),
+				item.getSum() + sum, 
+				item.getProduct() * product);
 	}
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
@@ -133,9 +102,7 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 	} else {
 		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
 		static_assert(currentDepth == 0);
-		//quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>();
-		quodigiousKernel<depth, currentDepth, factor><<<16, 16>>>();
-		(void)hipDeviceSynchronize();
+		quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>();
 	} 
 }
 
@@ -172,8 +139,6 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 
 int main() {
 	computeDataElements5<<<256, 128>>>();
-	computeDataElements4<<<64, 64>>>();
-	computeDataElements3<<<32, 16>>>();
 	(void)hipDeviceSynchronize();
     while(std::cin.good()) {
         uint64_t currentIndex = 0;
