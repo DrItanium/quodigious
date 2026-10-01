@@ -16,6 +16,9 @@ private:
 __device__ DataContainer computeDataContainer(uint32_t stride) noexcept {
 	// we can extract up to 30-bits or 10 digits worth of data
 	uint64_t d0 = ((stride & 0b111)) + 2;
+	uint64_t tProd = d0;
+	uint64_t tSum = d0;	
+	uint64_t tNum = d0;
 #define X(field, shamt) uint64_t field = (((stride >> shamt) & 0b111) + 2)
 	X(d1, 3);
 	X(d2, 6);
@@ -27,8 +30,7 @@ __device__ DataContainer computeDataContainer(uint32_t stride) noexcept {
 	X(d8, 24);
 	X(d9, 27);
 #undef X
-	uint64_t tNum = d0 + 
-		(d1 * 10ull) + 
+	tNum += (d1 * 10ull) + 
 		(d2 * 100ull) + 
 		(d3 * 1000ull) + 
 		(d4 * 10000ull) +
@@ -37,9 +39,9 @@ __device__ DataContainer computeDataContainer(uint32_t stride) noexcept {
 		(d7 * 10000000ull) +
 		(d8 * 100000000ull) +
 		(d9 * 1000000000ull);
-	
-	uint64_t tSum = d0 + d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9;
-	uint64_t tProd = d0 * d1 * d2 * d3 * d4 * d5 * d6 * d7 * d8 * d9;
+	tSum += d1;
+	tSum += d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9;
+	tProd *= d1 * d2 * d3 * d4 * d5 * d6 * d7 * d8 * d9;
 	return DataContainer{tNum, tSum, tProd};
 }
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
