@@ -75,14 +75,10 @@ __global__ void quodigiousKernel(int size = 256 * 128, uint64_t number = 0, uint
 			i < size;
 			i += blockDim.x * gridDim.x) {
 		auto item = computeDataContainer(i);
-		if constexpr (maxDepth == (depth + 10)) {
-			checkQuodigious(item.getNumber(), item.getSum(), item.getProduct());
-		} else {
-			doQuodigious<maxDepth, depth + 10, (factor * 10000000000ull)>(
-					number + (item.getNumber() * factor),
-					item.getSum() + sum, 
-					item.getProduct() * product);
-		}
+		doQuodigious<maxDepth, depth + 10, (factor * 10000000000ull)>(
+				number + (item.getNumber() * factor),
+				item.getSum() + sum, 
+				item.getProduct() * product);
 	}
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
