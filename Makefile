@@ -59,7 +59,7 @@ ${PROGRAM5}: threadedReverseQuodigious.o
 	@${CXX} ${LXXFLAGS} -o ${PROGRAM5} threadedReverseQuodigious.o
 	@echo done.
 
-hip_targets: amdquodigious_v1 amdquodigious_v2 amdquodigious_v3 amdquodigious_v4
+hip_targets: amdquodigious_v1 amdquodigious_v2 amdquodigious_v3 amdquodigious_v4 amdquodigious_v5
 
 amdquodigious_v1: quodigious.hip
 	@echo -n "Building HIP Version (v1)..."

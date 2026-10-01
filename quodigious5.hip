@@ -20,7 +20,6 @@ __global__ void computeDataElements5() {
 	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
-	printf("%lu\n", blockDim.x * gridDim.x);
 	// This means the design is actually based off of the number of threads you dispatch on.
 	//
 	// This is garbage code so who cares!
@@ -96,11 +95,15 @@ __device__ void doQuodigious(uint64_t number, uint64_t sum, uint64_t product) {
 
 template<uint8_t maxDepth, uint8_t depth, uint64_t factor>
 __global__ void quodigiousKernel(uint64_t number = 0, uint64_t sum = 0, uint64_t product = 1) {
-	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
+	//auto stride = blockIdx.x * blockDim.x + threadIdx.x;
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
-	auto item = DataElements5[stride];
-	doQuodigious<maxDepth, depth + 5, factor * 100000>(item.getNumber(), item.getSum(), item.getProduct());
+	for (int i = blockIdx.x * blockDim.x + threadIdx.x; 
+			i < (sizeof(DataElements5)/sizeof(DataContainer));
+			i += blockDim.x * gridDim.x) {
+		auto item = DataElements5[i];
+		doQuodigious<maxDepth, depth + 5, factor * 100000>(item.getNumber(), item.getSum(), item.getProduct());
+	}
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
 // generally, doing 5-8 digits in a linear fashion is totally safe so we should setup partitioning breaks.
@@ -130,7 +133,8 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 	} else {
 		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
 		static_assert(currentDepth == 0);
-		quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>();
+		//quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>();
+		quodigiousKernel<depth, currentDepth, factor><<<16, 16>>>();
 		(void)hipDeviceSynchronize();
 	} 
 }
