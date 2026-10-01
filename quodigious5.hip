@@ -13,16 +13,33 @@ private:
 			 _sum, 
 			 _product;
 };
-__device__ DataContainer computeDataContainer(int stride) noexcept {
-	auto d0 = ((stride & 0b111)) + 2;
-	auto d1 = (((stride >> 3) & 0b111)) + 2;
-	auto d2 = (((stride >> 6) & 0b111)) + 2;
-	auto d3 = (((stride >> 9) & 0b111)) + 2;
-	auto d4 = (((stride >> 12) & 0b111)) + 2;
-
-	uint64_t tNum = d0 + (d1 * 10) + (d2 * 100) + (d3 * 1000) + (d4 * 10000);
-	uint64_t tSum = d0 + d1 + d2 + d3 + d4;
-	uint64_t tProd = d0 * d1 * d2 * d3 * d4;
+__device__ DataContainer computeDataContainer(uint32_t stride) noexcept {
+	// we can extract up to 30-bits or 10 digits worth of data
+	uint64_t d0 = ((stride & 0b111)) + 2;
+#define X(field, shamt) uint64_t field = (((stride >> shamt) & 0b111) + 2)
+	X(d1, 3);
+	X(d2, 6);
+	X(d3, 9);
+	X(d4, 12);
+	X(d5, 15);
+	X(d6, 18);
+	X(d7, 21);
+	X(d8, 24);
+	X(d9, 27);
+#undef X
+	uint64_t tNum = d0 + 
+		(d1 * 10ull) + 
+		(d2 * 100ull) + 
+		(d3 * 1000ull) + 
+		(d4 * 10000ull) +
+		(d5 * 100000ull) +
+		(d6 * 1000000ull) +
+		(d7 * 10000000ull) +
+		(d8 * 100000000ull) +
+		(d9 * 1000000000ull);
+	
+	uint64_t tSum = d0 + d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9;
+	uint64_t tProd = d0 * d1 * d2 * d3 * d4 * d5 * d6 * d7 * d8 * d9;
 	return DataContainer{tNum, tSum, tProd};
 }
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
@@ -30,7 +47,7 @@ __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t pr
 }
 __device__ __host__ void checkQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	if (isQuodigious(number, sum, prod)) {
-		printf("\t\t%lu\n", number);
+		printf("%lu\n", number);
 	}
 }
 template<uint8_t maxDepth, uint8_t currentDepth, uint64_t factor>
@@ -58,10 +75,14 @@ __global__ void quodigiousKernel(int size = 256 * 128, uint64_t number = 0, uint
 			i < size;
 			i += blockDim.x * gridDim.x) {
 		auto item = computeDataContainer(i);
-		doQuodigious<maxDepth, depth + 5, factor * 100000>(
-				number + (item.getNumber() * factor),
-				item.getSum() + sum, 
-				item.getProduct() * product);
+		if constexpr (maxDepth == (depth + 10)) {
+			checkQuodigious(item.getNumber(), item.getSum(), item.getProduct());
+		} else {
+			doQuodigious<maxDepth, depth + 10, (factor * 10000000000ull)>(
+					number + (item.getNumber() * factor),
+					item.getSum() + sum, 
+					item.getProduct() * product);
+		}
 	}
 }
 // we need to setup a sectional splitting so that each thread actually processes increasingly large numbers as we walk through execution
@@ -92,7 +113,7 @@ __host__ void performQuodigious(uint64_t number = 0, uint64_t sum = 0, uint64_t 
 	} else {
 		// starting at depth 10 we just directly dispatch to the GPU, I tested it on an RX9070 and it makes a huge difference execution wise
 		static_assert(currentDepth == 0);
-		quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>();
+		quodigiousKernel<depth, currentDepth, factor><<<256, 128>>>(32768 * 32768);
 	} 
 }
 
