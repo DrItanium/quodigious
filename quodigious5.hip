@@ -13,7 +13,6 @@ private:
 			 _sum, 
 			 _product;
 };
-__device__ DataContainer DataElements5[256*128];
 __device__ DataContainer computeDataContainer(int stride) noexcept {
 	auto d0 = ((stride & 0b111)) + 2;
 	auto d1 = (((stride >> 3) & 0b111)) + 2;
@@ -25,15 +24,6 @@ __device__ DataContainer computeDataContainer(int stride) noexcept {
 	uint64_t tSum = d0 + d1 + d2 + d3 + d4;
 	uint64_t tProd = d0 * d1 * d2 * d3 * d4;
 	return DataContainer{tNum, tSum, tProd};
-}
-__global__ void computeDataElements5() {
-	auto stride = blockIdx.x * blockDim.x + threadIdx.x;
-	// use the stride to determine a fixed digit pattern to add onto the number to compute.
-	// We break the stride up into multiple three bit quantities and generate our data off of that.
-	// This means the design is actually based off of the number of threads you dispatch on.
-	//
-	// This is garbage code so who cares!
-	DataElements5[stride] = computeDataContainer(stride);
 }
 __device__ __host__ bool isQuodigious(uint64_t number, uint64_t sum, uint64_t prod) noexcept {
 	return ((number % prod) == 0) && ((number % sum) == 0);
@@ -65,7 +55,7 @@ __global__ void quodigiousKernel(uint64_t number = 0, uint64_t sum = 0, uint64_t
 	// use the stride to determine a fixed digit pattern to add onto the number to compute.
 	// We break the stride up into multiple three bit quantities and generate our data off of that.
 	for (int i = blockIdx.x * blockDim.x + threadIdx.x; 
-			i < (sizeof(DataElements5)/sizeof(DataContainer));
+			i < 256*128;
 			i += blockDim.x * gridDim.x) {
 		auto item = computeDataContainer(i);
 		doQuodigious<maxDepth, depth + 5, factor * 100000>(
@@ -138,8 +128,6 @@ __host__ bool dispatchQuodigious(uint64_t idx) noexcept {
 }
 
 int main() {
-	computeDataElements5<<<256, 128>>>();
-	(void)hipDeviceSynchronize();
     while(std::cin.good()) {
         uint64_t currentIndex = 0;
         std::cin >> currentIndex;
