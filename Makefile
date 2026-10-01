@@ -81,6 +81,11 @@ amdquodigious_v4: quodigious4.hip
 	@hipcc -o amdquodigious_v4 quodigious4.hip
 	@echo done.
 
+amdquodigious_v5: quodigious5.hip
+	@echo -n "Building HIP Version (v5)..."
+	@hipcc -o amdquodigious_v5 quodigious5.hip
+	@echo done.
+
 %.o: %.cc
 	@echo -n Compiling $< into $@ ...
 	@${CXX} ${CXXFLAGS} -c $< -o $@
